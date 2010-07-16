@@ -42,7 +42,7 @@ LEVEL long time_begin,time_now;
 
 LEVEL long enter;
 LEVEL bool razlet;
-LEVEL double TotalEnergy;
+LEVEL double TotalEnergy, PulsEn;
 LEVEL int CheckStep;  //each CheckStep divergence of program is checking
 LEVEL int OutStep;    //each OutStep result is printing
 LEVEL int num_dump;
