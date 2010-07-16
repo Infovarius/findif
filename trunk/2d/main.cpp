@@ -5,7 +5,7 @@
 
 #define CheckStep 10
 //each CheckStep divergence of program is checking
-#define OutStep   10
+#define OutStep   100
 //each OutStep result is printing
 
 int main(int argc, char** argv)
@@ -18,8 +18,8 @@ int main(int argc, char** argv)
 
 #include "init_vars.h"
 
-   Re=1000;
-   Gamma=1e-3;
+   Re=20000;
+   Gamma=1e-4;
    l1=1;
    l2=1;
    l3=1;
