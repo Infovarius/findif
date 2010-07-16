@@ -1,7 +1,7 @@
 object MainWindow: TMainWindow
-  Left = 192
-  Top = 123
-  Width = 808
+  Left = 136
+  Top = 113
+  Width = 816
   Height = 507
   Caption = 'Интегрирование каскадно-сеточным методом'
   Color = clBtnFace
@@ -18,10 +18,10 @@ object MainWindow: TMainWindow
   object Notebook: TTabbedNotebook
     Left = 0
     Top = 0
-    Width = 808
+    Width = 816
     Height = 460
     Anchors = [akLeft, akTop, akRight, akBottom]
-    PageIndex = 3
+    PageIndex = 1
     TabFont.Charset = DEFAULT_CHARSET
     TabFont.Color = clBtnText
     TabFont.Height = -11
@@ -177,12 +177,30 @@ object MainWindow: TMainWindow
         end
         object InputInit: TButton
           Left = 32
-          Top = 120
+          Top = 168
           Width = 169
           Height = 41
           Caption = 'Ввести данные в программу'
           TabOrder = 1
           OnClick = InputInitClick
+        end
+        object RadioInitVel: TRadioButton
+          Left = 32
+          Top = 104
+          Width = 169
+          Height = 17
+          Caption = 'Ввести начальную скорость'
+          Checked = True
+          TabOrder = 2
+          TabStop = True
+        end
+        object RadioInitContinue: TRadioButton
+          Left = 32
+          Top = 136
+          Width = 113
+          Height = 17
+          Caption = 'Продолжить счет'
+          TabOrder = 3
         end
       end
     end
@@ -311,9 +329,9 @@ object MainWindow: TMainWindow
       object Label14: TLabel
         Left = 384
         Top = 120
-        Width = 153
+        Width = 208
         Height = 13
-        Caption = 'Как часто выводить на экран:'
+        Caption = 'Как часто выводить на экран и в файлы:'
       end
       object CheckScreenOutput: TCheckBox
         Left = 72
@@ -402,12 +420,47 @@ object MainWindow: TMainWindow
         Height = 13
         Caption = 'Re='
       end
+      object GroupTurbulent: TGroupBox
+        Left = 40
+        Top = 264
+        Width = 425
+        Height = 153
+        Caption = 'Турбулентная вязкость'
+        TabOrder = 0
+        object Label18: TLabel
+          Left = 24
+          Top = 60
+          Width = 180
+          Height = 13
+          Caption = 'Коэффициент пропорциональности'
+        end
+        object CheckNut: TCheckBox
+          Left = 16
+          Top = 32
+          Width = 369
+          Height = 17
+          Caption = 'Использовать турбулентную вязкость через каскадные функции'
+          Checked = True
+          State = cbChecked
+          TabOrder = 0
+          OnClick = CheckNutClick
+        end
+        object EditMaschtab: TEdit
+          Left = 224
+          Top = 56
+          Width = 121
+          Height = 21
+          TabOrder = 1
+          Text = '1000'
+          OnChange = EditMaschtabChange
+        end
+      end
       object EditRe: TEdit
         Left = 120
         Top = 64
         Width = 121
         Height = 21
-        TabOrder = 0
+        TabOrder = 1
         Text = '10000'
         OnKeyUp = EditReKeyUp
       end
@@ -417,8 +470,8 @@ object MainWindow: TMainWindow
         Width = 305
         Height = 145
         Caption = 'Выберите тип начальных условий для скорости'
-        TabOrder = 1
-        object RadioInit1: TRadioButton
+        TabOrder = 2
+        object RadioZeroInit: TRadioButton
           Left = 24
           Top = 24
           Width = 113
@@ -426,7 +479,7 @@ object MainWindow: TMainWindow
           Caption = 'Нулевая'
           TabOrder = 0
         end
-        object RadioInit2: TRadioButton
+        object RadioParabole: TRadioButton
           Left = 24
           Top = 56
           Width = 129
@@ -438,12 +491,12 @@ object MainWindow: TMainWindow
         end
       end
       object GroupNoise: TGroupBox
-        Left = 464
-        Top = 264
+        Left = 384
+        Top = 104
         Width = 217
         Height = 145
         Caption = 'Параметры шума'
-        TabOrder = 2
+        TabOrder = 3
         object Label16: TLabel
           Left = 24
           Top = 56
@@ -498,97 +551,6 @@ object MainWindow: TMainWindow
           OnChange = EditNormChange
         end
       end
-      object GroupTurbulent: TGroupBox
-        Left = 40
-        Top = 264
-        Width = 385
-        Height = 153
-        Caption = 'Турбулентная вязкость'
-        TabOrder = 3
-        object Label18: TLabel
-          Left = 24
-          Top = 60
-          Width = 180
-          Height = 13
-          Caption = 'Коэффициент пропорциональности'
-        end
-        object CheckNut: TCheckBox
-          Left = 16
-          Top = 32
-          Width = 361
-          Height = 17
-          Caption = 'Использовать турбулентную вязкость через каскадные функции'
-          Checked = True
-          State = cbChecked
-          TabOrder = 0
-          OnClick = CheckNutClick
-        end
-        object EditMaschtab: TEdit
-          Left = 224
-          Top = 56
-          Width = 121
-          Height = 21
-          TabOrder = 1
-          Text = '1000'
-          OnChange = EditMaschtabChange
-        end
-      end
-      object GroupBox1: TGroupBox
-        Left = 368
-        Top = 104
-        Width = 369
-        Height = 145
-        Caption = 'Параметры сетки'
-        TabOrder = 4
-        object Label19: TLabel
-          Left = 40
-          Top = 28
-          Width = 89
-          Height = 13
-          Caption = 'Кол-во узлов по х'
-        end
-        object Label20: TLabel
-          Left = 40
-          Top = 64
-          Width = 89
-          Height = 13
-          Caption = 'Кол-во узлов по y'
-        end
-        object Label21: TLabel
-          Left = 40
-          Top = 100
-          Width = 89
-          Height = 13
-          Caption = 'Кол-во узлов по z'
-        end
-        object EditNx: TEdit
-          Left = 168
-          Top = 24
-          Width = 121
-          Height = 21
-          TabOrder = 0
-          Text = '10'
-          OnChange = EditNxChange
-        end
-        object EditNy: TEdit
-          Left = 168
-          Top = 60
-          Width = 121
-          Height = 21
-          TabOrder = 1
-          Text = '10'
-          OnChange = EditNyChange
-        end
-        object EditNz: TEdit
-          Left = 168
-          Top = 96
-          Width = 121
-          Height = 21
-          TabOrder = 2
-          Text = '20'
-          OnChange = EditNzChange
-        end
-      end
     end
     object TTabPage
       Left = 4
@@ -599,7 +561,7 @@ object MainWindow: TMainWindow
   object StatusBarCalc: TStatusBar
     Left = 0
     Top = 460
-    Width = 800
+    Width = 808
     Height = 20
     Panels = <
       item
