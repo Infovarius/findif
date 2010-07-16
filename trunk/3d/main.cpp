@@ -1,19 +1,23 @@
 #define LEVEL
 
-//#include <conio.h>
 #include "head.h"
+#include <time.h>
 
 #define CheckStep 20
 //each CheckStep divergence of program is checking
-#define EACH   1
-//each EACH of each CheckStep printing is doing
+#define OutStep   20
+//each OutStep result is printing
 
 int main(int argc, char** argv)
 {
-   double t_cur, Ttot, dttry, dtdid, dtnext;
+   double t_cur, Ttot, dttry, dtdid, dtnext, PulsEn;
    int i,j,k,l;
+   double Re;
 
-   Re=2000;
+   time(&time_begin);
+   nmessage("work has begun",t_cur);
+
+   Re=2500;
    Gamma=1e-3;
    l1=3;
    l2=1;
@@ -51,19 +55,29 @@ int main(int argc, char** argv)
    nut=alloc_mem_3f(m1, m2, m3);
 
    fileopen("error.err",0);
-   init_conditions(f);
-   printing(f,dtdid,t_cur,count);
+/*   if argc==1 init_conditions(f,Re);
+     else {*/
+
+   PulsEn=check(f);
+   printing(f,dtdid,t_cur,count,PulsEn);
 
    dtnext=1e-3;
-   dump(f,t_cur,count);
+//   dump(f,t_cur,count);
 
-   while (t_cur < Ttot) {            /*----- MAIN ITERATIONS ----*/
+   while (t_cur < Ttot && !razlet) {            /*----- MAIN ITERATIONS ----*/
+//        nut_by_flux(f,Re);
         pde(t_cur, f, df);
         dttry=dtnext;
         timestep(f, df, t_cur, f1, dttry, &dtdid, &dtnext);
         t_cur+=dtdid;
         if (count%CheckStep==0)
-            printing(f1,dtdid,t_cur,count,count%(CheckStep*EACH));
+            PulsEn=check(f);
+        if (count%OutStep==0)
+            {
+            if (count%CheckStep!=0)
+                PulsEn=check(f);
+            printing(f1,dtdid,t_cur,count,PulsEn);
+            };
         for(l=0;l<nvar;l++)
         for(i=ghost;i<mm1;i++)
         for(j=ghost;j<mm2;j++)
@@ -74,7 +88,7 @@ int main(int argc, char** argv)
                 switch (getch()) {
                         case 'd' : dump(f1,t_cur,count); break;
                         case 'q' : { dump(f1,t_cur,count);
-                                     nrerror("You asked to exit. Here you are...");
+                                     nrerror("You asked to exit. Here you are...",t_cur);
                                     }
                         }
               }
@@ -90,8 +104,8 @@ int main(int argc, char** argv)
    free_mem_4f(df4,nvar, m1, m2, m3);
    free_mem_4f(df5,nvar, m1, m2, m3);
    free_mem_3f(nut, m1, m2, m3);
+   nrerror("this is break of scheme",t_cur);
 
 return 0;
 }
-
 
