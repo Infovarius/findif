@@ -85,19 +85,112 @@ void __fastcall TMainWindow::FormDestroy(TObject *Sender)
    free_mem_4f(df4,nvar, m1, m2, m3);
    free_mem_4f(df5,nvar, m1, m2, m3);
    free_mem_3f(nut, m1, m2, m3);
-
 }
 //---------------------------------------------------------------------------
-void AnsiToChar(AnsiString as,char *cs)
+// ------------------------Main Block-----------------------------------------
+void __fastcall TMainWindow::BeginWorkClick(TObject *Sender)
 {
-int i,j;
-for(i=1,j=0;&as[i]<AnsiLastChar(as);i++,j++)
-    cs[j] = as[i];
-cs[j] = as[i];
-cs[j+1] = 0;
+   double dttry, dtdid, dtnext, PulsEn;
+   int i,j,k,l;
+   BeginWork->Caption="Пауза";
+   time(&time_begin);
+   t_cur = 0;
+   count = 0;  enter = 0;
+   nmessage("work has begun",t_cur);
+   init_conditions(f,Re);
+   PulsEn=check(f);
+   printing(f,dtdid,t_cur,count,PulsEn);
+
+   dtnext=1e-3;
+   dump(n1,n2,n3,Re,f,nut,t_cur,count);
+
+        /*----------- MAIN ITERATIONS --------------*/
+   while (t_cur < Ttot && !razlet) {
+        pde(t_cur, f, df);
+        dttry=dtnext;
+        timestep(f, df, t_cur, f1, dttry, &dtdid, &dtnext);
+        nut_by_flux(f,dtdid);
+        t_cur+=dtdid;
+        count++;
+        if (count%CheckStep==0)
+            PulsEn=check(f);
+        if (count%OutStep==0)
+            {
+            if (count%CheckStep!=0)
+                PulsEn=check(f);
+            printing(f1,dtdid,t_cur,count,PulsEn);
+            };
+        for(l=0;l<nvar;l++)
+        for(i=ghost;i<mm1;i++)
+        for(j=ghost;j<mm2;j++)
+        for(k=ghost;k<mm3;k++)
+           f[l][i][j][k]=f1[l][i][j][k];
+    /*    if(kbhit())
+             {
+                switch (getch()) {
+                        case 'd' : dump(n1,n2,n3,Re,f,nut,t_cur,count); break;
+                        case 'q' : { dump(n1,n2,n3,Re,f,nut,t_cur,count);
+                                     nrerror("You asked to exit. Here you are...",t_cur);
+                                   }
+                        case 'p' : return;
+                        }
+             }*/
+   }
+  BeginWork->Caption="Начать счет";
+  if(t_cur>Ttot&&!razlet) nmessage("work is succesfully done",t_cur);
+       else nrerror("this is break of scheme",t_cur);
 }
 //---------------------------------------------------------------------------
+void __fastcall TMainWindow::ContinueWorkClick(TObject *Sender)
+{
+   double dttry, dtdid, dtnext, PulsEn;
+   int i,j,k,l;
+   time(&time_begin);
+   nmessage("work has begun",t_cur);
+   init_conditions(f,Re);
+   PulsEn=check(f);
+   printing(f,dtdid,t_cur,count,PulsEn);
 
+   dtnext=1e-3;
+   dump(n1,n2,n3,Re,f,nut,t_cur,count);
+
+        /*----------- MAIN ITERATIONS --------------*/
+   while (t_cur < Ttot && !razlet) {
+        pde(t_cur, f, df);
+        dttry=dtnext;
+        timestep(f, df, t_cur, f1, dttry, &dtdid, &dtnext);
+        nut_by_flux(f,dtdid);
+        t_cur+=dtdid;
+        count++;
+        if (count%CheckStep==0)
+            PulsEn=check(f);
+        if (count%OutStep==0)
+            {
+            if (count%CheckStep!=0)
+                PulsEn=check(f);
+            printing(f1,dtdid,t_cur,count,PulsEn);
+            };
+        for(l=0;l<nvar;l++)
+        for(i=ghost;i<mm1;i++)
+        for(j=ghost;j<mm2;j++)
+        for(k=ghost;k<mm3;k++)
+           f[l][i][j][k]=f1[l][i][j][k];
+    /*    if(kbhit())
+             {
+                switch (getch()) {
+                        case 'd' : dump(n1,n2,n3,Re,f,nut,t_cur,count); break;
+                        case 'q' : { dump(n1,n2,n3,Re,f,nut,t_cur,count);
+                                     nrerror("You asked to exit. Here you are...",t_cur);
+                                   }
+                        case 'p' : return;
+                        }
+             }*/
+   }
+  if(t_cur>Ttot&&!razlet) nmessage("work is succesfully done",t_cur);
+       else nrerror("this is break of scheme",t_cur);
+}
+//---------------------------------------------------------------------------
+//                           other handlers
 void __fastcall TMainWindow::EditMessageKeyUp(TObject *Sender, WORD &Key,
       TShiftState Shift)
 {
@@ -140,8 +233,7 @@ void __fastcall TMainWindow::EditErrorKeyUp(TObject *Sender, WORD &Key,
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TMainWindow::EditDumpKeyUp(TObject *Sender, WORD &Key,
-      TShiftState Shift)
+void __fastcall TMainWindow::EditDumpChange(TObject *Sender)
 {
   NameDumpFile = MainWindow->EditDump->Text.c_str();
 }
@@ -165,76 +257,21 @@ void __fastcall TMainWindow::DoDumpClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-// ------------------------Main Block-----------------------------------------
-void __fastcall TMainWindow::BeginWorkClick(TObject *Sender)
-{
-   double t_cur, Ttot, dttry, dtdid, dtnext, PulsEn;
-   int i,j,k,l;
-   BeginWork->Caption="Пауза";
-   time(&time_begin);
-   t_cur = 0;
-   count = 0;
-   nmessage("work has begun",t_cur);
-   init_conditions(f,Re);
-   PulsEn=check(f);
-   printing(f,dtdid,t_cur,count,PulsEn);
-
-   dtnext=1e-3;
-   dump(n1,n2,n3,Re,f,nut,t_cur,count);
-
-        /*----------- MAIN ITERATIONS --------------*/
-   while (t_cur < Ttot && !razlet) {
-        pde(t_cur, f, df);
-        dttry=dtnext;
-        timestep(f, df, t_cur, f1, dttry, &dtdid, &dtnext);
-        nut_by_flux(f,dtdid);
-        t_cur+=dtdid;
-        count++;
-        if (count%CheckStep==0)
-            PulsEn=check(f);
-        if (count%OutStep==0)
-            {
-            if (count%CheckStep!=0)
-                PulsEn=check(f);
-            printing(f1,dtdid,t_cur,count,PulsEn);
-            };
-        for(l=0;l<nvar;l++)
-        for(i=ghost;i<mm1;i++)
-        for(j=ghost;j<mm2;j++)
-        for(k=ghost;k<mm3;k++)
-           f[l][i][j][k]=f1[l][i][j][k];
-    /*    if(kbhit())
-             {
-                switch (getch()) {
-                        case 'd' : dump(n1,n2,n3,Re,f,nut,t_cur,count); break;
-                        case 'q' : { dump(n1,n2,n3,Re,f,nut,t_cur,count);
-                                     nrerror("You asked to exit. Here you are...",t_cur);
-                                   }
-                        case 'p' : return;
-                        }
-             }*/
-   }
-  if(t_cur>Ttot&&!razlet) nmessage("work is succesfully done",t_cur);
-       else nrerror("this is break of scheme",t_cur);
-}
-//---------------------------------------------------------------------------
-
 void __fastcall TMainWindow::ExitClick(TObject *Sender)
 {
  MainWindow->Close();
 }
 //---------------------------------------------------------------------------
 
-
-void __fastcall TMainWindow::CSpinCheckingChange(TObject *Sender)
+void __fastcall TMainWindow::EditCheckStepChanging(TObject *Sender)
 {
- CheckStep = MainWindow->CSpinChecking->Value;
+ CheckStep = MainWindow->EditCheckStep->Text.ToInt();
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TMainWindow::CSpinOutputChange(TObject *Sender)
+void __fastcall TMainWindow::EditOutStepChanging(TObject *Sender)
 {
- OutStep = MainWindow->CSpinOutput->Value;
+ OutStep = MainWindow->EditOutStep->Text.ToInt();
 }
 //---------------------------------------------------------------------------
 
@@ -244,54 +281,45 @@ void __fastcall TMainWindow::EditReKeyUp(TObject *Sender, WORD &Key,
  Re = MainWindow->EditRe->Text.ToDouble();
 }
 //---------------------------------------------------------------------------
-void __fastcall TMainWindow::ContinueWorkClick(TObject *Sender)
+void __fastcall TMainWindow::EditNoiseKeyUp(TObject *Sender, WORD &Key,
+      TShiftState Shift)
 {
-   double t_cur, Ttot, dttry, dtdid, dtnext, PulsEn;
-   int i,j,k,l;
-   time(&time_begin);
-   nmessage("work has begun",t_cur);
-   init_conditions(f,Re);
-   PulsEn=check(f);
-   printing(f,dtdid,t_cur,count,PulsEn);
-
-   dtnext=1e-3;
-   dump(n1,n2,n3,Re,f,nut,t_cur,count);
-
-        /*----------- MAIN ITERATIONS --------------*/
-   while (t_cur < Ttot && !razlet) {
-        pde(t_cur, f, df);
-        dttry=dtnext;
-        timestep(f, df, t_cur, f1, dttry, &dtdid, &dtnext);
-        nut_by_flux(f,dtdid);
-        t_cur+=dtdid;
-        count++;
-        if (count%CheckStep==0)
-            PulsEn=check(f);
-        if (count%OutStep==0)
-            {
-            if (count%CheckStep!=0)
-                PulsEn=check(f);
-            printing(f1,dtdid,t_cur,count,PulsEn);
-            };
-        for(l=0;l<nvar;l++)
-        for(i=ghost;i<mm1;i++)
-        for(j=ghost;j<mm2;j++)
-        for(k=ghost;k<mm3;k++)
-           f[l][i][j][k]=f1[l][i][j][k];
-    /*    if(kbhit())
-             {
-                switch (getch()) {
-                        case 'd' : dump(n1,n2,n3,Re,f,nut,t_cur,count); break;
-                        case 'q' : { dump(n1,n2,n3,Re,f,nut,t_cur,count);
-                                     nrerror("You asked to exit. Here you are...",t_cur);
-                                   }
-                        case 'p' : return;
-                        }
-             }*/
-   }
-  if(t_cur>Ttot&&!razlet) nmessage("work is succesfully done",t_cur);
-       else nrerror("this is break of scheme",t_cur);
+ Noise = MainWindow->EditNoise->Text.ToDouble();
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::CheckNoiseClick(TObject *Sender)
+{
+ MainWindow->EditNoise->Enabled = CheckNoise->Checked;
 }
 //---------------------------------------------------------------------------
 
+void __fastcall TMainWindow::CheckNormClick(TObject *Sender)
+{
+ MainWindow->EditNorm->Enabled = CheckNorm->Checked;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TMainWindow::EditNormChange(TObject *Sender)
+{
+ NoiseNorm = MainWindow->EditNorm->Text.ToDouble();
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TMainWindow::ClearScrClick(TObject *Sender)
+{
+ MainWindow->Screen->Lines->Clear();         
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TMainWindow::EditMaschtabChange(TObject *Sender)
+{
+  maschtab = MainWindow->EditMaschtab->Text.ToDouble();        
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TMainWindow::CheckNutClick(TObject *Sender)
+{
+ MainWindow->EditMaschtab->Enabled = CheckNut->Checked;
+}
+//---------------------------------------------------------------------------
 

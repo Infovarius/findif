@@ -2,6 +2,7 @@
 #define LEVEL extern
 #include "head.h"
 
+
 inline double norma(double a,double b,double c,int order)
 {
 if(order==2) return ((a)*(a)+(b)*(b)+(c)*(c));
@@ -78,9 +79,10 @@ return(flux);
 
 void nut_by_flux(double ****f,double dt) //calculating nu_turbulent by velocity fluctuations
 {
-double maschtab = 0.1;
 int i,j,k,l;
 double koef;
+if(MainWindow->CheckNut->Checked)
+{
 struct_func(f,2,2,1);
 for(i=0;i<n3;i++)
     {
@@ -110,6 +112,7 @@ for(k=0;k<n3;k++)
        for(j=ghost;j<mm2;j++)
             nut[i][j][k+ghost] = (1. + tmp)/Re;
    }
+} //if CheckNut checked
 }
 
 void  boundary_conditions(double ****f)
@@ -156,19 +159,20 @@ void  boundary_conditions(double ****f)
 void  init_conditions(double ****f,double Re)
 {
    int i,j,k,l;
-   double Noise=0.1, Noise1=0;
+   double parabole=0;
 //   double k1,k2,k3;
-
+   if((MainWindow->CheckNoise->Checked)==False) Noise=0;
+   if(MainWindow->RadioInit2->Checked) parabole = 1;
 //   k1=2*M_PI/l1;  k3=M_PI/l3;
 
    for(i=0;i<m1;i++)
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++) {
-        f[0][i][j][k]=coordin(k,2)*(l3-coordin(k,2))*4/l3/l3
+        f[0][i][j][k]=parabole*coordin(k,2)*(l3-coordin(k,2))*4/l3/l3
                       + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX;
-        f[1][i][j][k]=Noise1*cos(2*M_PI*coordin(j,1)/l2)*cos(2*M_PI*coordin(k,2)/l3)
+        f[1][i][j][k]=NoiseNorm*cos(2*M_PI*coordin(j,1)/l2)*cos(2*M_PI*coordin(k,2)/l3)
                       + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX;
-        f[2][i][j][k]=Noise1*sin(2*M_PI*coordin(j,1)/l2)*sin(2*M_PI*coordin(k,2)/l3)
+        f[2][i][j][k]=NoiseNorm*sin(2*M_PI*coordin(j,1)/l2)*sin(2*M_PI*coordin(k,2)/l3)
                       + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX;
         f[3][i][j][k]=p1+(i-0.5)*(p2-p1)/n1;
         nut[i][j][k]=1./Re;

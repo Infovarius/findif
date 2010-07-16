@@ -10,6 +10,7 @@ USEUNIT("GOY.CPP");
 USEUNIT("pde.cpp");
 USEUNIT("RKAD.CPP");
 USEUNIT("struct_func.cpp");
+USE("course.todo", ToDo);
 //---------------------------------------------------------------------------
 WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {

@@ -1,6 +1,6 @@
 object MainWindow: TMainWindow
-  Left = 210
-  Top = 118
+  Left = 160
+  Top = 104
   Width = 757
   Height = 504
   Caption = 'Интегрирование каскадно-сеточным методом'
@@ -16,11 +16,12 @@ object MainWindow: TMainWindow
   PixelsPerInch = 96
   TextHeight = 13
   object Notebook: TTabbedNotebook
-    Left = 0
+    Left = 8
     Top = 0
     Width = 757
     Height = 479
     Anchors = [akLeft, akTop, akRight, akBottom]
+    PageIndex = 3
     TabFont.Charset = DEFAULT_CHARSET
     TabFont.Color = clBtnText
     TabFont.Height = -11
@@ -31,7 +32,7 @@ object MainWindow: TMainWindow
       Left = 4
       Top = 24
       Caption = 'Initiation'
-      object GroupBox1: TGroupBox
+      object GroupOutput: TGroupBox
         Left = 296
         Top = 24
         Width = 337
@@ -139,7 +140,7 @@ object MainWindow: TMainWindow
           Height = 21
           TabOrder = 6
           Text = 'dump.dat'
-          OnKeyUp = EditDumpKeyUp
+          OnChange = EditDumpChange
         end
         object EditV: TEdit
           Left = 152
@@ -151,7 +152,7 @@ object MainWindow: TMainWindow
           OnKeyUp = EditVKeyUp
         end
       end
-      object GroupBox2: TGroupBox
+      object GroupInit: TGroupBox
         Left = 24
         Top = 24
         Width = 249
@@ -237,6 +238,15 @@ object MainWindow: TMainWindow
         Visible = False
         OnClick = ContinueWorkClick
       end
+      object ClearScr: TButton
+        Left = 24
+        Top = 392
+        Width = 65
+        Height = 25
+        Caption = 'Очистить'
+        TabOrder = 5
+        OnClick = ClearScrClick
+      end
     end
     object TTabPage
       Left = 4
@@ -318,31 +328,46 @@ object MainWindow: TMainWindow
         Caption = 'Очищать экран после вывода одного шага'
         TabOrder = 2
       end
-      object CSpinChecking: TCSpinEdit
+      object EditCheckStep: TEdit
         Left = 480
         Top = 80
-        Width = 121
-        Height = 22
-        TabStop = True
-        MaxValue = 1000
-        MinValue = 1
-        ParentColor = False
-        TabOrder = 3
-        Value = 10
-        OnChange = CSpinCheckingChange
-      end
-      object CSpinOutput: TCSpinEdit
-        Left = 480
-        Top = 139
-        Width = 121
-        Height = 22
-        TabStop = True
-        MaxValue = 1000
-        MinValue = 1
-        ParentColor = False
+        Width = 120
+        Height = 21
         TabOrder = 4
-        Value = 20
-        OnChange = CSpinOutputChange
+        Text = '10'
+        OnChange = EditCheckStepChanging
+      end
+      object UpDownCheck: TUpDown
+        Left = 600
+        Top = 80
+        Width = 15
+        Height = 21
+        Associate = EditCheckStep
+        Min = 1
+        Position = 10
+        TabOrder = 3
+        Wrap = False
+      end
+      object EditOutStep: TEdit
+        Left = 480
+        Top = 144
+        Width = 120
+        Height = 21
+        TabOrder = 5
+        Text = '20'
+        OnChange = EditOutStepChanging
+      end
+      object UpDownOut: TUpDown
+        Left = 600
+        Top = 144
+        Width = 15
+        Height = 21
+        Associate = EditOutStep
+        Min = 1
+        Max = 1000
+        Position = 20
+        TabOrder = 6
+        Wrap = False
       end
     end
     object TTabPage
@@ -364,6 +389,128 @@ object MainWindow: TMainWindow
         TabOrder = 0
         Text = '10000'
         OnKeyUp = EditReKeyUp
+      end
+      object GroupInitVariant: TGroupBox
+        Left = 40
+        Top = 104
+        Width = 305
+        Height = 145
+        Caption = 'Выберите тип начальных условий для скорости'
+        TabOrder = 1
+        object RadioInit1: TRadioButton
+          Left = 24
+          Top = 24
+          Width = 113
+          Height = 17
+          Caption = 'Нулевая'
+          TabOrder = 0
+        end
+        object RadioInit2: TRadioButton
+          Left = 24
+          Top = 56
+          Width = 129
+          Height = 17
+          Caption = 'Профиль Пуазейля'
+          Checked = True
+          TabOrder = 1
+          TabStop = True
+        end
+      end
+      object GroupNoise: TGroupBox
+        Left = 384
+        Top = 104
+        Width = 217
+        Height = 145
+        Caption = 'Параметры шума'
+        TabOrder = 2
+        object Label16: TLabel
+          Left = 24
+          Top = 56
+          Width = 78
+          Height = 13
+          Caption = 'Величина шума'
+        end
+        object Label17: TLabel
+          Left = 24
+          Top = 116
+          Width = 80
+          Height = 13
+          Caption = 'Величина возм.'
+        end
+        object CheckNoise: TCheckBox
+          Left = 24
+          Top = 24
+          Width = 97
+          Height = 17
+          Caption = 'Включить шум'
+          Checked = True
+          State = cbChecked
+          TabOrder = 0
+          OnClick = CheckNoiseClick
+        end
+        object EditNoise: TEdit
+          Left = 120
+          Top = 52
+          Width = 65
+          Height = 21
+          TabOrder = 1
+          Text = '0.1'
+          OnKeyUp = EditNoiseKeyUp
+        end
+        object CheckNorm: TCheckBox
+          Left = 24
+          Top = 88
+          Width = 177
+          Height = 17
+          Caption = 'Включить норм. возмущения'
+          TabOrder = 2
+          OnClick = CheckNormClick
+        end
+        object EditNorm: TEdit
+          Left = 120
+          Top = 112
+          Width = 65
+          Height = 21
+          Enabled = False
+          TabOrder = 3
+          Text = '0'
+          OnChange = EditNormChange
+        end
+      end
+      object GroupTurbulent: TGroupBox
+        Left = 40
+        Top = 264
+        Width = 425
+        Height = 153
+        Caption = 'Турбулентная вязкость'
+        TabOrder = 3
+        object Label18: TLabel
+          Left = 24
+          Top = 60
+          Width = 180
+          Height = 13
+          Caption = 'Коэффициент пропорциональности'
+        end
+        object CheckNut: TCheckBox
+          Left = 16
+          Top = 32
+          Width = 369
+          Height = 17
+          Caption = 'Использовать турбулентную вязкость через каскадные функции'
+          Checked = True
+          State = cbChecked
+          TabOrder = 0
+          OnClick = CheckNutClick
+        end
+        object EditMaschtab: TEdit
+          Left = 224
+          Top = 56
+          Width = 121
+          Height = 21
+          TabOrder = 1
+          Text = '0.1'
+          OnChange = EditMaschtabChange
+        end
       end
     end
     object TTabPage
