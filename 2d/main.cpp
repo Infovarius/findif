@@ -5,12 +5,12 @@
 
 #define CheckStep 10
 //each CheckStep divergence of program is checking
-#define OutStep   100
+#define OutStep   10
 //each OutStep result is printing
 
 int main(int argc, char** argv)
 {
-   double t_cur, Ttot, dttry, dtdid, dtnext;
+   double dttry, dtdid, dtnext;
    int i,j,k,l;
 
    time(&time_begin);
@@ -18,8 +18,8 @@ int main(int argc, char** argv)
 
 #include "init_vars.h"
 
-   Re=10000;
-   Gamma=1e-5;
+   Re=1000;
+   Gamma=1e-3;
    l1=1;
    l2=1;
    l3=1;
@@ -60,10 +60,9 @@ int main(int argc, char** argv)
 
    fileopen("error.err",0);
    init_conditions(f,Re);
-   boundary_conditions(f);
    if(argc>1)
            {
-           FILE *inp=fileopen("init.dat",-1);
+           FILE *inp=fileopen(argv[1],-1);
            float tmpd;
            char tmpc;
            for(l=0;l<nvar;l++)
@@ -88,8 +87,9 @@ int main(int argc, char** argv)
               fscanf(inp,"%c",&tmpc);
               }
            }
-   printing(f,0,t_cur,count,PulsEn);
    PulsEn=check(f);
+   boundary_conditions(f);
+   printing(f,0,t_cur,count,PulsEn);
 
    dtnext=1e-3;
    dump(n1,n2,n3,Re,f,nut,t_cur,count);
@@ -141,3 +141,4 @@ int main(int argc, char** argv)
 
 return 0;
 }
+

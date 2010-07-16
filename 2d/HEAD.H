@@ -87,7 +87,7 @@ void   timestep(double ****, double ****, double, double ****,
 double rkck(double ****, double ****, double, double, double ****);
 /*------- pde.cpp -----------*/
 void   pde(double, double ****, double ****);
-inline double norma(double a,double b,double c,int q);
+double norma(double a,double b,double c,int q);
 double deviation(double ****,int,int,int);
 void nut_by_flux(double ****f,double Re);
 void   boundary_conditions(double ****);

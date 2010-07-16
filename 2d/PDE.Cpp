@@ -74,7 +74,7 @@ void nut_by_flux(double ****f,double dt) //calculating nu_turbulent by velocity 
 int i,j,k,l;
 double koef;
 double big_puls=300;
-if(PulsEn/TotalEnergy>big_puls) struct_func(f,2);
+//if(PulsEn/TotalEnergy>big_puls) struct_func(f,2);
 /*for(i=0;i<n3;i++)
     {
     koef=sqrt(s_func[i][0]/(pow(sha[i][1],2.)+pow(shb[i][1],2.)));
@@ -99,12 +99,12 @@ for(k=0;k<n3;k++)
 /*   double tmp = maschtab*pow(nl[0]*(sha[k][0]*sha[k][0]+shb[k][0]*shb[k][0]) +
                              nl[1]*(sha[k][1]*sha[k][1]+shb[k][1]*shb[k][1]),
                          1./3);*/
-  double tmp;
+/*  double tmp;
   if(PulsEn/TotalEnergy>big_puls) tmp=maschtab*pow(s_func[k][1]+s_func[k][0],2);
                  else tmp=0;
    for(i=ghost;i<mm1;i++)
        for(j=ghost;j<=ghost;j++)
-            nut[i][j][k+ghost] = (1. + tmp)/Re;
+            nut[i][j][k+ghost] = (1. + tmp)/Re;*/
    }
 }
 
@@ -138,27 +138,46 @@ void  boundary_conditions(double ****f)
    return;
 }
 
+double ***fill_function()
+{
+ double ***ar;
+// double MaxLevel;
+ int i,j,k;
+ ar =alloc_mem_3f(m1, m2, m3);
+   for(i=0;i<m1;i++)
+   for(j=ghost;j<=ghost;j++)
+   for(k=0;k<m3;k++)
+       ar[i][j][k] = ((double)rand()-RAND_MAX/2)/RAND_MAX;
+
+ return(ar);
+}
+
 void  init_conditions(double ****f,double Re)
 {
    int i,j,k;
-   double Noise,NoiseNorm,parabole;
+   double Noise,NoiseNorm,NoiseAdiv,parabole;
    double k1,k2,k3;
-   Noise = 0.1;
-   NoiseNorm = 0.5;
+   double ***arbfunc = fill_function();
+   Noise = 0.;
+   NoiseAdiv = 0.1;
+   NoiseNorm = 0.;
    parabole = 0;
    k1=13*M_PI/l1;  k3=7*M_PI/l3;
 
-   for(i=0;i<m1;i++)
+   for(i=ghost;i<mm1;i++)
    for(j=ghost;j<=ghost;j++)
-   for(k=0;k<m3;k++) {
+   for(k=ghost;k<mm3;k++) {
         f[0][i][j][k]=parabole*coordin(k,2)*(l3-coordin(k,2))*4/l3/l3
                       + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX
-                      + NoiseNorm * sin(k1*coordin(k,2));
-        f[2][i][j][k]=NoiseNorm /*sin(k2*coordin(j,1))*/ * sin(k3*coordin(k,2))
-                      + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX;
+                      + NoiseNorm * sin(k1*coordin(k,2))
+                      + NoiseAdiv * dr(arbfunc,i,j,k,1,0,dx[0],ghost, approx) ;
+        f[2][i][j][k]=//NoiseNorm /*sin(k2*coordin(j,1))*/ * sin(k3*coordin(k,2))
+                      //+ Noise*((double)rand()-RAND_MAX/2)/RAND_MAX
+                      + NoiseAdiv * (-dr(arbfunc,i,j,k,3,0,dx[2],ghost, approx)) ;
         f[3][i][j][k]=p1+(i-0.5)*(p2-p1)/n1;
         nut[i][j][k]=1./Re;
    }
+   dump(n1,n2,n3,Re,f,arbfunc,t_cur,count);
 
 }
 
@@ -187,7 +206,8 @@ int i;
 switch (sm*dr) {
 	case 3 : for(i=0; i<sm; i++) tmp += m[ii+i-sh][jj][kk]*kf3[or][sh][i]; break;
 	case 6 : for(i=0; i<sm; i++) tmp += m[ii][jj+i-sh][kk]*kf3[or][sh][i]; break;
-	case 9 : for(i=0; i<sm; i++) tmp += m[ii][jj][kk+i-sh]*kf3[or][sh][i]; break;
+	case 9 : for(i=0; i<sm; i++)
+                      tmp += m[ii][jj][kk+i-sh]*kf3[or][sh][i]; break;
 	case 5 : for(i=0; i<sm; i++) tmp += m[ii+i-sh][jj][kk]*kf5[or][sh][i]; break;
 	case 10: for(i=0; i<sm; i++) tmp += m[ii][jj+i-sh][kk]*kf5[or][sh][i]; break;
 	case 15: for(i=0; i<sm; i++) tmp += m[ii][jj][kk+i-sh]*kf5[or][sh][i]; break;

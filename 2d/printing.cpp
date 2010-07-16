@@ -230,7 +230,7 @@ for(k=ghost;k<mm3;k++)
 //putting velocities to file
         fv = fileopen(NameVFile,count);
         fprintf(fv,"{%-7.5lf}",t_cur);
-        print_array1d(fv,f1[0][m1/2][3],ghost,n3);
+        print_array1d(fv,f1[0][m1/2][ghost],ghost,n3);
         fclose(fv);
 //putting viscosities to file
       fnu = fileopen(NameNuFile,count);
