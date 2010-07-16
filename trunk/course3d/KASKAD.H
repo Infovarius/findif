@@ -12,6 +12,7 @@
 #include <Tabnotbk.hpp>
 #include <Menus.hpp>
 //---------------------------------------------------------------------------
+
 class TMainWindow : public TForm
 {
 __published:	// IDE-managed Components
@@ -72,6 +73,13 @@ __published:	// IDE-managed Components
         TEdit *EditMaschtab;
         TComboBox *SelPrior;
         TStatusBar *StatusBarCalc;
+        TGroupBox *GroupBox1;
+        TLabel *Label19;
+        TLabel *Label20;
+        TLabel *Label21;
+        TEdit *EditNx;
+        TEdit *EditNy;
+        TEdit *EditNz;
         void __fastcall FormCreate(TObject *Sender);
         void __fastcall FormDestroy(TObject *Sender);
         void __fastcall EditMessageKeyUp(TObject *Sender, WORD &Key,
@@ -107,7 +115,10 @@ __published:	// IDE-managed Components
         void __fastcall CheckNutClick(TObject *Sender);
         void __fastcall BeginWorkClick(TObject *Sender);
         void __fastcall SelPriorChange(TObject *Sender);
-        void __fastcall ChangeStatus(char *str1,char *str2);   
+        void __fastcall ChangeStatus(char *str1,char *str2);
+        void __fastcall EditNxChange(TObject *Sender);
+        void __fastcall EditNyChange(TObject *Sender);
+        void __fastcall EditNzChange(TObject *Sender);
 private:	// User declarations
 public:		// User declarations
         __fastcall TMainWindow(TComponent* Owner);

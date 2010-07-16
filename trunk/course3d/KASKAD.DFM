@@ -1,6 +1,6 @@
 object MainWindow: TMainWindow
-  Left = 183
-  Top = 106
+  Left = 192
+  Top = 123
   Width = 808
   Height = 507
   Caption = 'Интегрирование каскадно-сеточным методом'
@@ -21,7 +21,7 @@ object MainWindow: TMainWindow
     Width = 808
     Height = 460
     Anchors = [akLeft, akTop, akRight, akBottom]
-    PageIndex = 1
+    PageIndex = 3
     TabFont.Charset = DEFAULT_CHARSET
     TabFont.Color = clBtnText
     TabFont.Height = -11
@@ -438,8 +438,8 @@ object MainWindow: TMainWindow
         end
       end
       object GroupNoise: TGroupBox
-        Left = 384
-        Top = 104
+        Left = 464
+        Top = 264
         Width = 217
         Height = 145
         Caption = 'Параметры шума'
@@ -501,7 +501,7 @@ object MainWindow: TMainWindow
       object GroupTurbulent: TGroupBox
         Left = 40
         Top = 264
-        Width = 425
+        Width = 385
         Height = 153
         Caption = 'Турбулентная вязкость'
         TabOrder = 3
@@ -515,7 +515,7 @@ object MainWindow: TMainWindow
         object CheckNut: TCheckBox
           Left = 16
           Top = 32
-          Width = 369
+          Width = 361
           Height = 17
           Caption = 'Использовать турбулентную вязкость через каскадные функции'
           Checked = True
@@ -531,6 +531,62 @@ object MainWindow: TMainWindow
           TabOrder = 1
           Text = '1000'
           OnChange = EditMaschtabChange
+        end
+      end
+      object GroupBox1: TGroupBox
+        Left = 368
+        Top = 104
+        Width = 369
+        Height = 145
+        Caption = 'Параметры сетки'
+        TabOrder = 4
+        object Label19: TLabel
+          Left = 40
+          Top = 28
+          Width = 89
+          Height = 13
+          Caption = 'Кол-во узлов по х'
+        end
+        object Label20: TLabel
+          Left = 40
+          Top = 64
+          Width = 89
+          Height = 13
+          Caption = 'Кол-во узлов по y'
+        end
+        object Label21: TLabel
+          Left = 40
+          Top = 100
+          Width = 89
+          Height = 13
+          Caption = 'Кол-во узлов по z'
+        end
+        object EditNx: TEdit
+          Left = 168
+          Top = 24
+          Width = 121
+          Height = 21
+          TabOrder = 0
+          Text = '10'
+          OnChange = EditNxChange
+        end
+        object EditNy: TEdit
+          Left = 168
+          Top = 60
+          Width = 121
+          Height = 21
+          TabOrder = 1
+          Text = '10'
+          OnChange = EditNyChange
+        end
+        object EditNz: TEdit
+          Left = 168
+          Top = 96
+          Width = 121
+          Height = 21
+          TabOrder = 2
+          Text = '20'
+          OnChange = EditNzChange
         end
       end
     end
