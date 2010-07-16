@@ -121,7 +121,7 @@ for (tm_cur=0;tm_cur<tm;tm_cur+=dtsh)
       shb[j][k] *= rk[k];
     }
   }
-}
+  }
 }
 
 void erase_shell(void)
