@@ -1,0 +1,11 @@
+USEUNIT("main.cpp");
+USEUNIT("pde.cpp");
+USEUNIT("rkad.cpp");
+USEUNIT("util.cpp");
+USEUNIT("printing.cpp");
+USEUNIT("struct_func.cpp");
+USEUNIT("goy.cpp");
+//---------------------------------------------------------------------------
+This file is used by the project manager only and should be treated like the project file
+
+main
