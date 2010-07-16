@@ -60,12 +60,12 @@ void __fastcall TMainWindow::FormCreate(TObject *Sender)
    Re=10000;
    maschtab=1000;
    Gamma=1e-3;
-   l1=3;                    CheckStep=10;
+   l1=1;                    CheckStep=10;
    l2=1;                    OutStep = 20;
    l3=1;
 
    nvar=4;
-   n1=10;
+   n1=5;
    n2=5;
    n3=10;
    Ns=25;
@@ -271,12 +271,12 @@ void __fastcall TMainWindow::DoDumpClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TMainWindow::EditCheckStepChanging(TObject *Sender)
 {
- CheckStep = MainWindow->EditCheckStep->Text.ToInt();
+ CheckStep = MainWindow->EditCheckStep->Text.ToIntDef(10);
 }
 //---------------------------------------------------------------------------
 void __fastcall TMainWindow::EditOutStepChanging(TObject *Sender)
 {
- OutStep = MainWindow->EditOutStep->Text.ToInt();
+ OutStep = MainWindow->EditOutStep->Text.ToIntDef(20);
 }
 //---------------------------------------------------------------------------
 void __fastcall TMainWindow::EditReKeyUp(TObject *Sender, WORD &Key,
@@ -320,7 +320,7 @@ void __fastcall TMainWindow::EditMaschtabChange(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TMainWindow::CheckNutClick(TObject *Sender)
 {
- MainWindow->EditMaschtab->Enabled = CheckNut->Checked;
+// MainWindow->EditMaschtab->Enabled = CheckNut->Checked;
 }
 //---------------------------------------------------------------------------
 void __fastcall TMainWindow::SelPriorChange(TObject *Sender)

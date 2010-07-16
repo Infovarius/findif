@@ -1,6 +1,6 @@
 object MainWindow: TMainWindow
-  Left = 39
-  Top = 130
+  Left = 177
+  Top = 112
   Width = 798
   Height = 507
   Caption = '»нтегрирование каскадно-сеточным методом'

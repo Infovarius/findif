@@ -83,7 +83,7 @@ int i,j,k,l;
 double koef;
 if(MainWindow->CheckNut->Checked)
 {
-struct_func(f,2,2,4);
+struct_func(f,2);
 for(i=0;i<n3;i++)
     {
     koef=sqrt(s_func[i][0]/(pow(sha[i][1],2.)+pow(shb[i][1],2.)));
@@ -161,10 +161,10 @@ void  init_conditions(double ****f,double Re)
    int i,j,k;
    double parabole;
 //   double k1,k2,k3;
-   Noise = (MainWindow->CheckNoise->Checked) ? Noise :0;
-             //  MainWindow->EditNoise->Text.ToDouble() : 0;
-   NoiseNorm = (MainWindow->CheckNorm->Checked) ? NoiseNorm : 0;
-             //   MainWindow->EditNorm->Text.ToDouble()  : 0;
+   Noise = (MainWindow->CheckNoise->Checked) ? //Noise : 0;
+               atof(MainWindow->EditNoise->Text.c_str()) : 0;
+   NoiseNorm = (MainWindow->CheckNorm->Checked) ? //NoiseNorm : 0;
+               atof(MainWindow->EditNorm->Text.c_str())  : 0;
    parabole = (MainWindow->RadioParabole->Checked) ? 1 : 0;
 //   k1=2*M_PI/l1;  k3=M_PI/l3;
 
