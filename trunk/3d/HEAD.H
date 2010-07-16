@@ -1,9 +1,23 @@
+#ifndef headH
+#define headH
+//---------------------------------------------------------------------------
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include <string.h>
-#include <conio.h>
+#include <system.hpp>
 
+//#include <conio.h>
+
+//#define LEVEL
+LEVEL char *NameNuFile;
+LEVEL char *NameVFile;
+LEVEL char *NameDumpFile;
+LEVEL char *NameEnergyFile;
+LEVEL char *NameKaskadVarFile;
+LEVEL char *NameMessageFile;
+LEVEL char *NameErrorFile;
+LEVEL char *NameInitFile;
 
 LEVEL double ****f, ****f1, ****df, ****df2, ****df3, ****df4, ****df5,**s_func,
              dx[3];
@@ -14,14 +28,28 @@ LEVEL double ***nut,
 LEVEL int    m1, m2, m3, mm1, mm2, mm3, n1, n2, n3, Ns,
              approx, ghost, nvar;
 
-LEVEL double t_cur,Ttot;
+LEVEL double t_cur=0,Ttot;
 
 LEVEL long count;
 LEVEL long time_begin,time_now;
 LEVEL long enter;
 LEVEL bool razlet;
 const int kol_masht=5;
+LEVEL int CheckStep;  //each CheckStep divergence of program is checking
+LEVEL int OutStep;    //each OutStep result is printing
 
+/*------- ioutil.cpp ---------*/
+int init_data(int *n1,int *n2,int *n3,double *Re,double ****f,double ***nut,double *t_cur,long *count);
+FILE *fileopen(char *, int mode);
+void print_array1d(FILE *ff,double *a,int beg1,int n1);
+void print_array2d(FILE *ff,double **a,int beg1,int n1,int beg2,int n2);
+void print_array3d(FILE *ff,double ***a,
+        int beg1,int n1,int beg2,int n2,int beg3,int n3);
+double check(double ****f);
+void printing(double ****f1,double dtdid,double t_cur,long count,double en);
+void dump(int n1,int n2,int n3,double Re,double ****f,double ***nut,double t_cur,long count);
+/*------- kaskad.h -----------*/
+void AnsiToChar(AnsiString, char *);
 /*-------- goy.cpp -----------*/
 LEVEL double *nl,**sha,**shb;
 void init_shell(void);
@@ -53,14 +81,5 @@ void   boundary_conditions(double ****);
 void  init_conditions(double ****,double Re);
 double dr(double ***, int, int, int, int, int, double, int, int);
 double coordin(int, int);
-/*------- printing.cpp ------*/
-FILE *fileopen(const char *, int mode);
-void print_array1d(FILE *ff,double *a,int beg1,int n1);
-void print_array2d(FILE *ff,double **a,int beg1,int n1,int beg2,int n2);
-void print_array3d(FILE *ff,double ***a,
-        int beg1,int n1,int beg2,int n2,int beg3,int n3);
-double check(double ****f);
-void printing(double ****f1,double dtdid,double t_cur,long count,double en);
-void dump(double ****f1,double t_cur,long count);
 
-
+#endif
