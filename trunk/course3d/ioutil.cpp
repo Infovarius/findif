@@ -43,6 +43,7 @@ int init_data(int *n1,int *n2,int *n3,double *Re,double ****f,double ***nut,doub
  read_tilleq(inp,'n');   if(fscanf(inp,"%d",n2)==0) error=1;
  read_tilleq(inp,'n');   if(fscanf(inp,"%d",n3)==0) error=1;
  read_tilleq(inp,'n');   if(fscanf(inp,"%lf",Re)==0) error=1;
+      MainWindow->EditRe->Text.printf("%0.10f",*Re);  //don't work
  for(l=0;l<nvar;l++)                    // reading f
         {
         do fscanf(inp,"%c",&tmpc); while (tmpc!='{');
@@ -143,7 +144,7 @@ int i,j,k,l;
            PulsEnergy+=deviation(f,i,j,k);
            for(l=0;l<=2;l++)  TotalEnergy+=pow(f[l][i][j][k],2);
            }
-razlet = (PulsEnergy/(TotalEnergy-PulsEnergy)>UpLimit||TotalEnergy<PulsEnergy);
+razlet = (PulsEnergy/TotalEnergy>UpLimit/*||TotalEnergy<PulsEnergy*/);
 return(PulsEnergy);
 }
 
@@ -173,7 +174,7 @@ time(&time_now);
 if(MainWindow->CheckScreenOutput->Checked)  {
    TempScreen.printf("program is working %ld seconds",time_now-time_begin);
    MainWindow->Screen->Lines->Append(TempScreen);
-   TempScreen.printf("t=%e\tdtdid=%e\tNIter=%d\t%e", t_cur, dtdid, count, div);
+   TempScreen.printf("t=%e \tdtdid=%e \tNIter=%d \t%e", t_cur, dtdid, count, div);
    MainWindow->Screen->Lines->Append(TempScreen);
    }
 for(l=0;l<nvar;l++) {
