@@ -3,36 +3,35 @@
 #include "head.h"
 #include <time.h>
 
-#define CheckStep 10
-//each CheckStep divergence of program is checking
-#define OutStep   20
-//each OutStep result is printing
-
 int main(int argc, char** argv)
 {
-   double t_cur, Ttot, dttry, dtdid, dtnext, PulsEn;
+   double dttry, dtdid, dtnext;
    int i,j,k,l;
 
    time(&time_begin);
-   nmessage("work has begun",t_cur);
+   nmessage("work has begun",0);
+
+   OutStep = 10*(CheckStep=10);
+#include "init_vars.h"
+
 
    Re=10000;
-   Gamma=1e-3;
-   l1=3;
+   Gamma=1e-4;
+   l1=1;
    l2=1;
    l3=1;
 
    nvar=4;
-   n1=16;
-   n2=16;
-   n3=16;
-   Ns=20;
+   n1=10;
+   n2=10;
+   n3=10;
+   Ns=15;
    approx=7;                      //derivatives approximation order
    ghost=(approx-1)/2;            //radius of approx sample
    dx[0]=l1/n1;
    dx[1]=l2/n2;
    dx[2]=l3/n3;
-   p1 = 8*l1/(l3*Re) ; p2 = 0;
+   p1 = 80*l1/(l3*Re) ; p2 = 0;
 
 
    m1 = n1+2*ghost;
@@ -42,7 +41,7 @@ int main(int argc, char** argv)
    mm2 = ghost+n2;
    mm3 = ghost+n3;
 
-   t_cur=0; Ttot=100;
+   t_cur=0; Ttot=1000;
    count=0; enter = 0;
 
    s_func = alloc_mem_2f(n3+2,kol_masht);
@@ -60,7 +59,7 @@ int main(int argc, char** argv)
    init_conditions(f,Re);
    if(argc>1)
            {
-           FILE *inp=fileopen("init.dat",-1);
+           FILE *inp=fileopen(argv[1],-1);
            float tmpd;
            char tmpc;
            for(l=0;l<nvar;l++)
@@ -86,10 +85,11 @@ int main(int argc, char** argv)
               }
            }
    PulsEn=check(f);
-   printing(f,dtdid,t_cur,count,PulsEn);
+   boundary_conditions(f);
+   printing(f,0,t_cur,count,PulsEn);
 
    dtnext=1e-3;
-   dump(f,t_cur,count);
+   dump(n1,n2,n3,Re,f,nut,t_cur,count);
 
 /*------------------------ MAIN ITERATIONS -------------------------*/
    while (t_cur < Ttot && !razlet) {
@@ -115,15 +115,15 @@ int main(int argc, char** argv)
         if(kbhit())
              {
                 switch (getch()) {
-                        case 'd' : dump(f1,t_cur,count); break;
-                        case 'q' : { dump(f1,t_cur,count);
+                        case 'd' : dump(n1,n2,n3,Re,f,nut,t_cur,count); break;
+                        case 'q' : { dump(n1,n2,n3,Re,f,nut,t_cur,count);
                                      nrerror("You asked to exit. Here you are...",t_cur);
                                     }
                         }
               }
    }
 
-   dump(f1,t_cur,count);
+   dump(n1,n2,n3,Re,f,nut,t_cur,count);
 //   free_mem_2f(s_func,n3+2,kol_masht);
    free_mem_4f(f  ,nvar, m1, m2, m3);
    free_mem_4f(f1 ,nvar, m1, m2, m3);
@@ -138,5 +138,4 @@ int main(int argc, char** argv)
 
 return 0;
 }
-
 

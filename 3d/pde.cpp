@@ -81,7 +81,7 @@ void nut_by_flux(double ****f,double dt) //calculating nu_turbulent by velocity 
 double maschtab = 100000;
 int i,j,k,l;
 double koef;
-//struct_func(f,2,2,3);
+struct_func(f,2,2,3);
 /*for(i=0;i<n3;i++)
     {
     koef=sqrt(s_func[i][0]/(pow(sha[i][1],2.)+pow(shb[i][1],2.)));
@@ -100,8 +100,8 @@ for(j=0;j<n3;j++)
       en+=sha[j][i]*sha[j][i]+shb[j][i]*shb[j][i];
     printf("   totEn=%lf\n",en);
     }  */
-/*time_step_shell(dt);*/
-/*for(k=0;k<n3;k++)
+time_step_shell(dt);
+for(k=0;k<n3;k++)
    {
    double tmp = maschtab*pow(
            (nl[2]*s_func[k][0] + nl[1]*s_func[k][1] + nl[0]*s_func[k][2])*pow(dx[2],4),
@@ -109,7 +109,7 @@ for(j=0;j<n3;j++)
    for(i=ghost;i<mm1;i++)
        for(j=ghost;j<mm2;j++)
             nut[i][j][k+ghost] = (1. + tmp)/Re;
-   }*/
+   }
 }
 
 void  boundary_conditions(double ****f)
@@ -174,7 +174,7 @@ void  init_conditions(double ****f,double Re)
                        coordin(k,2)*(l3-coordin(k,2))*4/l3/l3;
         f[3][i][j][k]=p1+(i-0.5)*(p2-p1)/n1;
         nut[i][j][k]=(
-        (0.39+14.8*exp(-2.13*pow(2*coordin(k,2)-l3,2)))*10
+        (0.39+14.8*exp(-2.13*pow(2*coordin(k,2)-l3,2)))*1
                 +1)/Re;
    }
 //   struct_func(f,2,2,3);
