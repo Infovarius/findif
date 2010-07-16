@@ -9,7 +9,7 @@
 #include "run.h"
 #include <time.h>
 #include <conio.h>
-#include <system.hpp>
+//#include <system.hpp>
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
@@ -57,6 +57,8 @@ void free_memory(double **s_func,double ****f,double ****f1,double ****df,double
 //---------------------------------------------------------------------------
 void __fastcall TMainWindow::FormCreate(TObject *Sender)
 {
+   #include "init_vars.h"
+
    Re=10000;
    maschtab=1000;
    Gamma=1e-3;
@@ -87,16 +89,8 @@ void __fastcall TMainWindow::FormCreate(TObject *Sender)
    t_cur=0; Ttot=1000;
    count=0; enter = 0;
 
-   NameNuFile = "nut.dat";
-   NameVFile  = "vv.dat";
-   NameDumpFile = "dump.dat";          num_dump = 0;
-   NameEnergyFile = "energy.dat";
-   NameKaskadVarFile = "kaskvar.dat";
-   NameMessageFile = "message.dat";
-   NameErrorFile = "error.err";
-   NameInitFile = "init.dat";
-
-   allocate_memory();      //needn't (run in refreshing)
+   num_dump = 0;
+   allocate_memory();
    Noise = 0.1;
    NoiseNorm = 0.05;
 
@@ -272,7 +266,6 @@ void __fastcall TMainWindow::InputInitClick(TObject *Sender)
 void __fastcall TMainWindow::DoDumpClick(TObject *Sender)
 {
   dump(n1,n2,n3,Re,f,nut,t_cur,count);
-  do_dump=1;
 }
 //---------------------------------------------------------------------------
 void __fastcall TMainWindow::EditCheckStepChanging(TObject *Sender)

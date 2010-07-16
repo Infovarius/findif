@@ -1,8 +1,8 @@
 object MainWindow: TMainWindow
-  Left = 184
-  Top = 162
-  Width = 798
-  Height = 507
+  Left = 1
+  Top = 1
+  Width = 636
+  Height = 478
   Caption = '»нтегрирование каскадно-сеточным методом'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -21,7 +21,7 @@ object MainWindow: TMainWindow
     Width = 798
     Height = 460
     Anchors = [akLeft, akTop, akRight, akBottom]
-    PageIndex = 3
+    PageIndex = 4
     TabFont.Charset = DEFAULT_CHARSET
     TabFont.Color = clBtnText
     TabFont.Height = -11

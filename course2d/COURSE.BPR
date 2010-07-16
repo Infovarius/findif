@@ -4,18 +4,18 @@
   <MACROS>
     <VERSION value="BCB.05.03"/>
     <PROJECT value="course.exe"/>
-    <OBJFILES value="..\exeobj\course.obj ..\exeobj\kaskad.obj ..\exeobj\ioutil.obj 
-      ..\exeobj\UTIL.obj ..\exeobj\GOY.obj ..\exeobj\pde.obj ..\exeobj\RKAD.obj 
-      ..\exeobj\struct_func.obj ..\exeobj\run.obj"/>
-    <RESFILES value="course.res"/>
+    <OBJFILES value="d:\bc31\obj\course.obj d:\bc31\obj\GOY.obj d:\bc31\obj\ioutil.obj 
+      d:\bc31\obj\kaskad.obj d:\bc31\obj\pde.obj d:\bc31\obj\RKAD.obj 
+      d:\bc31\obj\run.obj d:\bc31\obj\struct_func.obj d:\bc31\obj\UTIL.obj"/>
+    <RESFILES value=""/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>
     <DEFFILE value=""/>
     <RESDEPEN value="$(RESFILES) kaskad.dfm"/>
     <LIBFILES value=""/>
-    <LIBRARIES value=""/>
-    <SPARELIBS value="Vcl50.lib Vclx50.lib bcbsmp50.lib bcb2kaxserver50.lib"/>
-    <PACKAGES value="Vcl50.bpi Vclx50.bpi bcbsmp50.bpi Vcldb50.bpi vclado50.bpi ibsmp50.bpi 
+    <LIBRARIES value="Vclx50.lib Vcl50.lib"/>
+    <SPARELIBS value="Vcl50.lib Vclx50.lib"/>
+    <PACKAGES value="Vcl50.bpi Vclx50.bpi bcbsmp50.bpi vclado50.bpi Vcldb50.bpi ibsmp50.bpi 
       VCLBDE50.bpi vcldbx50.bpi Qrpt50.bpi TeeUI50.bpi TeeDB50.bpi Tee50.bpi 
       Dss50.bpi TeeQR50.bpi VCLIB50.bpi Vclmid50.bpi vclie50.bpi Inetdb50.bpi 
       Inet50.bpi NMFast50.bpi webmid50.bpi bcbie50.bpi dclocx50.bpi 
@@ -28,34 +28,33 @@
     <RELEASELIBPATH value="$(BCB)\lib\release"/>
     <LINKER value="tlink32"/>
     <USERDEFINES value="_DEBUG"/>
-    <SYSDEFINES value="_RTLDLL;NO_STRICT;USEPACKAGES"/>
-    <MAINSOURCE value="course.cpp"/>
-    <INCLUDEPATH value="..\..\Bin;$(BCB)\include;$(BCB)\include\vcl"/>
-    <LIBPATH value="..\..\Bin;$(BCB)\lib\obj;$(BCB)\lib"/>
+    <SYSDEFINES value="NO_STRICT;_NO_VCL"/>
+    <MAINSOURCE value="course.bpf"/>
+    <INCLUDEPATH value="$(BCB)\include;$(BCB)\include\vcl"/>
+    <LIBPATH value="$(BCB)\lib\obj;$(BCB)\lib"/>
     <WARNINGS value="-w-par"/>
   </MACROS>
   <OPTIONS>
-    <IDLCFLAGS value="-I..\..\Bin -I$(BCB)\include -I$(BCB)\include\vcl -src_suffix cpp -D_DEBUG 
-      -boa"/>
-    <CFLAG1 value="-Od -H=$(BCB)\lib\vcl50.csm -Q -Vx -Ve -X- -r- -a8 -b- -k -y -v -vi- -c 
-      -tW -tWM"/>
-    <PFLAGS value="-N2..\exeobj -N0..\exeobj -$YD -$W -$O- -v -JPHNE -M"/>
+    <IDLCFLAGS value="-I$(BCB)\include -I$(BCB)\include\vcl -src_suffix cpp -D_DEBUG -boa"/>
+    <CFLAG1 value="-Od -H=$(BCB)\lib\vcl50.csm -Hc -Vx -Ve -X- -r- -a8 -b- -k -y -v -vi- -tW 
+      -tWM -c"/>
+    <PFLAGS value="-N2&quot;d:\bc31\obj\&quot; -N0&quot;d:\bc31\obj\&quot; -$YD -$W -$O- -v -JPHNE -M"/>
     <RFLAGS value=""/>
-    <AFLAGS value="/mx /w2 /zi"/>
-    <LFLAGS value="-I..\exeobj -D&quot;&quot; -aa -Tpe -x -Gn -v"/>
+    <AFLAGS value="/mx /w2 /zd"/>
+    <LFLAGS value="-I&quot;d:\bc31\obj\&quot; -D&quot;&quot; -aa -Tpe -x -Gn -v"/>
   </OPTIONS>
   <LINKER>
-    <ALLOBJ value="c0w32.obj $(PACKAGES) Memmgr.Lib sysinit.obj $(OBJFILES)"/>
+    <ALLOBJ value="c0w32.obj $(OBJFILES)"/>
     <ALLRES value="$(RESFILES)"/>
-    <ALLLIB value="$(LIBFILES) $(LIBRARIES) import32.lib cp32mti.lib"/>
+    <ALLLIB value="$(LIBFILES) $(LIBRARIES) import32.lib cw32mt.lib"/>
   </LINKER>
   <IDEOPTIONS>
 [Version Info]
-IncludeVerInfo=1
+IncludeVerInfo=0
 AutoIncBuild=0
-MajorVer=2
+MajorVer=1
 MinorVer=0
-Release=4
+Release=0
 Build=0
 Debug=0
 PreRelease=0
@@ -66,26 +65,24 @@ Locale=1049
 CodePage=1251
 
 [Version Info Keys]
-CompanyName=ICMM
-FileDescription=Демонстрация каскадно-сеточного подхода
-FileVersion=2.0.4.0
-InternalName=kaskad-shell
+CompanyName=
+FileDescription=
+FileVersion=1.0.0.0
+InternalName=
 LegalCopyright=
 LegalTrademarks=
-OriginalFilename=course
+OriginalFilename=
 ProductName=
 ProductVersion=1.0.0.0
 Comments=
 
 [HistoryLists\hlIncludePath]
-Count=2
-Item0=..\..\Bin;$(BCB)\include;$(BCB)\include\vcl
-Item1=$(BCB)\include;$(BCB)\include\vcl
+Count=1
+Item0=$(BCB)\include;$(BCB)\include\vcl
 
 [HistoryLists\hlLibraryPath]
-Count=2
-Item0=..\..\Bin;$(BCB)\lib\obj;$(BCB)\lib
-Item1=$(BCB)\lib\obj;$(BCB)\lib
+Count=1
+Item0=$(BCB)\lib\obj;$(BCB)\lib
 
 [HistoryLists\hlDebugSourcePath]
 Count=1
@@ -96,22 +93,8 @@ Count=1
 Item0=_DEBUG
 
 [HistoryLists\hlIntOutputDir]
-Count=5
-Item0=D:\Home\anton\exeobj
-Item1=D:\BC31\obj\
-Item2=D:\BC31\obj
-Item3=D:\CBuilder5\mine\course
-Item4=D:\CBuilder5\mine\course\
-
-[HistoryLists\hlFinalOutputDir]
-Count=7
-Item0=D:\CBuilder5\mine\course\
-Item1=..\course\
-Item2=..\exe\
-Item3=D:\CBuilder5\mine\exe
-Item4=D:\BC31\EXE\
-Item5=D:\CBuilder5\mine\course
-Item6=D:\BC31\EXE
+Count=1
+Item0=d:\bc31\obj
 
 [Debugging]
 DebugSourceDirs=$(BCB)\source\vcl

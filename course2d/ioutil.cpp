@@ -4,7 +4,7 @@
 #include "head.h"
 #include "kaskad.h"
 
-const double UpLimit=100.;     //after this limit there's dump
+const double UpLimit=100.;     //after this limit there's turbulence
 
 FILE *fileopen(AnsiString x, int mode)  //opening of file to ff
                          /*   0-rewrite;>0-append;<0-read    */
@@ -146,7 +146,7 @@ for(l=0;l<=2;l++)
    for(i=0;i<n;i++)
        averf[l][i] = 0;
 for(i=ghost;i<mm1;i++)
-     for(j=ghost;j<mm2;j++)
+     for(j=ghost;j<=ghost;j++)
         for(k=ghost;k<mm3;k++)
            {
            PulsEnergy+=deviation(f,i,j,k);
@@ -157,7 +157,7 @@ for(l=0;l<=2;l++)
         {
 //        averf[l][k-ghost] /= n1*n2;
 //        for(i=ghost;i<mm1;i++)
-//            for(j=ghost;j<mm2;j++)
+//            for(j=ghost;j<=ghost;j++)
                TotalEnergy += pow(averf[l][k-ghost],2.);
         }
 TotalEnergy += 1.;   //if zero average field
@@ -180,7 +180,7 @@ if(MainWindow->CheckClear->Checked)
 boundary_conditions(f1);
 
 for(i=ghost;i<mm1;i++)
-   for(j=ghost;j<mm2;j++)
+   for(j=ghost;j<=ghost;j++)
       for(k=ghost;k<mm3;k++) {
            temp=0;
            for(l=0;l<3;l++)
@@ -198,7 +198,7 @@ if(MainWindow->CheckScreenOutput->Checked)  {
 for(l=0;l<nvar;l++) {
        mf=mda=mdr=0;
        for(i=ghost;i<mm1;i++)
-        for(j=ghost;j<mm2;j++)
+        for(j=ghost;j<=ghost;j++)
          for(k=ghost;k<mm3;k++) {
             temp=fabs(f[l][i][j][k]-f1[l][i][j][k]);
             if (temp>mda) mda=temp;
@@ -228,7 +228,7 @@ for(l=0;l<nvar;l++) {
 
 if(MainWindow->CheckFileOutput->Checked)  {  //if fileoutput
 /*avervx = alloc_mem_1f(m3);
-if(avervx == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n\a",t_cur);*/
+if(avervx == NULL)  nrerror("\nAlloc_mem: unsuffitient memory!\n\a",t_cur);*/
 
 avernu = alloc_mem_1f(m3);
 
@@ -236,7 +236,7 @@ for(k=ghost;k<mm3;k++)
 	{
 	/*  avervx[k] =*/ avernu[k] = 0;
           for(i=ghost;i<mm1;i++)
-             for(j=ghost;j<mm2;j++)
+             for(j=ghost;j<=ghost;j++)
 		 {
 	  //	   avervx[k] += f1[0][i][j][k];
                    avernu[k] += nut[i][j][k];
@@ -247,7 +247,7 @@ for(k=ghost;k<mm3;k++)
   //putting velocities to file
         fv = fileopen(NameVFile,count);
         fprintf(fv,"{%-7.5lf}",t_cur);
-        print_array1d(fv,f1[0][m1/2][0],ghost,n3);
+        print_array1d(fv,f1[0][m1/2][3],ghost,n3);
         fclose(fv);
   //putting viscosities to file
       fnu = fileopen(NameNuFile,count);

@@ -9,18 +9,6 @@
 #include "kaskad.h"
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-//   Important: Methods and properties of objects in VCL can only be
-//   used in a method called using Synchronize, for example:
-//
-//      Synchronize(UpdateCaption);
-//
-//   where UpdateCaption could look like:
-//
-//      void __fastcall Unit1::UpdateCaption()
-//      {
-//        Form1->Caption = "Updated in a thread";
-//      }
-//---------------------------------------------------------------------------
 
 __fastcall CalcProcess::CalcProcess(bool CreateSuspended)
         : TThread(CreateSuspended)
@@ -31,7 +19,6 @@ __fastcall CalcProcess::CalcProcess(bool CreateSuspended)
 void __fastcall CalcProcess::Execute()
 {
    double dttry, dtdid, dtnext;
-   do_dump=0;
    int i,j,k,l;
    const min_dump=(int)Ttot;
    AnsiString TempScreen;
@@ -65,9 +52,9 @@ void __fastcall CalcProcess::Execute()
                 PulsEn=check(f);
             printing(f1,dtdid,t_cur,count,PulsEn);
             };
-        for(l=0;l<nvar;l++)
+        for(l=0;l<nvar;l++ for2D(l))
         for(i=ghost;i<mm1;i++)
-        for(j=ghost;j<mm2;j++)
+        for(j=ghost;j<=ghost;j++)
         for(k=ghost;k<mm3;k++)
            f[l][i][j][k]=f1[l][i][j][k];
         if(action)
