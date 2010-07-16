@@ -134,7 +134,7 @@ void free_mem_2f(double **aa, int n1, int n2)
 int j, k;
 
    for(j = 0; j < n1; j++)
-	free(aa[j]);
+	if(aa[j]) free(aa[j]);
 
    free(aa);
 

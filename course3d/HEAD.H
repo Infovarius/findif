@@ -3,11 +3,10 @@
 //---------------------------------------------------------------------------
 
 #include <stdio.h>
-#include <stdlib.h>
+#include <stdlib.h>                              
 #include <math.h>
 #include <system.hpp>
 #include "kaskad.h"
-#include <vector.h>
 
 //#include <conio.h>
 
@@ -45,8 +44,11 @@ LEVEL long enter;
 LEVEL bool razlet;
 LEVEL double TotalEnergy;
 const int kol_masht=5;
+const int size_okr=3;  //должно быть <=ghost, иначе окрестность выходит из фикт.обл-ти - виснет
+LEVEL long num_points[kol_masht];
 LEVEL int CheckStep;  //each CheckStep divergence of program is checking
 LEVEL int OutStep;    //each OutStep result is printing
+LEVEL int num_dump;
 
 /*------- ioutil.cpp ---------*/
 int init_data(int *n1,int *n2,int *n3,double *Re,double ****f,double ***nut,double *t_cur,long *count);
@@ -65,7 +67,7 @@ void sima(double *zza, double *zzb, double *xx, double *yy);
 void time_step_shell(double tm);
 void erase_shell(void);
 /*------- struct_func.cpp----*/
-void struct_func(double ****f,int q,double lambda,int size_okr);
+void struct_func(double ****f,int q,double lambda);
 /*------- util.cpp -----------*/
 void nrerror(char[],double);
 void nmessage(char [],double);
@@ -90,5 +92,9 @@ void   boundary_conditions(double ****);
 void  init_conditions(double ****,double Re);
 double dr(double ***, int, int, int, int, int, double, int, int);
 double coordin(int, int);
-
+/*------- kaskad.cpp --------*/
+void allocate_memory();
+void free_memory(double **s_func,double ****f,double ****f1,double ****df,double ****df2,
+                     double ****df3,double ****df4,double ****df5,double ***nut);
+void at_the_end_of_work();
 #endif

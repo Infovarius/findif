@@ -83,7 +83,7 @@ int i,j,k,l;
 double koef;
 if(MainWindow->CheckNut->Checked)
 {
-struct_func(f,2,2,1);
+struct_func(f,2,2,4);
 for(i=0;i<n3;i++)
     {
     koef=sqrt(s_func[i][0]/(pow(sha[i][1],2.)+pow(shb[i][1],2.)));

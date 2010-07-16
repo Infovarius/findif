@@ -9,7 +9,6 @@
 #include "kaskad.h"
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
-
 //   Important: Methods and properties of objects in VCL can only be
 //   used in a method called using Synchronize, for example:
 //
@@ -33,6 +32,7 @@ void __fastcall CalcProcess::Execute()
 {
    double dttry, dtdid, dtnext, PulsEn;
    int i,j,k,l;
+   const min_dump=10;
    AnsiString TempScreen;
    MainWindow->ChangeStatus("Идут вычисления...","Начаты вычисления");
    MainWindow->BeginWork->Caption="Пауза";
@@ -49,10 +49,13 @@ void __fastcall CalcProcess::Execute()
 
         /*----------- MAIN ITERATIONS --------------*/
    while (t_cur < Ttot && !razlet && action!=ActQuit) {
+
         pde(t_cur, f, df);
         dttry=dtnext;
         timestep(f, df, t_cur, f1, dttry, &dtdid, &dtnext);
         nut_by_flux(f,dtdid);
+        if(int(min_dump*t_cur/Ttot)-int(min_dump*(t_cur+dtdid)/Ttot))
+                   dump(n1,n2,n3,Re,f,nut,t_cur,count);
         t_cur+=dtdid;
         count++;
         if (count%CheckStep==0)
@@ -105,9 +108,8 @@ void __fastcall CalcProcess::Execute()
        else
          { nrerror("this is break of scheme",t_cur);
            TempScreen.printf("this is break of scheme at modelling time=%g",t_cur);
+           dump(n1,n2,n3,Re,f,nut,t_cur,count);
            MainWindow->Screen->Lines->Append(TempScreen);}
-  RunStatus = StNone;
-  action = ActQuit;
-  MainWindow->BeginWork->Caption = "Начать счет";
+ at_the_end_of_work();          
 }
 //---------------------------------------------------------------------------
