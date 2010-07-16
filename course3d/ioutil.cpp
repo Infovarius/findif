@@ -4,7 +4,7 @@
 #include "head.h"
 #include "kaskad.h"
 
-const double UpLimit=10.;     //after this limit there's dump
+const double UpLimit=100.;     //after this limit there's dump
 
 FILE *fileopen(AnsiString x, int mode)  //opening of file to ff
                          /*   0-rewrite;>0-append;<0-read    */
@@ -155,13 +155,13 @@ for(i=ghost;i<mm1;i++)
 for(l=0;l<=2;l++)
    for(k=ghost;k<mm3;k++)
         {
-        averf[l][k-ghost] /= n1*n2;
-        for(i=ghost;i<mm1;i++)
-            for(j=ghost;j<mm2;j++)
+//        averf[l][k-ghost] /= n1*n2;
+//        for(i=ghost;i<mm1;i++)
+//            for(j=ghost;j<mm2;j++)
                TotalEnergy += pow(averf[l][k-ghost],2.);
         }
 TotalEnergy += 1.;   //if zero average field
-razlet = (PulsEnergy/TotalEnergy>UpLimit/*||TotalEnergy<PulsEnergy*/);
+razlet = (PulsEnergy/TotalEnergy>UpLimit);
 free_mem_2f(averf,3,n);
 return(PulsEnergy);
 }
