@@ -29,9 +29,6 @@ dnn=alloc_mem_1f(Ns+1);
 rk=alloc_mem_1f(Ns+1);
 nl =alloc_mem_1f(Ns+1);
 
-en_flux = alloc_mem_1f(n3);     //for nu-turbulent
-f0 = alloc_mem_1f(n3);
-
   for (k=0; k<=Ns; k++) {
     nk = k - N0;
     dnn[k] = pow(2.0,(double)nk);
@@ -40,38 +37,17 @@ f0 = alloc_mem_1f(n3);
   }
  for (j=0; j<n3; j++)
     for (i=0; i<=Ns; i++) {
-         sha[j][i] = (i==0||i==1)? 1e-10:0;
-         shb[j][i] = (i==0||i==1)? 1e-10:0;
+         sha[j][i] = (i==0||i==1)? 1:0;
+         shb[j][i] = (i==0||i==1)? 1.5:0;
     }
     EPS = -2.;
     CK = -EPS/2.0;
     CJ = (EPS-1.0)/2.0;
     CI = 0.5;
-//filling num_points (number of near points for structural function)
-int l,m,n,dist,wrong=0;
-double d,rx,ry,rz,logl;
-double min_d=min(min(dx[0],dx[1]),dx[2]);
-logl=log(lambda);
-for(i=0;i<=kol_masht-1;i++) num_points[i] = 0;
-for(i=ghost;i<mm1;i++)
-for(j=ghost;j<=ghost;j++)
-        for(l=-max_okr;l<=max_okr;l++)
-        for(m=-max_okr;m<=max_okr;m++)
-        for(n=-max_okr;n<=max_okr;n++)
-		 {
-		 if ((l==0)&&(m==0)&&(n==0)) continue;
-		 rx = abs(l)*dx[0];
-                 ry = abs(m)*dx[1];
-                 rz = abs(n)*dx[2];
-                 d = sqrt(rx*rx+ry*ry+rz*rz);
-                 d = log(d/min_d)/logl;    //(per wave number add "minus")
-                 dist=floor(d);
-                 if(dist>=kol_masht || dist<0) {wrong++;continue;}
-                 num_points[dist]++;
-                 }
- }
 
-void sima(double *zza, double *zzb, double *xx, double *yy,int layer)
+}
+
+void sima(double *zza, double *zzb, double *xx, double *yy)
 {
   int  i, j, k;
   double  ti, tj, tk;
@@ -96,30 +72,17 @@ void sima(double *zza, double *zzb, double *xx, double *yy,int layer)
     xx[k] += tk*(zza[j]*zzb[i]+zzb[j]*zza[i]);
   }
 
-  xx[0] += f0[layer]*zza[0]/2;
-  yy[0] += f0[layer]*zzb[0]/2;
-  xx[1] += f0[layer]*zza[0]/2;
-  yy[1] += f0[layer]*zzb[0]/2;
-
   for(i = 0; i<=Ns; i++) {
     xx[i] = dtsh*xx[i];
     yy[i] = dtsh*yy[i];
   }
 }
 
-void time_step_shell(double tm,double *en_flux)
+void time_step_shell(double tm)
 {
 int i,j,k;
 double tm_cur, en;
-for (j=0; j<n3; j++)
-    {
-    en_flux[j] = 0;
-    f0[j] = -f0[j]/2;
-//    f0[j] /= (fabs(sha[j][0])+pow(shb[j][0],2)>0) ? pow(sha[j][0],2)+pow(shb[j][0],2) : 1e-5;
-    f0[j] /=pow(sha[j][0],2)+pow(shb[j][0],2) + 1e-10;
-    }
 
-  dtsh = tm/10;
 for (tm_cur=0;tm_cur<tm;tm_cur+=dtsh)
     {
     enter++;
@@ -131,22 +94,22 @@ for (tm_cur=0;tm_cur<tm;tm_cur+=dtsh)
       shza[j][i] = sha[j][i];
       shzb[j][i] = shb[j][i];
     }
-    sima(shza[j],shzb[j],shx1[j],shy1[j],j);
+    sima(shza[j],shzb[j],shx1[j],shy1[j]);
     for (i=0; i<=Ns; i++) {
       shza[j][i] = sha[j][i]+shx1[j][i]/2.0f;
       shzb[j][i] = shb[j][i]+shy1[j][i]/2.0f;
     }
-    sima(shza[j],shzb[j],shx2[j],shy2[j],j);
+    sima(shza[j],shzb[j],shx2[j],shy2[j]);
     for (i=0; i<=Ns; i++) {
       shza[j][i] = sha[j][i]+shx2[j][i]/2.0f;
       shzb[j][i] = shb[j][i]+shy2[j][i]/2.0f;
     }
-    sima(shza[j],shzb[j],shx3[j],shy3[j],j);
+    sima(shza[j],shzb[j],shx3[j],shy3[j]);
      for (i=0; i<=Ns; i++) {
       shza[j][i] = sha[j][i]+shx3[j][i];
       shzb[j][i] = shb[j][i]+shy3[j][i];
     }
-    sima(shza[j],shzb[j],shx4[j],shy4[j],j);
+    sima(shza[j],shzb[j],shx4[j],shy4[j]);
 
     for (i=0; i<=Ns; i++){
       sha[j][i] += (shx1[j][i]+2.0f*shx2[j][i]+2.0f*shx3[j][i]+shx4[j][i])/6.0f;
@@ -157,12 +120,8 @@ for (tm_cur=0;tm_cur<tm;tm_cur+=dtsh)
       sha[j][k] *= rk[k];
       shb[j][k] *= rk[k];
     }
-    for(k = 0; k<=Ns; k++)
-        en_flux[j] += dnn[k]*(pow(sha[j][k],2.)+pow(shb[j][k],2.));
   }
   }
-for (j=0; j<n3; j++)
-    en_flux[j] *= dtsh/tm;
 }
 
 void erase_shell(void)
@@ -182,6 +141,4 @@ void erase_shell(void)
  free_mem_1f(dnn,Ns+1);
  free_mem_1f(rk,Ns+1);
  free_mem_1f(nl,Ns+1);
- free_mem_1f(en_flux,n3);
- free_mem_1f(f0,n3);
 }

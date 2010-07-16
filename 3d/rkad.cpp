@@ -78,6 +78,7 @@ double          dc1=c1-2825.0/27648.0,dc3=c3-18575.0/48384.0,
    pde(t+a4*dt,fout, df4);
 
    /*5th step*/
+//   for(l=0;l<4;l++)
    for(l=0;l<nvar;l++)
    for(i=ghost;i<mm1;i++)
    for(j=ghost;j<mm2;j++)
