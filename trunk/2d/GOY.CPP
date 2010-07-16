@@ -52,9 +52,9 @@ logl=log(lambda);
 for(i=0;i<=kol_masht-1;i++) num_points[i] = 0;
 for(i=ghost;i<mm1;i++)
 for(j=ghost;j<=ghost;j++)
-        for(l=-size_okr;l<=size_okr;l++)
-        for(m=-size_okr;m<=size_okr;m++)
-        for(n=-size_okr;n<=size_okr;n++)
+        for(l=-max_okr;l<=max_okr;l++)
+        for(m=-max_okr;m<=max_okr;m++)
+        for(n=-max_okr;n<=max_okr;n++)
 		 {
 		 if ((l==0)&&(m==0)&&(n==0)) continue;
 		 rx = abs(l)*dx[0];
