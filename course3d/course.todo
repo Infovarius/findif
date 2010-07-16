@@ -1,5 +1,4 @@
-{TODO 3 -cwork : В init_conditions (CheckNorm ? 1:0) дает 1 при Checked=false}
-{TODO 5 -cinterface : Сделать изменение массива чер}
+{TODO 3 -cwork : В init_conditions (CheckNorm ? 1:0) дает 1 при Checked=false}{TODO 5 -cinterface : Сделать изменение массива чер}
 {TODO 5 : Разобраться, почему ToDouble не переводит 0.05 в число и поменять atof(c_str) на ToDouble (обработка ошибок лучше)}
 {TODO 4 -cinterface : Сделать обработку исключений и выдачу ошибок}
 {TODO 2 -cwork : Noise===NoiseNorm????}

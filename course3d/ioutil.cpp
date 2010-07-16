@@ -137,7 +137,9 @@ double check(double ****f)   //give energy of pulsations
 {
 double PulsEnergy=0;
 double **averf;
-int n=max(n1,max(n2,n3));
+int n;
+n=(n1>n2)?n1:n2;
+n=(n>n3)?n:n3;
 TotalEnergy=0;
 averf = alloc_mem_2f(3,n);
 int i,j,k,l;
@@ -227,7 +229,7 @@ for(l=0;l<nvar;l++) {
 
 if(MainWindow->CheckFileOutput->Checked)  {  //if fileoutput
 /*avervx = alloc_mem_1f(m3);
-if(avervx == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n\a",t_cur);*/
+if(avervx == NULL)  nrerror("\nAlloc_mem: unsuffitient memory!\n\a",t_cur);*/
 
 avernu = alloc_mem_1f(m3);
 

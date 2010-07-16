@@ -160,6 +160,7 @@ void  init_conditions(double ****f,double Re)
 {
    int i,j,k;
    double parabole;
+   double dop;
 //   double k1,k2,k3;
    Noise = (MainWindow->CheckNoise->Checked) ? //Noise : 0;
                atof(MainWindow->EditNoise->Text.c_str()) : 0;
@@ -171,6 +172,9 @@ void  init_conditions(double ****f,double Re)
    for(i=0;i<m1;i++)
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++) {
+        dop = Noise;
+        dop *=((double)rand()-RAND_MAX/2);
+        dop/=RAND_MAX;
         f[0][i][j][k]=parabole*coordin(k,2)*(l3-coordin(k,2))*4/l3/l3
                       + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX;
         f[1][i][j][k]=NoiseNorm*cos(2*M_PI*coordin(j,1)/l2)*cos(2*M_PI*coordin(k,2)/l3)
