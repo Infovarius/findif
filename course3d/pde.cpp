@@ -1,4 +1,3 @@
-
 //----------------------- Calculation of PDE right part  ----------//
 #define LEVEL extern
 #include "head.h"
@@ -20,7 +19,8 @@ void pde(double t, double ****f, double ****df)
    for(i=ghost;i<mm1;i++)
    for(j=ghost;j<mm2;j++)
    for(k=ghost;k<mm3;k++) {
-      for(l=0;l<3;l++)
+      for(l=0;l<3;l++ for2D(l))
+)
       for(m=0;m<3;m++) {
          dv1[l][m]=dr(f[l],i,j,k,m+1,0,dx[m],ghost, approx);
          dv2[l][m]=dr(f[l],i,j,k,m+1,1,dx[m]*dx[m],ghost, approx);
@@ -36,6 +36,12 @@ void pde(double t, double ****f, double ****df)
                               + (dn1[1]-f[1][i][j][k])*dv1[l][1]
                               + (dn1[2]-f[2][i][j][k])*dv1[l][2];
       df[3][i][j][k]= (-(dv1[0][0] + dv1[1][1] + dv1[2][2]))/Gamma;
+      if(do_dump)
+                {
+                FILE fd=fileopen("slag.dat",0);
+                print_array3d(fd,f1[0],0,m1,0,m2,0,m3);
+                do_dump=0;
+                }
    }
 
    return;
@@ -85,7 +91,7 @@ double koef;
 if(MainWindow->CheckNut->Checked)
 {
 struct_func(f,2);
-/*for(i=0;i<n3;i++)
+for(i=0;i<n3;i++)
     {
     koef=sqrt(s_func[i][0]/(pow(sha[i][1],2.)+pow(shb[i][1],2.)));
     sha[i][1] *= koef;
@@ -93,7 +99,7 @@ struct_func(f,2);
     koef=sqrt(s_func[i][1]/(pow(sha[i][0],2.)+pow(shb[i][0],2.)));
     sha[i][0] *= koef;
     shb[i][0] *= koef;
-    }*/
+    }
 /*clrscr();
 for(j=0;j<n3;j++)
     {
@@ -103,15 +109,16 @@ for(j=0;j<n3;j++)
       en+=sha[j][i]*sha[j][i]+shb[j][i]*shb[j][i];
     printf("   totEn=%lf\n",en);
     }  */
-//time_step_shell(dt);
+time_step_shell(dt);
 for(k=0;k<n3;k++)
    {
-/*   double tmp = maschtab*pow(nl[0]*(sha[k][0]*sha[k][0]+shb[k][0]*shb[k][0]) +
+   double tmp = maschtab*pow(nl[0]*(sha[k][0]*sha[k][0]+shb[k][0]*shb[k][0]) +
                              nl[1]*(sha[k][1]*sha[k][1]+shb[k][1]*shb[k][1]),
-                         1./3);*/
-  double tmp;
-  if(PulsEn>100) tmp=maschtab*pow(s_func[k][1]+s_func[k][0],2);
-                 else tmp=0;
+                         1./3);
+   if(PulsEn/TotalEnergy<0.1) tmp=0;
+   /*  double tmp;
+  if(PulsEn/TotalEnergy>0.1) tmp=maschtab*pow(s_func[k][1]+s_func[k][0],2);
+                 else tmp=0;*/
    for(i=ghost;i<mm1;i++)
        for(j=ghost;j<mm2;j++)
             nut[i][j][k+ghost] = (1. + tmp)/Re;
