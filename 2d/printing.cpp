@@ -34,7 +34,6 @@ int init_data(double *Re,double *t_cur,long *count)
  int i,j,k,l;
  float tmpd;
  char tmpc;
- int n1,n2,n3;
 
  FILE *inp = fileopen(NameInitFile,-1);
  read_tilleq(inp,'n');   if(fscanf(inp,"%lf",t_cur)==0) error=1;
@@ -210,7 +209,7 @@ printf("t=%e dtdid=%e NIter=%d %e\n", t_cur, dtdid, count, div);
          printf("number of runge-kutt calculations=%d",enter);
 
 /*avervx = alloc_mem_1f(m3);
-if(avervx == NULL)  nrerror("\nAlloc_mem: unsuffitient memory!\n\a",t_cur);*/
+if(avervx == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n\a",t_cur);*/
 
 avernu = alloc_mem_1f(m3);
 
@@ -229,7 +228,7 @@ for(k=ghost;k<mm3;k++)
 
 //putting velocities to file
         fv = fileopen(NameVFile,count);
-        fprintf(fv,"{%-7.5lf}",t_cur);
+        fprintf(fv,"{%0.7lf}",t_cur);
         print_array1d(fv,f1[0][m1/2][ghost],ghost,n3);
         fclose(fv);
 //putting viscosities to file
@@ -238,7 +237,7 @@ for(k=ghost;k<mm3;k++)
         fclose(fnu);
 //for(k=0;k<m3;k++) printf("%e\n",f1[0][5][5][k]);
 //putting kaskad variables(log energy combined from them) to file
-/*fkv=fileopen(KaskadVarFile,count);
+/**/fkv=fileopen(KaskadVarFile,count);
 fprintf(fkv,"{");
 for(i=0;i<Ns;i++)
     {
@@ -252,7 +251,20 @@ for(i=0;i<Ns;i++)
         }
     fprintf(fkv,i<Ns-1 ? "," : "}\n");
     }
-fclose(fkv);*/
+fclose(fkv);/**/
+FILE *force=fileopen("force.dat",count);
+print_array1d(force,f0,ghost,n3);
+fclose(force);
+FILE *casc=fileopen("casc.dat",count);
+fprintf(casc,"{");
+for(k=0;k<n3;k++)
+    {
+    mf=pow(sha[k][0],2)+pow(shb[k][0],2);
+    if(mf>1e-300) fprintf(casc,"%0.10lf",log(mf));
+                else fprintf(casc,"NAN");
+    fprintf(casc,k<n3-1 ? "," : "}\n");
+    }
+fclose(force);
 }
 
 void dump(int n1,int n2,int n3,double Re,double ****f1,double ***nut,double t_cur,long count)

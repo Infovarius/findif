@@ -8,6 +8,8 @@
 #include <conio.h>
 
 #define for2D(l)  ,l==1?l++:l
+#define min(a,b)  ((a>b)?(b):(a))
+#define max(a,b)  ((a>b)?(a):(b))
 
 LEVEL enum {ActNone=0, ActBegin=1, ActDump=2, ActPause=4, ActContinue=8, ActQuit=16}
      action;
@@ -52,6 +54,8 @@ LEVEL int max_okr;  //должно быть <=ghost, иначе окрестность выходит из фикт.обл
 LEVEL double lambda; //multiplier
 LEVEL long num_points[kol_masht];
 LEVEL double *nl,**sha,**shb;
+LEVEL double *f0;                           //flux of energy from grid to shell
+LEVEL double *en_flux;                      //summary of energy in cascade model
 
 /*------- printing.cpp ---------*/
 int init_data(double *Re,double *t_cur,long *count);
@@ -65,8 +69,8 @@ void printing(double ****f1,double dtdid,double t_cur,long count,double en);
 void dump(int n1,int n2,int n3,double Re,double ****f,double ***nut,double t_cur,long count);
 /*-------- goy.cpp -----------*/
 void init_shell(void);
-void sima(double *zza, double *zzb, double *xx, double *yy);
-void time_step_shell(double tm);
+void sima(double *zza, double *zzb, double *xx, double *yy,int layer);
+void time_step_shell(double tm,double *en_flux);
 void erase_shell(void);
 /*------- struct_func.cpp----*/
 void struct_func(double ****f,int q);
