@@ -3,26 +3,24 @@
 //---------------------------------------------------------------------------
 
 #include <stdio.h>
-#include <stdlib.h>                              
+#include <stdlib.h>
 #include <math.h>
-#include <system.hpp>
 #include <conio.h>
 
 #define for2D(l)  ,l==1?l++:l
-
 
 LEVEL enum {ActNone=0, ActBegin=1, ActDump=2, ActPause=4, ActContinue=8, ActQuit=16}
      action;
 LEVEL enum {StNone=0, StPause=1, StRun=2} RunStatus;
 
-LEVEL char * NameMessageFile;
-LEVEL char * NameErrorFile;
-LEVEL char * NameInitFile;
-LEVEL char *NameNuFile = "nut.dat";
-LEVEL char *NameVFile  = "vv.dat";
-LEVEL char *NameDumpFile = "dump.dat";
-LEVEL char *NameEnergyFile = "energy.dat";
-LEVEL char *KaskadVarFile = "kaskvar.dat";
+LEVEL char *NameMessageFile;
+LEVEL char *NameErrorFile;
+LEVEL char *NameInitFile;
+LEVEL char *NameNuFile;
+LEVEL char *NameVFile;
+LEVEL char *NameDumpFile;
+LEVEL char *NameEnergyFile;
+LEVEL char *KaskadVarFile;
 
 LEVEL double ****f, ****f1, ****df, ****df2, ****df3, ****df4, ****df5,**s_func,
              dx[3];
@@ -33,8 +31,8 @@ LEVEL double ***nut,
 LEVEL int    m1, m2, m3, mm1, mm2, mm3, n1, n2, n3, Ns,
              approx, ghost, nvar;
 
-LEVEL double Noise=0.1;
-LEVEL double NoiseNorm=0.;
+LEVEL double Noise;
+LEVEL double NoiseNorm;
 LEVEL double maschtab;
 
 LEVEL double t_cur,Ttot;
@@ -49,9 +47,9 @@ LEVEL int OutStep;    //each OutStep result is printing
 LEVEL int num_dump;
 
 //--------for GOY
-const int kol_masht=5;
-const int size_okr=3;  //должно быть <=ghost, иначе окрестность выходит из фикт.обл-ти - виснет
-const double lambda=2; //multiplier
+#define kol_masht 5
+LEVEL int max_okr;  //должно быть <=ghost, иначе окрестность выходит из фикт.обл-ти - виснет
+LEVEL double lambda; //multiplier
 LEVEL long num_points[kol_masht];
 LEVEL double *nl,**sha,**shb;
 
@@ -64,7 +62,7 @@ void print_array3d(FILE *ff,double ***a,
         int beg1,int n1,int beg2,int n2,int beg3,int n3);
 double check(double ****f);
 void printing(double ****f1,double dtdid,double t_cur,long count,double en);
-void dump(int n1,int n2,int n3,double Re,double ****f1,double ***nut,double t_cur,long count);
+void dump(int n1,int n2,int n3,double Re,double ****f,double ***nut,double t_cur,long count);
 /*-------- goy.cpp -----------*/
 void init_shell(void);
 void sima(double *zza, double *zzb, double *xx, double *yy);
@@ -89,7 +87,7 @@ void   timestep(double ****, double ****, double, double ****,
 double rkck(double ****, double ****, double, double, double ****);
 /*------- pde.cpp -----------*/
 void   pde(double, double ****, double ****);
-double norma(double a,double b,double c,int q);
+inline double norma(double a,double b,double c,int q);
 double deviation(double ****,int,int,int);
 void nut_by_flux(double ****f,double Re);
 void   boundary_conditions(double ****);
