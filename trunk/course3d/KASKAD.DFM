@@ -1,8 +1,8 @@
 object MainWindow: TMainWindow
-  Left = 160
-  Top = 104
-  Width = 757
-  Height = 504
+  Left = 183
+  Top = 106
+  Width = 808
+  Height = 507
   Caption = 'Интегрирование каскадно-сеточным методом'
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -16,12 +16,12 @@ object MainWindow: TMainWindow
   PixelsPerInch = 96
   TextHeight = 13
   object Notebook: TTabbedNotebook
-    Left = 8
+    Left = 0
     Top = 0
-    Width = 757
-    Height = 479
+    Width = 808
+    Height = 460
     Anchors = [akLeft, akTop, akRight, akBottom]
-    PageIndex = 3
+    PageIndex = 1
     TabFont.Charset = DEFAULT_CHARSET
     TabFont.Color = clBtnText
     TabFont.Height = -11
@@ -228,15 +228,15 @@ object MainWindow: TMainWindow
         TabOrder = 3
         OnClick = ExitClick
       end
-      object ButtonContinue: TButton
+      object ButtonRecontinue: TButton
         Left = 480
         Top = 141
         Width = 145
         Height = 45
-        Caption = 'Продолжить счет'
+        Caption = 'Начать счет сызнова'
         TabOrder = 4
         Visible = False
-        OnClick = ContinueWorkClick
+        OnClick = RecontinueClick
       end
       object ClearScr: TButton
         Left = 24
@@ -246,6 +246,27 @@ object MainWindow: TMainWindow
         Caption = 'Очистить'
         TabOrder = 5
         OnClick = ClearScrClick
+      end
+      object SelPrior: TComboBox
+        Left = 656
+        Top = 152
+        Width = 113
+        Height = 21
+        Hint = 'по умолчанию самый низкий'
+        ItemHeight = 13
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 6
+        Text = 'Приоритет'
+        OnChange = SelPriorChange
+        Items.Strings = (
+          '0.в безделье'
+          '1.низкий'
+          '2.ниже среднего'
+          '3.нормальный'
+          '4.выше среднего'
+          '5.высокий'
+          '6.реального времени')
       end
     end
     object TTabPage
@@ -508,7 +529,7 @@ object MainWindow: TMainWindow
           Width = 121
           Height = 21
           TabOrder = 1
-          Text = '0.1'
+          Text = '1000'
           OnChange = EditMaschtabChange
         end
       end
@@ -518,5 +539,21 @@ object MainWindow: TMainWindow
       Top = 24
       Caption = 'Tasks'
     end
+  end
+  object StatusBarCalc: TStatusBar
+    Left = 0
+    Top = 460
+    Width = 800
+    Height = 20
+    Panels = <
+      item
+        Text = 'Начало работы (нажмите кнопку)'
+        Width = 200
+      end
+      item
+        Text = 'Ничего не сделано'
+        Width = 50
+      end>
+    SimplePanel = False
   end
 end

@@ -11,6 +11,7 @@ USEUNIT("pde.cpp");
 USEUNIT("RKAD.CPP");
 USEUNIT("struct_func.cpp");
 USE("course.todo", ToDo);
+USEUNIT("run.cpp");
 //---------------------------------------------------------------------------
 WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 {
