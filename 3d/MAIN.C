@@ -3,13 +3,13 @@
 //#include <conio.h>
 #include "head.h"
 
-#define EACH 100
+#define EACH 20
 int main(int argc, char** argv)
 {
    double t_cur, Ttot, dttry, dtdid, dtnext;
-   int i,k,l;
+   int i,j,k,l;
 
-   Re=10000;
+   Re=4000;
    Gamma=1e-3;
    l1=3;
    l2=1;
@@ -17,7 +17,7 @@ int main(int argc, char** argv)
 
    nvar=4;
    n1=10;
-   n2=1;
+   n2=10;
    n3=10;
    approx=7;                      //derivatives approximation order
    ghost=(approx-1)/2;            //radius of approx sample
@@ -34,10 +34,10 @@ int main(int argc, char** argv)
    mm2 = ghost+n2;
    mm3 = ghost+n3;
 
-   t_cur=0; Ttot=1000;
+   t_cur=0; Ttot=100;
    count=0; enter = 0;
 
-   f  =alloc_mem_4f(nvar, m1, m2, m3);   //f[3]-pressure,f[0,2]-v(vector)
+   f  =alloc_mem_4f(nvar, m1, m2, m3);   //f[3]-pressure,f[0..2]-v(vector)
    f1 =alloc_mem_4f(nvar, m1, m2, m3);
    df =alloc_mem_4f(nvar, m1, m2, m3);
    df2=alloc_mem_4f(nvar, m1, m2, m3);
@@ -51,6 +51,7 @@ int main(int argc, char** argv)
 
    dtnext=1e-3;
    dump(f,t_cur,count);
+
    while (t_cur < Ttot) {            /*----- MAIN ITERATIONS ----*/
         pde(t_cur, f, df);
         dttry=dtnext;
@@ -60,9 +61,18 @@ int main(int argc, char** argv)
             printing(f1,dtdid,t_cur,count);
         for(l=0;l<nvar;l++)
         for(i=ghost;i<mm1;i++)
+        for(j=ghost;j<mm2;j++)
         for(k=ghost;k<mm3;k++)
-           f[l][i][0][k]=f1[l][i][0][k];
-
+           f[l][i][j][k]=f1[l][i][j][k];
+        if(kbhit())
+             {
+                switch (getch()) {
+                        case 'd' : dump(f1,t_cur,count); break;
+                        case 'q' : { dump(f1,t_cur,count);
+                                     nrerror("You asked to exit. Here you are...");
+                                    }
+                        }
+              }
         count++;
    }
 
