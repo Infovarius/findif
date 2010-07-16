@@ -4,7 +4,6 @@
 #include <string.h>
 //#include <conio.h>
 
-#define for2D(l)  ,l==1?l++:l
 
 LEVEL double ****f, ****f1, ****df, ****df2, ****df3, ****df4, ****df5,
              dx[3];
@@ -42,5 +41,5 @@ void print_array3d(FILE *ff,double ***a,
         int beg1,int n1,int beg2,int n2,int beg3,int n3);
 void printing(double ****f1,double dtdid,double t_cur,long count);
 void dump(double ****f1,double t_cur,long count);
-void print_array3d2(FILE *ff,double ***a,
-        int beg1,int n1,int beg3,int n3);
+
+
