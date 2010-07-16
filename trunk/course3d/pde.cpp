@@ -85,7 +85,7 @@ double koef;
 if(MainWindow->CheckNut->Checked)
 {
 struct_func(f,2);
-for(i=0;i<n3;i++)
+/*for(i=0;i<n3;i++)
     {
     koef=sqrt(s_func[i][0]/(pow(sha[i][1],2.)+pow(shb[i][1],2.)));
     sha[i][1] *= koef;
@@ -93,7 +93,7 @@ for(i=0;i<n3;i++)
     koef=sqrt(s_func[i][1]/(pow(sha[i][0],2.)+pow(shb[i][0],2.)));
     sha[i][0] *= koef;
     shb[i][0] *= koef;
-    }
+    }*/
 /*clrscr();
 for(j=0;j<n3;j++)
     {
@@ -103,13 +103,13 @@ for(j=0;j<n3;j++)
       en+=sha[j][i]*sha[j][i]+shb[j][i]*shb[j][i];
     printf("   totEn=%lf\n",en);
     }  */
-time_step_shell(dt);
+//time_step_shell(dt);
 for(k=0;k<n3;k++)
    {
-   double tmp = maschtab*pow(nl[0]*(sha[k][0]*sha[k][0]+shb[k][0]*shb[k][0]) +
+/*   double tmp = maschtab*pow(nl[0]*(sha[k][0]*sha[k][0]+shb[k][0]*shb[k][0]) +
                              nl[1]*(sha[k][1]*sha[k][1]+shb[k][1]*shb[k][1]),
-                         1./3);
-// double tmp=maschtab*s_func[k][0];
+                         1./3);*/
+   double tmp=maschtab*s_func[k][1];
    for(i=ghost;i<mm1;i++)
        for(j=ghost;j<mm2;j++)
             nut[i][j][k+ghost] = (1. + tmp)/Re;

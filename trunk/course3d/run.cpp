@@ -30,7 +30,7 @@ __fastcall CalcProcess::CalcProcess(bool CreateSuspended)
 //---------------------------------------------------------------------------
 void __fastcall CalcProcess::Execute()
 {
-   double dttry, dtdid, dtnext, PulsEn;
+   double dttry, dtdid, dtnext;
    int i,j,k,l;
    const min_dump=(int)Ttot;
    AnsiString TempScreen;

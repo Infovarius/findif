@@ -1,6 +1,6 @@
 object MainWindow: TMainWindow
-  Left = -2
-  Top = 16
+  Left = 6
+  Top = 50
   Width = 798
   Height = 507
   Caption = 'Интегрирование каскадно-сеточным методом'
@@ -365,6 +365,8 @@ object MainWindow: TMainWindow
         Width = 249
         Height = 17
         Caption = 'Очищать экран после вывода одного шага'
+        Checked = True
+        State = cbChecked
         TabOrder = 2
       end
       object EditCheckStep: TEdit
