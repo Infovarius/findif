@@ -7,6 +7,7 @@
 #include <math.h>
 #include <system.hpp>
 #include "kaskad.h"
+#include <vector.h>
 
 //#include <conio.h>
 
@@ -14,14 +15,14 @@ LEVEL enum {ActNone=0, ActBegin=1, ActDump=2, ActPause=4, ActContinue=8, ActQuit
      action;
 LEVEL enum {StNone=0, StPause=1, StRun=2} RunStatus;
 
-LEVEL char *NameNuFile;
-LEVEL char *NameVFile;
-LEVEL char *NameDumpFile;
-LEVEL char *NameEnergyFile;
-LEVEL char *NameKaskadVarFile;
-LEVEL char *NameMessageFile;
-LEVEL char *NameErrorFile;
-LEVEL char *NameInitFile;
+LEVEL AnsiString NameNuFile;
+LEVEL AnsiString NameVFile;
+LEVEL AnsiString NameDumpFile;
+LEVEL AnsiString NameEnergyFile;
+LEVEL AnsiString NameKaskadVarFile;
+LEVEL AnsiString NameMessageFile;
+LEVEL AnsiString NameErrorFile;
+LEVEL AnsiString NameInitFile;
 
 LEVEL double ****f, ****f1, ****df, ****df2, ****df3, ****df4, ****df5,**s_func,
              dx[3];
@@ -33,7 +34,7 @@ LEVEL int    m1, m2, m3, mm1, mm2, mm3, n1, n2, n3, Ns,
              approx, ghost, nvar;
 
 LEVEL double Noise=0.1;
-LEVEL double NoiseNorm=0.0;
+LEVEL double NoiseNorm=0.;
 LEVEL double maschtab;
 
 LEVEL double t_cur,Ttot;
@@ -49,7 +50,7 @@ LEVEL int OutStep;    //each OutStep result is printing
 
 /*------- ioutil.cpp ---------*/
 int init_data(int *n1,int *n2,int *n3,double *Re,double ****f,double ***nut,double *t_cur,long *count);
-FILE *fileopen(char *, int mode);
+FILE *fileopen(AnsiString, int mode);
 void print_array1d(FILE *ff,double *a,int beg1,int n1);
 void print_array2d(FILE *ff,double **a,int beg1,int n1,int beg2,int n2);
 void print_array3d(FILE *ff,double ***a,

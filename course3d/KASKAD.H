@@ -49,19 +49,7 @@ __published:	// IDE-managed Components
         TLabel *Label12;
         TLabel *Label13;
         TLabel *Label14;
-        TEdit *EditRe;
-        TLabel *Label15;
         TButton *ButtonRecontinue;
-        TGroupBox *GroupInitVariant;
-        TRadioButton *RadioInit1;
-        TRadioButton *RadioInit2;
-        TGroupBox *GroupNoise;
-        TCheckBox *CheckNoise;
-        TEdit *EditNoise;
-        TLabel *Label16;
-        TCheckBox *CheckNorm;
-        TLabel *Label17;
-        TEdit *EditNorm;
         TButton *ClearScr;
         TUpDown *UpDownCheck;
         TEdit *EditCheckStep;
@@ -73,13 +61,20 @@ __published:	// IDE-managed Components
         TEdit *EditMaschtab;
         TComboBox *SelPrior;
         TStatusBar *StatusBarCalc;
-        TGroupBox *GroupBox1;
-        TLabel *Label19;
-        TLabel *Label20;
-        TLabel *Label21;
-        TEdit *EditNx;
-        TEdit *EditNy;
-        TEdit *EditNz;
+        TRadioButton *RadioInitVel;
+        TRadioButton *RadioInitContinue;
+        TEdit *EditRe;
+        TLabel *Label15;
+        TGroupBox *GroupInitVariant;
+        TRadioButton *RadioZeroInit;
+        TRadioButton *RadioParabole;
+        TGroupBox *GroupNoise;
+        TLabel *Label16;
+        TLabel *Label17;
+        TCheckBox *CheckNoise;
+        TEdit *EditNoise;
+        TCheckBox *CheckNorm;
+        TEdit *EditNorm;
         void __fastcall FormCreate(TObject *Sender);
         void __fastcall FormDestroy(TObject *Sender);
         void __fastcall EditMessageKeyUp(TObject *Sender, WORD &Key,
@@ -115,10 +110,8 @@ __published:	// IDE-managed Components
         void __fastcall CheckNutClick(TObject *Sender);
         void __fastcall BeginWorkClick(TObject *Sender);
         void __fastcall SelPriorChange(TObject *Sender);
-        void __fastcall ChangeStatus(char *str1,char *str2);
-        void __fastcall EditNxChange(TObject *Sender);
-        void __fastcall EditNyChange(TObject *Sender);
-        void __fastcall EditNzChange(TObject *Sender);
+        void __fastcall ChangeStatus(AnsiString str1, AnsiString str2);
+        void __fastcall RefreshForm();
 private:	// User declarations
 public:		// User declarations
         __fastcall TMainWindow(TComponent* Owner);

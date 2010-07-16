@@ -4,8 +4,9 @@
   <MACROS>
     <VERSION value="BCB.05.03"/>
     <PROJECT value="course.exe"/>
-    <OBJFILES value="course.obj kaskad.obj ioutil.obj UTIL.obj GOY.obj pde.obj RKAD.obj 
-      struct_func.obj run.obj"/>
+    <OBJFILES value="D:\BC31\obj\\course.obj D:\BC31\obj\\kaskad.obj D:\BC31\obj\\ioutil.obj 
+      D:\BC31\obj\\UTIL.obj D:\BC31\obj\\GOY.obj D:\BC31\obj\\pde.obj 
+      D:\BC31\obj\\RKAD.obj D:\BC31\obj\\struct_func.obj D:\BC31\obj\\run.obj"/>
     <RESFILES value="course.res"/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>
@@ -36,12 +37,12 @@
   <OPTIONS>
     <IDLCFLAGS value="-I..\..\Bin -I$(BCB)\include -I$(BCB)\include\vcl -src_suffix cpp -D_DEBUG 
       -boa"/>
-    <CFLAG1 value="-Od -H=$(BCB)\lib\vcl50.csm -Hc -Vx -Ve -ff -X- -rd -a8 -6 -b- -k -y -v 
-      -vi- -c -tW -tWM"/>
-    <PFLAGS value="-$YD -$W -$O- -v -JPHNE -M"/>
+    <CFLAG1 value="-Od -H=$(BCB)\lib\vcl50.csm -Q -Vx -Ve -X- -r- -a8 -b- -k -y -v -vi- -c 
+      -tW -tWM"/>
+    <PFLAGS value="-N2&quot;D:\BC31\obj\&quot; -N0&quot;D:\BC31\obj\&quot; -$YD -$W -$O- -v -JPHNE -M"/>
     <RFLAGS value=""/>
-    <AFLAGS value="/mx /w2 /zd"/>
-    <LFLAGS value="-D&quot;&quot; -aa -Tpe -x -Gn -v"/>
+    <AFLAGS value="/mx /w2 /zi"/>
+    <LFLAGS value="-I&quot;D:\BC31\obj\&quot; -D&quot;&quot; -aa -Tpe -x -Gn -v"/>
   </OPTIONS>
   <LINKER>
     <ALLOBJ value="c0w32.obj $(PACKAGES) Memmgr.Lib sysinit.obj $(OBJFILES)"/>
@@ -50,11 +51,11 @@
   </LINKER>
   <IDEOPTIONS>
 [Version Info]
-IncludeVerInfo=0
+IncludeVerInfo=1
 AutoIncBuild=0
 MajorVer=1
 MinorVer=0
-Release=0
+Release=1
 Build=0
 Debug=0
 PreRelease=0
@@ -65,13 +66,13 @@ Locale=1049
 CodePage=1251
 
 [Version Info Keys]
-CompanyName=
-FileDescription=
-FileVersion=1.0.0.0
-InternalName=
+CompanyName=ICMM
+FileDescription=Демонстрация каскадно-сеточного подхода
+FileVersion=1.0.1.0
+InternalName=kaskad-shell
 LegalCopyright=
 LegalTrademarks=
-OriginalFilename=
+OriginalFilename=course
 ProductName=
 ProductVersion=1.0.0.0
 Comments=

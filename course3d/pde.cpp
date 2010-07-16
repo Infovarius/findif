@@ -161,23 +161,11 @@ void  init_conditions(double ****f,double Re)
    int i,j,k;
    double parabole;
 //   double k1,k2,k3;
-
-   s_func = alloc_mem_2f(n3+2,kol_masht);
-   f  =alloc_mem_4f(nvar, m1, m2, m3);   //f[3]-pressure,f[0..2]-v(vector)
-   f1 =alloc_mem_4f(nvar, m1, m2, m3);
-   df =alloc_mem_4f(nvar, m1, m2, m3);
-   df2=alloc_mem_4f(nvar, m1, m2, m3);
-   df3=alloc_mem_4f(nvar, m1, m2, m3);
-   df4=alloc_mem_4f(nvar, m1, m2, m3);
-   df5=alloc_mem_4f(nvar, m1, m2, m3);
-   nut=alloc_mem_3f(m1, m2, m3);
-   init_shell();
-
    Noise = (MainWindow->CheckNoise->Checked) ? Noise :0;
              //  MainWindow->EditNoise->Text.ToDouble() : 0;
    NoiseNorm = (MainWindow->CheckNorm->Checked) ? NoiseNorm : 0;
              //   MainWindow->EditNorm->Text.ToDouble()  : 0;
-   parabole = (MainWindow->RadioInit2->Checked) ? 1 : 0;
+   parabole = (MainWindow->RadioParabole->Checked) ? 1 : 0;
 //   k1=2*M_PI/l1;  k3=M_PI/l3;
 
    for(i=0;i<m1;i++)

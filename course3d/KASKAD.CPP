@@ -37,14 +37,7 @@ void __fastcall TMainWindow::FormCreate(TObject *Sender)
    nvar=4;
    n1=5;
    n2=5;
-   n3=10;
-   m1 = n1+2*ghost;
-   mm1 = ghost+n1;
-   m2 = n2+2*ghost;
-   mm2 = ghost+n2;
-   m3 = n3+2*ghost;
-   mm3 = ghost+n3;
-
+   n3=11;
    Ns=25;
    approx=7;                      //derivatives approximation order
    ghost=(approx-1)/2;            //radius of approx sample
@@ -52,6 +45,14 @@ void __fastcall TMainWindow::FormCreate(TObject *Sender)
    dx[1]=l2/n2;
    dx[2]=l3/n3;
    p1 = 8*l1/(l3*Re) ; p2 = 0;
+
+
+   m1 = n1+2*ghost;
+   m2 = n2+2*ghost;
+   m3 = n3+2*ghost;
+   mm1 = ghost+n1;
+   mm2 = ghost+n2;
+   mm3 = ghost+n3;
 
    t_cur=0; Ttot=100;
    count=0; enter = 0;
@@ -65,12 +66,43 @@ void __fastcall TMainWindow::FormCreate(TObject *Sender)
    NameErrorFile = "error.err";
    NameInitFile = "init.dat";
 
-//   Noise = 0.1;
-//   NoiseNorm = 0.0;
+   s_func = alloc_mem_2f(n3+2,kol_masht);
+   f  =alloc_mem_4f(nvar, m1, m2, m3);   //f[3]-pressure,f[0..2]-v(vector)
+   f1 =alloc_mem_4f(nvar, m1, m2, m3);
+   df =alloc_mem_4f(nvar, m1, m2, m3);
+   df2=alloc_mem_4f(nvar, m1, m2, m3);
+   df3=alloc_mem_4f(nvar, m1, m2, m3);
+   df4=alloc_mem_4f(nvar, m1, m2, m3);
+   df5=alloc_mem_4f(nvar, m1, m2, m3);
+   nut=alloc_mem_3f(m1, m2, m3);
+   init_shell();
+
+   Noise = 0.1;
+   NoiseNorm = 0.05;
 
    prioritet = tpIdle;
    RunStatus = StNone;
    fileopen("error.err",0);
+   RefreshForm();
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::RefreshForm()
+{
+ AnsiString Temp;
+ Temp.printf("%g",Re);           EditRe->Text = Temp;
+ Temp.printf("%g",maschtab);     EditMaschtab->Text = Temp;
+ Temp.printf("%d",OutStep);      EditOutStep->Text = Temp;
+ Temp.printf("%d",CheckStep);    EditCheckStep->Text = Temp;
+   EditNu->Text = NameNuFile;
+   EditV->Text  = NameVFile;
+   EditDump->Text = NameDumpFile;
+   EditEnergy->Text = NameEnergyFile;
+   EditKaskvar->Text = NameKaskadVarFile;
+   EditMessage->Text = NameMessageFile;
+   EditError->Text = NameErrorFile;
+   EditInit->Text = NameInitFile;
+ Temp.printf("%g",Noise);        EditNoise->Text = Temp;
+ Temp.printf("%g",NoiseNorm);    EditNorm->Text = Temp;
 }
 //---------------------------------------------------------------------------
 void __fastcall TMainWindow::FormDestroy(TObject *Sender)
@@ -184,7 +216,13 @@ void __fastcall TMainWindow::EditInitKeyUp(TObject *Sender, WORD &Key,
 void __fastcall TMainWindow::InputInitClick(TObject *Sender)
 {
   int code=0;
-  if ( (code=init_data(&n1,&n2,&n3,&Re,f,nut,&t_cur,&count)) > 0)
+  long dummy_count;
+  double dummy_Re,dummy_t;
+  if (RadioInitVel->Checked)
+         code=init_data(&n1,&n2,&n3,&dummy_Re,f,nut,&dummy_t,&dummy_count);
+         else code=init_data(&n1,&n2,&n3,&Re,f,nut,&t_cur,&count);
+  RefreshForm();
+  if ( code > 0)
      nrerror("Не удался ввод начальных данных. Код ошибки = %d",code);
    else input_done = true;
 }
@@ -202,121 +240,97 @@ void __fastcall TMainWindow::ExitClick(TObject *Sender)
               action = ActQuit;
               if(proc->WaitFor()) delete proc;
               RunStatus = StNone;
-              MainWindow->EditRe->Enabled = true;
-              MainWindow->EditRe->ShowHint = false;
-            }
-     else MainWindow->Close();
-}
-//---------------------------------------------------------------------------
+              MainWindow->EditRe->EnableRun-time error at t=0.0535:
+You asked to exit. Here you are...
+...now exiting to system...
+                                                                                                                                                                                                                                                                                                                                                                                                                                  --------------------------------------------------
+__fastcall TMainWindow::TMainWindow(TComponent* Owner)
+        : TForm(Owner)
+{
+ ChangeStatus("","Запущена программа, спасибо");
 
-void __fastcall TMainWindow::EditCheckStepChanging(TObject *Sender)
-{
- CheckStep = MainWindow->EditCheckStep->Text.ToInt();
 }
 //---------------------------------------------------------------------------
+void __fastcall TMainWindow::FormCreate(TObject *Sender)
+{
+   Re=10000;
+   maschtab=1000;
+   Gamma=1e-3;
+   l1=3;                    CheckStep=10;
+   l2=1;                    OutStep = 20;
+   l3=1;
 
-void __fastcall TMainWindow::EditOutStepChanging(TObject *Sender)
-{
- OutStep = MainWindow->EditOutStep->Text.ToInt();
-}
-//---------------------------------------------------------------------------
+   nvar=4;
+   n1=10;
+   n2=5;
+   n3=10;
+   Ns=25;
+   approx=7;                      //derivatives approximation order
+   ghost=(approx-1)/2;            //radius of approx sample
+   dx[0]=l1/n1;
+   dx[1]=l2/n2;
+   dx[2]=l3/n3;
+   p1 = 8*l1/(l3*Re) ; p2 = 0;
 
-void __fastcall TMainWindow::EditReKeyUp(TObject *Sender, WORD &Key,
-      TShiftState Shift)
-{
- Re = MainWindow->EditRe->Text.ToDouble();
- if(Re<1) Re=1.;
- p1 = 8*l1/(l3*Re);
-}
-//---------------------------------------------------------------------------
-void __fastcall TMainWindow::EditNoiseKeyUp(TObject *Sender, WORD &Key,
-      TShiftState Shift)
-{
- Noise = MainWindow->EditNoise->Text.ToDouble();
-}
-//---------------------------------------------------------------------------
-void __fastcall TMainWindow::CheckNoiseClick(TObject *Sender)
-{
- MainWindow->EditNoise->Enabled = CheckNoise->Checked;
-}
-//---------------------------------------------------------------------------
 
-void __fastcall TMainWindow::CheckNormClick(TObject *Sender)
-{
- MainWindow->EditNorm->Enabled = CheckNorm->Checked;
-}
-//---------------------------------------------------------------------------
+   m1 = n1+2*ghost;
+   m2 = n2+2*ghost;
+   m3 = n3+2*ghost;
+   mm1 = ghost+n1;
+   mm2 = ghost+n2;
+   mm3 = ghost+n3;
 
-void __fastcall TMainWindow::EditNormChange(TObject *Sender)
-{
- NoiseNorm = MainWindow->EditNorm->Text.ToDouble();
-}
-//---------------------------------------------------------------------------
+   t_cur=0; Ttot=100;
+   count=0; enter = 0;
 
-void __fastcall TMainWindow::ClearScrClick(TObject *Sender)
-{
- MainWindow->Screen->Lines->Clear();         
-}
-//---------------------------------------------------------------------------
+   NameNuFile = "nut.dat";
+   NameVFile  = "vv.dat";
+   NameDumpFile = "dump.dat";
+   NameEnergyFile = "energy.dat";
+   NameKaskadVarFile = "kaskvar.dat";
+   NameMessageFile = "message.dat";
+   NameErrorFile = "error.err";
+   NameInitFile = "init.dat";
 
-void __fastcall TMainWindow::EditMaschtabChange(TObject *Sender)
-{
-  maschtab = MainWindow->EditMaschtab->Text.ToDouble();        
-}
-//---------------------------------------------------------------------------
+   s_func = alloc_mem_2f(n3+2,kol_masht);
+   f  =alloc_mem_4f(nvar, m1, m2, m3);   //f[3]-pressure,f[0..2]-v(vector)
+   f1 =alloc_mem_4f(nvar, m1, m2, m3);
+   df =alloc_mem_4f(nvar, m1, m2, m3);
+   df2=alloc_mem_4f(nvar, m1, m2, m3);
+   df3=alloc_mem_4f(nvar, m1, m2, m3);
+   df4=alloc_mem_4f(nvar, m1, m2, m3);
+   df5=alloc_mem_4f(nvar, m1, m2, m3);
+   nut=alloc_mem_3f(m1, m2, m3);
+   init_shell();
 
-void __fastcall TMainWindow::CheckNutClick(TObject *Sender)
-{
- MainWindow->EditMaschtab->Enabled = CheckNut->Checked;
-}
-//---------------------------------------------------------------------------
-void __fastcall TMainWindow::SelPriorChange(TObject *Sender)
-{
-switch (MainWindow->SelPrior->Text[1])
- {
-   case '0' : prioritet = tpIdle;   break;
-   case '1' : prioritet = tpLowest;   break;
-   case '2' : prioritet = tpLower;   break;
-   case '3' : prioritet = tpNormal;   break;
-   case '4' : prioritet = tpHigher;   break;
-   case '5' : prioritet = tpHighest;   break;
- }
- if(proc) proc->Priority = prioritet;
-}
-//---------------------------------------------------------------------------
-void __fastcall TMainWindow::ChangeStatus(char *str1,char *str2)
-{
-  StatusBarCalc->Panels->BeginUpdate();
-  try
-  {
-   if(str1[0]!='\0') MainWindow->StatusBarCalc->Panels->Items[0]->Text=str1;
-   if(str2[0]!='\0') MainWindow->StatusBarCalc->Panels->Items[1]->Text=str2;
-  }
-  __finally
-  {
-    StatusBarCalc->Panels->EndUpdate();
-  }
-}
-//---------------------------------------------------------------------------
-void __fastcall TMainWindow::EditNxChange(TObject *Sender)
-{
- n1 = MainWindow->EditNx->Text.ToIntDef(10);
- m1 = n1+2*ghost;
- mm1 = ghost+n1;
-}
-//---------------------------------------------------------------------------
-void __fastcall TMainWindow::EditNyChange(TObject *Sender)
-{
- n2 = MainWindow->EditNy->Text.ToIntDef(10);
- m2 = n2+2*ghost;
- mm2 = ghost+n2;
-}
-//---------------------------------------------------------------------------
-void __fastcall TMainWindow::EditNzChange(TObject *Sender)
-{
- n3 = MainWindow->EditNz->Text.ToIntDef(20);
- m3 = n3+2*ghost;
- mm3 = ghost+n3;
-}
-//---------------------------------------------------------------------------
+   Noise = 0.1;
+   NoiseNorm = 0.05;
 
+   prioritet = tpIdle;
+   RunStatus = StNone;
+   fileopen("error.err",0);
+   RefreshForm();
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::RefreshForm()
+{
+ AnsiString Temp;
+ Temp.printf("%g",Re);           EditRe->Text = Temp;
+ Temp.printf("%g",maschtab);     EditMaschtab->Text = Temp;
+ Temp.printf("%d",OutStep);      EditOutStep->Text = Temp;
+ Temp.printf("%d",CheckStep);    EditCheckStep->Text = Temp;
+   EditNu->Text = NameNuFile;
+   EditV->Text  = NameVFile;
+   EditDump->Text = NameDumpFile;
+   EditEnergy->Text = NameEnergyFile;
+   EditKaskvar->Text = NameKaskadVarFile;
+   EditMessage->Text = NameMessageFile;
+   EditError->Text = NameErrorFile;
+   EditInit->Text = NameInitFile;
+ Temp.printf("%g",Noise);        EditNoise->Text = Temp;
+ Temp.printf("%g",NoiseNorm);    EditNorm->Text = Temp;
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::FormDestroy(TObject *Sender)
+{
+   free_mem_2f(s_func,n3+2,kol_masht);
