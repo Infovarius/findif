@@ -1,6 +1,6 @@
 object MainWindow: TMainWindow
-  Left = 6
-  Top = 50
+  Left = 184
+  Top = 162
   Width = 798
   Height = 507
   Caption = 'Интегрирование каскадно-сеточным методом'
@@ -424,7 +424,7 @@ object MainWindow: TMainWindow
       end
       object GroupTurbulent: TGroupBox
         Left = 40
-        Top = 224
+        Top = 264
         Width = 425
         Height = 153
         Caption = 'Турбулентная вязкость'

@@ -84,7 +84,7 @@ void __fastcall TMainWindow::FormCreate(TObject *Sender)
    mm2 = ghost+n2;
    mm3 = ghost+n3;
 
-   t_cur=0; Ttot=100;
+   t_cur=0; Ttot=1000;
    count=0; enter = 0;
 
    NameNuFile = "nut.dat";

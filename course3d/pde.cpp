@@ -109,7 +109,9 @@ for(k=0;k<n3;k++)
 /*   double tmp = maschtab*pow(nl[0]*(sha[k][0]*sha[k][0]+shb[k][0]*shb[k][0]) +
                              nl[1]*(sha[k][1]*sha[k][1]+shb[k][1]*shb[k][1]),
                          1./3);*/
-   double tmp=maschtab*s_func[k][1];
+  double tmp;
+  if(PulsEn>100) tmp=maschtab*pow(s_func[k][1]+s_func[k][0],2);
+                 else tmp=0;
    for(i=ghost;i<mm1;i++)
        for(j=ghost;j<mm2;j++)
             nut[i][j][k+ghost] = (1. + tmp)/Re;
