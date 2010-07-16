@@ -11,19 +11,21 @@ int main(int argc, char** argv)
    time(&time_begin);
    nmessage("work has begun",0);
 
+   OutStep = 10*(CheckStep=10);
 #include "init_vars.h"
 
-   Re=20000;
+
+   Re=100;
    Gamma=1e-4;
    l1=1;
    l2=1;
    l3=1;
 
    nvar=4;
-   n1=30;
+   n1=10;
    n2=1;
-   n3=30;
-   Ns=25;
+   n3=20;
+   Ns=10;
    approx=7;                      //derivatives approximation order
    ghost=(approx-1)/2;            //radius of approx sample
    dx[0]=l1/n1;

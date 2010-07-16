@@ -17,6 +17,8 @@ void pde(double t, double ****f, double ****df)
 
    boundary_conditions(f);
 
+   for(k=ghost;k<mm3;k++) f0[k] = 0;
+
    for(i=ghost;i<mm1;i++)
    for(j=ghost;j<=ghost;j++)
    for(k=ghost;k<mm3;k++) {
@@ -35,7 +37,11 @@ void pde(double t, double ****f, double ****df)
                      - dp1[l] + (dn1[0]-f[0][i][j][k])*dv1[l][0]
                               + (dn1[2]-f[2][i][j][k])*dv1[l][2];
       df[3][i][j][k]= (-(dv1[0][0] + dv1[2][2]))/Gamma;
+      f0[k-ghost] += nut[i][j][k]*(dv2[0][0]*f[0][i][j][k]+dv2[2][2]*f[2][i][j][k]);
    }
+
+   for(k=0;k<n3;k++) { f0[k] *= dx[0]*dx[2];
+                       f0[k] *= 1;}
 
    return;
 }
@@ -73,9 +79,10 @@ void nut_by_flux(double ****f,double dt) //calculating nu_turbulent by velocity 
 {
 int i,j,k,l;
 double koef;
-double big_puls=300;
-//if(PulsEn/TotalEnergy>big_puls) struct_func(f,2);
-/*for(i=0;i<n3;i++)
+double big_puls=0.000;
+if(PulsEn/TotalEnergy>big_puls) {
+  /*struct_func(f,2);
+  for(i=0;i<n3;i++)
     {
     koef=sqrt(s_func[i][0]/(pow(sha[i][1],2.)+pow(shb[i][1],2.)));
     sha[i][1] *= koef;
@@ -93,18 +100,20 @@ for(j=0;j<n3;j++)
       en+=sha[j][i]*sha[j][i]+shb[j][i]*shb[j][i];
     printf("   totEn=%lf\n",en);
     }  */
-//time_step_shell(dt);
+  time_step_shell(dt,en_flux);
+  }
 for(k=0;k<n3;k++)
    {
 /*   double tmp = maschtab*pow(nl[0]*(sha[k][0]*sha[k][0]+shb[k][0]*shb[k][0]) +
                              nl[1]*(sha[k][1]*sha[k][1]+shb[k][1]*shb[k][1]),
                          1./3);*/
-/*  double tmp;
-  if(PulsEn/TotalEnergy>big_puls) tmp=maschtab*pow(s_func[k][1]+s_func[k][0],2);
+  double tmp;
+  if(PulsEn/TotalEnergy>big_puls)
+                      tmp=maschtab*pow(en_flux[k]*pow(dx[2],4),1./3);
                  else tmp=0;
    for(i=ghost;i<mm1;i++)
        for(j=ghost;j<=ghost;j++)
-            nut[i][j][k+ghost] = (1. + tmp)/Re;*/
+            nut[i][j][k+ghost] = (1. + tmp)/Re;
    }
 }
 
@@ -158,9 +167,9 @@ void  init_conditions(double ****f,double Re)
    double Noise,NoiseNorm,NoiseAdiv,parabole;
    double k1,k2,k3;
    double ***arbfunc = fill_function();
-   Noise = 0.0001;
+   Noise = 0.01;
    NoiseAdiv = 0.0;
-   NoiseNorm = 0.1;
+   NoiseNorm = 0.01;
    parabole = 1;
    k1=2*M_PI/l1;  k3=1*2*M_PI/l3;
    NoiseNorm /= sqrt(k1*k1+k3*k3);
@@ -168,12 +177,13 @@ void  init_conditions(double ****f,double Re)
    for(i=ghost;i<mm1;i++)
    for(j=ghost;j<=ghost;j++)
    for(k=ghost;k<mm3;k++) {
-        f[0][i][j][k]=parabole*coordin(k,2)*(l3-coordin(k,2))*4/l3/l3
-                      + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX
+        f[0][i][j][k]=(parabole+Noise*((double)rand()-RAND_MAX/2)/RAND_MAX)
+                                    *coordin(k,2)*(l3-coordin(k,2))*4/l3/l3
                       + NoiseNorm * k3*sin(k1*coordin(i,0))*sin(k3*coordin(k,2))
                       + NoiseAdiv * dr(arbfunc,i,j,k,1,0,dx[0],ghost, approx) ;
         f[2][i][j][k]=NoiseNorm *k1*cos(k1*coordin(i,0))* (cos(k3*coordin(k,2))-1)
                       + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX
+                           *coordin(k,2)*(l3-coordin(k,2))/l3/l3
                       + NoiseAdiv * (-dr(arbfunc,i,j,k,3,0,dx[2],ghost, approx)) ;
    }
    for(i=0;i<m1;i++)
