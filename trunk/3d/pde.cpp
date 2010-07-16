@@ -77,7 +77,7 @@ return(flux);
 
 void nut_by_flux(double ****f,double Re) //calculating nu_turbulent by velocity fluctuations
 {
-double maschtab = 10;
+double maschtab = 100;
 int i,j,k,l;
 for(i=ghost;i<mm1;i++)
     for(j=ghost;j<mm2;j++)
@@ -131,7 +131,7 @@ void  boundary_conditions(double ****f)
 void  init_conditions(double ****f,double Re)
 {
    int i,j,k,l;
-   double Noise=0.1, Noise1=0;
+   double Noise=0.0, Noise1=0;
 //   double k1,k2,k3;
 
 //   k1=2*M_PI/l1;  k3=M_PI/l3;
@@ -149,7 +149,6 @@ void  init_conditions(double ****f,double Re)
         nut[i][j][k]=1./Re;
    }
 
-   return;
 }
 
 static double kf3[2][3][3]={{{-3./2.0, 2.0, -1./2.0}, {-1./2.0, 0.0, 1./2.0}, {1./2.0, -2.0, 3./2.0}},

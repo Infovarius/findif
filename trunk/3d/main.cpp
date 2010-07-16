@@ -3,7 +3,7 @@
 #include "head.h"
 #include <time.h>
 
-#define CheckStep 20
+#define CheckStep 10
 //each CheckStep divergence of program is checking
 #define OutStep   20
 //each OutStep result is printing
@@ -17,7 +17,7 @@ int main(int argc, char** argv)
    time(&time_begin);
    nmessage("work has begun",t_cur);
 
-   Re=2500;
+   Re=10000;
    Gamma=1e-3;
    l1=3;
    l2=1;
@@ -45,6 +45,7 @@ int main(int argc, char** argv)
    t_cur=0; Ttot=100;
    count=0; enter = 0;
 
+   s_func = alloc_mem_2f(n3+2,kol_masht);
    f  =alloc_mem_4f(nvar, m1, m2, m3);   //f[3]-pressure,f[0..2]-v(vector)
    f1 =alloc_mem_4f(nvar, m1, m2, m3);
    df =alloc_mem_4f(nvar, m1, m2, m3);
@@ -55,17 +56,43 @@ int main(int argc, char** argv)
    nut=alloc_mem_3f(m1, m2, m3);
 
    fileopen("error.err",0);
-/*   if argc==1 init_conditions(f,Re);
-     else {*/
-
+   init_conditions(f,Re);
+   if(argc>1)
+           {
+           FILE *inp=fileopen("init.dat",-1);
+           float tmpd;
+           char tmpc;
+           for(l=0;l<nvar;l++)
+              {
+              do fscanf(inp,"%c",&tmpc); while (tmpc!='{');
+              for(i=0;i<m1;i++)
+                 {
+                 do fscanf(inp,"%c",&tmpc); while (tmpc!='{');
+                 for(j=0;j<m2;j++)
+                    {
+                    do fscanf(inp,"%c",&tmpc); while (tmpc!='{');
+                    for(k=0;k<m3;k++)
+                       {
+                       tmpc=fscanf(inp,"%g",&tmpd);
+                       fscanf(inp,"%c",&tmpc);
+                       f[l][i][j][k]=tmpd;
+                       }
+                    fscanf(inp,"%c",&tmpc);
+                    }
+                 fscanf(inp,"%c",&tmpc);
+                 }
+              fscanf(inp,"%c",&tmpc);
+              }
+           }
    PulsEn=check(f);
    printing(f,dtdid,t_cur,count,PulsEn);
 
    dtnext=1e-3;
 //   dump(f,t_cur,count);
 
-   while (t_cur < Ttot && !razlet) {            /*----- MAIN ITERATIONS ----*/
-//        nut_by_flux(f,Re);
+/*------------------------ MAIN ITERATIONS -------------------------*/
+/*   while (t_cur < Ttot && !razlet) {
+        nut_by_flux(f,Re);
         pde(t_cur, f, df);
         dttry=dtnext;
         timestep(f, df, t_cur, f1, dttry, &dtdid, &dtnext);
@@ -95,7 +122,8 @@ int main(int argc, char** argv)
         count++;
    }
 
-   dump(f1,t_cur,count);
+   dump(f1,t_cur,count);*/
+   free_mem_2f(s_func,n3+2,kol_masht);
    free_mem_4f(f  ,nvar, m1, m2, m3);
    free_mem_4f(f1 ,nvar, m1, m2, m3);
    free_mem_4f(df ,nvar, m1, m2, m3);
@@ -104,7 +132,8 @@ int main(int argc, char** argv)
    free_mem_4f(df4,nvar, m1, m2, m3);
    free_mem_4f(df5,nvar, m1, m2, m3);
    free_mem_3f(nut, m1, m2, m3);
-   nrerror("this is break of scheme",t_cur);
+   if(t_cur>Ttot&&!razlet) nmessage("work is succesfully done",t_cur);
+       else nrerror("this is break of scheme",t_cur);
 
 return 0;
 }

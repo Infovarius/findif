@@ -9,14 +9,17 @@ const char *NameVFile  = "vv.dat";
 const char *NameDumpFile = "dump.dat";
 const char *NameEnergyFile = "energy.dat";
 
-const double UpLimit=3.;     //after this limit there's dump
+const double UpLimit=10.;     //after this limit there's dump
 
 FILE *fileopen(const char *x, int mode)  //opening of file to ff
                          /*   0-rewrite;others-append   */
 {
 FILE *ff;
-if(mode) ff=fopen(x,"a");
-else if ((ff = fopen (x,"w+"))==NULL)
+char* s_mode;
+if(mode>0) s_mode="a";
+if(mode<0) s_mode="r";
+if(mode==0) s_mode="w";
+if ((ff = fopen(x,s_mode))==NULL)
 	 {
 		printf ("Can't open file %s !\n",x);
 		exit(-1);
@@ -81,7 +84,7 @@ int i,j,k,l;
            PulsEnergy+=deviation(f,i,j,k);
            for(l=0;l<=2;l++)  TotalEnergy+=pow(f[l][i][j][k],2);
            }
-razlet = (PulsEnergy/(TotalEnergy-PulsEnergy)>UpLimit);
+razlet = (PulsEnergy/(TotalEnergy-PulsEnergy)>UpLimit||TotalEnergy<PulsEnergy);
 return(PulsEnergy);
 }
 
@@ -131,10 +134,10 @@ printf("t=%e dtdid=%e NIter=%d %e\n", t_cur, dtdid, count, div);
          printf("number of runge-kutt calculations=%d",enter);
 
 /*avervx = (double *)calloc(m3, sizeof(double));
-if(avervx == NULL)  nrerror("\nAlloc_mem: unsuffitient memory!\n\a");
+if(avervx == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n\a");
 
 avernu = (double *)calloc(m3, sizeof(double));
-if(avernu == NULL)  nrerror("\nAlloc_mem: unsuffitient memory!\n\a");
+if(avernu == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n\a");
 
 for(k=ghost;k<mm3;k++)
 	{
@@ -151,6 +154,7 @@ for(k=ghost;k<mm3;k++)
 
 //putting velocities to file
         fv = fileopen(NameVFile,count);
+        fprintf(fv,"{%-7.5lf}",t_cur);
         print_array1d(fv,f1[0][m1/2][0],ghost,n3);
         fclose(fv);
 //putting viscosities to file
