@@ -32,7 +32,7 @@ void __fastcall CalcProcess::Execute()
 {
    double dttry, dtdid, dtnext, PulsEn;
    int i,j,k,l;
-   const min_dump=10;
+   const min_dump=(int)Ttot;
    AnsiString TempScreen;
    MainWindow->ChangeStatus("Идут вычисления...","Начаты вычисления");
    MainWindow->BeginWork->Caption="Пауза";
