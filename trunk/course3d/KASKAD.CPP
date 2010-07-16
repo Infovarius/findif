@@ -17,6 +17,7 @@ TMainWindow *MainWindow;
 CalcProcess *proc;
 TThreadPriority prioritet;
 bool input_done=false;
+//                            initial actions and procedures
 //---------------------------------------------------------------------------
 __fastcall TMainWindow::TMainWindow(TComponent* Owner)
         : TForm(Owner)
@@ -25,47 +26,8 @@ __fastcall TMainWindow::TMainWindow(TComponent* Owner)
 
 }
 //---------------------------------------------------------------------------
-void __fastcall TMainWindow::FormCreate(TObject *Sender)
+void allocate_memory()
 {
-   Re=10000;
-   maschtab=1000;
-   Gamma=1e-3;
-   l1=3;                    CheckStep=10;
-   l2=1;                    OutStep = 20;
-   l3=1;
-
-   nvar=4;
-   n1=5;
-   n2=5;
-   n3=11;
-   Ns=25;
-   approx=7;                      //derivatives approximation order
-   ghost=(approx-1)/2;            //radius of approx sample
-   dx[0]=l1/n1;
-   dx[1]=l2/n2;
-   dx[2]=l3/n3;
-   p1 = 8*l1/(l3*Re) ; p2 = 0;
-
-
-   m1 = n1+2*ghost;
-   m2 = n2+2*ghost;
-   m3 = n3+2*ghost;
-   mm1 = ghost+n1;
-   mm2 = ghost+n2;
-   mm3 = ghost+n3;
-
-   t_cur=0; Ttot=100;
-   count=0; enter = 0;
-
-   NameNuFile = "nut.dat";
-   NameVFile  = "vv.dat";
-   NameDumpFile = "dump.dat";
-   NameEnergyFile = "energy.dat";
-   NameKaskadVarFile = "kaskvar.dat";
-   NameMessageFile = "message.dat";
-   NameErrorFile = "error.err";
-   NameInitFile = "init.dat";
-
    s_func = alloc_mem_2f(n3+2,kol_masht);
    f  =alloc_mem_4f(nvar, m1, m2, m3);   //f[3]-pressure,f[0..2]-v(vector)
    f1 =alloc_mem_4f(nvar, m1, m2, m3);
@@ -76,36 +38,10 @@ void __fastcall TMainWindow::FormCreate(TObject *Sender)
    df5=alloc_mem_4f(nvar, m1, m2, m3);
    nut=alloc_mem_3f(m1, m2, m3);
    init_shell();
-
-   Noise = 0.1;
-   NoiseNorm = 0.05;
-
-   prioritet = tpIdle;
-   RunStatus = StNone;
-   fileopen("error.err",0);
-   RefreshForm();
 }
 //---------------------------------------------------------------------------
-void __fastcall TMainWindow::RefreshForm()
-{
- AnsiString Temp;
- Temp.printf("%g",Re);           EditRe->Text = Temp;
- Temp.printf("%g",maschtab);     EditMaschtab->Text = Temp;
- Temp.printf("%d",OutStep);      EditOutStep->Text = Temp;
- Temp.printf("%d",CheckStep);    EditCheckStep->Text = Temp;
-   EditNu->Text = NameNuFile;
-   EditV->Text  = NameVFile;
-   EditDump->Text = NameDumpFile;
-   EditEnergy->Text = NameEnergyFile;
-   EditKaskvar->Text = NameKaskadVarFile;
-   EditMessage->Text = NameMessageFile;
-   EditError->Text = NameErrorFile;
-   EditInit->Text = NameInitFile;
- Temp.printf("%g",Noise);        EditNoise->Text = Temp;
- Temp.printf("%g",NoiseNorm);    EditNorm->Text = Temp;
-}
-//---------------------------------------------------------------------------
-void __fastcall TMainWindow::FormDestroy(TObject *Sender)
+void free_memory(double **s_func,double ****f,double ****f1,double ****df,double ****df2,
+                     double ****df3,double ****df4,double ****df5,double ***nut)
 {
    free_mem_2f(s_func,n3+2,kol_masht);
    free_mem_4f(f  ,nvar, m1, m2, m3);
@@ -117,138 +53,6 @@ void __fastcall TMainWindow::FormDestroy(TObject *Sender)
    free_mem_4f(df5,nvar, m1, m2, m3);
    free_mem_3f(nut, m1, m2, m3);
    erase_shell();
-}
-//---------------------------------------------------------------------------
-void __fastcall TMainWindow::BeginWorkClick(TObject *Sender)
-{
- switch (RunStatus)
- {
-   case StNone:  { RunStatus = StRun;
-                   ChangeStatus("Загрузка задания...","Сейчас будут начаты вычисления");
-                   MainWindow->EditRe->Enabled = false;
-                   MainWindow->EditRe->Hint = "Число не может быть изменено во время счета";
-                   MainWindow->EditRe->ShowHint = false;
-                   action = ActBegin;
-                   if(!input_done) init_conditions(f,Re);
-                   proc = new CalcProcess(false);
-                   proc->Priority = prioritet;
-//                   ButtonRecontinue->Visible = false;
-                 }
-   break;
-   case StPause: { RunStatus = StRun;
-                   action = ActContinue;
-//                   ButtonRecontinue->Visible = false;
-                 }
-   case StRun  : { RunStatus = StPause;
-                   action = ActPause;
-//                   ButtonRecontinue->Visible = true;
-                 }
-   break;
- }
-}
-// ------------------------Main Block-----------------------------------------
-void __fastcall TMainWindow::RecontinueClick(TObject *Sender)
-{
-   ChangeStatus("Перезагрузка задания...","Вычисления будут начаты сначала");
-   RunStatus = StRun;
-   action = ActBegin;
-   init_conditions(f,Re);
-   delete proc;
-   proc = new CalcProcess(false);
-   proc->Priority = prioritet;
-   ChangeStatus("Идут вычисления...","Вычисления начаты сначала");
-}
-//---------------------------------------------------------------------------
-//                           other handlers
-void __fastcall TMainWindow::EditMessageKeyUp(TObject *Sender, WORD &Key,
-      TShiftState Shift)
-{
-  NameMessageFile = MainWindow->EditMessage->Text.c_str();
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TMainWindow::EditEnergyKeyUp(TObject *Sender, WORD &Key,
-      TShiftState Shift)
-{
-  NameEnergyFile = MainWindow->EditEnergy->Text.c_str();
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TMainWindow::EditVKeyUp(TObject *Sender, WORD &Key,
-      TShiftState Shift)
-{
-  NameVFile = MainWindow->EditV->Text.c_str();
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TMainWindow::EditNuKeyUp(TObject *Sender, WORD &Key,
-      TShiftState Shift)
-{
-  NameNuFile = MainWindow->EditNu->Text.c_str();
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TMainWindow::EditKaskvarKeyUp(TObject *Sender, WORD &Key,
-      TShiftState Shift)
-{
-  NameKaskadVarFile = MainWindow->EditKaskvar->Text.c_str();
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TMainWindow::EditErrorKeyUp(TObject *Sender, WORD &Key,
-      TShiftState Shift)
-{
-  NameErrorFile = MainWindow->EditError->Text.c_str();
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TMainWindow::EditDumpChange(TObject *Sender)
-{
-  NameDumpFile = MainWindow->EditDump->Text.c_str();
-}
-//---------------------------------------------------------------------------
-void __fastcall TMainWindow::EditInitKeyUp(TObject *Sender, WORD &Key,
-      TShiftState Shift)
-{
-  NameInitFile = MainWindow->EditInit->Text.c_str();
-}
-//---------------------------------------------------------------------------
-void __fastcall TMainWindow::InputInitClick(TObject *Sender)
-{
-  int code=0;
-  long dummy_count;
-  double dummy_Re,dummy_t;
-  if (RadioInitVel->Checked)
-         code=init_data(&n1,&n2,&n3,&dummy_Re,f,nut,&dummy_t,&dummy_count);
-         else code=init_data(&n1,&n2,&n3,&Re,f,nut,&t_cur,&count);
-  RefreshForm();
-  if ( code > 0)
-     nrerror("Не удался ввод начальных данных. Код ошибки = %d",code);
-   else input_done = true;
-}
-//---------------------------------------------------------------------------
-void __fastcall TMainWindow::DoDumpClick(TObject *Sender)
-{
-  dump(n1,n2,n3,Re,f,nut,t_cur,count);
-}
-//---------------------------------------------------------------------------
-
-void __fastcall TMainWindow::ExitClick(TObject *Sender)
-{
- if(RunStatus == StRun || RunStatus == StPause)
-            { ChangeStatus("Удаление задания...","Вычисления будут прерваны");
-              action = ActQuit;
-              if(proc->WaitFor()) delete proc;
-              RunStatus = StNone;
-              MainWindow->EditRe->EnableRun-time error at t=0.0535:
-You asked to exit. Here you are...
-...now exiting to system...
-                                                                                                                                                                                                                                                                                                                                                                                                                                  --------------------------------------------------
-__fastcall TMainWindow::TMainWindow(TComponent* Owner)
-        : TForm(Owner)
-{
- ChangeStatus("","Запущена программа, спасибо");
-
 }
 //---------------------------------------------------------------------------
 void __fastcall TMainWindow::FormCreate(TObject *Sender)
@@ -285,24 +89,14 @@ void __fastcall TMainWindow::FormCreate(TObject *Sender)
 
    NameNuFile = "nut.dat";
    NameVFile  = "vv.dat";
-   NameDumpFile = "dump.dat";
+   NameDumpFile = "dump.dat";          num_dump = 0;
    NameEnergyFile = "energy.dat";
    NameKaskadVarFile = "kaskvar.dat";
    NameMessageFile = "message.dat";
    NameErrorFile = "error.err";
    NameInitFile = "init.dat";
 
-   s_func = alloc_mem_2f(n3+2,kol_masht);
-   f  =alloc_mem_4f(nvar, m1, m2, m3);   //f[3]-pressure,f[0..2]-v(vector)
-   f1 =alloc_mem_4f(nvar, m1, m2, m3);
-   df =alloc_mem_4f(nvar, m1, m2, m3);
-   df2=alloc_mem_4f(nvar, m1, m2, m3);
-   df3=alloc_mem_4f(nvar, m1, m2, m3);
-   df4=alloc_mem_4f(nvar, m1, m2, m3);
-   df5=alloc_mem_4f(nvar, m1, m2, m3);
-   nut=alloc_mem_3f(m1, m2, m3);
-   init_shell();
-
+   allocate_memory();      //needn't (run in refreshing)
    Noise = 0.1;
    NoiseNorm = 0.05;
 
@@ -329,8 +123,265 @@ void __fastcall TMainWindow::RefreshForm()
    EditInit->Text = NameInitFile;
  Temp.printf("%g",Noise);        EditNoise->Text = Temp;
  Temp.printf("%g",NoiseNorm);    EditNorm->Text = Temp;
+ Temp.printf("%d",n1);           EditNx->Text = Temp;
+ Temp.printf("%d",n2);           EditNy->Text = Temp;
+ Temp.printf("%d",n3);           EditNz->Text = Temp;
 }
 //---------------------------------------------------------------------------
 void __fastcall TMainWindow::FormDestroy(TObject *Sender)
 {
-   free_mem_2f(s_func,n3+2,kol_masht);
+   free_memory(s_func,f,f1,df,df2,df3,df4,df5,nut);
+}
+//---------------------------------------------------------------------------
+//                         Main Block
+void __fastcall TMainWindow::BeginWorkClick(TObject *Sender)
+{
+ switch (RunStatus)
+ {
+   case StNone:  { RunStatus = StRun;
+                   ChangeStatus("Загрузка задания...","Сейчас будут начаты вычисления");
+                   EditRe->Enabled = false;
+                   EditRe->Hint = "Число не может быть изменено во время счета";
+                   EditRe->ShowHint = false;
+                   EditNx->Enabled = false;
+                   EditNy->Enabled = false;
+                   EditNz->Enabled = false;
+                   action = ActBegin;
+                   if(!input_done) init_conditions(f,Re);
+                   proc = new CalcProcess(false);
+                   proc->Priority = prioritet;
+//                   ButtonRecontinue->Visible = false;
+                 }
+   break;
+   case StPause: { RunStatus = StRun;    
+                   action = ActContinue;
+//                   ButtonRecontinue->Visible = false;
+                 }
+   case StRun  : { RunStatus = StPause;
+                   action = ActPause;
+//                   ButtonRecontinue->Visible = true;
+                 }
+   break;
+ }
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::RecontinueClick(TObject *Sender)
+{
+   ChangeStatus("Перезагрузка задания...","Вычисления будут начаты сначала");
+   RunStatus = StRun;
+   action = ActBegin;
+   init_conditions(f,Re);
+   delete proc;
+   proc = new CalcProcess(false);
+   proc->Priority = prioritet;
+   ChangeStatus("Идут вычисления...","Вычисления начаты сначала");
+}
+//---------------------------------------------------------------------------
+void at_the_end_of_work()
+{
+     MainWindow->EditRe->Enabled = true;
+     MainWindow->EditRe->ShowHint = false;
+     MainWindow->EditNx->Enabled = true;
+     MainWindow->EditNy->Enabled = true;
+     MainWindow->EditNz->Enabled = true;
+  RunStatus = StNone;
+  action = ActQuit;
+  MainWindow->BeginWork->Caption = "Начать счет";
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::ExitClick(TObject *Sender)
+{
+ if(RunStatus == StRun || RunStatus == StPause)
+            { ChangeStatus("Удаление задания...","Вычисления будут прерваны");
+              action = ActQuit;
+              if(proc->WaitFor()) delete proc;
+              RunStatus = StNone;
+              at_the_end_of_work();
+            }
+     else MainWindow->Close();
+}
+//---------------------------------------------------------------------------
+//                           other handlers
+void __fastcall TMainWindow::EditMessageKeyUp(TObject *Sender, WORD &Key,
+      TShiftState Shift)
+{
+  NameMessageFile = EditMessage->Text;
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::EditEnergyKeyUp(TObject *Sender, WORD &Key,
+      TShiftState Shift)
+{
+  NameEnergyFile = EditEnergy->Text;
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::EditVKeyUp(TObject *Sender, WORD &Key,
+      TShiftState Shift)
+{
+  NameVFile = EditV->Text;
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::EditNuKeyUp(TObject *Sender, WORD &Key,
+      TShiftState Shift)
+{
+  NameNuFile = EditNu->Text;
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::EditKaskvarKeyUp(TObject *Sender, WORD &Key,
+      TShiftState Shift)
+{
+  NameKaskadVarFile = EditKaskvar->Text;
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::EditErrorKeyUp(TObject *Sender, WORD &Key,
+      TShiftState Shift)
+{
+  NameErrorFile = EditError->Text;
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::EditDumpChange(TObject *Sender)
+{
+  NameDumpFile = EditDump->Text;
+  num_dump = 0;
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::EditInitKeyUp(TObject *Sender, WORD &Key,
+      TShiftState Shift)
+{
+  NameInitFile = EditInit->Text;
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::InputInitClick(TObject *Sender)
+{
+  int code=0;
+  long dummy_count;
+  double dummy_Re,dummy_t;
+  if (RadioInitVel->Checked)
+         code=init_data(&n1,&n2,&n3,&dummy_Re,f,nut,&dummy_t,&dummy_count);
+         else code=init_data(&n1,&n2,&n3,&Re,f,nut,&t_cur,&count);
+  RefreshForm();
+  if ( code > 0)
+     nrerror("Не удался ввод начальных данных. Код ошибки = %d",code);
+   else input_done = true;
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::DoDumpClick(TObject *Sender)
+{
+  dump(n1,n2,n3,Re,f,nut,t_cur,count);
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::EditCheckStepChanging(TObject *Sender)
+{
+ CheckStep = MainWindow->EditCheckStep->Text.ToInt();
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::EditOutStepChanging(TObject *Sender)
+{
+ OutStep = MainWindow->EditOutStep->Text.ToInt();
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::EditReKeyUp(TObject *Sender, WORD &Key,
+      TShiftState Shift)
+{
+ Re = atof(MainWindow->EditRe->Text.c_str());
+ if(Re<1) Re=1.;
+ p1 = 8*l1/(l3*Re);
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::EditNoiseKeyUp(TObject *Sender, WORD &Key,
+      TShiftState Shift)
+{
+ Noise = atof(MainWindow->EditNoise->Text.c_str());
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::CheckNoiseClick(TObject *Sender)
+{
+ MainWindow->EditNoise->Enabled = CheckNoise->Checked;
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::CheckNormClick(TObject *Sender)
+{
+ MainWindow->EditNorm->Enabled = CheckNorm->Checked;
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::EditNormChange(TObject *Sender)
+{
+ NoiseNorm = atof(MainWindow->EditNorm->Text.c_str());
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::ClearScrClick(TObject *Sender)
+{
+ MainWindow->Screen->Lines->Clear();
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::EditMaschtabChange(TObject *Sender)
+{
+  maschtab = atof(MainWindow->EditMaschtab->Text.c_str());
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::CheckNutClick(TObject *Sender)
+{
+ MainWindow->EditMaschtab->Enabled = CheckNut->Checked;
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::SelPriorChange(TObject *Sender)
+{
+switch (MainWindow->SelPrior->Text[1])
+ {
+   case '0' : prioritet = tpIdle;   break;
+   case '1' : prioritet = tpLowest;   break;
+   case '2' : prioritet = tpLower;   break;
+   case '3' : prioritet = tpNormal;   break;
+   case '4' : prioritet = tpHigher;   break;
+   case '5' : prioritet = tpHighest;   break;
+ }
+ if(proc) proc->Priority = prioritet;
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::ChangeStatus(AnsiString str1,AnsiString str2)
+{
+  StatusBarCalc->Panels->BeginUpdate();
+  try
+  {
+   if(!str1.IsEmpty()) MainWindow->StatusBarCalc->Panels->Items[0]->Text=str1;
+   if(!str2.IsEmpty()) MainWindow->StatusBarCalc->Panels->Items[1]->Text=str2;
+  }
+  __finally
+  {
+    StatusBarCalc->Panels->EndUpdate();
+  }
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::EditNxChange(TObject *Sender)
+{
+  free_memory(s_func,f,f1,df,df2,df3,df4,df5,nut);
+  n1 = EditNx->Text.ToIntDef(5);
+  if(n1<5) n1 = 5;
+  m1 = n1+2*ghost;
+  mm1 = ghost+n1;
+  dx[0]=l1/n1;
+  allocate_memory();
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::EditNyChange(TObject *Sender)
+{
+  free_memory(s_func,f,f1,df,df2,df3,df4,df5,nut);
+  n2 = EditNy->Text.ToIntDef(5);
+  if(n2<5) n2 = 5;
+  m2 = n2+2*ghost;
+  mm2 = ghost+n2;
+  dx[1]=l2/n2;
+  allocate_memory();
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::EditNzChange(TObject *Sender)
+{
+  free_memory(s_func,f,f1,df,df2,df3,df4,df5,nut);
+  n3 = EditNz->Text.ToIntDef(5);
+  if(n3<5) n3 = 5;
+  m3 = n3+2*ghost;
+  mm3 = ghost+n3;
+  dx[2]=l3/n3;
+  allocate_memory();
+}
+//---------------------------------------------------------------------------
+

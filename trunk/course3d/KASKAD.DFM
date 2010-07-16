@@ -1,7 +1,7 @@
 object MainWindow: TMainWindow
-  Left = 136
-  Top = 113
-  Width = 816
+  Left = 39
+  Top = 130
+  Width = 798
   Height = 507
   Caption = 'Интегрирование каскадно-сеточным методом'
   Color = clBtnFace
@@ -18,10 +18,10 @@ object MainWindow: TMainWindow
   object Notebook: TTabbedNotebook
     Left = 0
     Top = 0
-    Width = 816
+    Width = 798
     Height = 460
     Anchors = [akLeft, akTop, akRight, akBottom]
-    PageIndex = 1
+    PageIndex = 3
     TabFont.Charset = DEFAULT_CHARSET
     TabFont.Color = clBtnText
     TabFont.Height = -11
@@ -491,10 +491,10 @@ object MainWindow: TMainWindow
         end
       end
       object GroupNoise: TGroupBox
-        Left = 384
-        Top = 104
+        Left = 496
+        Top = 264
         Width = 217
-        Height = 145
+        Height = 153
         Caption = 'Параметры шума'
         TabOrder = 3
         object Label16: TLabel
@@ -551,6 +551,62 @@ object MainWindow: TMainWindow
           OnChange = EditNormChange
         end
       end
+      object GroupGrid: TGroupBox
+        Left = 392
+        Top = 104
+        Width = 353
+        Height = 145
+        Caption = 'Параметры сетки'
+        TabOrder = 4
+        object Label19: TLabel
+          Left = 16
+          Top = 24
+          Width = 89
+          Height = 13
+          Caption = 'Кол-во узлов по x'
+        end
+        object Label20: TLabel
+          Left = 16
+          Top = 100
+          Width = 89
+          Height = 13
+          Caption = 'Кол-во узлов по z'
+        end
+        object Label21: TLabel
+          Left = 16
+          Top = 62
+          Width = 89
+          Height = 13
+          Caption = 'Кол-во узлов по y'
+        end
+        object EditNx: TEdit
+          Left = 144
+          Top = 20
+          Width = 65
+          Height = 21
+          TabOrder = 0
+          Text = 'EditNx'
+          OnChange = EditNxChange
+        end
+        object EditNy: TEdit
+          Left = 144
+          Top = 58
+          Width = 65
+          Height = 21
+          TabOrder = 1
+          Text = 'EditNy'
+          OnChange = EditNyChange
+        end
+        object EditNz: TEdit
+          Left = 144
+          Top = 96
+          Width = 65
+          Height = 21
+          TabOrder = 2
+          Text = 'EditNz'
+          OnChange = EditNzChange
+        end
+      end
     end
     object TTabPage
       Left = 4
@@ -561,7 +617,7 @@ object MainWindow: TMainWindow
   object StatusBarCalc: TStatusBar
     Left = 0
     Top = 460
-    Width = 808
+    Width = 790
     Height = 20
     Panels = <
       item
