@@ -2,6 +2,10 @@
 #define LEVEL extern
 #include "head.h"
 
+inline double norma(double a,double b,double c)
+{
+return ((a)*(a)+(b)*(b)+(c)*(c));
+}
 
 void pde(double t, double ****f, double ****df)
 {
@@ -32,6 +36,50 @@ void pde(double t, double ****f, double ****df)
    }
 
    return;
+}
+
+void nut_by_flux(double ****f,double Re) //calculating nu_turbulent by velocity fluctuations
+{
+const size_okr=min(1,ghost);
+double flux, maxflux = 0;
+double maschtab = 10000;
+int i,j,k,kol = 0,l;
+for(i=ghost;i<mm1;i++)
+    for(j=ghost;j<mm2;j++)
+        for(k=ghost;k<mm3;k++)
+           for(l=1;l<=size_okr;l++)
+           {
+            {
+            flux = 0;
+            if(i>0)
+               {flux += norma(f[0][i][j][k]-f[0][i-l][j][k],f[1][i][j][k]-f[1][i-l][j][k],f[2][i][j][k]-f[2][i-l][j][k]);
+            	kol++;
+               }
+            if(i<m1)
+               {flux += norma(f[0][i][j][k]-f[0][i+l][j][k],f[1][i][j][k]-f[1][i+l][j][k],f[2][i][j][k]-f[2][i+l][j][k]);
+            	kol++;
+               }
+            if(j>0)
+               {flux += norma(f[0][i][j][k]-f[0][i][j-l][k],f[1][i][j][k]-f[1][i][j-l][k],f[2][i][j][k]-f[2][i][j-l][k]);
+            	kol++;
+               }
+            if(j<m2)
+               {flux += norma(f[0][i][j][k]-f[0][i][j+l][k],f[1][i][j][k]-f[1][i][j+l][k],f[2][i][j][k]-f[2][i][j+l][k]);
+            	kol++;
+               }
+            if(k>0)
+               {flux += norma(f[0][i][j][k]-f[0][i][j][k-l],f[1][i][j][k]-f[1][i][j][k-l],f[2][i][j][k]-f[2][i][j][k-l]);
+                kol++;
+               }
+            if(k<m3)
+               {flux += norma(f[0][i][j][k]-f[0][i][j][k+l],f[1][i][j][k]-f[1][i][j][k+l],f[2][i][j][k]-f[2][i][j][k+l]);
+                kol++;
+               }
+           };
+            flux /= kol;
+            if(flux>maxflux) maxflux = flux;
+            nut[i][j][k] = (1. + maschtab * flux)/Re;
+            }
 }
 
 void  boundary_conditions(double ****f)
@@ -75,17 +123,23 @@ void  boundary_conditions(double ****f)
    return;
 }
 
-void  init_conditions(double ****f)
+void  init_conditions(double ****f,double Re)
 {
    int i,j,k,l;
-   double Noise=0.1, Noise1=0.;
+   double Noise=0.1, Noise1=0;
+//   double k1,k2,k3;
+
+//   k1=2*M_PI/l1;  k3=M_PI/l3;
 
    for(i=0;i<m1;i++)
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++) {
-        f[0][i][j][k]=coordin(k,2)*(l3-coordin(k,2))*4/l3/l3 + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX;
-        f[1][i][j][k]=Noise1*cos(2*M_PI*coordin(j,1)/l2)*cos(2*M_PI*coordin(k,2)/l3) + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX;
-        f[2][i][j][k]=Noise1*sin(2*M_PI*coordin(j,1)/l2)*sin(2*M_PI*coordin(k,2)/l3) + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX;
+        f[0][i][j][k]=coordin(k,2)*(l3-coordin(k,2))*4/l3/l3
+                      + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX;
+        f[1][i][j][k]=Noise1*cos(2*M_PI*coordin(j,1)/l2)*cos(2*M_PI*coordin(k,2)/l3)
+                      + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX;
+        f[2][i][j][k]=Noise1*sin(2*M_PI*coordin(j,1)/l2)*sin(2*M_PI*coordin(k,2)/l3)
+                      + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX;
         f[3][i][j][k]=p1+(i-0.5)*(p2-p1)/n1;
         nut[i][j][k]=1./Re;
    }

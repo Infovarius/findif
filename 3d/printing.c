@@ -1,13 +1,13 @@
 //------------------------ all the outputting stuff -----------------//
 
 #define LEVEL extern
-#include <conio.h>
+//#include <conio.h>
 #include "head.h"
 
-LEVEL const char *NameNuFile = "nut.dat";
-LEVEL const char *NameVFile  = "vv.dat";
-LEVEL const char *NameDumpFile = "dump.dat";
-LEVEL const char *NameEnergyFile = "energy.dat";
+const char *NameNuFile = "nut.dat";
+const char *NameVFile  = "vv.dat";
+const char *NameDumpFile = "dump.dat";
+const char *NameEnergyFile = "energy.dat";
 
 const double UpLimit=3.;     //after this limit there's dump
 
@@ -70,7 +70,7 @@ for(i=beg1;i<beg1+n1;i++) {
     }
 }
 
-void printing(double ****f1,double dtdid,double t_cur,long count)
+void printing(double ****f1,double dtdid,double t_cur,long count,bool vivod)
 {
 static int net;
 double temp, div=0;
@@ -90,12 +90,9 @@ for(i=ghost;i<mm1;i++)
            temp=0;
            for(l=0;l<3;l++)
             temp+=dr(f1[l],i,j,k,l+1,0,dx[l],ghost, approx);
-//           fprintf(fnu,"%g%15g%15g%15g%15g\n",coordin(i,0),coordin(k,2),temp,
-//                dr(f1[0],i,0,k,1,0,dx[0],ghost, approx), dr(f1[2],i,0,k,3,0,dx[2],ghost, approx));
            if (fabs(temp)>div) div=fabs(temp);
            }
-//           fclose(fnu);
-printf("%e %e %d %e\n", t_cur, dtdid, count, div);
+if(vivod) printf("%e %e %d %e\n", t_cur, dtdid, count, div);
 
         for(l=0;l<nvar;l++) {
           mf=mda=mdr=en=0;
@@ -110,19 +107,21 @@ printf("%e %e %d %e\n", t_cur, dtdid, count, div);
             if (fabs(f1[l][i][j][k])>mf) mf=fabs(f1[l][i][j][k]);
           }
           if(l==0&&mf>UpLimit&&net) {dump(f1,t_cur,count); net = 0;};
-          printf("%d %e %e %e\n",l, mf, mda, mdr);
+          if(vivod) printf("%d %e %e %e\n",l, mf, mda, mdr);
           }
-printf("Energy of pulsations=%g\n",en);
-fen = fileopen(NameEnergyFile,count);
-fprintf(fen,"%0.10f\n",en);
-fclose(fen);
-printf("number of runge-kutt calculations=%d",enter);
+if(vivod) {
+         printf("Energy of pulsations=%g\n",en);
+         fen = fileopen(NameEnergyFile,count);
+         fprintf(fen,"%0.10f\n",en);
+         fclose(fen);
+         printf("number of runge-kutt calculations=%d",enter);
+         }
 
-avervx = (double *)calloc(m3, sizeof(double));
-if(avervx == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n\a");
+/*avervx = (double *)calloc(m3, sizeof(double));
+if(avervx == NULL)  nrerror("\nAlloc_mem: unsuffitient memory!\n\a");
 
 avernu = (double *)calloc(m3, sizeof(double));
-if(avernu == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n\a");
+if(avernu == NULL)  nrerror("\nAlloc_mem: unsuffitient memory!\n\a");
 
 for(k=ghost;k<mm3;k++)
 	{
@@ -135,19 +134,21 @@ for(k=ghost;k<mm3;k++)
 		  }
 	   avervx[k] /= n1*n2;
 	   avernu[k] /= n1*n2;
-	 }
+	 }*/
 
 //putting velocities to file
+if(vivod){
         fv = fileopen(NameVFile,count);
         print_array1d(fv,f1[0][m1/2][0],ghost,n3);
         fclose(fv);
+        }
 //putting viscosities to file
-/*        fnu = fileopen(NameNuFile,count);
+/*      fnu = fileopen(NameNuFile,count);
         print_array1d(fnu,avernu,ghost,n3);
         fclose(fnu);*/
 
 //for(k=0;k<m3;k++) printf("%e\n",f1[0][5][5][k]);
-if(kbhit()&&getch()=='q') 
+if(kbhit()&&getch()=='q')
 	{
 	dump(f1,t_cur,count);
 	nrerror("You asked to exit. Here you are...");
@@ -158,7 +159,7 @@ void dump(double ****f1,double t_cur,long count)
 {
 FILE *fd;
 fd = fileopen(NameDumpFile,0);
-fprintf(fd,"%0.10f   %ld\n",t_cur,count);
+fprintf(fd,"%0.10f \n  %ld\n",t_cur,count);
 print_array3d(fd,f1[0],0,m1,0,m2,0,m3);
 print_array3d(fd,f1[1],0,m1,0,m2,0,m3);
 print_array3d(fd,f1[2],0,m1,0,m2,0,m3);

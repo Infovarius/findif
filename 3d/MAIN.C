@@ -3,13 +3,17 @@
 //#include <conio.h>
 #include "head.h"
 
-#define EACH 20
+#define CheckStep 20
+//each CheckStep divergence of program is checking
+#define EACH   1
+//each EACH of each CheckStep printing is doing
+
 int main(int argc, char** argv)
 {
    double t_cur, Ttot, dttry, dtdid, dtnext;
    int i,j,k,l;
 
-   Re=4000;
+   Re=2000;
    Gamma=1e-3;
    l1=3;
    l2=1;
@@ -18,7 +22,7 @@ int main(int argc, char** argv)
    nvar=4;
    n1=10;
    n2=10;
-   n3=10;
+   n3=20;
    approx=7;                      //derivatives approximation order
    ghost=(approx-1)/2;            //radius of approx sample
    dx[0]=l1/n1;
@@ -46,6 +50,7 @@ int main(int argc, char** argv)
    df5=alloc_mem_4f(nvar, m1, m2, m3);
    nut=alloc_mem_3f(m1, m2, m3);
 
+   fileopen("error.err",0);
    init_conditions(f);
    printing(f,dtdid,t_cur,count);
 
@@ -57,8 +62,8 @@ int main(int argc, char** argv)
         dttry=dtnext;
         timestep(f, df, t_cur, f1, dttry, &dtdid, &dtnext);
         t_cur+=dtdid;
-        if (count%EACH==0)
-            printing(f1,dtdid,t_cur,count);
+        if (count%CheckStep==0)
+            printing(f1,dtdid,t_cur,count,count%(CheckStep*EACH));
         for(l=0;l<nvar;l++)
         for(i=ghost;i<mm1;i++)
         for(j=ghost;j<mm2;j++)
@@ -76,6 +81,7 @@ int main(int argc, char** argv)
         count++;
    }
 
+   dump(f1,t_cur,count);
    free_mem_4f(f  ,nvar, m1, m2, m3);
    free_mem_4f(f1 ,nvar, m1, m2, m3);
    free_mem_4f(df ,nvar, m1, m2, m3);

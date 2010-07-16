@@ -41,9 +41,9 @@ Wolfram Research.
 
 (*NotebookFileLineBreakTest
 NotebookFileLineBreakTest*)
-(*NotebookOptionsPosition[      4275,        161]*)
-(*NotebookOutlinePosition[      4920,        183]*)
-(*  CellTagsIndexPosition[      4876,        179]*)
+(*NotebookOptionsPosition[      3438,        126]*)
+(*NotebookOutlinePosition[      4082,        148]*)
+(*  CellTagsIndexPosition[      4038,        144]*)
 (*WindowFrame->Normal*)
 
 
@@ -52,93 +52,58 @@ Notebook[{
 
 Cell[CellGroupData[{
 Cell[BoxData[
-    \(lv = ReadList["\<D:\\home\\anton\\2d\\vv.dat\>"]; Length[lv]\)], "Input"],
+    \(lv = ReadList["\<D:\\doc\imcc\progs\\3d\\vv.dat\>"]; 
+    Length[lv]\)], "Input"],
 
 Cell[BoxData[
-    \(321\)], "Output"]
+    \(13\)], "Output"]
 }, Open  ]],
 
 Cell[BoxData[
     \(\(\(ListPlot[#, PlotJoined \[Rule] True, 
-            PlotRange \[Rule] {\(-1\), 2}] &\) /@ Drop[lv, 0];\)\)], "Input"],
+            PlotRange \[Rule] {\(-1\), 2}] &\) /@ Drop[lv, 00];\)\)], "Input"],
 
-Cell[CellGroupData[{
-
-Cell[BoxData[
+Cell[BoxData[{
     \(\(len = 
-        ReadList["\<D:\\doc\imcc\progs\\2d\\energy.dat\>"];\)\)], "Input"],
-
-Cell[BoxData[
-    \(ReadList::"nffil" \(\(:\)\(\ \)\) 
-      "File not found during \
-\!\(ReadList[\"D:\\\\doc\\\\imcc\\\\progs\\\\2d\\\\energy.dat\"]\)."\)], \
-"Message"]
-}, Open  ]],
-
-Cell[BoxData[
-    \(\(len = ReadList["\<D:\\home\\anton\\3d\\energy.dat\>"];\)\)], "Input"],
-
-Cell[BoxData[
-    \(\(ListPlot[Log[len], 
-        PlotJoined \[Rule] 
-          True (*\(,\)\(PlotRange \[Rule] {0, 30}\)*) ];\)\)], "Input"],
+        ReadList["\<D:\\doc\imcc\progs\\3d\\energy.dat\>"];\)\), "\
+\[IndentingNewLine]", 
+    \(\(ListPlot[Log[len], PlotJoined \[Rule] True];\)\)}], "Input"],
 
 Cell[CellGroupData[{
 
 Cell[BoxData[{
     \(\(dump = 
-        ReadList["\<D:\\home\\anton\\3d\\dump.dat\>"];\)\), "\
+        ReadList["\<D:\\doc\\imcc\\progs\\3d\\dump.dat\>"];\)\), "\
 \[IndentingNewLine]", 
-    \({t, vx, vy, vz, p} = dump; t\)}], "Input"],
+    \(\({t, count, vx, vy, vz, p} = dump;\)\), "\[IndentingNewLine]", 
+    \({t, count}\)}], "Input"],
 
 Cell[BoxData[
-    \(0\)], "Output"]
+    \({0.`, 0}\)], "Output"]
 }, Open  ]],
 
 Cell[BoxData[
-    \(\(ListPlot3D[vx[\([4]\)]];\)\)], "Input"],
-
-Cell[BoxData[
-    \(\(ListPlot3D[vz];\)\)], "Input"],
+    \(Table[len[\([i]\)], {i, Floor[count/20] - 7, Length[len]}]\)], "Input"],
 
 Cell[BoxData[
     \(\(Table[
-        ListPlot[\(Transpose[vz]\)[\([i]\)], PlotJoined \[Rule] True], {i, 1, 
-          20}];\)\)], "Input"],
-
-Cell[BoxData[
-    \(\(ListPlot3D[p];\)\)], "Input"],
+        ListPlot3D[vx[\([k]\)], PlotLabel \[Rule] k], {k, 4, 
+          Length[vx] - 4}];\)\)], "Input"],
 
 Cell[BoxData[
     \(\(fou[l2_] := 
         ListPlot[Abs[Fourier[l2[\([Length[l2]\/2]\)]]], 
           PlotJoined \[Rule] True];\)\)], "Input"],
 
+Cell[CellGroupData[{
+
 Cell[BoxData[
     \(\(fou[vz];\)\)], "Input"],
 
 Cell[BoxData[
-    \(\(ListPlot[Abs[Fourier[\(Transpose[vz]\)[\([10]\)]]], 
-        PlotJoined -> True];\)\)], "Input"],
-
-Cell[CellGroupData[{
-
-Cell[BoxData[
-    \(fou[{1, 0, 1, 0, 1, 0, 1, 0}]\)], "Input"],
-
-Cell[BoxData[
-    \(Fourier::"fftl" \(\(:\)\(\ \)\) 
-      "Argument \!\(0\) is not a non-empty list or tensor of numeric \
-quantities."\)], "Message"],
-
-Cell[BoxData[
-    \(ListPlot::"list" \(\(:\)\(\ \)\) 
-      "List expected at position \!\(1\) in \
-\!\(ListPlot[\(\(\(\(Abs[\(\(Fourier[0]\)\)]\)\), \(\(PlotJoined \[Rule] True\
-\)\)\)\)]\)."\)], "Message"],
-
-Cell[BoxData[
-    \(ListPlot[Abs[Fourier[0]], PlotJoined \[Rule] True]\)], "Output"]
+    \(ListPlot::"lpn" \(\(:\)\(\ \)\) 
+      "\!\({\(\[LeftSkeleton] 1 \[RightSkeleton]\)}\) is not a list of \
+numbers or pairs of numbers."\)], "Message"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -147,7 +112,7 @@ Cell[BoxData[
     \(t\)], "Input"],
 
 Cell[BoxData[
-    \(16.1248720306`\)], "Output"]
+    \(2.184627916`\)], "Output"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -156,13 +121,13 @@ Cell[BoxData[
     \(count\)], "Input"],
 
 Cell[BoxData[
-    \(8859\)], "Output"]
+    \(8134\)], "Output"]
 }, Open  ]]
 },
 FrontEndVersion->"5.0 for Microsoft Windows",
 ScreenRectangle->{{0, 1022}, {0, 681}},
 WindowSize->{774, 545},
-WindowMargins->{{Automatic, 71}, {57, Automatic}}
+WindowMargins->{{Automatic, 1}, {Automatic, 12}}
 ]
 
 (*******************************************************************
@@ -184,45 +149,33 @@ CellTagsIndex->{}
 Notebook[{
 
 Cell[CellGroupData[{
-Cell[1776, 53, 93, 1, 30, "Input"],
-Cell[1872, 56, 37, 1, 29, "Output"]
+Cell[1776, 53, 101, 2, 30, "Input"],
+Cell[1880, 57, 36, 1, 29, "Output"]
 }, Open  ]],
-Cell[1924, 60, 139, 2, 30, "Input"],
+Cell[1931, 61, 140, 2, 30, "Input"],
+Cell[2074, 65, 189, 4, 50, "Input"],
 
 Cell[CellGroupData[{
-Cell[2088, 66, 103, 2, 30, "Input"],
-Cell[2194, 70, 171, 4, 22, "Message"]
+Cell[2288, 73, 223, 5, 70, "Input"],
+Cell[2514, 80, 42, 1, 29, "Output"]
 }, Open  ]],
-Cell[2380, 77, 91, 1, 30, "Input"],
-Cell[2474, 80, 141, 3, 30, "Input"],
+Cell[2571, 84, 91, 1, 30, "Input"],
+Cell[2665, 87, 133, 3, 30, "Input"],
+Cell[2801, 92, 142, 3, 42, "Input"],
 
 Cell[CellGroupData[{
-Cell[2640, 87, 165, 4, 50, "Input"],
-Cell[2808, 93, 35, 1, 29, "Output"]
-}, Open  ]],
-Cell[2858, 97, 61, 1, 30, "Input"],
-Cell[2922, 100, 52, 1, 30, "Input"],
-Cell[2977, 103, 138, 3, 30, "Input"],
-Cell[3118, 108, 51, 1, 30, "Input"],
-Cell[3172, 111, 142, 3, 42, "Input"],
-Cell[3317, 116, 45, 1, 30, "Input"],
-Cell[3365, 119, 118, 2, 30, "Input"],
-
-Cell[CellGroupData[{
-Cell[3508, 125, 62, 1, 30, "Input"],
-Cell[3573, 128, 151, 3, 22, "Message"],
-Cell[3727, 133, 207, 4, 22, "Message"],
-Cell[3937, 139, 84, 1, 29, "Output"]
+Cell[2968, 99, 45, 1, 30, "Input"],
+Cell[3016, 102, 170, 3, 22, "Message"]
 }, Open  ]],
 
 Cell[CellGroupData[{
-Cell[4058, 145, 34, 1, 30, "Input"],
-Cell[4095, 148, 48, 1, 29, "Output"]
+Cell[3223, 110, 34, 1, 30, "Input"],
+Cell[3260, 113, 46, 1, 29, "Output"]
 }, Open  ]],
 
 Cell[CellGroupData[{
-Cell[4180, 154, 38, 1, 30, "Input"],
-Cell[4221, 157, 38, 1, 29, "Output"]
+Cell[3343, 119, 38, 1, 30, "Input"],
+Cell[3384, 122, 38, 1, 29, "Output"]
 }, Open  ]]
 }
 ]

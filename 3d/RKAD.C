@@ -79,7 +79,6 @@ enter++;
    pde(t+a4*dt,fout, df4);
 
    /*5th step*/
-//   for(l=0;l<4;l++)
    for(l=0;l<nvar;l++)
    for(i=ghost;i<mm1;i++)
    for(j=ghost;j<mm2;j++)
