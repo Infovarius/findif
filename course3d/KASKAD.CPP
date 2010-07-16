@@ -6,18 +6,22 @@
 #define LEVEL
 #include "kaskad.h"
 #include "head.h"
+#include "run.h"
 #include <time.h>
 #include <conio.h>
 #include <system.hpp>
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
-#pragma link "CSPIN"
 #pragma resource "*.dfm"
 TMainWindow *MainWindow;
+CalcProcess *proc;
+TThreadPriority prioritet;
 //---------------------------------------------------------------------------
 __fastcall TMainWindow::TMainWindow(TComponent* Owner)
         : TForm(Owner)
 {
+ ChangeStatus("","Запущена программа, спасибо");
+
 }
 //---------------------------------------------------------------------------
 void __fastcall TMainWindow::FormCreate(TObject *Sender)
@@ -71,6 +75,8 @@ void __fastcall TMainWindow::FormCreate(TObject *Sender)
    nut=alloc_mem_3f(m1, m2, m3);
    init_shell();
 
+   prioritet = tpIdle;
+   RunStatus = StNone;
    fileopen("error.err",0);
 }
 //---------------------------------------------------------------------------
@@ -87,107 +93,44 @@ void __fastcall TMainWindow::FormDestroy(TObject *Sender)
    free_mem_3f(nut, m1, m2, m3);
 }
 //---------------------------------------------------------------------------
-// ------------------------Main Block-----------------------------------------
 void __fastcall TMainWindow::BeginWorkClick(TObject *Sender)
 {
-   double dttry, dtdid, dtnext, PulsEn;
-   int i,j,k,l;
-   BeginWork->Caption="Пауза";
-   time(&time_begin);
-   t_cur = 0;
-   count = 0;  enter = 0;
-   nmessage("work has begun",t_cur);
-   init_conditions(f,Re);
-   PulsEn=check(f);
-   printing(f,dtdid,t_cur,count,PulsEn);
-
-   dtnext=1e-3;
-   dump(n1,n2,n3,Re,f,nut,t_cur,count);
-
-        /*----------- MAIN ITERATIONS --------------*/
-   while (t_cur < Ttot && !razlet) {
-        pde(t_cur, f, df);
-        dttry=dtnext;
-        timestep(f, df, t_cur, f1, dttry, &dtdid, &dtnext);
-        nut_by_flux(f,dtdid);
-        t_cur+=dtdid;
-        count++;
-        if (count%CheckStep==0)
-            PulsEn=check(f);
-        if (count%OutStep==0)
-            {
-            if (count%CheckStep!=0)
-                PulsEn=check(f);
-            printing(f1,dtdid,t_cur,count,PulsEn);
-            };
-        for(l=0;l<nvar;l++)
-        for(i=ghost;i<mm1;i++)
-        for(j=ghost;j<mm2;j++)
-        for(k=ghost;k<mm3;k++)
-           f[l][i][j][k]=f1[l][i][j][k];
-    /*    if(kbhit())
-             {
-                switch (getch()) {
-                        case 'd' : dump(n1,n2,n3,Re,f,nut,t_cur,count); break;
-                        case 'q' : { dump(n1,n2,n3,Re,f,nut,t_cur,count);
-                                     nrerror("You asked to exit. Here you are...",t_cur);
-                                   }
-                        case 'p' : return;
-                        }
-             }*/
-   }
-  BeginWork->Caption="Начать счет";
-  if(t_cur>Ttot&&!razlet) nmessage("work is succesfully done",t_cur);
-       else nrerror("this is break of scheme",t_cur);
+ switch (RunStatus)
+ {
+   case StNone:  { RunStatus = StRun;
+                   ChangeStatus("Загрузка задания...","Сейчас будут начаты вычисления");
+                   MainWindow->EditRe->Enabled = false;
+                   MainWindow->EditRe->Hint = "Число не может быть изменено во время счета";
+                   MainWindow->EditRe->ShowHint = false;
+                   action = ActBegin;
+                   init_conditions(f,Re);
+                   proc = new CalcProcess(false);
+                   proc->Priority = prioritet;
+//                   ButtonRecontinue->Visible = false;
+                 }
+   break;
+   case StPause: { RunStatus = StRun;
+                   action = ActContinue;
+//                   ButtonRecontinue->Visible = false;
+                 }
+   case StRun  : { RunStatus = StPause;
+                   action = ActPause;
+//                   ButtonRecontinue->Visible = true;
+                 }
+   break;
+ }
 }
-//---------------------------------------------------------------------------
-void __fastcall TMainWindow::ContinueWorkClick(TObject *Sender)
+// ------------------------Main Block-----------------------------------------
+void __fastcall TMainWindow::RecontinueClick(TObject *Sender)
 {
-   double dttry, dtdid, dtnext, PulsEn;
-   int i,j,k,l;
-   time(&time_begin);
-   nmessage("work has begun",t_cur);
+   ChangeStatus("Перезагрузка задания...","Вычисления будут начаты сначала");
+   RunStatus = StRun;
+   action = ActBegin;
    init_conditions(f,Re);
-   PulsEn=check(f);
-   printing(f,dtdid,t_cur,count,PulsEn);
-
-   dtnext=1e-3;
-   dump(n1,n2,n3,Re,f,nut,t_cur,count);
-
-        /*----------- MAIN ITERATIONS --------------*/
-   while (t_cur < Ttot && !razlet) {
-        pde(t_cur, f, df);
-        dttry=dtnext;
-        timestep(f, df, t_cur, f1, dttry, &dtdid, &dtnext);
-        nut_by_flux(f,dtdid);
-        t_cur+=dtdid;
-        count++;
-        if (count%CheckStep==0)
-            PulsEn=check(f);
-        if (count%OutStep==0)
-            {
-            if (count%CheckStep!=0)
-                PulsEn=check(f);
-            printing(f1,dtdid,t_cur,count,PulsEn);
-            };
-        for(l=0;l<nvar;l++)
-        for(i=ghost;i<mm1;i++)
-        for(j=ghost;j<mm2;j++)
-        for(k=ghost;k<mm3;k++)
-           f[l][i][j][k]=f1[l][i][j][k];
-    /*    if(kbhit())
-             {
-                switch (getch()) {
-                        case 'd' : dump(n1,n2,n3,Re,f,nut,t_cur,count); break;
-                        case 'q' : { dump(n1,n2,n3,Re,f,nut,t_cur,count);
-                                     nrerror("You asked to exit. Here you are...",t_cur);
-                                   }
-                        case 'p' : return;
-                        }
-             }*/
-   }
-  if(t_cur>Ttot&&!razlet) nmessage("work is succesfully done",t_cur);
-       else nrerror("this is break of scheme",t_cur);
+   delete proc;
+   proc = new CalcProcess(false);
+   proc->Priority = prioritet;
+   ChangeStatus("Идут вычисления...","Вычисления начаты сначала");
 }
 //---------------------------------------------------------------------------
 //                           other handlers
@@ -259,7 +202,15 @@ void __fastcall TMainWindow::DoDumpClick(TObject *Sender)
 
 void __fastcall TMainWindow::ExitClick(TObject *Sender)
 {
- MainWindow->Close();
+ if(RunStatus == StRun || RunStatus == StPause)
+            { action = ActQuit;
+              delete proc;
+              RunStatus = StNone;
+              ChangeStatus("Удаление задания...","Вычисления будут прерваны");
+              MainWindow->EditRe->Enabled = true;
+              MainWindow->EditRe->ShowHint = false;
+            }
+     else MainWindow->Close();
 }
 //---------------------------------------------------------------------------
 
@@ -279,6 +230,8 @@ void __fastcall TMainWindow::EditReKeyUp(TObject *Sender, WORD &Key,
       TShiftState Shift)
 {
  Re = MainWindow->EditRe->Text.ToDouble();
+ if(Re<1) Re=1.;
+ p1 = 8*l1/(l3*Re);
 }
 //---------------------------------------------------------------------------
 void __fastcall TMainWindow::EditNoiseKeyUp(TObject *Sender, WORD &Key,
@@ -322,4 +275,32 @@ void __fastcall TMainWindow::CheckNutClick(TObject *Sender)
  MainWindow->EditMaschtab->Enabled = CheckNut->Checked;
 }
 //---------------------------------------------------------------------------
+void __fastcall TMainWindow::SelPriorChange(TObject *Sender)
+{
+switch (MainWindow->SelPrior->Text[1])
+ {
+   case '0' : prioritet = tpIdle;   break;
+   case '1' : prioritet = tpLowest;   break;
+   case '2' : prioritet = tpLower;   break;
+   case '3' : prioritet = tpNormal;   break;
+   case '4' : prioritet = tpHigher;   break;
+   case '5' : prioritet = tpHighest;   break;
+ }
+ if(proc) proc->Priority = prioritet;
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::ChangeStatus(char *str1,char *str2)
+{
+  StatusBarCalc->Panels->BeginUpdate();
+  try
+  {
+   if(str1[0]!='\0') MainWindow->StatusBarCalc->Panels->Items[0]->Text=str1;
+   if(str2[0]!='\0') MainWindow->StatusBarCalc->Panels->Items[1]->Text=str2;
+  }
+  __finally
+  {
+    StatusBarCalc->Panels->EndUpdate();
+  }
+}
+
 

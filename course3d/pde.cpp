@@ -159,10 +159,13 @@ void  boundary_conditions(double ****f)
 void  init_conditions(double ****f,double Re)
 {
    int i,j,k,l;
-   double parabole=0;
+   double parabole;
 //   double k1,k2,k3;
-   if((MainWindow->CheckNoise->Checked)==False) Noise=0;
-   if(MainWindow->RadioInit2->Checked) parabole = 1;
+   Noise = (MainWindow->CheckNoise->Checked) ? Noise :0;
+      //         MainWindow->EditNoise->Text.ToDouble() : 0;
+   NoiseNorm = (MainWindow->CheckNoise->Checked) ? NoiseNorm : 0;
+      //          MainWindow->EditNorm->Text.ToDouble()  : 0;
+   parabole = (MainWindow->RadioInit2->Checked) ? 1 : 0;
 //   k1=2*M_PI/l1;  k3=M_PI/l3;
 
    for(i=0;i<m1;i++)

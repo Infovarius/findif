@@ -84,10 +84,11 @@ int i,j,k;
 double tm_cur, en;
 
 for (tm_cur=0;tm_cur<tm;tm_cur+=dtsh)
+    {
     enter++;
  for (j=0; j<n3; j++) {
-    for (i=0,en=0; i<=Ns; i++)
-      en+=sha[j][i]*sha[j][i]+shb[j][i]*shb[j][i];
+//    for (i=0,en=0; i<=Ns; i++)
+//      en+=sha[j][i]*sha[j][i]+shb[j][i]*shb[j][i];
 
     for (i=0; i<=Ns; i++) {
       shza[j][i] = sha[j][i];
@@ -120,6 +121,24 @@ for (tm_cur=0;tm_cur<tm;tm_cur+=dtsh)
       shb[j][k] *= rk[k];
     }
   }
+  }
 }
 
-
+void erase_shell(void)
+{
+ free_mem_2f(sha,n3,Ns+1);
+ free_mem_2f(shb,n3,Ns+1);
+ free_mem_2f(shza,n3,Ns+1);
+ free_mem_2f(shzb,n3,Ns+1);
+ free_mem_2f(shx1,n3,Ns+1);
+ free_mem_2f(shy1,n3,Ns+1);
+ free_mem_2f(shx2,n3,Ns+1);
+ free_mem_2f(shy2,n3,Ns+1);
+ free_mem_2f(shx3,n3,Ns+1);
+ free_mem_2f(shy3,n3,Ns+1);
+ free_mem_2f(shx4,n3,Ns+1);
+ free_mem_2f(shy4,n3,Ns+1);
+ free_mem_1f(dnn,Ns+1);
+ free_mem_1f(rk,Ns+1);
+ free_mem_1f(nl,Ns+1);
+}

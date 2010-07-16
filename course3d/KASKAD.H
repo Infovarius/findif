@@ -11,7 +11,6 @@
 #include <ComCtrls.hpp>
 #include <Tabnotbk.hpp>
 #include <Menus.hpp>
-#include "CSPIN.h"
 //---------------------------------------------------------------------------
 class TMainWindow : public TForm
 {
@@ -51,7 +50,7 @@ __published:	// IDE-managed Components
         TLabel *Label14;
         TEdit *EditRe;
         TLabel *Label15;
-        TButton *ButtonContinue;
+        TButton *ButtonRecontinue;
         TGroupBox *GroupInitVariant;
         TRadioButton *RadioInit1;
         TRadioButton *RadioInit2;
@@ -71,6 +70,8 @@ __published:	// IDE-managed Components
         TCheckBox *CheckNut;
         TLabel *Label18;
         TEdit *EditMaschtab;
+        TComboBox *SelPrior;
+        TStatusBar *StatusBarCalc;
         void __fastcall FormCreate(TObject *Sender);
         void __fastcall FormDestroy(TObject *Sender);
         void __fastcall EditMessageKeyUp(TObject *Sender, WORD &Key,
@@ -90,11 +91,10 @@ __published:	// IDE-managed Components
           TShiftState Shift);
         void __fastcall DoDumpClick(TObject *Sender);
         void __fastcall InputInitClick(TObject *Sender);
-        void __fastcall BeginWorkClick(TObject *Sender);
         void __fastcall ExitClick(TObject *Sender);
         void __fastcall EditReKeyUp(TObject *Sender, WORD &Key,
           TShiftState Shift);
-        void __fastcall ContinueWorkClick(TObject *Sender);
+        void __fastcall RecontinueClick(TObject *Sender);
         void __fastcall EditNoiseKeyUp(TObject *Sender, WORD &Key,
           TShiftState Shift);
         void __fastcall CheckNoiseClick(TObject *Sender);
@@ -105,9 +105,13 @@ __published:	// IDE-managed Components
         void __fastcall EditCheckStepChanging(TObject *Sender);
         void __fastcall EditMaschtabChange(TObject *Sender);
         void __fastcall CheckNutClick(TObject *Sender);
+        void __fastcall BeginWorkClick(TObject *Sender);
+        void __fastcall SelPriorChange(TObject *Sender);
+        void __fastcall ChangeStatus(char *str1,char *str2);   
 private:	// User declarations
 public:		// User declarations
         __fastcall TMainWindow(TComponent* Owner);
+protected:
 };
   
 //---------------------------------------------------------------------------

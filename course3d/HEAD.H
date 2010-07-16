@@ -10,7 +10,10 @@
 
 //#include <conio.h>
 
-//#define LEVEL
+LEVEL enum {ActNone=0, ActBegin=1, ActDump=2, ActPause=4, ActContinue=8, ActQuit=16}
+     action;
+LEVEL enum {StNone=0, StPause=1, StRun=2} RunStatus;
+
 LEVEL char *NameNuFile;
 LEVEL char *NameVFile;
 LEVEL char *NameDumpFile;
@@ -30,7 +33,7 @@ LEVEL int    m1, m2, m3, mm1, mm2, mm3, n1, n2, n3, Ns,
              approx, ghost, nvar;
 
 LEVEL double Noise=0.1, NoiseNorm=0;             
-LEVEL double maschtab = 0.1;
+LEVEL double maschtab;
 LEVEL double t_cur=0,Ttot;
 
 LEVEL long count;

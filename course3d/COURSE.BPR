@@ -5,7 +5,7 @@
     <VERSION value="BCB.05.03"/>
     <PROJECT value="course.exe"/>
     <OBJFILES value="course.obj kaskad.obj ioutil.obj UTIL.obj GOY.obj pde.obj RKAD.obj 
-      struct_func.obj"/>
+      struct_func.obj run.obj"/>
     <RESFILES value="course.res"/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>

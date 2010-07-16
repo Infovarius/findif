@@ -210,10 +210,10 @@ for(l=0;l<nvar;l++) {
 
 if(MainWindow->CheckFileOutput->Checked)  {  //if fileoutput
 /*avervx = (double *)calloc(m3, sizeof(double));
-if(avervx == NULL)  nrerror("\nAlloc_mem: unsuffitient memory!\n\a",t_cur);*/
+if(avervx == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n\a",t_cur);*/
 
 avernu = (double *)calloc(m3, sizeof(double));
-if(avernu == NULL)  nrerror("\nAlloc_mem: unsuffitient memory!\n\a",t_cur);
+if(avernu == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n\a",t_cur);
 
 for(k=ghost;k<mm3;k++)
 	{
@@ -238,6 +238,8 @@ for(k=ghost;k<mm3;k++)
         fclose(fnu);
   //for(k=0;k<m3;k++) printf("%e\n",f1[0][5][5][k]);
   //putting kaskad variables(log energy combined from them) to file
+if(MainWindow->CheckNut->Checked)
+  {
   fkv=fileopen(NameKaskadVarFile,count);
   fprintf(fkv,"{");
   for(i=0;i<Ns;i++)
@@ -252,15 +254,18 @@ for(k=ghost;k<mm3;k++)
         }
     fprintf(fkv,i<Ns-1 ? "," : "}\n");
     }
-fclose(fkv);
+  fclose(fkv);
+  }//if nu_kaskad is used
   }//if fileoutput
 }
 
 void dump(int n1,int n2,int n3,double Re,double ****f1,double ***nut,double t_cur,long count)
 {
 FILE *fd;
+static numdump=0;
 fd = fileopen(NameDumpFile,0);
 nmessage("dump is done",t_cur);
+MainWindow->ChangeStatus("","—брошены данные в файл");
 fprintf(fd,"current time = %0.10f \ncurrent iteration = %ld\n",t_cur,count);
 fprintf(fd,"Number of points along x = %d\n",n1);
 fprintf(fd,"Number of points along y = %d\n",n2);
