@@ -8,11 +8,12 @@ const char *NameNuFile = "nut.dat";
 const char *NameVFile  = "vv.dat";
 const char *NameDumpFile = "dump.dat";
 const char *NameEnergyFile = "energy.dat";
+const char *KaskadVarFile = "kaskvar.dat";
 
 const double UpLimit=10.;     //after this limit there's dump
 
 FILE *fileopen(const char *x, int mode)  //opening of file to ff
-                         /*   0-rewrite;others-append   */
+                         /*   0-rewrite;>0-append;<0-read    */
 {
 FILE *ff;
 char* s_mode;
@@ -47,7 +48,7 @@ for(i=beg1;i<beg1+n1;i++)
     fprintf(ff,"{");
     for(j=beg2;j<beg2+n2-1;j++)
         {
-        fprintf(ff,"%0.10f,",a[i][j]);
+        fprintf(ff,"%0.10f",a[i][j]);
         fprintf(ff,j<beg2+n2-1 ? "," : "}");
         }
     fprintf(ff,i<beg1+n1-1 ? "," : "}\n");
@@ -95,7 +96,7 @@ double temp, div=0;
 int i,j,k,l;
 double mf, mda, mdr;
 double *avervx, *avernu;
-FILE *fv,*fnu,*fen;
+FILE *fv,*fnu,*fen,*fkv;
 //fnu = fileopen(NameNuFile,count);
 clrscr();
 boundary_conditions(f1);
@@ -134,23 +135,23 @@ printf("t=%e dtdid=%e NIter=%d %e\n", t_cur, dtdid, count, div);
          printf("number of runge-kutt calculations=%d",enter);
 
 /*avervx = (double *)calloc(m3, sizeof(double));
-if(avervx == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n\a");
+if(avervx == NULL)  nrerror("\nAlloc_mem: unsuffitient memory!\n\a",t_cur);*/
 
 avernu = (double *)calloc(m3, sizeof(double));
-if(avernu == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n\a");
+if(avernu == NULL)  nrerror("\nAlloc_mem: unsuffitient memory!\n\a",t_cur);
 
 for(k=ghost;k<mm3;k++)
 	{
-	  avervx[k] = avernu[k] = 0;
+	/*  avervx[k] =*/ avernu[k] = 0;
           for(i=ghost;i<mm1;i++)
              for(j=ghost;j<mm2;j++)
 		 {
-		   avervx[k] += f1[0][i][j][k];
+	  //	   avervx[k] += f1[0][i][j][k];
                    avernu[k] += nut[i][j][k];
 		  }
-	   avervx[k] /= n1*n2;
+//	   avervx[k] /= n1*n2;
 	   avernu[k] /= n1*n2;
-	 }*/
+	 }
 
 //putting velocities to file
         fv = fileopen(NameVFile,count);
@@ -158,16 +159,26 @@ for(k=ghost;k<mm3;k++)
         print_array1d(fv,f1[0][m1/2][0],ghost,n3);
         fclose(fv);
 //putting viscosities to file
-/*      fnu = fileopen(NameNuFile,count);
+      fnu = fileopen(NameNuFile,count);
         print_array1d(fnu,avernu,ghost,n3);
-        fclose(fnu);*/
-
+        fclose(fnu);
 //for(k=0;k<m3;k++) printf("%e\n",f1[0][5][5][k]);
-if(kbhit()&&getch()=='q')
-	{
-	dump(f1,t_cur,count);
-	nrerror("You asked to exit. Here you are...",t_cur);
+//putting kaskad variables(log energy combined from them) to file
+fkv=fileopen(KaskadVarFile,count);
+fprintf(fkv,"{");
+for(i=0;i<Ns;i++)
+    {
+    fprintf(fkv,"{");
+    for(k=0;k<n3;k++)
+        {
+        mf=fabs(sha[k][i]*sha[k][i]+shb[k][i]*shb[k][i]);
+        if(mf>1e-300) fprintf(fkv,"%0.10lf",log(mf));
+                 else fprintf(fkv,"NAN");
+        fprintf(fkv,k<n3-1 ? "," : "}");
         }
+    fprintf(fkv,i<Ns-1 ? "," : "}\n");
+    }
+fclose(fkv);
 }
 
 void dump(double ****f1,double t_cur,long count)
