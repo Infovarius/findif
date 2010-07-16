@@ -3,11 +3,6 @@
 #include "head.h"
 #include <time.h>
 
-#define CheckStep 10
-//each CheckStep divergence of program is checking
-#define OutStep   100
-//each OutStep result is printing
-
 int main(int argc, char** argv)
 {
    double dttry, dtdid, dtnext;
@@ -18,16 +13,16 @@ int main(int argc, char** argv)
 
 #include "init_vars.h"
 
-   Re=20000;
+   Re=10000;
    Gamma=1e-4;
-   l1=1;
+   l1=3;
    l2=1;
    l3=1;
 
    nvar=4;
-   n1=30;
+   n1=100;
    n2=1;
-   n3=30;
+   n3=100;
    Ns=25;
    approx=7;                      //derivatives approximation order
    ghost=(approx-1)/2;            //radius of approx sample
@@ -55,6 +50,9 @@ int main(int argc, char** argv)
    df3=alloc_mem_4f(nvar, m1, m2, m3);
    df4=alloc_mem_4f(nvar, m1, m2, m3);
    df5=alloc_mem_4f(nvar, m1, m2, m3);
+   prel=alloc_mem_4f(nvar, m1, m2, m3);
+   prel1=alloc_mem_4f(nvar, m1, m2, m3);
+   diver=alloc_mem_3f(m1, m2, m3);
    nut=alloc_mem_3f(m1, m2, m3);
    init_shell();
 
@@ -98,7 +96,7 @@ int main(int argc, char** argv)
    while (t_cur < Ttot && !razlet) {
         pde(t_cur, f, df);
         dttry=dtnext;
-        timestep(f, df, t_cur, f1, dttry, &dtdid, &dtnext);
+        timestep(f, df, t_cur, f1, dttry, dtdid, dtnext,pde);
         nut_by_flux(f,dtdid);
         t_cur+=dtdid;
         count++;
@@ -135,10 +133,12 @@ int main(int argc, char** argv)
    free_mem_4f(df3,nvar, m1, m2, m3);
    free_mem_4f(df4,nvar, m1, m2, m3);
    free_mem_4f(df5,nvar, m1, m2, m3);
+   free_mem_4f(prel,nvar, m1, m2, m3);
+   free_mem_4f(prel1,nvar, m1, m2, m3);
+   free_mem_3f(diver, m1, m2, m3);
    free_mem_3f(nut, m1, m2, m3);
    if(t_cur>Ttot&&!razlet) nmessage("work is succesfully done",t_cur);
        else nrerror("this is break of scheme",t_cur);
 
 return 0;
 }
-

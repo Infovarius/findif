@@ -3,7 +3,7 @@
 #define LEVEL extern
 #include "head.h"
 
-const double UpLimit=100.;     //after this limit there's turbulence
+const double UpLimit=1e100;     //after this limit there's turbulence
 
 FILE *fileopen(char *x, int mode)  //opening of file to ff
                          /*   0-rewrite;>0-append;<0-read    */
@@ -34,7 +34,7 @@ int init_data(double *Re,double *t_cur,long *count)
  int i,j,k,l;
  float tmpd;
  char tmpc;
- int n1,n2,n3;
+// int n1,n2,n3;
 
  FILE *inp = fileopen(NameInitFile,-1);
  read_tilleq(inp,'n');   if(fscanf(inp,"%lf",t_cur)==0) error=1;
@@ -171,7 +171,7 @@ double temp, div=0;
 int i,j,k,l;
 double mf, mda, mdr;
 double *avervx, *avernu;
-FILE *fv,*fnu,*fen,*fkv;
+FILE *fv,*fnu,*fen,*fkv,*fdiv;
 //fnu = fileopen(NameNuFile,count);
 clrscr();
 boundary_conditions(f1);
@@ -187,7 +187,11 @@ for(i=ghost;i<mm1;i++)
 time(&time_now);
 printf("program is working %ld seconds\n",time_now-time_begin);
 
-printf("t=%e dtdid=%e NIter=%d %e\n", t_cur, dtdid, count, div);
+         fdiv = fileopen("diverg.dat",count);
+         fprintf(fdiv,"%0.10f\n",div);
+         fclose(fdiv);
+
+printf("t=%e dtdid=%e NIter=%d maxdiver=%e\n", t_cur, dtdid, count, div);
 
    for(l=0;l<nvar;l++) {
        mf=mda=mdr=0;
@@ -210,7 +214,7 @@ printf("t=%e dtdid=%e NIter=%d %e\n", t_cur, dtdid, count, div);
          printf("number of runge-kutt calculations=%d",enter);
 
 /*avervx = alloc_mem_1f(m3);
-if(avervx == NULL)  nrerror("\nAlloc_mem: unsuffitient memory!\n\a",t_cur);*/
+if(avervx == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n\a",t_cur);*/
 
 avernu = alloc_mem_1f(m3);
 

@@ -11,32 +11,34 @@
 
 
 void timestep(double ****f, double ****df, double t, double ****fout,
-              double dttry, double *dtdid, double *dtnext)
+              double dttry, double &dtdid, double &dtnext,
+              double pde(double t,double ****f,double ****df))
 {
    double dt, err = 0;
 
    dt=dttry;
    for (;;)
    {
-      err = rkck(f, df, t, dt, fout);
+      err = rkck(f, df, t, dt, fout,pde);
       err *=ErrScale;
       if (err<=1.0)
          break;
       dt = max(Safety * dt * pow(err, Pshrink), dt*(double)0.1);
-      if (t+dt == t) 
+      if (t+dt == t)
 	    {
 	     dump(n1,n2,n3,Re,f,nut,t_cur,count);
              nrerror("Stepsize underflow in rk\n\a",t);
             }
    }
-   *dtdid = dt;
+   dtdid = dt;
    if (err>ErrCon)
-      *dtnext = Safety * dt * pow(err, Pgrow);
+      dtnext = Safety * dt * pow(err, Pgrow);
    else
-      *dtnext = dt * (double)5.0;
+      dtnext = dt * (double)5.0;
 }
 
-double rkck(double ****f, double ****df1, double t, double dt, double ****fout)
+double rkck(double ****f, double ****df1, double t, double dt, double ****fout,
+              double pde(double t,double ****f,double ****df))
 {
 static double   a2=0.2,a3=0.3,a4=0.6,a5=1.0,a6=0.875,b21=0.2,
 		b31=3.0/40.0,b32=9.0/40.0,b41=0.3,b42 = -0.9,b43=1.2,

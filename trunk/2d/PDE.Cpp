@@ -1,8 +1,6 @@
-
 //----------------------- Calculation of PDE right part  ----------//
 #define LEVEL extern
 #include "head.h"
-
 
 inline double norma(double a,double b,double c,int order)
 {
@@ -10,13 +8,13 @@ if(order==2) return ((a)*(a)+(b)*(b)+(c)*(c));
    else  return  pow(((a)*(a)+(b)*(b)+(c)*(c)),order/2.);
 }
 
-void pde(double t, double ****f, double ****df)
+double pde(double t, double ****f, double ****df)
 {
    int i,j,k,l,m;
-   double dv1[3][3],dv2[3][3],dp1[3],dp2[3],dn1[3];
+   double dv1[3][3],dv2[3][3],dp1[3],dn1[3],dvr;
 
    boundary_conditions(f);
-
+//calculating velocity without pressure (quasi-velocity)
    for(i=ghost;i<mm1;i++)
    for(j=ghost;j<=ghost;j++)
    for(k=ghost;k<mm3;k++) {
@@ -26,18 +24,34 @@ void pde(double t, double ****f, double ****df)
          dv2[l][m]=dr(f[l],i,j,k,m+1,1,dx[m]*dx[m],ghost, approx);
       }
       for(m=0;m<3;m++ for2D(m)) {
-         dp1[m]=dr(f[3],i,j,k,m+1,0,dx[m],ghost, approx);
          dn1[m]=dr(nut,i,j,k,m+1,0,dx[m],ghost, approx);
       }
 
-      for(l=0;l<3;l++ for2D(l))
-       df[l][i][j][k]= (dv2[l][0] + dv2[l][2])*nut[i][j][k]
-                     - dp1[l] + (dn1[0]-f[0][i][j][k])*dv1[l][0]
-                              + (dn1[2]-f[2][i][j][k])*dv1[l][2];
-      df[3][i][j][k]= (-(dv1[0][0] + dv1[2][2]))/Gamma;
+      for(m=0;m<3;m++ for2D(m))
+       df[m][i][j][k]= (dv2[m][0] + dv2[m][2])*nut[i][j][k]
+                              + dn1[0]*dv1[m][0]
+                              + dn1[2]*dv1[m][2]
+                     -coordin(k,2)*(m3-coordin(k,2))*4/m3/m3*dv1[m][0]
+                     -(m==0? p1/l1 : 0)                                            //normalizing of pressure
+                     -(m==0? 4*(m3-2*coordin(k,2))*4/m3/m3*f[2][i][0][k] : 0);
    }
+//calculating divergence of current quasi-velocity
+dvr = divergention(f);
 
-   return;
+//calculating pressure
+//p_relax(f,df);
+//correcting velocity by pressure
+   for(i=ghost;i<mm1;i++)
+   for(j=ghost;j<=ghost;j++)
+   for(k=ghost;k<mm3;k++)
+      for(m=0;m<3;m++ for2D(m)) {
+         dp1[m]=dr(df[3],i,j,k,m+1,0,dx[m],ghost, approx);
+//               +dr(f[3],i,j,k,m+1,0,dx[m],ghost, approx);
+         df[m][i][j][k] -= dp1[m];
+                                }
+//calculating divergence of current velocity
+   dvr = divergention(f);
+   return 0;            //better return maxd
 }
 
 double deviation(double ****f,int i,int j,int k)
@@ -119,8 +133,8 @@ void  boundary_conditions(double ****f)
    for(g=0;g<ghost;g++)
    {
    //periodic for velocities and gradient-periodic for pressure
-      f[l][g][j][k] = f[l][n1+g][j][k] - ((l==3)?(p2-p1):0);
-      f[l][mm1+g][j][k] = f[l][ghost+g][j][k] + ((l==3)?(p2-p1):0);
+      f[l][g][j][k] = f[l][n1+g][j][k];
+      f[l][mm1+g][j][k] = f[l][ghost+g][j][k];
    }
 
    // on horizontal surfaces
@@ -138,7 +152,7 @@ void  boundary_conditions(double ****f)
    return;
 }
 
-double ***fill_function()
+/*double ***fill_function()
 {
  double ***ar;
 // double MaxLevel;
@@ -150,18 +164,19 @@ double ***fill_function()
        ar[i][j][k] = ((double)rand()-RAND_MAX/2)/RAND_MAX;
 
  return(ar);
-}
+} */
 
 void  init_conditions(double ****f,double Re)
 {
    int i,j,k;
    double Noise,NoiseNorm,NoiseAdiv,parabole;
    double k1,k2,k3;
-   double ***arbfunc = fill_function();
-   Noise = 0.0001;
+   double ***arbfunc;
+//   arbfunc = fill_function();
+   Noise = 0.0;
    NoiseAdiv = 0.0;
-   NoiseNorm = 0.1;
-   parabole = 1;
+   NoiseNorm = 0.01;
+   parabole = 0;
    k1=2*M_PI/l1;  k3=1*2*M_PI/l3;
    NoiseNorm /= sqrt(k1*k1+k3*k3);
 
@@ -171,15 +186,17 @@ void  init_conditions(double ****f,double Re)
         f[0][i][j][k]=parabole*coordin(k,2)*(l3-coordin(k,2))*4/l3/l3
                       + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX
                       + NoiseNorm * k3*sin(k1*coordin(i,0))*sin(k3*coordin(k,2))
-                      + NoiseAdiv * dr(arbfunc,i,j,k,1,0,dx[0],ghost, approx) ;
+                          *pow(coordin(k,2)*(l3-coordin(k,2))*4/l3/l3,1.)
+                          *pow(coordin(i,0)*(l1-coordin(i,0))*4/l1/l1,1.);
+//                      + NoiseAdiv * dr(arbfunc,i,j,k,1,0,dx[0],ghost, approx) ;
         f[2][i][j][k]=NoiseNorm *k1*cos(k1*coordin(i,0))* (cos(k3*coordin(k,2))-1)
-                      + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX
-                      + NoiseAdiv * (-dr(arbfunc,i,j,k,3,0,dx[2],ghost, approx)) ;
+                      + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX;
+//                      + NoiseAdiv * (-dr(arbfunc,i,j,k,3,0,dx[2],ghost, approx)) ;
    }
    for(i=0;i<m1;i++)
    for(j=ghost;j<=ghost;j++)
    for(k=0;k<m3;k++) {
-        f[3][i][j][k]=p1+(i-0.5)*(p2-p1)/n1;
+        f[3][i][j][k]=0;
         nut[i][j][k]=1./Re;
         }
 //   dump(n1,n2,n3,Re,f,arbfunc,t_cur,count);
