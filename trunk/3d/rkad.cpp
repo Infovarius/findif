@@ -25,7 +25,7 @@ void timestep(double ****f, double ****df, double t, double ****fout,
       dt = max(Safety * dt * pow(err, Pshrink), dt*(double)0.1);
       if (t+dt == t) 
 	    {
-	     dump(n1,n2,n3,Re,f,nut,t_cur,count);
+	     dump(f,t,count);
              nrerror("Stepsize underflow in rk\n\a",t);
             }
    }

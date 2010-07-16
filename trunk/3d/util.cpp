@@ -12,7 +12,7 @@ void nrerror(char error_text[],double t_cur)
 	fprintf(err,"%s\n",error_text);
 	fprintf(err,"...now exiting to system...\n");
         fclose(err);
-	//exit(1);
+	exit(1);
 }
 
 void nmessage(char msg_text[],double t_cur)
