@@ -1,0 +1,13 @@
+USEUNIT("course.cpp");
+USEUNIT("GOY.CPP");
+USEUNIT("ioutil.cpp");
+USEFORM("kaskad.cpp", MainWindow);
+USEUNIT("pde.cpp");
+USEUNIT("RKAD.CPP");
+USEUNIT("run.cpp");
+USEUNIT("struct_func.cpp");
+USEUNIT("UTIL.CPP");
+//---------------------------------------------------------------------------
+This file is used by the project manager only and should be treated like the project file
+
+WinMain
