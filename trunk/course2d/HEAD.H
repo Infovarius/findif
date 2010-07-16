@@ -7,9 +7,8 @@
 #include <math.h>
 #include <system.hpp>
 #include "kaskad.h"
-#define for2D(l)  ,l==1?l++:l
 
-//#include <conio.h>
+#define for2D(l)  ,l==1?l++:l
 
 LEVEL enum {ActNone=0, ActBegin=1, ActDump=2, ActPause=4, ActContinue=8, ActQuit=16}
      action;
@@ -24,7 +23,6 @@ LEVEL AnsiString NameMessageFile;
 LEVEL AnsiString NameErrorFile;
 LEVEL AnsiString NameInitFile;
 
-
 LEVEL double ****f, ****f1, ****df, ****df2, ****df3, ****df4, ****df5,**s_func,
              dx[3];
 
@@ -34,8 +32,8 @@ LEVEL double ***nut,
 LEVEL int    m1, m2, m3, mm1, mm2, mm3, n1, n2, n3, Ns,
              approx, ghost, nvar;
 
-LEVEL double Noise=0.1;
-LEVEL double NoiseNorm=0.;
+LEVEL double Noise;
+LEVEL double NoiseNorm;
 LEVEL double maschtab;
 
 LEVEL double t_cur,Ttot;
@@ -48,11 +46,11 @@ LEVEL double TotalEnergy, PulsEn;
 LEVEL int CheckStep;  //each CheckStep divergence of program is checking
 LEVEL int OutStep;    //each OutStep result is printing
 LEVEL int num_dump;
-LEVEL int do_dump;
+
 //--------for GOY
-const int kol_masht=5;
-const int size_okr=3;  //должно быть <=ghost, иначе окрестность выходит из фикт.обл-ти - виснет
-const double lambda=2; //multiplier
+#define kol_masht 5
+LEVEL int max_okr;  //должно быть <=ghost, иначе окрестность выходит из фикт.обл-ти - виснет
+LEVEL double lambda; //multiplier
 LEVEL long num_points[kol_masht];
 LEVEL double *nl,**sha,**shb;
 

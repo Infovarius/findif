@@ -1,3 +1,4 @@
+
 //----------------------- Calculation of PDE right part  ----------//
 #define LEVEL extern
 #include "head.h"
@@ -17,31 +18,23 @@ void pde(double t, double ****f, double ****df)
    boundary_conditions(f);
 
    for(i=ghost;i<mm1;i++)
-   for(j=ghost;j<mm2;j++)
+   for(j=ghost;j<=ghost;j++)
    for(k=ghost;k<mm3;k++) {
       for(l=0;l<3;l++ for2D(l))
-)
-      for(m=0;m<3;m++) {
+      for(m=0;m<3;m++ for2D(m)) {
          dv1[l][m]=dr(f[l],i,j,k,m+1,0,dx[m],ghost, approx);
          dv2[l][m]=dr(f[l],i,j,k,m+1,1,dx[m]*dx[m],ghost, approx);
       }
-      for(m=0;m<3;m++) {
+      for(m=0;m<3;m++ for2D(m)) {
          dp1[m]=dr(f[3],i,j,k,m+1,0,dx[m],ghost, approx);
          dn1[m]=dr(nut,i,j,k,m+1,0,dx[m],ghost, approx);
       }
 
-      for(l=0;l<3;l++)
-       df[l][i][j][k]= (dv2[l][0] + dv2[l][1] + dv2[l][2])*nut[i][j][k]
+      for(l=0;l<3;l++ for2D(l))
+       df[l][i][j][k]= (dv2[l][0] + dv2[l][2])*nut[i][j][k]
                      - dp1[l] + (dn1[0]-f[0][i][j][k])*dv1[l][0]
-                              + (dn1[1]-f[1][i][j][k])*dv1[l][1]
                               + (dn1[2]-f[2][i][j][k])*dv1[l][2];
-      df[3][i][j][k]= (-(dv1[0][0] + dv1[1][1] + dv1[2][2]))/Gamma;
-      if(do_dump)
-                {
-                FILE fd=fileopen("slag.dat",0);
-                print_array3d(fd,f1[0],0,m1,0,m2,0,m3);
-                do_dump=0;
-                }
+      df[3][i][j][k]= (-(dv1[0][0] + dv1[2][2]))/Gamma;
    }
 
    return;
@@ -63,14 +56,6 @@ int kol=0,l;
                {flux += norma(f[0][i][j][k]-f[0][i+l][j][k],f[1][i][j][k]-f[1][i+l][j][k],f[2][i][j][k]-f[2][i+l][j][k],2);
             	kol++;
                }
-            if(j>0)
-               {flux += norma(f[0][i][j][k]-f[0][i][j-l][k],f[1][i][j][k]-f[1][i][j-l][k],f[2][i][j][k]-f[2][i][j-l][k],2);
-            	kol++;
-               }
-            if(j<m2)
-               {flux += norma(f[0][i][j][k]-f[0][i][j+l][k],f[1][i][j][k]-f[1][i][j+l][k],f[2][i][j][k]-f[2][i][j+l][k],2);
-            	kol++;
-               }
             if(k>0)
                {flux += norma(f[0][i][j][k]-f[0][i][j][k-l],f[1][i][j][k]-f[1][i][j][k-l],f[2][i][j][k]-f[2][i][j][k-l],2);
                 kol++;
@@ -88,10 +73,12 @@ void nut_by_flux(double ****f,double dt) //calculating nu_turbulent by velocity 
 {
 int i,j,k,l;
 double koef;
+double big_puls=300;
+if(PulsEn/TotalEnergy>big_puls) 
 if(MainWindow->CheckNut->Checked)
 {
 struct_func(f,2);
-for(i=0;i<n3;i++)
+/*for(i=0;i<n3;i++)
     {
     koef=sqrt(s_func[i][0]/(pow(sha[i][1],2.)+pow(shb[i][1],2.)));
     sha[i][1] *= koef;
@@ -99,7 +86,7 @@ for(i=0;i<n3;i++)
     koef=sqrt(s_func[i][1]/(pow(sha[i][0],2.)+pow(shb[i][0],2.)));
     sha[i][0] *= koef;
     shb[i][0] *= koef;
-    }
+    }*/
 /*clrscr();
 for(j=0;j<n3;j++)
     {
@@ -109,18 +96,17 @@ for(j=0;j<n3;j++)
       en+=sha[j][i]*sha[j][i]+shb[j][i]*shb[j][i];
     printf("   totEn=%lf\n",en);
     }  */
-time_step_shell(dt);
+//time_step_shell(dt);
 for(k=0;k<n3;k++)
    {
-   double tmp = maschtab*pow(nl[0]*(sha[k][0]*sha[k][0]+shb[k][0]*shb[k][0]) +
+/*   double tmp = maschtab*pow(nl[0]*(sha[k][0]*sha[k][0]+shb[k][0]*shb[k][0]) +
                              nl[1]*(sha[k][1]*sha[k][1]+shb[k][1]*shb[k][1]),
-                         1./3);
-   if(PulsEn/TotalEnergy<0.1) tmp=0;
-   /*  double tmp;
-  if(PulsEn/TotalEnergy>0.1) tmp=maschtab*pow(s_func[k][1]+s_func[k][0],2);
-                 else tmp=0;*/
+                         1./3);*/
+  double tmp;
+  if(PulsEn/TotalEnergy>big_puls) tmp=maschtab*pow(s_func[k][1]+s_func[k][0],2);
+                 else tmp=0;
    for(i=ghost;i<mm1;i++)
-       for(j=ghost;j<mm2;j++)
+       for(j=ghost;j<=ghost;j++)
             nut[i][j][k+ghost] = (1. + tmp)/Re;
    }
 } //if CheckNut checked
@@ -131,8 +117,8 @@ void  boundary_conditions(double ****f)
    int i, j, k, l, g;
 
    // stream surfaces
-   for(l=0;l<nvar;l++)
-   for(j=ghost;j<mm2;j++)
+   for(l=0;l<nvar;l++ for2D(l))
+   for(j=ghost;j<=ghost;j++)
    for(k=ghost;k<mm3;k++)
    for(g=0;g<ghost;g++)
    {
@@ -141,22 +127,11 @@ void  boundary_conditions(double ****f)
       f[l][mm1+g][j][k] = f[l][ghost+g][j][k] + ((l==3)?(p2-p1):0);
    }
 
-   // vertical surfaces
-   for(l=0;l<nvar;l++)
-   for(i=ghost;i<mm1;i++)
-   for(k=ghost;k<mm3;k++)
-   for(g=0;g<ghost;g++)
-   {
-   //periodic conditions for velocities and pressure
-      f[l][i][g][k] = f[l][i][n2+g][k];
-      f[l][i][mm2+g][k] = f[l][i][ghost+g][k];
-   }
-
    // on horizontal surfaces
 
-   for(l=0;l<nvar;l++)
+   for(l=0;l<nvar;l++ for2D(l))
    for(i=ghost;i<mm1;i++)
-   for(j=ghost;j<mm2;j++)
+   for(j=ghost;j<=ghost;j++)
    for(g=0;g<ghost;g++)
    {
    //sticking for velocities and free conditions for pressure
@@ -171,22 +146,21 @@ void  init_conditions(double ****f,double Re)
 {
    int i,j,k;
    double parabole;
-//   double k1,k2,k3;
+   double k1,k2,k3;
    Noise = (MainWindow->CheckNoise->Checked) ? //Noise : 0;
                atof(MainWindow->EditNoise->Text.c_str()) : 0;
    NoiseNorm = (MainWindow->CheckNorm->Checked) ? //NoiseNorm : 0;
                atof(MainWindow->EditNorm->Text.c_str())  : 0;
    parabole = (MainWindow->RadioParabole->Checked) ? 1 : 0;
-//   k1=2*M_PI/l1;  k3=M_PI/l3;
+   k1=13*M_PI/l1;  k3=7*M_PI/l3;
 
    for(i=0;i<m1;i++)
-   for(j=0;j<m2;j++)
+   for(j=ghost;j<=ghost;j++)
    for(k=0;k<m3;k++) {
         f[0][i][j][k]=parabole*coordin(k,2)*(l3-coordin(k,2))*4/l3/l3
-                      + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX;
-        f[1][i][j][k]=NoiseNorm*cos(2*M_PI*coordin(j,1)/l2)*cos(2*M_PI*coordin(k,2)/l3)
-                      + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX;
-        f[2][i][j][k]=NoiseNorm*sin(2*M_PI*coordin(j,1)/l2)*sin(2*M_PI*coordin(k,2)/l3)
+                      + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX
+                      + NoiseNorm * sin(k1*coordin(k,2));
+        f[2][i][j][k]=NoiseNorm /*sin(k2*coordin(j,1))*/ * sin(k3*coordin(k,2))
                       + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX;
         f[3][i][j][k]=p1+(i-0.5)*(p2-p1)/n1;
         nut[i][j][k]=1./Re;
