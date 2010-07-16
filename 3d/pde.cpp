@@ -38,17 +38,12 @@ void pde(double t, double ****f, double ****df)
    return;
 }
 
-void nut_by_flux(double ****f,double Re) //calculating nu_turbulent by velocity fluctuations
+double deviation(double ****f,int i,int j,int k)
 {
 const size_okr=min(1,ghost);
-double flux, maxflux = 0;
-double maschtab = 10000;
-int i,j,k,kol = 0,l;
-for(i=ghost;i<mm1;i++)
-    for(j=ghost;j<mm2;j++)
-        for(k=ghost;k<mm3;k++)
-           for(l=1;l<=size_okr;l++)
-           {
+double flux;
+int kol=0,l;
+   for(l=1;l<=size_okr;l++)
             {
             flux = 0;
             if(i>0)
@@ -76,10 +71,20 @@ for(i=ghost;i<mm1;i++)
                 kol++;
                }
            };
-            flux /= kol;
-            if(flux>maxflux) maxflux = flux;
-            nut[i][j][k] = (1. + maschtab * flux)/Re;
-            }
+   flux /= kol;
+return(flux);
+}
+
+void nut_by_flux(double ****f,double Re) //calculating nu_turbulent by velocity fluctuations
+{
+double maschtab = 10;
+int i,j,k,l;
+for(i=ghost;i<mm1;i++)
+    for(j=ghost;j<mm2;j++)
+        for(k=ghost;k<mm3;k++)
+           {
+            nut[i][j][k] = (1. + maschtab * deviation(f,i,j,k))/Re;
+           }
 }
 
 void  boundary_conditions(double ****f)
@@ -180,7 +185,7 @@ switch (sm*dr) {
 	case 14: for(i=0; i<sm; i++) tmp += m[ii][jj+i-sh][kk]*kf7[or][sh][i]; break;
 	case 21: for(i=0; i<sm; i++) tmp += m[ii][jj][kk+i-sh]*kf7[or][sh][i]; break;
 	default :
-    	nrerror("\nNO SUCH SAMPLE for derivative Bye ...");
+    	nrerror("\nNO SUCH SAMPLE for derivative Bye ...",0);
 	}
 return(tmp/dx);
 }
