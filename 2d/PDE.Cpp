@@ -1,4 +1,4 @@
-                                           
+
 //----------------------- Calculation of PDE right part  ----------//
 #define LEVEL extern
 #include "head.h"
@@ -158,26 +158,31 @@ void  init_conditions(double ****f,double Re)
    double Noise,NoiseNorm,NoiseAdiv,parabole;
    double k1,k2,k3;
    double ***arbfunc = fill_function();
-   Noise = 0.;
-   NoiseAdiv = 0.1;
-   NoiseNorm = 0.;
-   parabole = 0;
-   k1=13*M_PI/l1;  k3=7*M_PI/l3;
+   Noise = 0.0001;
+   NoiseAdiv = 0.0;
+   NoiseNorm = 0.1;
+   parabole = 1;
+   k1=2*M_PI/l1;  k3=1*2*M_PI/l3;
+   NoiseNorm /= sqrt(k1*k1+k3*k3);
 
    for(i=ghost;i<mm1;i++)
    for(j=ghost;j<=ghost;j++)
    for(k=ghost;k<mm3;k++) {
         f[0][i][j][k]=parabole*coordin(k,2)*(l3-coordin(k,2))*4/l3/l3
                       + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX
-                      + NoiseNorm * sin(k1*coordin(k,2))
+                      + NoiseNorm * k3*sin(k1*coordin(i,0))*sin(k3*coordin(k,2))
                       + NoiseAdiv * dr(arbfunc,i,j,k,1,0,dx[0],ghost, approx) ;
-        f[2][i][j][k]=//NoiseNorm /*sin(k2*coordin(j,1))*/ * sin(k3*coordin(k,2))
-                      //+ Noise*((double)rand()-RAND_MAX/2)/RAND_MAX
+        f[2][i][j][k]=NoiseNorm *k1*cos(k1*coordin(i,0))* (cos(k3*coordin(k,2))-1)
+                      + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX
                       + NoiseAdiv * (-dr(arbfunc,i,j,k,3,0,dx[2],ghost, approx)) ;
+   }
+   for(i=0;i<m1;i++)
+   for(j=ghost;j<=ghost;j++)
+   for(k=0;k<m3;k++) {
         f[3][i][j][k]=p1+(i-0.5)*(p2-p1)/n1;
         nut[i][j][k]=1./Re;
-   }
-   dump(n1,n2,n3,Re,f,arbfunc,t_cur,count);
+        }
+//   dump(n1,n2,n3,Re,f,arbfunc,t_cur,count);
 
 }
 
