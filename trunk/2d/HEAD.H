@@ -22,11 +22,10 @@ LEVEL char *NameDumpFile;
 LEVEL char *NameEnergyFile;
 LEVEL char *KaskadVarFile;
 
-LEVEL double ****f, ****f1, ****df, ****df2, ****df3, ****df4, ****df5,
-             ****prel,****prel1,
-             ***diver, ***nut, **s_func;
+LEVEL double ****f, ****f1, ****df, ****df2, ****df3, ****df4, ****df5,**s_func,
+             dx[3];
 
-LEVEL double dx[3],
+LEVEL double ***nut,
              Gamma, l1, l2, l3, p1, p2,Re;
 
 LEVEL int    m1, m2, m3, mm1, mm2, mm3, n1, n2, n3, Ns,
@@ -40,15 +39,15 @@ LEVEL double t_cur,Ttot;
 LEVEL long count;
 LEVEL long time_begin,time_now;
 
-LEVEL long enter, pres_step;
+LEVEL long enter;
 LEVEL bool razlet;
 LEVEL double TotalEnergy, PulsEn;
-LEVEL int CheckStep=10;  //each CheckStep divergence of program is checking
-LEVEL int OutStep=1;    //each OutStep result is printing
+LEVEL int CheckStep;  //each CheckStep divergence of program is checking
+LEVEL int OutStep;    //each OutStep result is printing
 LEVEL int num_dump;
 
 //--------for GOY
-const kol_masht=5;
+#define kol_masht 5
 LEVEL int max_okr;  //должно быть <=ghost, иначе окрестность выходит из фикт.обл-ти - виснет
 LEVEL double lambda; //multiplier
 LEVEL long num_points[kol_masht];
@@ -84,12 +83,10 @@ double *alloc_mem_1f(int);
 void   free_mem_1f(double *, int);
 /*------- rkad.cpp -----------*/
 void   timestep(double ****, double ****, double, double ****,
-              double, double &, double &,
-              double pde(double t,double ****f,double ****df));
-double rkck(double ****, double ****, double, double, double ****,
-              double pde(double t,double ****f,double ****df));
+              double, double *, double *);
+double rkck(double ****, double ****, double, double, double ****);
 /*------- pde.cpp -----------*/
-double   pde(double, double ****, double ****);
+void   pde(double, double ****, double ****);
 double norma(double a,double b,double c,int q);
 double deviation(double ****,int,int,int);
 void nut_by_flux(double ****f,double Re);
@@ -103,9 +100,4 @@ void free_memory(double **s_func,double ****f,double ****f1,double ****df,double
                      double ****df3,double ****df4,double ****df5,double ***nut);
 void at_the_end_of_work();
 void recreate_arrays(int n1new,int n2new,int n3new);
-/*-------- prelax.cpp -------*/
-double divergention(double ****f);
-void p_relax(double ****f,double ****df);
-double pde_prelax(double t,double ****f,double ****df);
-
 #endif
