@@ -1,0 +1,181 @@
+(************** Content-type: application/mathematica **************
+
+                    Mathematica-Compatible Notebook
+
+This notebook can be used with any Mathematica-compatible
+application, such as Mathematica, MathReader or Publicon. The data
+for the notebook starts with the line containing stars above.
+
+To get the notebook into a Mathematica-compatible application, do
+one of the following:
+
+* Save the data starting with the line of stars above into a file
+  with a name ending in .nb, then open the file inside the
+  application;
+
+* Copy the data starting with the line of stars above to the
+  clipboard, then use the Paste menu command inside the application.
+
+Data for notebooks contains only printable 7-bit ASCII and can be
+sent directly in email or through ftp in text mode.  Newlines can be
+CR, LF or CRLF (Unix, Macintosh or MS-DOS style).
+
+NOTE: If you modify the data for this notebook not in a Mathematica-
+compatible application, you must delete the line below containing
+the word CacheID, otherwise Mathematica-compatible applications may
+try to use invalid cache data.
+
+For more information on notebooks and Mathematica-compatible 
+applications, contact Wolfram Research:
+  web: http://www.wolfram.com
+  email: info@wolfram.com
+  phone: +1-217-398-0700 (U.S.)
+
+Notebook reader applications are available free of charge from 
+Wolfram Research.
+*******************************************************************)
+
+(*CacheID: 232*)
+
+
+(*NotebookFileLineBreakTest
+NotebookFileLineBreakTest*)
+(*NotebookOptionsPosition[      4986,        133]*)
+(*NotebookOutlinePosition[      5628,        155]*)
+(*  CellTagsIndexPosition[      5584,        151]*)
+(*WindowFrame->Normal*)
+
+
+
+Notebook[{
+Cell[BoxData[
+    \(\(ShowIsoline[x0_, y0_, z0_] := 
+        Block[{x, y, z}, 
+          tmax = 1; \[IndentingNewLine]{xp, yp, zp} = {x, y, z} /. 
+              First[NDSolve[{\(x'\)[t] \[Equal] 
+                      vx[x[t], y[t], z[t]], \(y'\)[t] == 
+                      vy[x[t], y[t], z[t]], \(z'\)[t] == 
+                      vz[x[t], y[t], z[t]], \[IndentingNewLine]x[0] \[Equal] 
+                      x0, y[0] \[Equal] y0, z[0] \[Equal] z0}, {x, y, z}, {t, 
+                    0, tmax}, 
+                  MaxSteps \[Rule] 10000]]; \[IndentingNewLine]tmax = 
+            xp[\([1, 1, 2]\)]; \[IndentingNewLine]ParametricPlot3D[{xp[t], 
+              yp[t], zp[t]}, {t, 0, tmax}, 
+            PlotRange \[Rule] {{0, 1}, {0, 1}, {0, 1}}, 
+            DisplayFunction \[Rule] 
+              Identity]\[IndentingNewLine]];\)\)], "Input"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+    \(\(Off[Set::write, General::spell1];\)\), "\[IndentingNewLine]", 
+    \(\(dump = 
+        ReadList["\<D:\\CBuilder5\\mine\\course\\run\\dump4.dat\>"];\)\), "\
+\[IndentingNewLine]", 
+    \(\({t, count, n1, n2, n3, Rey, vx, vy, vz, p, nut} = 
+        dump;\)\), "\[IndentingNewLine]", 
+    \(\(Unwrap[l_] := 
+        Take[l, {4, Length[l] - 3}];\)\), "\[IndentingNewLine]", 
+    \(\(vx = 
+        Unwrap[Unwrap /@ \((\(Map[Unwrap, #] &\) /@ 
+                vx)\)];\)\), "\[IndentingNewLine]", 
+    \(\(vy = 
+        Unwrap[Unwrap /@ \((\(Map[Unwrap, #] &\) /@ 
+                vy)\)];\)\), "\[IndentingNewLine]", 
+    \(\(vz = 
+        Unwrap[Unwrap /@ \((\(Map[Unwrap, #] &\) /@ 
+                vz)\)];\)\), "\[IndentingNewLine]", 
+    \({t, count, n1, n2, n3, Rey}\), "\[IndentingNewLine]", 
+    \(\(Clear[t, x, y, z];\)\), "\[IndentingNewLine]", 
+    \(vxi = ListInterpolation[vx, {{0, 1}, {0, 1}, {0, 1}}]; 
+    vxi[x_, y_, 0] = 0; vxi[x_, y_, 1] = 0;\), "\[IndentingNewLine]", 
+    \(vyi = ListInterpolation[vy, {{0, 1}, {0, 1}, {0, 1}}]; 
+    vyi[x_, y_, 0] = 0; vyi[x_, y_, 1] = 0;\), "\[IndentingNewLine]", 
+    \(vzi = ListInterpolation[vz, {{0, 1}, {0, 1}, {0, 1}}]; 
+    vzi[x_, y_, 0] = 0; vzi[x_, y_, 1] = 0;\), "\[IndentingNewLine]", 
+    \(\(Clear[vx, vy, vz];\)\), "\[IndentingNewLine]", 
+    \(\(Frac[x_] := x - Floor[x];\)\), "\[IndentingNewLine]", 
+    \(\(vx[x_, y_, z_] := 
+        vxi[Frac[x], Frac[y], Frac[z]];\)\), "\[IndentingNewLine]", 
+    \(\(vy[x_, y_, z_] := 
+        vyi[Frac[x], Frac[y], Frac[z]];\)\), "\[IndentingNewLine]", 
+    \(\(vz[x_, y_, z_] := vzi[Frac[x], Frac[y], Frac[z]];\)\)}], "Input"],
+
+Cell[BoxData[
+    \({0.`, 0, 20, 20, 40, 100000.`}\)], "Output"]
+}, Open  ]],
+
+Cell[BoxData[
+    \(\(Plot[{yp[t], zp[t]}, {t, 0, tmax}];\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(Show[Table[ShowIsoline[0, y, 0.9], {y, 0, 1, 0.1}], 
+        DisplayFunction -> $DisplayFunction];\)\)], "Input"],
+
+Cell[BoxData[{
+    \(\(Off[NDSolve::mxst];\)\), "\[IndentingNewLine]", 
+    \(\(tt = 
+        Table[ShowIsoline[0, y, z], {y, 0.3, 0.6, 0.01}, {z, 0.8, 0.9, 
+            0.01}];\)\)}], "Input"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(ByteCount[tt]\)], "Input"],
+
+Cell[BoxData[
+    \(6047384\)], "Output"]
+}, Open  ]],
+
+Cell[BoxData[
+    \(\(Show[tt, DisplayFunction -> $DisplayFunction, 
+        ViewPoint -> {1.809, \ \(-4.940\), \ 1.230}];\)\)], "Input"]
+},
+FrontEndVersion->"4.1 for Microsoft Windows",
+ScreenRectangle->{{0, 798}, {0, 503}},
+WindowSize->{790, 476},
+WindowMargins->{{0, Automatic}, {Automatic, 0}}
+]
+
+(*******************************************************************
+Cached data follows.  If you edit this Notebook file directly, not
+using Mathematica, you must remove the line containing CacheID at
+the top of  the file.  The cache data will then be recreated when
+you save this file from within Mathematica.
+*******************************************************************)
+
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+
+(*NotebookFileOutline
+Notebook[{
+Cell[1705, 50, 844, 15, 210, "Input"],
+
+Cell[CellGroupData[{
+Cell[2574, 69, 1653, 32, 350, "Input"],
+Cell[4230, 103, 64, 1, 29, "Output"]
+}, Open  ]],
+Cell[4309, 107, 72, 1, 30, "Input"],
+Cell[4384, 110, 135, 2, 30, "Input"],
+Cell[4522, 114, 193, 4, 50, "Input"],
+
+Cell[CellGroupData[{
+Cell[4740, 122, 46, 1, 30, "Input"],
+Cell[4789, 125, 41, 1, 29, "Output"]
+}, Open  ]],
+Cell[4845, 129, 137, 2, 30, "Input"]
+}
+]
+*)
+
+
+
+(*******************************************************************
+End of Mathematica Notebook file.
+*******************************************************************)
+
