@@ -12,7 +12,6 @@ int main(int argc, char** argv)
 {
    double t_cur, Ttot, dttry, dtdid, dtnext, PulsEn;
    int i,j,k,l;
-   double Re;
 
    time(&time_begin);
    nmessage("work has begun",t_cur);
@@ -27,6 +26,7 @@ int main(int argc, char** argv)
    n1=10;
    n2=10;
    n3=20;
+   Ns=25;
    approx=7;                      //derivatives approximation order
    ghost=(approx-1)/2;            //radius of approx sample
    dx[0]=l1/n1;
@@ -54,6 +54,7 @@ int main(int argc, char** argv)
    df4=alloc_mem_4f(nvar, m1, m2, m3);
    df5=alloc_mem_4f(nvar, m1, m2, m3);
    nut=alloc_mem_3f(m1, m2, m3);
+   init_shell();
 
    fileopen("error.err",0);
    init_conditions(f,Re);
@@ -88,15 +89,16 @@ int main(int argc, char** argv)
    printing(f,dtdid,t_cur,count,PulsEn);
 
    dtnext=1e-3;
-//   dump(f,t_cur,count);
+   dump(f,t_cur,count);
 
 /*------------------------ MAIN ITERATIONS -------------------------*/
-/*   while (t_cur < Ttot && !razlet) {
-        nut_by_flux(f,Re);
+   while (t_cur < Ttot && !razlet) {
         pde(t_cur, f, df);
         dttry=dtnext;
         timestep(f, df, t_cur, f1, dttry, &dtdid, &dtnext);
+        nut_by_flux(f,dtdid);
         t_cur+=dtdid;
+        count++;
         if (count%CheckStep==0)
             PulsEn=check(f);
         if (count%OutStep==0)
@@ -119,10 +121,9 @@ int main(int argc, char** argv)
                                     }
                         }
               }
-        count++;
    }
 
-   dump(f1,t_cur,count);*/
+   dump(f1,t_cur,count);
    free_mem_2f(s_func,n3+2,kol_masht);
    free_mem_4f(f  ,nvar, m1, m2, m3);
    free_mem_4f(f1 ,nvar, m1, m2, m3);

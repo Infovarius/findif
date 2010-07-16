@@ -2,9 +2,10 @@
 #define LEVEL extern
 #include "head.h"
 
-inline double norma(double a,double b,double c)
+inline double norma(double a,double b,double c,int order)
 {
-return ((a)*(a)+(b)*(b)+(c)*(c));
+if(order==2) return ((a)*(a)+(b)*(b)+(c)*(c));
+   else  return  pow(((a)*(a)+(b)*(b)+(c)*(c)),order/2.);
 }
 
 void pde(double t, double ****f, double ****df)
@@ -47,27 +48,27 @@ int kol=0,l;
             {
             flux = 0;
             if(i>0)
-               {flux += norma(f[0][i][j][k]-f[0][i-l][j][k],f[1][i][j][k]-f[1][i-l][j][k],f[2][i][j][k]-f[2][i-l][j][k]);
+               {flux += norma(f[0][i][j][k]-f[0][i-l][j][k],f[1][i][j][k]-f[1][i-l][j][k],f[2][i][j][k]-f[2][i-l][j][k],2);
             	kol++;
                }
             if(i<m1)
-               {flux += norma(f[0][i][j][k]-f[0][i+l][j][k],f[1][i][j][k]-f[1][i+l][j][k],f[2][i][j][k]-f[2][i+l][j][k]);
+               {flux += norma(f[0][i][j][k]-f[0][i+l][j][k],f[1][i][j][k]-f[1][i+l][j][k],f[2][i][j][k]-f[2][i+l][j][k],2);
             	kol++;
                }
             if(j>0)
-               {flux += norma(f[0][i][j][k]-f[0][i][j-l][k],f[1][i][j][k]-f[1][i][j-l][k],f[2][i][j][k]-f[2][i][j-l][k]);
+               {flux += norma(f[0][i][j][k]-f[0][i][j-l][k],f[1][i][j][k]-f[1][i][j-l][k],f[2][i][j][k]-f[2][i][j-l][k],2);
             	kol++;
                }
             if(j<m2)
-               {flux += norma(f[0][i][j][k]-f[0][i][j+l][k],f[1][i][j][k]-f[1][i][j+l][k],f[2][i][j][k]-f[2][i][j+l][k]);
+               {flux += norma(f[0][i][j][k]-f[0][i][j+l][k],f[1][i][j][k]-f[1][i][j+l][k],f[2][i][j][k]-f[2][i][j+l][k],2);
             	kol++;
                }
             if(k>0)
-               {flux += norma(f[0][i][j][k]-f[0][i][j][k-l],f[1][i][j][k]-f[1][i][j][k-l],f[2][i][j][k]-f[2][i][j][k-l]);
+               {flux += norma(f[0][i][j][k]-f[0][i][j][k-l],f[1][i][j][k]-f[1][i][j][k-l],f[2][i][j][k]-f[2][i][j][k-l],2);
                 kol++;
                }
             if(k<m3)
-               {flux += norma(f[0][i][j][k]-f[0][i][j][k+l],f[1][i][j][k]-f[1][i][j][k+l],f[2][i][j][k]-f[2][i][j][k+l]);
+               {flux += norma(f[0][i][j][k]-f[0][i][j][k+l],f[1][i][j][k]-f[1][i][j][k+l],f[2][i][j][k]-f[2][i][j][k+l],2);
                 kol++;
                }
            };
@@ -75,16 +76,40 @@ int kol=0,l;
 return(flux);
 }
 
-void nut_by_flux(double ****f,double Re) //calculating nu_turbulent by velocity fluctuations
+void nut_by_flux(double ****f,double dt) //calculating nu_turbulent by velocity fluctuations
 {
-double maschtab = 100;
+double maschtab = 0.1;
 int i,j,k,l;
-for(i=ghost;i<mm1;i++)
-    for(j=ghost;j<mm2;j++)
-        for(k=ghost;k<mm3;k++)
-           {
-            nut[i][j][k] = (1. + maschtab * deviation(f,i,j,k))/Re;
-           }
+double koef;
+struct_func(f,2,2,1);
+for(i=0;i<n3;i++)
+    {
+    koef=sqrt(s_func[i][0]/(pow(sha[i][1],2.)+pow(shb[i][1],2.)));
+    sha[i][1] *= koef;
+    shb[i][1] *= koef;
+    koef=sqrt(s_func[i][1]/(pow(sha[i][0],2.)+pow(shb[i][0],2.)));
+    sha[i][0] *= koef;
+    shb[i][0] *= koef;
+    }
+/*clrscr();
+for(j=0;j<n3;j++)
+    {
+    printf("%lf  %lf",s_func[j][0],s_func[j][1]);
+    double en;
+    for (i=0,en=0; i<=Ns; i++)
+      en+=sha[j][i]*sha[j][i]+shb[j][i]*shb[j][i];
+    printf("   totEn=%lf\n",en);
+    }  */
+time_step_shell(dt);
+for(k=0;k<n3;k++)
+   {
+   double tmp = maschtab*pow(nl[0]*(sha[k][0]*sha[k][0]+shb[k][0]*shb[k][0]) +
+                             nl[1]*(sha[k][1]*sha[k][1]+shb[k][1]*shb[k][1]),
+                         1./3);
+   for(i=ghost;i<mm1;i++)
+       for(j=ghost;j<mm2;j++)
+            nut[i][j][k+ghost] = (1. + tmp)/Re;
+   }
 }
 
 void  boundary_conditions(double ****f)
@@ -131,7 +156,7 @@ void  boundary_conditions(double ****f)
 void  init_conditions(double ****f,double Re)
 {
    int i,j,k,l;
-   double Noise=0.0, Noise1=0;
+   double Noise=0.1, Noise1=0;
 //   double k1,k2,k3;
 
 //   k1=2*M_PI/l1;  k3=M_PI/l3;
