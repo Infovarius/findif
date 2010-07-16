@@ -7,6 +7,8 @@
 #include <math.h>
 #include <system.hpp>
 #include "kaskad.h"
+#define max(x,y) ((x)>(y))?(x):(y)
+#define min(x,y) ((x)<(y))?(x):(y)
 
 //#include <conio.h>
 

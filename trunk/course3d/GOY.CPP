@@ -44,7 +44,7 @@ nl =alloc_mem_1f(Ns+1);
     CK = -EPS/2.0;
     CJ = (EPS-1.0)/2.0;
     CI = 0.5;
-//filling num_points (number of near points for structural function)
+//filling num_points (number of for structural function)
 int l,m,n,dist,wrong=0;
 double d,rx,ry,rz,logl;
 double min_d=min(min(dx[0],dx[1]),dx[2]);
@@ -105,7 +105,6 @@ int i,j,k;
 double tm_cur, en;
 
 for (tm_cur=0;tm_cur<tm;tm_cur+=dtsh)
-    {
     enter++;
  for (j=0; j<n3; j++) {
 //    for (i=0,en=0; i<=Ns; i++)
@@ -142,7 +141,6 @@ for (tm_cur=0;tm_cur<tm;tm_cur+=dtsh)
       shb[j][k] *= rk[k];
     }
   }
- }
 }
 
 void erase_shell(void)

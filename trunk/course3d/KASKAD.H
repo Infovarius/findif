@@ -10,6 +10,7 @@
 #include <Tabs.hpp>
 #include <ComCtrls.hpp>
 #include <Tabnotbk.hpp>
+#include <TabNotBk.hpp>
 //---------------------------------------------------------------------------
 
 class TMainWindow : public TForm
