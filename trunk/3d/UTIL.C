@@ -4,9 +4,12 @@
 
 void nrerror(char error_text[])
 {
-	fprintf(stderr,"Run-time error...\n");
-	fprintf(stderr,"%s\n",error_text);
-	fprintf(stderr,"...now exiting to system...\n");
+   FILE *err;
+   err=fileopen("error.err",0);
+
+	fprintf(err,"Run-time error:\n");
+	fprintf(err,"%s\n",error_text);
+	fprintf(err,"...now exiting to system...\n");
 	exit(1);
 }
 
