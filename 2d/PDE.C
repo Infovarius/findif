@@ -2,6 +2,35 @@
 #define LEVEL extern
 #include "head.h"
 
+/*void pde(double t, double ****f, double ****df)
+{
+   int i,k,l,m;
+   double dv1[3][3],dv2[3][3],dp1[3],dp2[3],dn1[3];
+
+   boundary_conditions(f);
+
+   for(i=ghost;i<mm1;i++)
+   for(k=ghost;k<mm3;k++) {
+      for(l=0;l<3;l++ for2D(l))
+      for(m=0;m<3;m++ for2D(m)) {
+         dv1[l][m]=dr(f[l],i,0,k,m+1,0,dx[m],ghost, approx);
+         dv2[l][m]=dr(f[l],i,0,k,m+1,1,dx[m]*dx[m],ghost, approx);
+      }
+      for(m=0;m<3;m++ for2D(m)) {
+         dp1[m]=dr(f[3],i,0,k,m+1,0,dx[m],ghost, approx);
+         dn1[m]=dr(nut,i,0,k,m+1,0,dx[m],ghost, approx);
+      }
+
+      for(l=0;l<3;l++ for2D(l))
+       df[l][i][0][k]= (dv2[l][0] + dv2[l][2])*nut[i][0][k]
+                     - dp1[l] + (dn1[0]-f[0][i][0][k])*dv1[l][0]
+                              + (dn1[2]-f[2][i][0][k])*dv1[l][2];
+      df[3][i][0][k]= (-(dv1[0][0] + dv1[2][2]))/Gamma;
+   }
+
+   return;
+} */
+
 void pde(double t, double ****f, double ****df)
 {
    int i,k,l,m;
