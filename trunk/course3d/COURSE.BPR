@@ -2,11 +2,11 @@
 <!-- C++Builder XML Project -->
 <PROJECT>
   <MACROS>
-    <VERSION value="BCB.06.00"/>
+    <VERSION value="BCB.05.03"/>
     <PROJECT value="course.exe"/>
-    <OBJFILES value="..\..\obj\course.obj ..\..\obj\kaskad.obj ..\..\obj\ioutil.obj 
-      ..\..\obj\UTIL.obj ..\..\obj\GOY.obj ..\..\obj\pde.obj ..\..\obj\RKAD.obj 
-      ..\..\obj\struct_func.obj ..\..\obj\run.obj"/>
+    <OBJFILES value="D:\BC31\obj\\course.obj D:\BC31\obj\\kaskad.obj D:\BC31\obj\\ioutil.obj 
+      D:\BC31\obj\\UTIL.obj D:\BC31\obj\\GOY.obj D:\BC31\obj\\pde.obj 
+      D:\BC31\obj\\RKAD.obj D:\BC31\obj\\struct_func.obj D:\BC31\obj\\run.obj"/>
     <RESFILES value="course.res"/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>
@@ -14,65 +14,47 @@
     <RESDEPEN value="$(RESFILES) kaskad.dfm"/>
     <LIBFILES value=""/>
     <LIBRARIES value=""/>
-    <SPARELIBS value="rtl.lib vcl.lib vclx.lib bcbsmp.lib bcb2kaxserver.lib"/>
-    <PACKAGES value="rtl.bpi vcl.bpi vclx.bpi bcbsmp.bpi dbrtl.bpi vcldb.bpi adortl.bpi 
-      ibsmp.bpi bdertl.bpi vcldbx.bpi qrpt.bpi teeui.bpi teedb.bpi tee.bpi 
-      dss.bpi teeqr.bpi ibxpress.bpi dsnap.bpi vclie.bpi inetdb.bpi inet.bpi 
-      nmfast.bpi webdsnap.bpi bcbie.bpi dclocx.bpi bcb2kaxserver.bpi"/>
+    <SPARELIBS value="Vcl50.lib Vclx50.lib bcbsmp50.lib bcb2kaxserver50.lib"/>
+    <PACKAGES value="Vcl50.bpi Vclx50.bpi bcbsmp50.bpi Vcldb50.bpi vclado50.bpi ibsmp50.bpi 
+      VCLBDE50.bpi vcldbx50.bpi Qrpt50.bpi TeeUI50.bpi TeeDB50.bpi Tee50.bpi 
+      Dss50.bpi TeeQR50.bpi VCLIB50.bpi Vclmid50.bpi vclie50.bpi Inetdb50.bpi 
+      Inet50.bpi NMFast50.bpi webmid50.bpi bcbie50.bpi dclocx50.bpi 
+      bcb2kaxserver50.bpi"/>
     <PATHCPP value=".;"/>
     <PATHPAS value=".;"/>
     <PATHRC value=".;"/>
     <PATHASM value=".;"/>
     <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
     <RELEASELIBPATH value="$(BCB)\lib\release"/>
-    <LINKER value="ilink32"/>
+    <LINKER value="tlink32"/>
     <USERDEFINES value="_DEBUG"/>
     <SYSDEFINES value="_RTLDLL;NO_STRICT;USEPACKAGES"/>
     <MAINSOURCE value="course.cpp"/>
     <INCLUDEPATH value="..\..\Bin;$(BCB)\include;$(BCB)\include\vcl"/>
     <LIBPATH value="..\..\Bin;$(BCB)\lib\obj;$(BCB)\lib"/>
     <WARNINGS value="-w-par"/>
-    <OTHERFILES value=""/>
   </MACROS>
   <OPTIONS>
     <IDLCFLAGS value="-I..\..\Bin -I$(BCB)\include -I$(BCB)\include\vcl -src_suffix cpp -D_DEBUG 
       -boa"/>
-    <CFLAG1 value="-Od -H=d:\borland\CBUILD~1\lib\vcl60.csm -Q -Vx -Ve -X- -r- -a8 -b- -k -y 
-      -v -vi- -c -tW -tWM"/>
-    <PFLAGS value="-N2E:\HOME\chupin\obj -N0E:\HOME\chupin\obj -$YD -$W -$O- -$A8 -v -JPHNE -M"/>
+    <CFLAG1 value="-Od -H=$(BCB)\lib\vcl50.csm -Q -Vx -Ve -X- -r- -a8 -b- -k -y -v -vi- -c 
+      -tW -tWM"/>
+    <PFLAGS value="-N2&quot;D:\BC31\obj\&quot; -N0&quot;D:\BC31\obj\&quot; -$YD -$W -$O- -v -JPHNE -M"/>
     <RFLAGS value=""/>
     <AFLAGS value="/mx /w2 /zi"/>
-    <LFLAGS value="-IE:\HOME\chupin\obj -D&quot;&quot; -aa -Tpe -x -Gn -v"/>
-    <OTHERFILES value=""/>
+    <LFLAGS value="-I&quot;D:\BC31\obj\&quot; -D&quot;&quot; -aa -Tpe -x -Gn -v"/>
   </OPTIONS>
   <LINKER>
     <ALLOBJ value="c0w32.obj $(PACKAGES) Memmgr.Lib sysinit.obj $(OBJFILES)"/>
     <ALLRES value="$(RESFILES)"/>
     <ALLLIB value="$(LIBFILES) $(LIBRARIES) import32.lib cp32mti.lib"/>
-    <OTHERFILES value=""/>
   </LINKER>
-  <FILELIST>
-      <FILE FILENAME="course.cpp" FORMNAME="" UNITNAME="course" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="course.res" FORMNAME="" UNITNAME="course" CONTAINERID="ResTool" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="kaskad.cpp" FORMNAME="MainWindow" UNITNAME="kaskad" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="ioutil.cpp" FORMNAME="" UNITNAME="ioutil" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="UTIL.CPP" FORMNAME="" UNITNAME="UTIL" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="GOY.CPP" FORMNAME="" UNITNAME="GOY" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="pde.cpp" FORMNAME="" UNITNAME="pde" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="RKAD.CPP" FORMNAME="" UNITNAME="RKAD" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="struct_func.cpp" FORMNAME="" UNITNAME="struct_func" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="course.todo" FORMNAME="" UNITNAME="course" CONTAINERID="ToDo" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="run.cpp" FORMNAME="" UNITNAME="run" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
-  </FILELIST>
-  <BUILDTOOLS>
-  </BUILDTOOLS>
-
   <IDEOPTIONS>
 [Version Info]
 IncludeVerInfo=1
 AutoIncBuild=0
 MajorVer=1
-MinorVer=3
+MinorVer=4
 Release=2
 Build=0
 Debug=0
@@ -86,7 +68,7 @@ CodePage=1251
 [Version Info Keys]
 CompanyName=ICMM
 FileDescription=Демонстрация каскадно-сеточного подхода
-FileVersion=1.3.2.0
+FileVersion=1.4.2.0
 InternalName=kaskad-shell
 LegalCopyright=
 LegalTrademarks=
@@ -94,9 +76,6 @@ OriginalFilename=course
 ProductName=
 ProductVersion=1.0.0.0
 Comments=
-
-[Excluded Packages]
-d:\borland\cbuilder6\Bin\dclite60.bpl=Borland Integrated Translation Environment
 
 [HistoryLists\hlIncludePath]
 Count=2
@@ -117,12 +96,11 @@ Count=1
 Item0=_DEBUG
 
 [HistoryLists\hlIntOutputDir]
-Count=5
-Item0=E:\HOME\chupin\obj
-Item1=D:\BC31\obj\
-Item2=D:\CBuilder5\mine\course
-Item3=D:\CBuilder5\mine\course\
-Item4=D:\BC31\obj
+Count=4
+Item0=D:\BC31\obj\
+Item1=D:\CBuilder5\mine\course
+Item2=D:\CBuilder5\mine\course\
+Item3=D:\BC31\obj
 
 [HistoryLists\hlFinalOutputDir]
 Count=7
@@ -139,14 +117,9 @@ DebugSourceDirs=$(BCB)\source\vcl
 
 [Parameters]
 RunParams=
-Launcher=
-UseLauncher=0
-DebugCWD=
 HostApplication=
 RemoteHost=
 RemotePath=
-RemoteLauncher=
-RemoteCWD=
 RemoteDebug=0
 
 [Compiler]

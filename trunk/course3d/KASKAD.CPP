@@ -102,7 +102,7 @@ void __fastcall TMainWindow::FormCreate(TObject *Sender)
 
    prioritet = tpIdle;
    RunStatus = StNone;
-   fileopen("error.err",0);
+//   fileopen("error.err",0);
    RefreshForm();
 }
 //---------------------------------------------------------------------------
@@ -147,13 +147,16 @@ void __fastcall TMainWindow::BeginWorkClick(TObject *Sender)
                    EditNy->Enabled = false;
                    EditNz->Enabled = false;
                    action = ActBegin;
-                   if(!input_done) init_conditions(f,Re);
+                   if(!input_done)
+                     { init_conditions(f,Re);
+                       t_cur = 0;  count = 0;  enter = 0;
+                     }  
                    proc = new CalcProcess(false);
                    proc->Priority = prioritet;
 //                   ButtonRecontinue->Visible = false;
                  }
    break;
-   case StPause: { RunStatus = StRun;    
+   case StPause: { RunStatus = StRun;
                    action = ActContinue;
 //                   ButtonRecontinue->Visible = false;
                  }
@@ -172,6 +175,7 @@ void __fastcall TMainWindow::RecontinueClick(TObject *Sender)
    action = ActBegin;
    init_conditions(f,Re);
    delete proc;
+   t_cur = 0;  count = 0;  enter = 0;
    proc = new CalcProcess(false);
    proc->Priority = prioritet;
    ChangeStatus("Идут вычисления...","Вычисления начаты сначала");
@@ -255,12 +259,13 @@ void __fastcall TMainWindow::InputInitClick(TObject *Sender)
   int code=0;
   long dummy_count;
   double dummy_Re,dummy_t;
-  if (RadioInitVel->Checked)
-         code=init_data(&n1,&n2,&n3,&dummy_Re,f,nut,&dummy_t,&dummy_count);
-         else code=init_data(&n1,&n2,&n3,&Re,f,nut,&t_cur,&count);
+  if (RadioInitVel->Checked) //from beginning
+         { code=init_data(&dummy_Re,&dummy_t,&dummy_count);
+           t_cur = 0;  count = 0;  enter = 0; }
+         else code=init_data(&Re,&t_cur,&count);
   RefreshForm();
   if ( code > 0)
-     nrerror("Не удался ввод начальных данных. Код ошибки = %d",code);
+     nrerror("Не удался ввод начальных данных. Код ошибки = "/*,code*/,0);
    else input_done = true;
 }
 //---------------------------------------------------------------------------
@@ -351,37 +356,34 @@ void __fastcall TMainWindow::ChangeStatus(AnsiString str1,AnsiString str2)
   }
 }
 //---------------------------------------------------------------------------
-void __fastcall TMainWindow::EditNxChange(TObject *Sender)
+void recreate_arrays(int n1new,int n2new,int n3new)
 {
   free_memory(s_func,f,f1,df,df2,df3,df4,df5,nut);
-  n1 = EditNx->Text.ToIntDef(5);
-  if(n1<5) n1 = 5;
+  n1 = n1new;
+  n2 = n2new;
+  n3 = n3new;
   m1 = n1+2*ghost;
-  mm1 = ghost+n1;
-  dx[0]=l1/n1;
-  allocate_memory();
-}
-//---------------------------------------------------------------------------
-void __fastcall TMainWindow::EditNyChange(TObject *Sender)
-{
-  free_memory(s_func,f,f1,df,df2,df3,df4,df5,nut);
-  n2 = EditNy->Text.ToIntDef(5);
-  if(n2<5) n2 = 5;
   m2 = n2+2*ghost;
-  mm2 = ghost+n2;
-  dx[1]=l2/n2;
-  allocate_memory();
-}
-//---------------------------------------------------------------------------
-void __fastcall TMainWindow::EditNzChange(TObject *Sender)
-{
-  free_memory(s_func,f,f1,df,df2,df3,df4,df5,nut);
-  n3 = EditNz->Text.ToIntDef(5);
-  if(n3<5) n3 = 5;
   m3 = n3+2*ghost;
-  mm3 = ghost+n3;
+  mm1 = n1+ghost;
+  mm2 = n2+ghost;
+  mm3 = n3+ghost;
+  dx[0]=l1/n1;
+  dx[1]=l2/n2;
   dx[2]=l3/n3;
   allocate_memory();
+}
+
+void __fastcall TMainWindow::ButtonSaveNiClick(TObject *Sender)
+{
+int n1,n2,n3;
+  n1 = EditNx->Text.ToIntDef(5);
+  if(n1<5) n1 = 5;
+  n2 = EditNy->Text.ToIntDef(5);
+  if(n2<5) n2 = 5;
+  n3 = EditNz->Text.ToIntDef(5);
+  if(n3<5) n3 = 5;
+  recreate_arrays(n1,n2,n3);
 }
 //---------------------------------------------------------------------------
 

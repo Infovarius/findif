@@ -32,13 +32,11 @@ void __fastcall CalcProcess::Execute()
 {
    double dttry, dtdid, dtnext, PulsEn;
    int i,j,k,l;
-   const min_dump=200;
+   const min_dump=10;
    AnsiString TempScreen;
    MainWindow->ChangeStatus("Идут вычисления...","Начаты вычисления");
    MainWindow->BeginWork->Caption="Пауза";
    time(&time_begin);
-   t_cur = 0;
-   count = 0;  enter = 0;
    nmessage("work has begun",t_cur);
    PulsEn=check(f);
    printing(f,dtdid,t_cur,count,PulsEn);

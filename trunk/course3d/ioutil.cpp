@@ -28,22 +28,23 @@ void read_tilleq(FILE *ffff,char echo)
          else    while ((ch=char(fgetc(ffff)))!='=') printf("%c",ch);
 }
 
-int init_data(int *n1,int *n2,int *n3,double *Re,double ****f,double ***nut,double *t_cur,long *count)
+int init_data(double *Re,double *t_cur,long *count)
                           //returns code of error
 {
  int error=0;
  int i,j,k,l;
  float tmpd;
  char tmpc;
+ int n1,n2,n3;
 
  FILE *inp = fileopen(NameInitFile,-1);
  read_tilleq(inp,'n');   if(fscanf(inp,"%lf",t_cur)==0) error=1;
  read_tilleq(inp,'n');   if(fscanf(inp,"%ld",count)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%d",n1)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%d",n2)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%d",n3)==0) error=1;
+ read_tilleq(inp,'n');   if(fscanf(inp,"%d",&n1)==0) error=1;
+ read_tilleq(inp,'n');   if(fscanf(inp,"%d",&n2)==0) error=1;
+ read_tilleq(inp,'n');   if(fscanf(inp,"%d",&n3)==0) error=1;
  read_tilleq(inp,'n');   if(fscanf(inp,"%lf",Re)==0) error=1;
-      MainWindow->EditRe->Text.printf("%0.10f",*Re);  //don't work
+ recreate_arrays(n1,n2,n3);
  for(l=0;l<nvar;l++)                    // reading f
         {
         do fscanf(inp,"%c",&tmpc); while (tmpc!='{');
@@ -137,9 +138,7 @@ double check(double ****f)   //give energy of pulsations
 {
 double PulsEnergy=0;
 double **averf;
-int n;
-n=(n1>n2)?n1:n2;
-n=(n>n3)?n:n3;
+int n=max(n1,max(n2,n3));
 TotalEnergy=0;
 averf = alloc_mem_2f(3,n);
 int i,j,k,l;
@@ -229,7 +228,7 @@ for(l=0;l<nvar;l++) {
 
 if(MainWindow->CheckFileOutput->Checked)  {  //if fileoutput
 /*avervx = alloc_mem_1f(m3);
-if(avervx == NULL)  nrerror("\nAlloc_mem: unsuffitient memory!\n\a",t_cur);*/
+if(avervx == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n\a",t_cur);*/
 
 avernu = alloc_mem_1f(m3);
 

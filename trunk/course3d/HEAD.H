@@ -7,8 +7,6 @@
 #include <math.h>
 #include <system.hpp>
 #include "kaskad.h"
-#define max(x,y) ((x)>(y))?(x):(y)
-#define min(x,y) ((x)<(y))?(x):(y)
 
 //#include <conio.h>
 
@@ -57,7 +55,7 @@ LEVEL long num_points[kol_masht];
 LEVEL double *nl,**sha,**shb;
 
 /*------- ioutil.cpp ---------*/
-int init_data(int *n1,int *n2,int *n3,double *Re,double ****f,double ***nut,double *t_cur,long *count);
+int init_data(double *Re,double *t_cur,long *count);
 FILE *fileopen(AnsiString, int mode);
 void print_array1d(FILE *ff,double *a,int beg1,int n1);
 void print_array2d(FILE *ff,double **a,int beg1,int n1,int beg2,int n2);
@@ -102,4 +100,5 @@ void allocate_memory();
 void free_memory(double **s_func,double ****f,double ****f1,double ****df,double ****df2,
                      double ****df3,double ****df4,double ****df5,double ***nut);
 void at_the_end_of_work();
+void recreate_arrays(int n1new,int n2new,int n3new);
 #endif
