@@ -4,6 +4,14 @@
 #include <string.h>
 #include <conio.h>
 
+LEVEL char *NameMessageFile;
+LEVEL char *NameErrorFile;
+LEVEL char *NameInitFile;
+LEVEL char *NameNuFile;
+LEVEL char *NameVFile;
+LEVEL char *NameDumpFile;
+LEVEL char *NameEnergyFile;
+LEVEL char *KaskadVarFile;
 
 LEVEL double ****f, ****f1, ****df, ****df2, ****df3, ****df4, ****df5,**s_func,
              dx[3];
@@ -14,17 +22,33 @@ LEVEL double ***nut,
 LEVEL int    m1, m2, m3, mm1, mm2, mm3, n1, n2, n3, Ns,
              approx, ghost, nvar;
 
-LEVEL double t_cur,Ttot;
+LEVEL double Noise;
+LEVEL double NoiseNorm;
+LEVEL double maschtab;
 
+LEVEL double t_cur,Ttot;
 LEVEL long count;
 LEVEL long time_begin,time_now;
+
 LEVEL long enter;
 LEVEL bool razlet;
-const int kol_masht=10;
+LEVEL double TotalEnergy, PulsEn;
+LEVEL int CheckStep;  //each CheckStep divergence of program is checking
+LEVEL int OutStep;    //each OutStep result is printing
+LEVEL int num_dump;
+
 #define min_d min(min(dx[0],dx[1]),dx[2])
 
-/*-------- goy.cpp -----------*/
+//--------for GOY
+const int kol_masht=10;
+LEVEL int max_okr;  //должно быть <=ghost, иначе окрестность выходит из фикт.обл-ти - виснет
+LEVEL double lambda; //multiplier
+LEVEL long num_points[kol_masht];
 LEVEL double *nl,**sha,**shb;
+LEVEL double *f0;                           //flux of energy from grid to shell
+LEVEL double *en_flux;                      //summary of energy in cascade model
+
+/*-------- goy.cpp -----------*/
 void init_shell(void);
 void sima(double *zza, double *zzb, double *xx, double *yy);
 void time_step_shell(double tm);
