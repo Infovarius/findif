@@ -53,9 +53,9 @@
 [Version Info]
 IncludeVerInfo=1
 AutoIncBuild=0
-MajorVer=1
-MinorVer=4
-Release=2
+MajorVer=2
+MinorVer=0
+Release=4
 Build=0
 Debug=0
 PreRelease=0
@@ -68,7 +68,7 @@ CodePage=1251
 [Version Info Keys]
 CompanyName=ICMM
 FileDescription=Демонстрация каскадно-сеточного подхода
-FileVersion=1.4.2.0
+FileVersion=2.0.4.0
 InternalName=kaskad-shell
 LegalCopyright=
 LegalTrademarks=
@@ -98,9 +98,9 @@ Item0=_DEBUG
 [HistoryLists\hlIntOutputDir]
 Count=4
 Item0=D:\BC31\obj\
-Item1=D:\CBuilder5\mine\course
-Item2=D:\CBuilder5\mine\course\
-Item3=D:\BC31\obj
+Item1=D:\BC31\obj
+Item2=D:\CBuilder5\mine\course
+Item3=D:\CBuilder5\mine\course\
 
 [HistoryLists\hlFinalOutputDir]
 Count=7

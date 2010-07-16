@@ -154,12 +154,7 @@ for(i=ghost;i<mm1;i++)
            }
 for(l=0;l<=2;l++)
    for(k=ghost;k<mm3;k++)
-        {
-//        averf[l][k-ghost] /= n1*n2;
-//        for(i=ghost;i<mm1;i++)
-//            for(j=ghost;j<mm2;j++)
-               TotalEnergy += pow(averf[l][k-ghost],2.);
-        }
+          TotalEnergy += pow(averf[l][k-ghost],2.);
 TotalEnergy += 1.;   //if zero average field
 razlet = (PulsEnergy/TotalEnergy>UpLimit);
 free_mem_2f(averf,3,n);
@@ -227,8 +222,7 @@ for(l=0;l<nvar;l++) {
             }
 
 if(MainWindow->CheckFileOutput->Checked)  {  //if fileoutput
-/*avervx = alloc_mem_1f(m3);
-if(avervx == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n\a",t_cur);*/
+//avervx = alloc_mem_1f(m3);
 
 avernu = alloc_mem_1f(m3);
 
@@ -255,7 +249,7 @@ for(k=ghost;k<mm3;k++)
         fclose(fnu);
   //for(k=0;k<m3;k++) printf("%e\n",f1[0][5][5][k]);
   //putting kaskad variables(log energy combined from them) to file
-if(MainWindow->CheckNut->Checked)
+if(MainWindow->CheckNut->Checked&&false)
   {
   fkv=fileopen(NameKaskadVarFile,count);
   fprintf(fkv,"{");
