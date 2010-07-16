@@ -82,7 +82,7 @@ double maschtab = 100000;
 int i,j,k,l;
 double koef;
 struct_func(f,2,2,3);
-/*for(i=0;i<n3;i++)
+for(i=0;i<n3;i++)
     {
     koef=sqrt(s_func[i][0]/(pow(sha[i][1],2.)+pow(shb[i][1],2.)));
     sha[i][1] *= koef;
@@ -90,7 +90,7 @@ struct_func(f,2,2,3);
     koef=sqrt(s_func[i][1]/(pow(sha[i][0],2.)+pow(shb[i][0],2.)));
     sha[i][0] *= koef;
     shb[i][0] *= koef;
-    }*/
+    }
 /*clrscr();
 for(j=0;j<n3;j++)
     {
@@ -174,7 +174,7 @@ void  init_conditions(double ****f,double Re)
                        coordin(k,2)*(l3-coordin(k,2))*4/l3/l3;
         f[3][i][j][k]=p1+(i-0.5)*(p2-p1)/n1;
         nut[i][j][k]=(
-        (0.39+14.8*exp(-2.13*pow(2*coordin(k,2)-l3,2)))*1
+        (0.39+14.8*exp(-2.13*pow(2*coordin(k,2)-l3,2)))*0.1
                 +1)/Re;
    }
 //   struct_func(f,2,2,3);
@@ -222,5 +222,5 @@ double coordin(int i, int dir)
                       //0-x,1-y,2-z
 {
  return dx[dir]*((double)(i-ghost)+0.5);
-};
+}
 

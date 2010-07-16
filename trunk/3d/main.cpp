@@ -15,16 +15,16 @@ int main(int argc, char** argv)
 #include "init_vars.h"
 
 
-   Re=10000;
+   Re=1000000;
    Gamma=1e-4;
-   l1=1;
+   l1=3;
    l2=1;
    l3=1;
 
    nvar=4;
-   n1=10;
-   n2=10;
-   n3=10;
+   n1=16;
+   n2=16;
+   n3=16;
    Ns=15;
    approx=7;                      //derivatives approximation order
    ghost=(approx-1)/2;            //radius of approx sample
@@ -89,7 +89,7 @@ int main(int argc, char** argv)
    printing(f,0,t_cur,count,PulsEn);
 
    dtnext=1e-3;
-   dump(n1,n2,n3,Re,f,nut,t_cur,count);
+   dump(f,t_cur,count);
 
 /*------------------------ MAIN ITERATIONS -------------------------*/
    while (t_cur < Ttot && !razlet) {
@@ -115,15 +115,15 @@ int main(int argc, char** argv)
         if(kbhit())
              {
                 switch (getch()) {
-                        case 'd' : dump(n1,n2,n3,Re,f,nut,t_cur,count); break;
-                        case 'q' : { dump(n1,n2,n3,Re,f,nut,t_cur,count);
+                        case 'd' : dump(f,t_cur,count);  break;
+                        case 'q' : { dump(f,t_cur,count); 
                                      nrerror("You asked to exit. Here you are...",t_cur);
                                     }
                         }
               }
    }
 
-   dump(n1,n2,n3,Re,f,nut,t_cur,count);
+   dump(f,t_cur,count); 
 //   free_mem_2f(s_func,n3+2,kol_masht);
    free_mem_4f(f  ,nvar, m1, m2, m3);
    free_mem_4f(f1 ,nvar, m1, m2, m3);
@@ -138,4 +138,5 @@ int main(int argc, char** argv)
 
 return 0;
 }
+
 
