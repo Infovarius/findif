@@ -272,6 +272,7 @@ void __fastcall TMainWindow::InputInitClick(TObject *Sender)
 void __fastcall TMainWindow::DoDumpClick(TObject *Sender)
 {
   dump(n1,n2,n3,Re,f,nut,t_cur,count);
+  do_dump=1;
 }
 //---------------------------------------------------------------------------
 void __fastcall TMainWindow::EditCheckStepChanging(TObject *Sender)

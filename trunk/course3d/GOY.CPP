@@ -105,6 +105,7 @@ int i,j,k;
 double tm_cur, en;
 
 for (tm_cur=0;tm_cur<tm;tm_cur+=dtsh)
+    {
     enter++;
  for (j=0; j<n3; j++) {
 //    for (i=0,en=0; i<=Ns; i++)
@@ -141,6 +142,7 @@ for (tm_cur=0;tm_cur<tm;tm_cur+=dtsh)
       shb[j][k] *= rk[k];
     }
   }
+ }
 }
 
 void erase_shell(void)

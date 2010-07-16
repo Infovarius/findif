@@ -7,6 +7,7 @@
 #include <math.h>
 #include <system.hpp>
 #include "kaskad.h"
+#define for2D(l)  ,l==1?l++:l
 
 //#include <conio.h>
 
@@ -22,6 +23,7 @@ LEVEL AnsiString NameKaskadVarFile;
 LEVEL AnsiString NameMessageFile;
 LEVEL AnsiString NameErrorFile;
 LEVEL AnsiString NameInitFile;
+
 
 LEVEL double ****f, ****f1, ****df, ****df2, ****df3, ****df4, ****df5,**s_func,
              dx[3];
@@ -46,7 +48,7 @@ LEVEL double TotalEnergy, PulsEn;
 LEVEL int CheckStep;  //each CheckStep divergence of program is checking
 LEVEL int OutStep;    //each OutStep result is printing
 LEVEL int num_dump;
-
+LEVEL int do_dump;
 //--------for GOY
 const int kol_masht=5;
 const int size_okr=3;  //должно быть <=ghost, иначе окрестность выходит из фикт.обл-ти - виснет
