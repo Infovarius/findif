@@ -44,8 +44,29 @@ nl =alloc_mem_1f(Ns+1);
     CK = -EPS/2.0;
     CJ = (EPS-1.0)/2.0;
     CI = 0.5;
-
-}
+//filling num_points (number of near points for structural function)
+int l,m,n,dist,wrong=0;
+double d,rx,ry,rz,logl;
+double min_d=min(min(dx[0],dx[1]),dx[2]);
+logl=log(lambda);
+for(i=0;i<=kol_masht-1;i++) num_points[i] = 0;
+for(i=ghost;i<mm1;i++)
+for(j=ghost;j<mm2;j++)
+        for(l=-size_okr;l<=size_okr;l++)
+        for(m=-size_okr;m<=size_okr;m++)
+        for(n=-size_okr;n<=size_okr;n++)
+		 {
+		 if ((l==0)&&(m==0)&&(n==0)) continue;
+		 rx = abs(l)*dx[0];
+                 ry = abs(m)*dx[1];
+                 rz = abs(n)*dx[2];
+                 d = sqrt(rx*rx+ry*ry+rz*rz);
+                 d = log(d/min_d)/logl;    //(per wave number add "minus")
+                 dist=floor(d);
+                 if(dist>=kol_masht || dist<0) {wrong++;continue;}
+                 num_points[dist]++;
+                 }
+ }
 
 void sima(double *zza, double *zzb, double *xx, double *yy)
 {
@@ -121,7 +142,7 @@ for (tm_cur=0;tm_cur<tm;tm_cur+=dtsh)
       shb[j][k] *= rk[k];
     }
   }
-  }
+ }
 }
 
 void erase_shell(void)

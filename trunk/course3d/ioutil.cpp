@@ -227,7 +227,7 @@ for(l=0;l<nvar;l++) {
 
 if(MainWindow->CheckFileOutput->Checked)  {  //if fileoutput
 /*avervx = alloc_mem_1f(m3);
-if(avervx == NULL)  nrerror("\nAlloc_mem: unsuffitient memory!\n\a",t_cur);*/
+if(avervx == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n\a",t_cur);*/
 
 avernu = alloc_mem_1f(m3);
 

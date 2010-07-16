@@ -43,12 +43,16 @@ LEVEL long time_begin,time_now;
 LEVEL long enter;
 LEVEL bool razlet;
 LEVEL double TotalEnergy;
-const int kol_masht=5;
-const int size_okr=3;  //должно быть <=ghost, иначе окрестность выходит из фикт.обл-ти - виснет
-LEVEL long num_points[kol_masht];
 LEVEL int CheckStep;  //each CheckStep divergence of program is checking
 LEVEL int OutStep;    //each OutStep result is printing
 LEVEL int num_dump;
+
+//--------for GOY
+const int kol_masht=5;
+const int size_okr=3;  //должно быть <=ghost, иначе окрестность выходит из фикт.обл-ти - виснет
+const double lambda=2; //multiplier
+LEVEL long num_points[kol_masht];
+LEVEL double *nl,**sha,**shb;
 
 /*------- ioutil.cpp ---------*/
 int init_data(int *n1,int *n2,int *n3,double *Re,double ****f,double ***nut,double *t_cur,long *count);
@@ -61,13 +65,12 @@ double check(double ****f);
 void printing(double ****f1,double dtdid,double t_cur,long count,double en);
 void dump(int n1,int n2,int n3,double Re,double ****f,double ***nut,double t_cur,long count);
 /*-------- goy.cpp -----------*/
-LEVEL double *nl,**sha,**shb;
 void init_shell(void);
 void sima(double *zza, double *zzb, double *xx, double *yy);
 void time_step_shell(double tm);
 void erase_shell(void);
 /*------- struct_func.cpp----*/
-void struct_func(double ****f,int q,double lambda);
+void struct_func(double ****f,int q);
 /*------- util.cpp -----------*/
 void nrerror(char[],double);
 void nmessage(char [],double);
