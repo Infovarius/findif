@@ -26,12 +26,14 @@
 __fastcall CalcProcess::CalcProcess(bool CreateSuspended)
         : TThread(CreateSuspended)
 {
+ Priority = tpIdle;
 }
 //---------------------------------------------------------------------------
 void __fastcall CalcProcess::Execute()
 {
    double dttry, dtdid, dtnext, PulsEn;
    int i,j,k,l;
+   AnsiString TempScreen;
    MainWindow->ChangeStatus("Идут вычисления...","Начаты вычисления");
    MainWindow->BeginWork->Caption="Пауза";
    time(&time_begin);
@@ -43,6 +45,7 @@ void __fastcall CalcProcess::Execute()
 
    dtnext=1e-3;
    dump(n1,n2,n3,Re,f,nut,t_cur,count);
+   action = ActNone;
 
         /*----------- MAIN ITERATIONS --------------*/
    while (t_cur < Ttot && !razlet && action!=ActQuit) {
@@ -68,25 +71,43 @@ void __fastcall CalcProcess::Execute()
         if(action)
              {
                 switch (action) {
-                        case ActDump  : dump(n1,n2,n3,Re,f,nut,t_cur,count); break;
+                        case ActDump  : { dump(n1,n2,n3,Re,f,nut,t_cur,count);
+                                          action = ActNone;}       break;
                         case ActQuit  : { dump(n1,n2,n3,Re,f,nut,t_cur,count);
-                                     nrerror("You asked to exit. Here you are...",t_cur);
-                                   }
-                        case ActPause : { MainWindow->BeginWork->Caption="Продолжить счет";
+                                          nrerror("You asked to exit. Here you are...",t_cur);
+                                          TempScreen = "You asked to exit. Here you are...";
+                                          MainWindow->Screen->Lines->Append(TempScreen);
+                                          RunStatus = StNone;
+                                          MainWindow->BeginWork->Caption = "Начать счет";
+                                          return;
+                                   }; break;
+                    /*    case ActPause : { MainWindow->BeginWork->Caption="Продолжить счет";
                                           RunStatus = StPause;
-                                          MainWindow->ButtonRecontinue->Visible=true;
+                                          MainWindow->ButtonRecontinue->Show();
                                           MainWindow->ChangeStatus("Идут вычисления...","Вычисления приостановлены");
                                           do ; while(action!=ActContinue && action!=ActBegin);
                                           MainWindow->BeginWork->Caption="Пауза";
-                                          MainWindow->ButtonRecontinue->Visible=false;
+                                          MainWindow->ButtonRecontinue->Hide();
                                           MainWindow->ChangeStatus("Идут вычисления...","Продолжение вычислений");
                                           RunStatus = StRun;
-                                        }
+                                          action = ActNone;
+                                        }; break;*/
                         }
-             action = ActNone;
              }
    }
-  if(t_cur>Ttot&&!razlet) nmessage("work is succesfully done",t_cur);
-       else nrerror("this is break of scheme",t_cur);
+ MainWindow->Screen->Lines->Append("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+ MainWindow->Screen->Lines->Append(" ");
+
+  if(t_cur>Ttot&&!razlet)
+       { nmessage("work is succesfully done",t_cur);
+         TempScreen.printf("work is succesfully done at modelling time=%g",t_cur);
+         MainWindow->Screen->Lines->Append(TempScreen);}
+       else
+         { nrerror("this is break of scheme",t_cur);
+           TempScreen.printf("this is break of scheme at modelling time=%g",t_cur);
+           MainWindow->Screen->Lines->Append(TempScreen);}
+  RunStatus = StNone;
+  action = ActQuit;
+  MainWindow->BeginWork->Caption = "Начать счет";
 }
 //---------------------------------------------------------------------------

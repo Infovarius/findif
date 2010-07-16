@@ -32,14 +32,17 @@ LEVEL double ***nut,
 LEVEL int    m1, m2, m3, mm1, mm2, mm3, n1, n2, n3, Ns,
              approx, ghost, nvar;
 
-LEVEL double Noise=0.1, NoiseNorm=0;             
+LEVEL double Noise=0.1;
+LEVEL double NoiseNorm=0.0;
 LEVEL double maschtab;
-LEVEL double t_cur=0,Ttot;
 
+LEVEL double t_cur,Ttot;
 LEVEL long count;
 LEVEL long time_begin,time_now;
+
 LEVEL long enter;
 LEVEL bool razlet;
+LEVEL double TotalEnergy;
 const int kol_masht=5;
 LEVEL int CheckStep;  //each CheckStep divergence of program is checking
 LEVEL int OutStep;    //each OutStep result is printing
@@ -54,12 +57,12 @@ void print_array3d(FILE *ff,double ***a,
 double check(double ****f);
 void printing(double ****f1,double dtdid,double t_cur,long count,double en);
 void dump(int n1,int n2,int n3,double Re,double ****f,double ***nut,double t_cur,long count);
-/*------- kaskad.h -----------*/
 /*-------- goy.cpp -----------*/
 LEVEL double *nl,**sha,**shb;
 void init_shell(void);
 void sima(double *zza, double *zzb, double *xx, double *yy);
 void time_step_shell(double tm);
+void erase_shell(void);
 /*------- struct_func.cpp----*/
 void struct_func(double ****f,int q,double lambda,int size_okr);
 /*------- util.cpp -----------*/

@@ -135,19 +135,35 @@ for(i=beg1;i<beg1+n1;i++) {
 
 double check(double ****f)   //give energy of pulsations
 {
-double TotalEnergy=0,PulsEnergy=0;
+double PulsEnergy=0;
+double **averf;
+int n=max(n1,max(n2,n3));
+TotalEnergy=0;
+averf = alloc_mem_2f(3,n);
 int i,j,k,l;
-  for(i=ghost;i<mm1;i++)
+for(l=0;l<=2;l++)
+   for(i=0;i<n;i++)
+       averf[l][i] = 0;
+for(i=ghost;i<mm1;i++)
      for(j=ghost;j<mm2;j++)
         for(k=ghost;k<mm3;k++)
            {
            PulsEnergy+=deviation(f,i,j,k);
-           for(l=0;l<=2;l++)  TotalEnergy+=pow(f[l][i][j][k],2);
+           for(l=0;l<=2;l++) averf[l][k-ghost] += f[l][i][j][k];
            }
+for(l=0;l<=2;l++)
+   for(k=ghost;k<mm3;k++)
+        {
+        averf[l][k-ghost] /= n1*n2;
+        for(i=ghost;i<mm1;i++)
+            for(j=ghost;j<mm2;j++)
+               TotalEnergy += pow(averf[l][k-ghost],2.);
+        }
+TotalEnergy += 1.;   //if zero average field
 razlet = (PulsEnergy/TotalEnergy>UpLimit/*||TotalEnergy<PulsEnergy*/);
+free_mem_2f(averf,3,n);
 return(PulsEnergy);
 }
-
 
 void printing(double ****f1,double dtdid,double t_cur,long count,double en)
 {
@@ -174,8 +190,9 @@ time(&time_now);
 if(MainWindow->CheckScreenOutput->Checked)  {
    TempScreen.printf("program is working %ld seconds",time_now-time_begin);
    MainWindow->Screen->Lines->Append(TempScreen);
-   TempScreen.printf("t=%e \tdtdid=%e \tNIter=%d \t%e", t_cur, dtdid, count, div);
+   TempScreen.printf("t=%e \tdtdid=%e \tNIter=%d", t_cur, dtdid, count);
    MainWindow->Screen->Lines->Append(TempScreen);
+   TempScreen.printf("divergention=%e", div);
    }
 for(l=0;l<nvar;l++) {
        mf=mda=mdr=0;
@@ -195,7 +212,7 @@ for(l=0;l<nvar;l++) {
           }
 
          if(MainWindow->CheckScreenOutput->Checked)  {
-            TempScreen.printf("Energy of pulsations=%g",en);
+            TempScreen.printf("Energy of pulsations=%g, total energy=%g",en,TotalEnergy);
             MainWindow->Screen->Lines->Append(TempScreen);
             }
          if(MainWindow->CheckFileOutput->Checked)  {
@@ -209,11 +226,10 @@ for(l=0;l<nvar;l++) {
             }
 
 if(MainWindow->CheckFileOutput->Checked)  {  //if fileoutput
-/*avervx = (double *)calloc(m3, sizeof(double));
+/*avervx = alloc_mem_1f(m3);
 if(avervx == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n\a",t_cur);*/
 
-avernu = (double *)calloc(m3, sizeof(double));
-if(avernu == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n\a",t_cur);
+avernu = alloc_mem_1f(m3);
 
 for(k=ghost;k<mm3;k++)
 	{
@@ -256,6 +272,7 @@ if(MainWindow->CheckNut->Checked)
     }
   fclose(fkv);
   }//if nu_kaskad is used
+ free_mem_1f(avernu,m3);
   }//if fileoutput
 }
 

@@ -16,6 +16,7 @@
 TMainWindow *MainWindow;
 CalcProcess *proc;
 TThreadPriority prioritet;
+bool input_done=false;
 //---------------------------------------------------------------------------
 __fastcall TMainWindow::TMainWindow(TComponent* Owner)
         : TForm(Owner)
@@ -27,15 +28,23 @@ __fastcall TMainWindow::TMainWindow(TComponent* Owner)
 void __fastcall TMainWindow::FormCreate(TObject *Sender)
 {
    Re=10000;
+   maschtab=1000;
    Gamma=1e-3;
    l1=3;                    CheckStep=10;
    l2=1;                    OutStep = 20;
    l3=1;
 
    nvar=4;
-   n1=10;
-   n2=10;
-   n3=20;
+   n1=5;
+   n2=5;
+   n3=10;
+   m1 = n1+2*ghost;
+   mm1 = ghost+n1;
+   m2 = n2+2*ghost;
+   mm2 = ghost+n2;
+   m3 = n3+2*ghost;
+   mm3 = ghost+n3;
+
    Ns=25;
    approx=7;                      //derivatives approximation order
    ghost=(approx-1)/2;            //radius of approx sample
@@ -43,14 +52,6 @@ void __fastcall TMainWindow::FormCreate(TObject *Sender)
    dx[1]=l2/n2;
    dx[2]=l3/n3;
    p1 = 8*l1/(l3*Re) ; p2 = 0;
-
-
-   m1 = n1+2*ghost;
-   m2 = n2+2*ghost;
-   m3 = n3+2*ghost;
-   mm1 = ghost+n1;
-   mm2 = ghost+n2;
-   mm3 = ghost+n3;
 
    t_cur=0; Ttot=100;
    count=0; enter = 0;
@@ -64,16 +65,8 @@ void __fastcall TMainWindow::FormCreate(TObject *Sender)
    NameErrorFile = "error.err";
    NameInitFile = "init.dat";
 
-   s_func = alloc_mem_2f(n3+2,kol_masht);
-   f  =alloc_mem_4f(nvar, m1, m2, m3);   //f[3]-pressure,f[0..2]-v(vector)
-   f1 =alloc_mem_4f(nvar, m1, m2, m3);
-   df =alloc_mem_4f(nvar, m1, m2, m3);
-   df2=alloc_mem_4f(nvar, m1, m2, m3);
-   df3=alloc_mem_4f(nvar, m1, m2, m3);
-   df4=alloc_mem_4f(nvar, m1, m2, m3);
-   df5=alloc_mem_4f(nvar, m1, m2, m3);
-   nut=alloc_mem_3f(m1, m2, m3);
-   init_shell();
+//   Noise = 0.1;
+//   NoiseNorm = 0.0;
 
    prioritet = tpIdle;
    RunStatus = StNone;
@@ -91,6 +84,7 @@ void __fastcall TMainWindow::FormDestroy(TObject *Sender)
    free_mem_4f(df4,nvar, m1, m2, m3);
    free_mem_4f(df5,nvar, m1, m2, m3);
    free_mem_3f(nut, m1, m2, m3);
+   erase_shell();
 }
 //---------------------------------------------------------------------------
 void __fastcall TMainWindow::BeginWorkClick(TObject *Sender)
@@ -103,7 +97,7 @@ void __fastcall TMainWindow::BeginWorkClick(TObject *Sender)
                    MainWindow->EditRe->Hint = "Число не может быть изменено во время счета";
                    MainWindow->EditRe->ShowHint = false;
                    action = ActBegin;
-                   init_conditions(f,Re);
+                   if(!input_done) init_conditions(f,Re);
                    proc = new CalcProcess(false);
                    proc->Priority = prioritet;
 //                   ButtonRecontinue->Visible = false;
@@ -192,6 +186,7 @@ void __fastcall TMainWindow::InputInitClick(TObject *Sender)
   int code=0;
   if ( (code=init_data(&n1,&n2,&n3,&Re,f,nut,&t_cur,&count)) > 0)
      nrerror("Не удался ввод начальных данных. Код ошибки = %d",code);
+   else input_done = true;
 }
 //---------------------------------------------------------------------------
 void __fastcall TMainWindow::DoDumpClick(TObject *Sender)
@@ -203,10 +198,10 @@ void __fastcall TMainWindow::DoDumpClick(TObject *Sender)
 void __fastcall TMainWindow::ExitClick(TObject *Sender)
 {
  if(RunStatus == StRun || RunStatus == StPause)
-            { action = ActQuit;
-              delete proc;
+            { ChangeStatus("Удаление задания...","Вычисления будут прерваны");
+              action = ActQuit;
+              if(proc->WaitFor()) delete proc;
               RunStatus = StNone;
-              ChangeStatus("Удаление задания...","Вычисления будут прерваны");
               MainWindow->EditRe->Enabled = true;
               MainWindow->EditRe->ShowHint = false;
             }
@@ -302,5 +297,26 @@ void __fastcall TMainWindow::ChangeStatus(char *str1,char *str2)
     StatusBarCalc->Panels->EndUpdate();
   }
 }
-
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::EditNxChange(TObject *Sender)
+{
+ n1 = MainWindow->EditNx->Text.ToIntDef(10);
+ m1 = n1+2*ghost;
+ mm1 = ghost+n1;
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::EditNyChange(TObject *Sender)
+{
+ n2 = MainWindow->EditNy->Text.ToIntDef(10);
+ m2 = n2+2*ghost;
+ mm2 = ghost+n2;
+}
+//---------------------------------------------------------------------------
+void __fastcall TMainWindow::EditNzChange(TObject *Sender)
+{
+ n3 = MainWindow->EditNz->Text.ToIntDef(20);
+ m3 = n3+2*ghost;
+ mm3 = ghost+n3;
+}
+//---------------------------------------------------------------------------
 
