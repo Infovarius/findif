@@ -78,11 +78,11 @@ return(flux);
 
 void nut_by_flux(double ****f,double dt) //calculating nu_turbulent by velocity fluctuations
 {
-double maschtab = 0.1;
+double maschtab = 100000;
 int i,j,k,l;
 double koef;
-struct_func(f,2,2,1);
-for(i=0;i<n3;i++)
+//struct_func(f,2,2,3);
+/*for(i=0;i<n3;i++)
     {
     koef=sqrt(s_func[i][0]/(pow(sha[i][1],2.)+pow(shb[i][1],2.)));
     sha[i][1] *= koef;
@@ -90,7 +90,7 @@ for(i=0;i<n3;i++)
     koef=sqrt(s_func[i][1]/(pow(sha[i][0],2.)+pow(shb[i][0],2.)));
     sha[i][0] *= koef;
     shb[i][0] *= koef;
-    }
+    }*/
 /*clrscr();
 for(j=0;j<n3;j++)
     {
@@ -100,16 +100,16 @@ for(j=0;j<n3;j++)
       en+=sha[j][i]*sha[j][i]+shb[j][i]*shb[j][i];
     printf("   totEn=%lf\n",en);
     }  */
-time_step_shell(dt);
-for(k=0;k<n3;k++)
+/*time_step_shell(dt);*/
+/*for(k=0;k<n3;k++)
    {
-   double tmp = maschtab*pow(nl[0]*(sha[k][0]*sha[k][0]+shb[k][0]*shb[k][0]) +
-                             nl[1]*(sha[k][1]*sha[k][1]+shb[k][1]*shb[k][1]),
+   double tmp = maschtab*pow(
+           (nl[2]*s_func[k][0] + nl[1]*s_func[k][1] + nl[0]*s_func[k][2])*pow(dx[2],4),
                          1./3);
    for(i=ghost;i<mm1;i++)
        for(j=ghost;j<mm2;j++)
             nut[i][j][k+ghost] = (1. + tmp)/Re;
-   }
+   }*/
 }
 
 void  boundary_conditions(double ****f)
@@ -156,7 +156,7 @@ void  boundary_conditions(double ****f)
 void  init_conditions(double ****f,double Re)
 {
    int i,j,k,l;
-   double Noise=0.1, Noise1=0;
+   double Noise=0.3, Noise1=0;
 //   double k1,k2,k3;
 
 //   k1=2*M_PI/l1;  k3=M_PI/l3;
@@ -164,16 +164,20 @@ void  init_conditions(double ****f,double Re)
    for(i=0;i<m1;i++)
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++) {
-        f[0][i][j][k]=coordin(k,2)*(l3-coordin(k,2))*4/l3/l3
-                      + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX;
+        f[0][i][j][k]=(1+Noise*((double)rand()-RAND_MAX/2)/RAND_MAX)*
+                       coordin(k,2)*(l3-coordin(k,2))*4/l3/l3;
         f[1][i][j][k]=Noise1*cos(2*M_PI*coordin(j,1)/l2)*cos(2*M_PI*coordin(k,2)/l3)
-                      + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX;
+                      + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
+                       coordin(k,2)*(l3-coordin(k,2))*4/l3/l3;
         f[2][i][j][k]=Noise1*sin(2*M_PI*coordin(j,1)/l2)*sin(2*M_PI*coordin(k,2)/l3)
-                      + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX;
+                      + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
+                       coordin(k,2)*(l3-coordin(k,2))*4/l3/l3;
         f[3][i][j][k]=p1+(i-0.5)*(p2-p1)/n1;
-        nut[i][j][k]=1./Re;
+        nut[i][j][k]=(
+        (0.39+14.8*exp(-2.13*pow(2*coordin(k,2)-l3,2)))*10
+                +1)/Re;
    }
-
+//   struct_func(f,2,2,3);
 }
 
 static double kf3[2][3][3]={{{-3./2.0, 2.0, -1./2.0}, {-1./2.0, 0.0, 1./2.0}, {1./2.0, -2.0, 3./2.0}},

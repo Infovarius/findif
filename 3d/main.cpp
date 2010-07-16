@@ -23,10 +23,10 @@ int main(int argc, char** argv)
    l3=1;
 
    nvar=4;
-   n1=10;
-   n2=10;
-   n3=20;
-   Ns=25;
+   n1=16;
+   n2=16;
+   n3=16;
+   Ns=20;
    approx=7;                      //derivatives approximation order
    ghost=(approx-1)/2;            //radius of approx sample
    dx[0]=l1/n1;
@@ -124,7 +124,7 @@ int main(int argc, char** argv)
    }
 
    dump(f1,t_cur,count);
-   free_mem_2f(s_func,n3+2,kol_masht);
+//   free_mem_2f(s_func,n3+2,kol_masht);
    free_mem_4f(f  ,nvar, m1, m2, m3);
    free_mem_4f(f1 ,nvar, m1, m2, m3);
    free_mem_4f(df ,nvar, m1, m2, m3);
@@ -138,4 +138,5 @@ int main(int argc, char** argv)
 
 return 0;
 }
+
 
