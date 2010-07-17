@@ -8,8 +8,6 @@
 #include <conio.h>
 
 #define for2D(l)  ,l==1?l++:l
-#define min(a,b)  ((a>b)?(b):(a))
-#define max(a,b)  ((a>b)?(a):(b))
 
 LEVEL enum {ActNone=0, ActBegin=1, ActDump=2, ActPause=4, ActContinue=8, ActQuit=16}
      action;

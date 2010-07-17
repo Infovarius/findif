@@ -34,6 +34,7 @@ int init_data(double *Re,double *t_cur,long *count)
  int i,j,k,l;
  float tmpd;
  char tmpc;
+// int n1,n2,n3;
 
  FILE *inp = fileopen(NameInitFile,-1);
  read_tilleq(inp,'n');   if(fscanf(inp,"%lf",t_cur)==0) error=1;
@@ -170,7 +171,7 @@ double temp, div=0;
 int i,j,k,l;
 double mf, mda, mdr;
 double *avervx, *avernu;
-FILE *fv,*fnu,*fen,*fkv;
+FILE *fv,*fnu,*fen,*fkv,*fdiv;
 //fnu = fileopen(NameNuFile,count);
 clrscr();
 boundary_conditions(f1);
@@ -185,6 +186,10 @@ for(i=ghost;i<mm1;i++)
            }
 time(&time_now);
 printf("program is working %ld seconds\n",time_now-time_begin);
+
+         fdiv = fileopen("diverg.dat",count);
+         fprintf(fdiv,"%0.10f\n",en);
+         fclose(fdiv);
 
 printf("t=%e dtdid=%e NIter=%d %e\n", t_cur, dtdid, count, div);
 
@@ -209,7 +214,7 @@ printf("t=%e dtdid=%e NIter=%d %e\n", t_cur, dtdid, count, div);
          printf("number of runge-kutt calculations=%d",enter);
 
 /*avervx = alloc_mem_1f(m3);
-if(avervx == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n\a",t_cur);*/
+if(avervx == NULL)  nrerror("\nAlloc_mem: unsuffitient memory!\n\a",t_cur);*/
 
 avernu = alloc_mem_1f(m3);
 
@@ -228,7 +233,7 @@ for(k=ghost;k<mm3;k++)
 
 //putting velocities to file
         fv = fileopen(NameVFile,count);
-        fprintf(fv,"{%0.7lf}",t_cur);
+        fprintf(fv,"{%-7.5lf}",t_cur);
         print_array1d(fv,f1[0][m1/2][ghost],ghost,n3);
         fclose(fv);
 //putting viscosities to file
@@ -237,7 +242,7 @@ for(k=ghost;k<mm3;k++)
         fclose(fnu);
 //for(k=0;k<m3;k++) printf("%e\n",f1[0][5][5][k]);
 //putting kaskad variables(log energy combined from them) to file
-/**/fkv=fileopen(KaskadVarFile,count);
+/*fkv=fileopen(KaskadVarFile,count);
 fprintf(fkv,"{");
 for(i=0;i<Ns;i++)
     {
@@ -251,9 +256,9 @@ for(i=0;i<Ns;i++)
         }
     fprintf(fkv,i<Ns-1 ? "," : "}\n");
     }
-fclose(fkv);/**/
+fclose(fkv);*/
 FILE *force=fileopen("force.dat",count);
-print_array1d(force,f0,ghost,n3);
+print_array1d(force,f0,0,n3);
 fclose(force);
 FILE *casc=fileopen("casc.dat",count);
 fprintf(casc,"{");

@@ -79,7 +79,7 @@ void nut_by_flux(double ****f,double dt) //calculating nu_turbulent by velocity 
 {
 int i,j,k,l;
 double koef;
-double big_puls=0.000;
+double big_puls=0.1;
 if(PulsEn/TotalEnergy>big_puls) {
   /*struct_func(f,2);
   for(i=0;i<n3;i++)
@@ -167,9 +167,9 @@ void  init_conditions(double ****f,double Re)
    double Noise,NoiseNorm,NoiseAdiv,parabole;
    double k1,k2,k3;
    double ***arbfunc = fill_function();
-   Noise = 0.01;
+   Noise = 0.3;
    NoiseAdiv = 0.0;
-   NoiseNorm = 0.01;
+   NoiseNorm = 0.00;
    parabole = 1;
    k1=2*M_PI/l1;  k3=1*2*M_PI/l3;
    NoiseNorm /= sqrt(k1*k1+k3*k3);
@@ -221,8 +221,7 @@ int i;
 switch (sm*dr) {
 	case 3 : for(i=0; i<sm; i++) tmp += m[ii+i-sh][jj][kk]*kf3[or][sh][i]; break;
 	case 6 : for(i=0; i<sm; i++) tmp += m[ii][jj+i-sh][kk]*kf3[or][sh][i]; break;
-	case 9 : for(i=0; i<sm; i++)
-                      tmp += m[ii][jj][kk+i-sh]*kf3[or][sh][i]; break;
+	case 9 : for(i=0; i<sm; i++) tmp += m[ii][jj][kk+i-sh]*kf3[or][sh][i]; break;
 	case 5 : for(i=0; i<sm; i++) tmp += m[ii+i-sh][jj][kk]*kf5[or][sh][i]; break;
 	case 10: for(i=0; i<sm; i++) tmp += m[ii][jj+i-sh][kk]*kf5[or][sh][i]; break;
 	case 15: for(i=0; i<sm; i++) tmp += m[ii][jj][kk+i-sh]*kf5[or][sh][i]; break;
