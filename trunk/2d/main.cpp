@@ -15,17 +15,17 @@ int main(int argc, char** argv)
 #include "init_vars.h"
 
 
-   Re=100;
+   Re=10000;
    Gamma=1e-4;
    l1=1;
    l2=1;
    l3=1;
 
    nvar=4;
-   n1=10;
+   n1=20;
    n2=1;
    n3=20;
-   Ns=10;
+   Ns=15;
    approx=7;                      //derivatives approximation order
    ghost=(approx-1)/2;            //radius of approx sample
    dx[0]=l1/n1;
@@ -138,4 +138,5 @@ int main(int argc, char** argv)
 
 return 0;
 }
+
 

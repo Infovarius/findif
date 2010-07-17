@@ -96,7 +96,8 @@ void sima(double *zza, double *zzb, double *xx, double *yy,int layer)
     xx[k] += tk*(zza[j]*zzb[i]+zzb[j]*zza[i]);
   }
 
-  xx[0] += f0[layer]*zza[0]/2;
+/*-------------forcing-------------*/
+  xx[0] += f0[layer]*zza[0]/2; 
   yy[0] += f0[layer]*zzb[0]/2;
   xx[1] += f0[layer]*zza[0]/2;
   yy[1] += f0[layer]*zzb[0]/2;
