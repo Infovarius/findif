@@ -1,0 +1,112 @@
+(************** Content-type: application/mathematica **************
+
+                    Mathematica-Compatible Notebook
+
+This notebook can be used with any Mathematica-compatible
+application, such as Mathematica, MathReader or Publicon. The data
+for the notebook starts with the line containing stars above.
+
+To get the notebook into a Mathematica-compatible application, do
+one of the following:
+
+* Save the data starting with the line of stars above into a file
+  with a name ending in .nb, then open the file inside the
+  application;
+
+* Copy the data starting with the line of stars above to the
+  clipboard, then use the Paste menu command inside the application.
+
+Data for notebooks contains only printable 7-bit ASCII and can be
+sent directly in email or through ftp in text mode.  Newlines can be
+CR, LF or CRLF (Unix, Macintosh or MS-DOS style).
+
+NOTE: If you modify the data for this notebook not in a Mathematica-
+compatible application, you must delete the line below containing
+the word CacheID, otherwise Mathematica-compatible applications may
+try to use invalid cache data.
+
+For more information on notebooks and Mathematica-compatible 
+applications, contact Wolfram Research:
+  web: http://www.wolfram.com
+  email: info@wolfram.com
+  phone: +1-217-398-0700 (U.S.)
+
+Notebook reader applications are available free of charge from 
+Wolfram Research.
+*******************************************************************)
+
+(*CacheID: 232*)
+
+
+(*NotebookFileLineBreakTest
+NotebookFileLineBreakTest*)
+(*NotebookOptionsPosition[      2928,         77]*)
+(*NotebookOutlinePosition[      3571,         99]*)
+(*  CellTagsIndexPosition[      3527,         95]*)
+(*WindowFrame->Normal*)
+
+
+
+Notebook[{
+Cell[BoxData[{
+    \(\(Smoothing[l_, dissip_] := 
+        Block[{Average, AverProfil}, \[IndentingNewLine]Average[m_] := 
+            Apply[Plus, m]/Length[m]; \[IndentingNewLine]AverProfil = 
+            Nest[Average, l, 2]; \[IndentingNewLine]Return[
+            Map[Map[\((AverProfil + dissip*\((# - AverProfil)\))\) &, #] &, 
+              l]];\[IndentingNewLine]];\)\), "\[IndentingNewLine]", 
+    \(\(Off[General::spell1];\)\), "\[IndentingNewLine]", 
+    \(\(kat = "\<D:\\doc\\imcc\\progs\\3d.1\\\>";\)\), "\[IndentingNewLine]", \
+
+    \(\(GettingInitialData[dissip_] := 
+        Block[{}, \[IndentingNewLine]dump = 
+            ReadList[kat <> "\<Re10000\\dump.dat\>"]; \[IndentingNewLine]{t, 
+              count, vx, vy, vz, p} = 
+            dump; \[IndentingNewLine]Smoothing[vx, 
+              dissip] >> \((kat <> "\<init.dat\>")\); \
+\[IndentingNewLine]Smoothing[vy, 
+              dissip] >>> \((kat <> "\<init.dat\>")\); \
+\[IndentingNewLine]Smoothing[vz, 
+              dissip] >>> \((kat <> "\<init.dat\>")\); \
+\[IndentingNewLine]Smoothing[p, 
+              dissip] >>> \((kat <> "\<init.dat\>")\);\[IndentingNewLine]];\)\
+\)}], "Input"],
+
+Cell[BoxData[
+    \(\(GettingInitialData[1];\)\)], "Input"]
+},
+FrontEndVersion->"4.1 for Microsoft Windows",
+ScreenRectangle->{{2, 1024}, {0, 695}},
+WindowSize->{770, 521},
+WindowMargins->{{0, Automatic}, {Automatic, 0}}
+]
+
+(*******************************************************************
+Cached data follows.  If you edit this Notebook file directly, not
+using Mathematica, you must remove the line containing CacheID at
+the top of  the file.  The cache data will then be recreated when
+you save this file from within Mathematica.
+*******************************************************************)
+
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+
+(*NotebookFileOutline
+Notebook[{
+Cell[1705, 50, 1157, 22, 310, "Input"],
+Cell[2865, 74, 59, 1, 30, "Input"]
+}
+]
+*)
+
+
+
+(*******************************************************************
+End of Mathematica Notebook file.
+*******************************************************************)
+
