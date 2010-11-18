@@ -3,6 +3,7 @@
 #include <math.h>
 #include <string.h>
 #include <conio.h>
+#include "mpi.h"
 
 LEVEL char *NameMessageFile;
 LEVEL char *NameErrorFile;
@@ -10,8 +11,11 @@ LEVEL char *NameInitFile;
 LEVEL char *NameNuFile;
 LEVEL char *NameVFile;
 LEVEL char *NameDumpFile;
+LEVEL char *NameSnapFile;
 LEVEL char *NameEnergyFile;
 LEVEL char *KaskadVarFile;
+LEVEL char  fname[30], fname_stat[30];
+LEVEL FILE *iop;
 
 LEVEL double ****f, ****f1, ****df, ****df2, ****df3, ****df4, ****df5,**s_func,
              dx[3];
@@ -19,7 +23,7 @@ LEVEL double ****f, ****f1, ****df, ****df2, ****df3, ****df4, ****df5,**s_func,
 LEVEL double ***nut,
              Gamma, l1, l2, l3, p1, p2,Re;
 
-LEVEL int    m1, m2, m3, mm1, mm2, mm3, n1, n2, n3, Ns,
+LEVEL int    m1, m2, m3, mm1, mm2, mm3, n1, n2, n3, N1, N2, N3, Ns,
              approx, ghost, nvar;
 
 LEVEL double Noise;
@@ -28,16 +32,28 @@ LEVEL double maschtab;
 
 LEVEL double t_cur,Ttot;
 LEVEL long count;
-LEVEL long time_begin,time_now;
+LEVEL double time_begin,time_now;
 
 LEVEL long enter;
 LEVEL bool razlet;
 LEVEL double TotalEnergy, PulsEn;
 LEVEL int CheckStep;  //each CheckStep divergence of program is checking
 LEVEL int OutStep;    //each OutStep result is printing
+LEVEL int VarStep;    //each VarStep step in RungeKutta varies
 LEVEL int num_dump;
 
+#define max(a, b)  (((a) > (b)) ? (a) : (b))
+#define min(a, b)  (((a) < (b)) ? (a) : (b))
 #define min_d min(min(dx[0],dx[1]),dx[2])
+/*----------------parallel---------------*/
+#define Master if(rank==0)
+LEVEL int rank, size;
+LEVEL int tag;
+LEVEL MPI_Request SendRequest[256],RecvRequest[256];
+LEVEL MPI_Status statuses[256];
+LEVEL double *buf_send[6], *buf_recv[6], buf_size[3];
+LEVEL int pr_neighbour[6],pp[3],n[3];
+void init_parallel();
 
 //--------for GOY
 const int kol_masht=10;
@@ -78,6 +94,8 @@ void   boundary_conditions(double ****);
 void  init_conditions(double ****,double Re);
 double dr(double ***, int, int, int, int, int, double, int, int);
 double coordin(int, int);
+void CopyBufferToGrid(double ****,double *,int,int,int,int,int,int);
+void CopyGridToBuffer(double ****,double *,int,int,int,int,int,int);
 /*------- printing.cpp ------*/
 FILE *fileopen(const char *, int mode);
 void print_array1d(FILE *ff,double *a,int beg1,int n1);

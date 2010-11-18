@@ -1,48 +1,51 @@
 #define LEVEL
 
 #include "head.h"
-#include <time.h>
 
 int main(int argc, char** argv)
 {
    double dttry, dtdid, dtnext;
    int i,j,k,l;
 
-   time(&time_begin);
    nmessage("work has begun",0);
 
-   OutStep = 10*(CheckStep=10);
+   OutStep = (CheckStep=100)/1;
+   VarStep = 0;
 #include "init_vars.h"
 
 
-   Re=1000000;
+   Re=10;
    Gamma=1e-4;
    l1=3;
    l2=1;
    l3=1;
 
    nvar=4;
-   n1=16;
-   n2=16;
-   n3=16;
+   N1=10;
+   N2=10;
+   N3=10;
    Ns=15;
    approx=7;                      //derivatives approximation order
    ghost=(approx-1)/2;            //radius of approx sample
-   dx[0]=l1/n1;
-   dx[1]=l2/n2;
-   dx[2]=l3/n3;
-   p1 = 80*l1/(l3*Re) ; p2 = 0;
-
-
-   m1 = n1+2*ghost;
-   m2 = n2+2*ghost;
-   m3 = n3+2*ghost;
-   mm1 = ghost+n1;
-   mm2 = ghost+n2;
-   mm3 = ghost+n3;
+   dx[0]=l1/N1;
+   dx[1]=l2/N2;
+   dx[2]=l3/N3;
+   p1 = 8*l1/(l3*Re) ; p2 = 0;
 
    t_cur=0; Ttot=1000;
    count=0; enter = 0;
+
+ /* Initialize MPI */
+ MPI_Init(&argc,&argv);
+ /*  Get rank of this process and process group size */
+ MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+ MPI_Comm_size(MPI_COMM_WORLD,&size);
+
+   sprintf(fname,"%s_%d",(argc>1)? argv[1] : "shellgrid",rank);
+   sprintf(NameDumpFile ,"%s.dmp",fname);
+   sprintf(fname_stat,"%s.sta",fname);
+
+   init_parallel();
 
    s_func = alloc_mem_2f(n3+2,kol_masht);
    f  =alloc_mem_4f(nvar, m1, m2, m3);   //f[3]-pressure,f[0..2]-v(vector)
@@ -55,7 +58,10 @@ int main(int argc, char** argv)
    nut=alloc_mem_3f(m1, m2, m3);
    init_shell();
 
-   fileopen("error.err",0);
+   time_begin = MPI_Wtime();
+
+   Master fileopen("error.err",0);
+
    init_conditions(f,Re);
    if(argc>1)
            {
@@ -86,7 +92,7 @@ int main(int argc, char** argv)
            }
    PulsEn=check(f);
    boundary_conditions(f);
-   printing(f,0,t_cur,count,PulsEn);
+   Master printing(f,0,t_cur,count,PulsEn);
 
    dtnext=1e-3;
    dump(f,t_cur,count);
@@ -105,7 +111,7 @@ int main(int argc, char** argv)
             {
             if (count%CheckStep!=0)
                 PulsEn=check(f);
-            printing(f1,dtdid,t_cur,count,PulsEn);
+            Master printing(f1,dtdid,t_cur,count,PulsEn);
             };
         for(l=0;l<nvar;l++)
         for(i=ghost;i<mm1;i++)
@@ -116,7 +122,8 @@ int main(int argc, char** argv)
              {
                 switch (getch()) {
                         case 'd' : dump(f,t_cur,count);  break;
-                        case 'q' : { dump(f,t_cur,count); 
+                        case 'q' : { dump(f,t_cur,count);
+                                     MPI_Finalize();
                                      nrerror("You asked to exit. Here you are...",t_cur);
                                     }
                         }
@@ -135,8 +142,8 @@ int main(int argc, char** argv)
    free_mem_3f(nut, m1, m2, m3);
    if(t_cur>Ttot&&!razlet) nmessage("work is succesfully done",t_cur);
        else nrerror("this is break of scheme",t_cur);
-
+   MPI_Finalize();
 return 0;
-}
+}                                   
 
 

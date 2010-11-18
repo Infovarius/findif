@@ -13,17 +13,26 @@
 void timestep(double ****f, double ****df, double t, double ****fout,
               double dttry, double *dtdid, double *dtnext)
 {
-   double dt, err = 0;
+   double dt, err, errs;
 
    dt=dttry;
    for (;;)
    {
       err = rkck(f, df, t, dt, fout);
+      if (VarStep==0 || count%VarStep!=0) {
+            *dtdid = dt;
+            *dtnext = dt;
+            return;
+            }
+
+      MPI_Allreduce(&err, &errs, 1, MPI_DOUBLE , MPI_MAX, MPI_COMM_WORLD);
+      err=errs;
+
       err *=ErrScale;
       if (err<=1.0)
          break;
       dt = max(Safety * dt * pow(err, Pshrink), dt*(double)0.1);
-      if (t+dt == t) 
+      if (t+dt == t)
 	    {
 	     dump(f,t,count);
              nrerror("Stepsize underflow in rk\n\a",t);
