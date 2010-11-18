@@ -7,32 +7,24 @@ int main(int argc, char** argv)
    double dttry, dtdid, dtnext;
    int i,j,k,l;
 
-   nmessage("work has begun",0);
+  NameMessageFile = "message.dat";
+  NameErrorFile = "error.dat";
+  NameNuFile = "nut.dat";
+  NameVFile  = "vv.dat";
+  //NameDumpFile = "dump.dat";
+  NameEnergyFile = "energy.dat";
+  KaskadVarFile = "kaskvar.dat";
 
-   OutStep = (CheckStep=100)/1;
-   VarStep = 0;
-#include "init_vars.h"
-
-
-   Re=10;
+   init_param(argc,argv,&dtnext);       // initilization of parameters
    Gamma=1e-4;
-   l1=3;
-   l2=1;
-   l3=1;
 
-   nvar=4;
-   N1=10;
-   N2=10;
-   N3=10;
-   Ns=15;
-   approx=7;                      //derivatives approximation order
    ghost=(approx-1)/2;            //radius of approx sample
    dx[0]=l1/N1;
    dx[1]=l2/N2;
    dx[2]=l3/N3;
    p1 = 8*l1/(l3*Re) ; p2 = 0;
 
-   t_cur=0; Ttot=1000;
+   t_cur=0;
    count=0; enter = 0;
 
  /* Initialize MPI */
@@ -41,7 +33,10 @@ int main(int argc, char** argv)
  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
  MPI_Comm_size(MPI_COMM_WORLD,&size);
 
-   sprintf(fname,"%s_%d",(argc>1)? argv[1] : "shellgrid",rank);
+   nmessage("work has begun",0);
+
+   sprintf(fname,"%s_%d",(argc>1)? argv[1] : argv[0],rank);
+   NameSnapFile = fname;
    sprintf(NameDumpFile ,"%s.dmp",fname);
    sprintf(fname_stat,"%s.sta",fname);
 
@@ -63,38 +58,11 @@ int main(int argc, char** argv)
    Master fileopen("error.err",0);
 
    init_conditions(f,Re);
-   if(argc>1)
-           {
-           FILE *inp=fileopen(argv[1],-1);
-           float tmpd;
-           char tmpc;
-           for(l=0;l<nvar;l++)
-              {
-              do fscanf(inp,"%c",&tmpc); while (tmpc!='{');
-              for(i=0;i<m1;i++)
-                 {
-                 do fscanf(inp,"%c",&tmpc); while (tmpc!='{');
-                 for(j=0;j<m2;j++)
-                    {
-                    do fscanf(inp,"%c",&tmpc); while (tmpc!='{');
-                    for(k=0;k<m3;k++)
-                       {
-                       tmpc=fscanf(inp,"%g",&tmpd);
-                       fscanf(inp,"%c",&tmpc);
-                       f[l][i][j][k]=tmpd;
-                       }
-                    fscanf(inp,"%c",&tmpc);
-                    }
-                 fscanf(inp,"%c",&tmpc);
-                 }
-              fscanf(inp,"%c",&tmpc);
-              }
-           }
+
    PulsEn=check(f);
    boundary_conditions(f);
    Master printing(f,0,t_cur,count,PulsEn);
 
-   dtnext=1e-3;
    dump(f,t_cur,count);
 
 /*------------------------ MAIN ITERATIONS -------------------------*/
@@ -105,20 +73,22 @@ int main(int argc, char** argv)
         nut_by_flux(f,dtdid);
         t_cur+=dtdid;
         count++;
-        if (count%CheckStep==0)
+        if (CheckStep!=0 && count%CheckStep==0)
             PulsEn=check(f);
-        if (count%OutStep==0)
+        if (OutStep!=0 && count%OutStep==0)
             {
-            if (count%CheckStep!=0)
+            if (CheckStep==0 || count%CheckStep!=0)
                 PulsEn=check(f);
             Master printing(f1,dtdid,t_cur,count,PulsEn);
             };
+        if (SnapStep!=0 && count%SnapStep==0) 
+            snapshot(f,t_cur,count);
         for(l=0;l<nvar;l++)
         for(i=ghost;i<mm1;i++)
         for(j=ghost;j<mm2;j++)
         for(k=ghost;k<mm3;k++)
            f[l][i][j][k]=f1[l][i][j][k];
-        if(kbhit())
+/*        if(kbhit())
              {
                 switch (getch()) {
                         case 'd' : dump(f,t_cur,count);  break;
@@ -127,7 +97,7 @@ int main(int argc, char** argv)
                                      nrerror("You asked to exit. Here you are...",t_cur);
                                     }
                         }
-              }
+              }*/
    }
 
    dump(f,t_cur,count); 

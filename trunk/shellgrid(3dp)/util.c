@@ -4,25 +4,25 @@
 
 void nrerror(char error_text[],double t_cur)
 {
-   FILE *err;
-   nmessage(error_text,t_cur);
-   err=fileopen("error.err",0);
+    FILE *err;
+    nmessage(error_text,t_cur);
+    err=fileopen("error.err",0);
 
-	fprintf(err,"Run-time error of proc#%d at t=%-6.4lf:\n",rank,t_cur);
-	fprintf(err,"%s\n",error_text);
-	fprintf(err,"...now exiting to system...\n");
-        fclose(err);
-   MPI_Finalize();
-	exit(1);
+    fprintf(err,"Run-time error of proc#%d at t=%-6.4lf:\n",rank,t_cur);
+    fprintf(err,"%s\n",error_text);
+    fprintf(err,"...now exiting to system...\n");
+    fclose(err);
+    MPI_Finalize();
+    exit(1);
 }
 
 void nmessage(char msg_text[],double t_cur)
 {
    FILE *msg;
    msg=fileopen("message.dat",1);
-   time_now = MPI_Wtime();
-   fprintf(msg,"message of proc#%d at t=%-7.4lf Niter=%-6d time of work=%ld:\n",rank,
-                    t_cur,count,(t_cur==0)?0:time_now-time_begin);
+   time_now = (t_cur==0)?time_begin:MPI_Wtime();
+   fprintf(msg,"message of proc#%d at t=%-7.4lf Niter=%-6d time of work=%g:\n",rank,
+                    t_cur,count,time_now-time_begin);
    fprintf(msg,"%s\n",msg_text);
    fclose(msg);
 }
