@@ -1,13 +1,13 @@
 //------------------------ all the outputting stuff -----------------//
 
 #define LEVEL extern
+//#include <conio.h>
 #include "head.h"
-#include "kaskad.h"
 
-const double UpLimit=10.;     //after this limit there's dump
+double UpLimit;     //after this limit there's dump
 
-FILE *fileopen(char *x, int mode)  //opening of file to ff
-                         /*   0-rewrite;>0-append;<0-read    */
+FILE *fileopen(const char *x, int mode)  //opening of file to ff
+                         /*   0-rewrite;others-append   */
 {
 FILE *ff;
 char* s_mode;
@@ -16,33 +16,105 @@ if(mode<0) s_mode="r";
 if(mode==0) s_mode="w";
 if ((ff = fopen(x,s_mode))==NULL)
 	 {
-		nrerror ("Can't open file %s !\n" /*,x*/ ,t_cur);
+		printf ("Can't open file %s !\n",x);
 		exit(-1);
 	 }
 return(ff);
 }
 
-void read_tilleq(FILE *ffff,char echo)
-{char ch;
-  if (echo=='n') while ((ch=char(fgetc(ffff)))!='=');
-         else    while ((ch=char(fgetc(ffff)))!='=') printf("%c",ch);
+void read_token(FILE *inp,double *param)
+{
+char str[256],*pstr;
+ do fgets(str,256,inp); while(strchr(str,'|')==NULL);
+ if(strchr(str,'|')==NULL) return;
+ if(sscanf(str,"%lf",param)==0) nrerror("Input of parameter error",0);
+ pstr=strtok(str,"|");
+ pstr=strtok((char *)NULL,"|");
+ printf("%g\t->\t%s",*param,pstr);
 }
 
-int init_data(int *n1,int *n2,int *n3,double *Re,double ****f,double ***nut,double *t_cur,long *count)
+void init_param(int argc, char** argv,double *dtnext)
+{
+int error=0;
+FILE *iop;
+double d;
+ if(argc<2 || (iop=fopen(argv[1],"r"))==NULL) //no ini file
+    {
+     if(argc>=2) nmessage("Start: no ini file!",0);
+     Re=10.;
+     l1=3.;
+     l2=1.;
+     l3=1.;
+     parabole=0.;
+     Noise=0.;
+     NoiseNorm=0.;
+     UpLimit=10.;
+     N1=10;
+     N2=10;
+     N3=10;
+     nvar=4;
+     approx=7;                    //derivatives approximation order
+     *dtnext=1e-3;
+     Ns=15;
+     maschtab=1e6;
+     lambda = 2.0;
+     max_okr = 3;
+     OutStep = (CheckStep=100)/1;
+     VarStep = 0;
+     SnapStep = 100;
+     Ttot=1.;
+     }
+    else {
+      read_token(iop,&Re);
+      read_token(iop,&l1);
+      read_token(iop,&l2);
+      read_token(iop,&l3);
+      read_token(iop,&parabole);
+      read_token(iop,&Noise);
+      read_token(iop,&NoiseNorm);
+      read_token(iop,&UpLimit);
+      read_token(iop,&d);         N1 = (int)d;
+      read_token(iop,&d);         N2 = (int)d;
+      read_token(iop,&d);         N3 = (int)d;
+      read_token(iop,&d);         nvar = (int)d;
+      read_token(iop,&d);         approx = (int)d;
+      read_token(iop,dtnext);
+      read_token(iop,&d);         Ns = (int)d;
+      read_token(iop,&maschtab);
+      read_token(iop,&lambda);
+      read_token(iop,&d);         max_okr = (int)d;
+      read_token(iop,&d);         OutStep = (int)d;
+      read_token(iop,&d);         SnapStep = (int)d;
+      read_token(iop,&d);         CheckStep = (int)d;
+      read_token(iop,&d);         VarStep = (int)d;
+      read_token(iop,&Ttot);
+      fclose(iop);
+      }
+}
+
+void read_tilleq(FILE *ffff,char echo)
+{char ch;
+  if (echo=='n') while ((ch=(char)fgetc(ffff))!='=');
+         else    while ((ch=(char)fgetc(ffff))!='=') printf("%c",ch);
+}
+
+int init_data(double *Re,double *t_cur,long *count)
                           //returns code of error
 {
  int error=0;
  int i,j,k,l;
  float tmpd;
  char tmpc;
+ int n1,n2,n3;
 
  FILE *inp = fileopen(NameInitFile,-1);
  read_tilleq(inp,'n');   if(fscanf(inp,"%lf",t_cur)==0) error=1;
  read_tilleq(inp,'n');   if(fscanf(inp,"%ld",count)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%d",n1)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%d",n2)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%d",n3)==0) error=1;
+ read_tilleq(inp,'n');   if(fscanf(inp,"%d",&n1)==0) error=1;
+ read_tilleq(inp,'n');   if(fscanf(inp,"%d",&n2)==0) error=1;
+ read_tilleq(inp,'n');   if(fscanf(inp,"%d",&n3)==0) error=1;
  read_tilleq(inp,'n');   if(fscanf(inp,"%lf",Re)==0) error=1;
+// recreate_arrays(n1,n2,n3);
  for(l=0;l<nvar;l++)                    // reading f
         {
         do fscanf(inp,"%c",&tmpc); while (tmpc!='{');
@@ -106,7 +178,7 @@ for(i=beg1;i<beg1+n1;i++)
     fprintf(ff,"{");
     for(j=beg2;j<beg2+n2-1;j++)
         {
-        fprintf(ff,"%0.10f",a[i][j]);
+        fprintf(ff,"%0.10f,",a[i][j]);
         fprintf(ff,j<beg2+n2-1 ? "," : "}");
         }
     fprintf(ff,i<beg1+n1-1 ? "," : "}\n");
@@ -134,19 +206,35 @@ for(i=beg1;i<beg1+n1;i++) {
 
 double check(double ****f)   //give energy of pulsations
 {
-double TotalEnergy=0,PulsEnergy=0;
+double PulsEnergy=0;
+double **averf;
 int i,j,k,l;
-  for(i=ghost;i<mm1;i++)
-     for(j=ghost;j<mm2;j++)
+int n=max(n1,max(n2,n3));
+TotalEnergy=0;
+averf = alloc_mem_2f(3,n);
+for(l=0;l<=2;l++)
+   for(i=0;i<n;i++)
+       averf[l][i] = 0;
+for(i=ghost;i<mm1;i++)
+     for(j=ghost;j<=ghost;j++)
         for(k=ghost;k<mm3;k++)
            {
            PulsEnergy+=deviation(f,i,j,k);
-           for(l=0;l<=2;l++)  TotalEnergy+=pow(f[l][i][j][k],2);
+           for(l=0;l<=2;l++) averf[l][k-ghost] += f[l][i][j][k];
            }
-razlet = (PulsEnergy/(TotalEnergy-PulsEnergy)>UpLimit||TotalEnergy<PulsEnergy);
+for(l=0;l<=2;l++)
+   for(k=ghost;k<mm3;k++)
+        {
+//        averf[l][k-ghost] /= n1*n2;
+//        for(i=ghost;i<mm1;i++)
+//            for(j=ghost;j<=ghost;j++)
+               TotalEnergy += pow(averf[l][k-ghost],2.);
+        }
+TotalEnergy += 1.;   //if zero average field
+razlet = (PulsEnergy/TotalEnergy>UpLimit);
+free_mem_2f(averf,3,n);
 return(PulsEnergy);
 }
-
 
 void printing(double ****f1,double dtdid,double t_cur,long count,double en)
 {
@@ -154,11 +242,9 @@ double temp, div=0;
 int i,j,k,l;
 double mf, mda, mdr;
 double *avervx, *avernu;
-AnsiString TempScreen;
 FILE *fv,*fnu,*fen,*fkv;
-//fnu = fileopen(NameNuFile,count);
-if(MainWindow->CheckClear->Checked)
-         MainWindow->Screen->Lines->Clear();
+
+//clrscr();
 boundary_conditions(f1);
 
 for(i=ghost;i<mm1;i++)
@@ -169,14 +255,12 @@ for(i=ghost;i<mm1;i++)
             temp+=dr(f1[l],i,j,k,l+1,0,dx[l],ghost, approx);
            if (fabs(temp)>div) div=fabs(temp);
            }
-time(&time_now);
-if(MainWindow->CheckScreenOutput->Checked)  {
-   TempScreen.printf("program is working %ld seconds",time_now-time_begin);
-   MainWindow->Screen->Lines->Append(TempScreen);
-   TempScreen.printf("t=%e\tdtdid=%e\tNIter=%d\t%e", t_cur, dtdid, count, div);
-   MainWindow->Screen->Lines->Append(TempScreen);
-   }
-for(l=0;l<nvar;l++) {
+time_now = MPI_Wtime();
+printf("program is working %0.2f seconds\n",time_now-time_begin);
+
+printf("t=%e dtdid=%e NIter=%d %e\n", t_cur, dtdid, count, div);
+
+   for(l=0;l<nvar;l++) {
        mf=mda=mdr=0;
        for(i=ghost;i<mm1;i++)
         for(j=ghost;j<mm2;j++)
@@ -187,75 +271,18 @@ for(l=0;l<nvar;l++) {
             if (temp>mdr) mdr=temp;
             if (fabs(f1[l][i][j][k])>mf) mf=fabs(f1[l][i][j][k]);
           }
-          if(MainWindow->CheckScreenOutput->Checked)  {
-                TempScreen.printf("%d\t%e\t%e\t%e",l, mf, mda, mdr);
-                MainWindow->Screen->Lines->Append(TempScreen);
-                }
+          printf("%d %e %e %e\n",l, mf, mda, mdr);
           }
 
-         if(MainWindow->CheckScreenOutput->Checked)  {
-            TempScreen.printf("Energy of pulsations=%g",en);
-            MainWindow->Screen->Lines->Append(TempScreen);
-            }
-         if(MainWindow->CheckFileOutput->Checked)  {
-            fen = fileopen(NameEnergyFile,count);
-            fprintf(fen,"%0.10f\n",en);
-            fclose(fen);
-            }
-         if(MainWindow->CheckScreenOutput->Checked)  {
-            TempScreen.printf("number of runge-kutt calculations=%d",enter);
-            MainWindow->Screen->Lines->Append(TempScreen);
-            }
+         printf("Energy of pulsations=%g\n",en);
+         fen = fileopen(NameEnergyFile,count);
+         fprintf(fen,"%0.10f\n",en);
+         fclose(fen);
+         printf("number of runge-kutt calculations=%d",enter);
 
-if(MainWindow->CheckFileOutput->Checked)  {  //if fileoutput
-/*avervx = (double *)calloc(m3, sizeof(double));
-if(avervx == NULL)  nrerror("\nAlloc_mem: unsuffitient memory!\n\a",t_cur);*/
-
-avernu = (double *)calloc(m3, sizeof(double));
-if(avernu == NULL)  nrerror("\nAlloc_mem: unsuffitient memory!\n\a",t_cur);
-
-for(k=ghost;k<mm3;k++)
-	{
-	/*  avervx[k] =*/ avernu[k] = 0;
-          for(i=ghost;i<mm1;i++)
-             for(j=ghost;j<mm2;j++)
-		 {
-	  //	   avervx[k] += f1[0][i][j][k];
-                   avernu[k] += nut[i][j][k];
-		  }
-//	   avervx[k] /= n1*n2;
-	   avernu[k] /= n1*n2;
-	 }
-  //putting velocities to file
-        fv = fileopen(NameVFile,count);
-        fprintf(fv,"{%-7.5lf}",t_cur);
-        print_array1d(fv,f1[0][m1/2][0],ghost,n3);
-        fclose(fv);
-  //putting viscosities to file
-      fnu = fileopen(NameNuFile,count);
-        print_array1d(fnu,avernu,ghost,n3);
-        fclose(fnu);
-  //for(k=0;k<m3;k++) printf("%e\n",f1[0][5][5][k]);
-  //putting kaskad variables(log energy combined from them) to file
-  fkv=fileopen(NameKaskadVarFile,count);
-  fprintf(fkv,"{");
-  for(i=0;i<Ns;i++)
-    {
-    fprintf(fkv,"{");
-    for(k=0;k<n3;k++)
-        {
-        mf=fabs(sha[k][i]*sha[k][i]+shb[k][i]*shb[k][i]);
-        if(mf>1e-300) fprintf(fkv,"%0.10lf",log(mf));
-                 else fprintf(fkv,"NAN");
-        fprintf(fkv,k<n3-1 ? "," : "}");
-        }
-    fprintf(fkv,i<Ns-1 ? "," : "}\n");
-    }
-fclose(fkv);
-  }//if fileoutput
 }
 
-void dump(int n1,int n2,int n3,double Re,double ****f1,double ***nut,double t_cur,long count)
+void dump(double ****f1,double t_cur,long count)
 {
 FILE *fd;
 fd = fileopen(NameDumpFile,0);
@@ -271,4 +298,27 @@ print_array3d(fd,f1[2],0,m1,0,m2,0,m3);
 print_array3d(fd,f1[3],0,m1,0,m2,0,m3);
 print_array3d(fd,nut,0,m1,0,m2,0,m3);
 fclose(fd);
+}
+
+void snapshot(double ****f,double t_cur,long count)
+{
+char str[256];
+int i, j, l;
+FILE *fd;
+
+ sprintf(str,"%s_%d.snp",NameSnapFile,count);
+ fd=fopen(str,"w");
+nmessage("snap is done",t_cur);
+fprintf(fd,"current time = %0.10f \ncurrent iteration = %ld\n",t_cur,count);
+fprintf(fd,"Number of points along x = %d\n",n1);
+fprintf(fd,"Number of points along y = %d\n",n2);
+fprintf(fd,"Number of points along z = %d\n",n3);
+fprintf(fd,"Reynolds number = %lf\n",Re);
+print_array3d(fd,f1[0],0,m1,0,m2,0,m3);
+print_array3d(fd,f1[1],0,m1,0,m2,0,m3);
+print_array3d(fd,f1[2],0,m1,0,m2,0,m3);
+print_array3d(fd,f1[3],0,m1,0,m2,0,m3);
+print_array3d(fd,nut,0,m1,0,m2,0,m3);
+ fclose(fd);
+
 }
