@@ -16,12 +16,26 @@ void nrerror(char error_text[],double t_cur)
     exit(1);
 }
 
+void Test_Errors_warn(int *code)
+{
+  char buf[MPI_MAX_ERROR_STRING+1];
+  int  result_len;
+  static int in_handler = 0;
+
+  if (in_handler) return;
+  in_handler = 1;
+  /* Преобразование кода ошибки в сообщение и печать*/
+  MPI_Error_string( *code, buf, &result_len );
+  printf( "%s\n", buf );
+  in_handler = 0;
+}
+
 void nmessage(char msg_text[],double t_cur)
 {
    FILE *msg;
    msg=fileopen("message.dat",1);
    time_now = (t_cur==0)?time_begin:MPI_Wtime();
-   fprintf(msg,"message of proc#%d at t=%-7.4lf Niter=%-6d time of work=%g:\n",rank,
+   fprintf(msg,"message of proc#%d at t=%-7.4lf Niter=%-6d time of work=%g sec\n",rank,
                     t_cur,count,time_now-time_begin);
    fprintf(msg,"%s\n",msg_text);
    fclose(msg);

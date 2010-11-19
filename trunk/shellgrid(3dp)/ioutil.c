@@ -22,6 +22,19 @@ if ((ff = fopen(x,s_mode))==NULL)
 return(ff);
 }
 
+void putlog(char msg_text[],long num)
+{
+   FILE *log;
+   char name[20];
+   sprintf(name,"mess%d.log",rank);
+   log=fileopen(name,num);
+   time_now = (num==0)?time_begin:MPI_Wtime();
+   fprintf(log,"message at t=%-7.4lf Niter=%-6d time of work=%g sec\n",
+                    t_cur,count,time_now-time_begin);
+   fprintf(log,"%s %d\n",msg_text,num);
+   fclose(log);
+}
+
 void read_token(FILE *inp,double *param)
 {
 char str[256],*pstr;
@@ -40,7 +53,7 @@ FILE *iop;
 double d;
  if(argc<2 || (iop=fopen(argv[1],"r"))==NULL) //no ini file
     {
-     if(argc>=2) nmessage("Start: no ini file!",0);
+     nrerror("Start from no ini file!",0);
      Re=10.;
      l1=3.;
      l2=1.;
@@ -64,7 +77,7 @@ double d;
      SnapStep = 100;
      Ttot=1.;
      }
-    else {
+    else {       nmessage("Parameters were extracted from file",0);
       read_token(iop,&Re);
       read_token(iop,&l1);
       read_token(iop,&l2);
@@ -216,7 +229,7 @@ for(l=0;l<=2;l++)
    for(i=0;i<n;i++)
        averf[l][i] = 0;
 for(i=ghost;i<mm1;i++)
-     for(j=ghost;j<=ghost;j++)
+     for(j=ghost;j<mm2;j++)
         for(k=ghost;k<mm3;k++)
            {
            PulsEnergy+=deviation(f,i,j,k);
@@ -238,14 +251,15 @@ return(PulsEnergy);
 
 void printing(double ****f1,double dtdid,double t_cur,long count,double en)
 {
-double temp, div=0;
+double temp, div, totdiv;
 int i,j,k,l;
-double mf, mda, mdr;
-double *avervx, *avernu;
+double mf[3], totmf[3], toten;     //mf[0]=max(f), mf[1]=max(df), mf[2]=max(df/f)
+double *totvx, *vx, *avernu;
 FILE *fv,*fnu,*fen,*fkv;
 
 //clrscr();
-boundary_conditions(f1);
+time_now = MPI_Wtime();
+Master printf("program is working %0.2f seconds\n",time_now-time_begin);
 
 for(i=ghost;i<mm1;i++)
    for(j=ghost;j<mm2;j++)
@@ -255,70 +269,101 @@ for(i=ghost;i<mm1;i++)
             temp+=dr(f1[l],i,j,k,l+1,0,dx[l],ghost, approx);
            if (fabs(temp)>div) div=fabs(temp);
            }
-time_now = MPI_Wtime();
-printf("program is working %0.2f seconds\n",time_now-time_begin);
-
-printf("t=%e dtdid=%e NIter=%d %e\n", t_cur, dtdid, count, div);
+MPI_Allreduce(&div, &totdiv, 1, MPI_DOUBLE , MPI_MAX, MPI_COMM_WORLD);
+Master printf("t=%g dtdid=%g NIter=%d maxdiv=%g(local=%g)\n", t_cur, dtdid, count, totdiv, div);
 
    for(l=0;l<nvar;l++) {
-       mf=mda=mdr=0;
+       mf[0]=mf[1]=mf[2]=0;
        for(i=ghost;i<mm1;i++)
         for(j=ghost;j<mm2;j++)
          for(k=ghost;k<mm3;k++) {
             temp=fabs(f[l][i][j][k]-f1[l][i][j][k]);
-            if (temp>mda) mda=temp;
+            if (temp>mf[1]) mf[1]=temp;
             if(f1[l][i][j][k]!=0) temp/=f1[l][i][j][k];
-            if (temp>mdr) mdr=temp;
-            if (fabs(f1[l][i][j][k])>mf) mf=fabs(f1[l][i][j][k]);
+            if (temp>mf[2]) mf[2]=temp;
+            if (fabs(f1[l][i][j][k])>mf[0]) mf[0]=fabs(f1[l][i][j][k]);
           }
-          printf("%d %e %e %e\n",l, mf, mda, mdr);
+          MPI_Allreduce(&mf, &totmf, 3, MPI_DOUBLE , MPI_MAX, MPI_COMM_WORLD);
+          Master printf("%d  maxf=%e(loc=%e) \tmaxdf=%e(loc=%e) \tmax(df/f)=%e(loc=%e)\n",
+                          l,      totmf[0],mf[0],    totmf[1],mf[1],       totmf[2],mf[2]);
           }
 
-         printf("Energy of pulsations=%g\n",en);
-         fen = fileopen(NameEnergyFile,count);
-         fprintf(fen,"%0.10f\n",en);
-         fclose(fen);
-         printf("number of runge-kutt calculations=%d",enter);
+         MPI_Allreduce(&en, &toten, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
+         Master printf("Energy of pulsations=%g (local=%g)\n",toten,en);
+         Master {fen = fileopen(NameEnergyFile,count);
+                 fprintf(fen,"%0.5g\t%e\n",t_cur,toten);
+                 fclose(fen);
+                }
+         Master printf("number of runge-kutt calculations=%d\n",enter);
 
+         vx = alloc_mem_1f(N3);        for(i=0;i<N3;i++)    vx[i]=0;
+         totvx = alloc_mem_1f(N3);     for(i=0;i<N3;i++) totvx[i]=0;
+         for(i=ghost;i<mm1;i++)
+            for(j=ghost;j<mm2;j++)
+               for(k=ghost;k<mm3;k++)
+                   vx[k-ghost+n[2]] += f[0][i][j][k];
+         MPI_Allreduce(vx, totvx, N3, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
+         Master {for(i=0;i<N3;i++) totvx[i] /= N1*N2;
+                 fv = fileopen(NameVFile,count);
+                 fprintf(fv,"{%8.8f}\t",t_cur);
+                 print_array1d(fv,totvx,0,N3);
+                 fclose(fv);
+                }
 }
 
 void dump(double ****f1,double t_cur,long count)
 {
 FILE *fd;
-fd = fileopen(NameDumpFile,0);
-nmessage("dump is done",t_cur);
-fprintf(fd,"current time = %0.10f \ncurrent iteration = %ld\n",t_cur,count);
-fprintf(fd,"Number of points along x = %d\n",n1);
-fprintf(fd,"Number of points along y = %d\n",n2);
-fprintf(fd,"Number of points along z = %d\n",n3);
-fprintf(fd,"Reynolds number = %lf\n",Re);
-print_array3d(fd,f1[0],0,m1,0,m2,0,m3);
-print_array3d(fd,f1[1],0,m1,0,m2,0,m3);
-print_array3d(fd,f1[2],0,m1,0,m2,0,m3);
-print_array3d(fd,f1[3],0,m1,0,m2,0,m3);
-print_array3d(fd,nut,0,m1,0,m2,0,m3);
-fclose(fd);
+char *message;
+int tag=1;
+
+ if(rank!=0) MPI_Recv(message,0,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);
+
+ fd=fileopen(NameDumpFile,rank);
+
+ Master nmessage("dump is done",t_cur);
+ Master fprintf(fd,"current time = %0.10f \ncurrent iteration = %ld\n",t_cur,count);
+ Master fprintf(fd,"Number of points along x = %d\n",N1);
+ Master fprintf(fd,"Number of points along y = %d\n",N2);
+ Master fprintf(fd,"Number of points along z = %d\n",N3);
+ Master fprintf(fd,"Reynolds number = %lf\n",Re);
+ print_array3d(fd,f1[0],0,m1,0,m2,0,m3);
+ print_array3d(fd,f1[1],0,m1,0,m2,0,m3);
+ print_array3d(fd,f1[2],0,m1,0,m2,0,m3);
+ print_array3d(fd,f1[3],0,m1,0,m2,0,m3);
+ print_array3d(fd,nut,0,m1,0,m2,0,m3);
+ fclose(fd);
+
+ if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
 }
 
-void snapshot(double ****f,double t_cur,long count)
+void snapshot(double ****f1,double t_cur,long count)
 {
 char str[256];
+char message[10]="message";
+long tag=count;
 int i, j, l;
 FILE *fd;
 
  sprintf(str,"%s_%d.snp",NameSnapFile,count);
- fd=fopen(str,"w");
-nmessage("snap is done",t_cur);
-fprintf(fd,"current time = %0.10f \ncurrent iteration = %ld\n",t_cur,count);
-fprintf(fd,"Number of points along x = %d\n",n1);
-fprintf(fd,"Number of points along y = %d\n",n2);
-fprintf(fd,"Number of points along z = %d\n",n3);
-fprintf(fd,"Reynolds number = %lf\n",Re);
-print_array3d(fd,f1[0],0,m1,0,m2,0,m3);
-print_array3d(fd,f1[1],0,m1,0,m2,0,m3);
-print_array3d(fd,f1[2],0,m1,0,m2,0,m3);
-print_array3d(fd,f1[3],0,m1,0,m2,0,m3);
-print_array3d(fd,nut,0,m1,0,m2,0,m3);
- fclose(fd);
 
+ if(rank!=0) MPI_Recv(message,1,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);
+
+
+ fd=fileopen(str,rank);
+ Master nmessage("snap is done",t_cur);
+ Master fprintf(fd,"current time = %0.10f \ncurrent iteration = %ld\n",t_cur,count);
+ Master fprintf(fd,"Number of points along x = %d\n",N1);
+ Master fprintf(fd,"Number of points along y = %d\n",N2);
+ Master fprintf(fd,"Number of points along z = %d\n",N3);
+ Master fprintf(fd,"Reynolds number = %lf\n",Re);
+
+ print_array3d(fd,f1[0],0,m1,0,m2,0,m3);
+ print_array3d(fd,f1[1],0,m1,0,m2,0,m3);
+ print_array3d(fd,f1[2],0,m1,0,m2,0,m3);
+ print_array3d(fd,f1[3],0,m1,0,m2,0,m3);
+ print_array3d(fd,nut,0,m1,0,m2,0,m3);
+ fclose(fd);
+                  
+ if(rank!=size-1) MPI_Send(message,1,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
 }
