@@ -29,14 +29,13 @@ void pde(double t, double ****f, double ****df)
       }
 
       for(l=0;l<3;l++)
-/*
        df[l][i][j][k]= (dv2[l][0] + dv2[l][1] + dv2[l][2])*nut[i][j][k]
-               - dp1[l]+p1/l1 + (dn1[0]-f[0][i][j][k])*dv1[l][0]
+                        - dp1[l]+(l==0?p1/l1:0)
+                              + (dn1[0]-f[0][i][j][k])*dv1[l][0]
                               + (dn1[1]-f[1][i][j][k])*dv1[l][1]
                               + (dn1[2]-f[2][i][j][k])*dv1[l][2];
-      df[3][i][j][k]= (-(dv1[0][0] + dv1[1][1] + dv1[2][2]))/Gamma;*/
-        df[l][i][j][k] = f[l][i][j][k];
-      df[3][i][j][k] = t;
+      df[3][i][j][k]= (-(dv1[0][0] + dv1[1][1] + dv1[2][2]))/Gamma;
+
    }
 
    return;
@@ -118,100 +117,120 @@ for(k=0;k<n3;k++)
 void  boundary_conditions(double ****f)
 {
    int i, j, k, l, g, req_numS=0, req_numR=0;
-
+   int flag,cnt,z[4],tag=10;
+   z[0]=z[1]=z[2]=-1; z[3]=1;  //  влияет на вид гран.условий (1:жесткие, -1:свободные)
+//            putlog("bc:reach this=",numlog++);
    // streamwise surfaces
       //periodic conditions for velocities and pressure
- if (pr_neighbour[0]!=-1) {
-   CopyGridToBuffer(f,buf_send[0],ghost,ghost,ghost,2*ghost-1,mm2-1,mm3-1);
-   MPI_Isend(buf_send[0],buf_size[0],MPI_DOUBLE,pr_neighbour[0],tag,MPI_COMM_WORLD,&SendRequest[req_numS++]);
-   MPI_Irecv(buf_recv[0],buf_size[0],MPI_DOUBLE,pr_neighbour[0],tag,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
-   } else {                                   // не бывает
-    for(l=0;l<nvar;l++)
-      for(j=ghost;j<mm2;j++)
-       for(k=ghost;k<mm3;k++)
-        for(g=0;g<ghost;g++)
-           f[l][g][j][k] = f[l][n1+g][j][k];
-    CopyGridToBuffer(f,buf_recv[0],0,ghost,ghost,ghost-1,mm2-1,mm3-1);
-   }
-
- if (pr_neighbour[1]!=-1) {
-   CopyGridToBuffer(f,buf_send[1],n1,ghost,ghost,mm1-1,mm2-1,mm3-1);
-   MPI_Isend(buf_send[1],buf_size[0],MPI_DOUBLE,pr_neighbour[1],tag,MPI_COMM_WORLD,&SendRequest[req_numS++]);
-   MPI_Irecv(buf_recv[1],buf_size[0],MPI_DOUBLE,pr_neighbour[1],tag,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
-   } else {                                  // не бывает
-    for(l=0;l<nvar;l++)
-      for(j=ghost;j<mm2;j++)
-       for(k=ghost;k<mm3;k++)
-        for(g=0;g<ghost;g++)
-          f[l][mm1+g][j][k] = f[l][ghost+g][j][k];
-    CopyGridToBuffer(f,buf_recv[1],mm1,ghost,ghost,m1-1,mm2-1,mm3-1);
-   }
-
+ if(pr_neighbour[0]==-1)
+             {  for(j=ghost;j<mm2;j++)
+                  for(k=ghost;k<mm3;k++)
+                    for(g=0;g<ghost;g++) {
+                       for(l=0;l<nvar;l++) f[l][g][j][k] = f[l][n1+g][j][k];
+                       nut[g][j][k] =  nut[n1+g][j][k];
+                       }
+                CopyGridToBuffer(f,nut,buf_recv[0],0,ghost,ghost,ghost-1,mm2-1,mm3-1);
+              }
+ else if(pr_neighbour[0]==rank) CopyGridToBuffer(f,nut,buf_recv[0],n1,ghost,ghost,mm1-1,mm2-1,mm3-1);
+         else { CopyGridToBuffer(f,nut,buf_send[0],ghost,ghost,ghost,2*ghost-1,mm2-1,mm3-1);
+                MPI_Isend(buf_send[0],buf_size[0],MPI_DOUBLE,pr_neighbour[0],tag,MPI_COMM_WORLD,&SendRequest[req_numS++]);
+                MPI_Irecv(buf_recv[0],buf_size[0],MPI_DOUBLE,pr_neighbour[0],tag+1,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
+                }
+//            putlog("bc:reach this=",numlog++);
+ if(pr_neighbour[1]==-1)
+             {  for(j=ghost;j<mm2;j++)
+                  for(k=ghost;k<mm3;k++)
+                    for(g=0;g<ghost;g++) {
+                       for(l=0;l<nvar;l++) f[l][mm1+g][j][k] = f[l][ghost+g][j][k];
+                       nut[mm1+g][j][k] =  nut[ghost+g][j][k];
+                       }
+              CopyGridToBuffer(f,nut,buf_recv[1],mm1,ghost,ghost,m1-1,mm2-1,mm3-1);
+              }
+ else if(pr_neighbour[1]==rank) CopyGridToBuffer(f,nut,buf_recv[1],ghost,ghost,ghost,2*ghost-1,mm2-1,mm3-1);
+         else { CopyGridToBuffer(f,nut,buf_send[1],n1,ghost,ghost,mm1-1,mm2-1,mm3-1);
+                MPI_Isend(buf_send[1],buf_size[0],MPI_DOUBLE,pr_neighbour[1],tag+1,MPI_COMM_WORLD,&SendRequest[req_numS++]);
+                MPI_Irecv(buf_recv[1],buf_size[0],MPI_DOUBLE,pr_neighbour[1],tag,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
+                }
+//            putlog("bc:reach this=",numlog++);
    // spanwise surfaces
        //periodic conditions for velocities and pressure
- if (pr_neighbour[2]!=-1) {
-   CopyGridToBuffer(f,buf_send[2],ghost,ghost,ghost,mm1-1,2*ghost-1,mm3-1);
-   MPI_Isend(buf_send[2],buf_size[1],MPI_DOUBLE,pr_neighbour[2],tag,MPI_COMM_WORLD,&SendRequest[req_numS++]);
-   MPI_Irecv(buf_recv[2],buf_size[1],MPI_DOUBLE,pr_neighbour[2],tag,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
-   } else {                                  // не бывает
-    for(l=0;l<nvar;l++)
-     for(i=ghost;i<mm1;i++)
-      for(k=ghost;k<mm3;k++)
-       for(g=0;g<ghost;g++)
-         f[l][i][g][k] = f[l][i][n2+g][k];
-    CopyGridToBuffer(f,buf_recv[2],ghost,0,ghost,mm1-1,ghost-1,mm3-1);
-   }
-
- if (pr_neighbour[3]!=-1) {
-   CopyGridToBuffer(f,buf_send[3],ghost,n2,ghost,mm1-1,mm2-1,mm3-1);
-   MPI_Isend(buf_send[3],buf_size[1],MPI_DOUBLE,pr_neighbour[3],tag,MPI_COMM_WORLD,&SendRequest[req_numS++]);
-   MPI_Irecv(buf_recv[3],buf_size[1],MPI_DOUBLE,pr_neighbour[3],tag,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
-   } else {                                // не бывает
-    for(l=0;l<nvar;l++)
-     for(i=ghost;i<mm1;i++)
-      for(k=ghost;k<mm3;k++)
-       for(g=0;g<ghost;g++)
-        f[l][i][mm2+g][k] = f[l][i][ghost+g][k];
-    CopyGridToBuffer(f,buf_recv[3],ghost,mm2,ghost,mm1-1,m2-1,mm3-1);
-   }
-
+ if(pr_neighbour[2]==-1)
+             {  for(i=ghost;i<mm1;i++)
+                  for(k=ghost;k<mm3;k++)
+                    for(g=0;g<ghost;g++) {
+                       for(l=0;l<nvar;l++) f[l][i][g][k] = f[l][i][n2+g][k];
+                       nut[i][g][k] =  nut[i][n2+g][k];
+                       }
+             CopyGridToBuffer(f,nut,buf_recv[2],ghost,0,ghost,mm1-1,ghost-1,mm3-1);
+              }
+ else if(pr_neighbour[2]==rank) CopyGridToBuffer(f,nut,buf_recv[2],ghost,n2,ghost,mm1-1,mm2-1,mm3-1);
+         else { CopyGridToBuffer(f,nut,buf_send[2],ghost,ghost,ghost,mm1-1,2*ghost-1,mm3-1);
+                MPI_Isend(buf_send[2],buf_size[1],MPI_DOUBLE,pr_neighbour[2],tag+2,MPI_COMM_WORLD,&SendRequest[req_numS++]);
+                MPI_Irecv(buf_recv[2],buf_size[1],MPI_DOUBLE,pr_neighbour[2],tag+3,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
+                }
+//            putlog("bc:reach this=",numlog++);
+ if(pr_neighbour[3]==-1)
+             {  for(i=ghost;i<mm1;i++)
+                  for(k=ghost;k<mm3;k++)
+                    for(g=0;g<ghost;g++) {
+                        for(l=0;l<nvar;l++) f[l][i][mm2+g][k] = f[l][i][ghost+g][k];
+                        nut[i][mm2+g][k] =  nut[i][ghost+g][k];
+                    }
+              CopyGridToBuffer(f,nut,buf_recv[3],ghost,mm2,ghost,mm1-1,m2-1,mm3-1);
+              }
+ else if(pr_neighbour[3]==rank) CopyGridToBuffer(f,nut,buf_recv[3],ghost,ghost,ghost,mm1-1,2*ghost-1,mm3-1);
+         else { CopyGridToBuffer(f,nut,buf_send[3],ghost,n2,ghost,mm1-1,mm2-1,mm3-1);
+                MPI_Isend(buf_send[3],buf_size[1],MPI_DOUBLE,pr_neighbour[3],tag+3,MPI_COMM_WORLD,&SendRequest[req_numS++]);
+                MPI_Irecv(buf_recv[3],buf_size[1],MPI_DOUBLE,pr_neighbour[3],tag+2,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
+                }
+//            putlog("bc:reach this=",numlog++);
    // on horizontal surfaces
       //sticking for velocities and free conditions for pressure
- if (pr_neighbour[4]!=-1) {
-   CopyGridToBuffer(f,buf_send[4],ghost,ghost,ghost,mm1-1,mm2-1,2*ghost-1);
-   MPI_Isend(buf_send[4],buf_size[2],MPI_DOUBLE,pr_neighbour[4],tag,MPI_COMM_WORLD,&SendRequest[req_numS++]);
-   MPI_Irecv(buf_recv[4],buf_size[2],MPI_DOUBLE,pr_neighbour[4],tag,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
-   } else {
-    for(l=0;l<nvar;l++)
-     for(i=ghost;i<mm1;i++)
-      for(j=ghost;j<mm2;j++)
-       for(g=0;g<ghost;g++)
-         f[l][i][j][g] = f[l][i][j][2*ghost-1-g]*((l==3)?1:-1);
-    CopyGridToBuffer(f,buf_recv[4],ghost,ghost,0,mm1-1,mm2-1,ghost-1);
-   }
-
- if (pr_neighbour[5]!=-1) {
-   CopyGridToBuffer(f,buf_send[5],ghost,ghost,n3,mm1-1,mm2-1,mm3-1);
-   MPI_Isend(buf_send[5],buf_size[2],MPI_DOUBLE,pr_neighbour[5],tag,MPI_COMM_WORLD,&SendRequest[req_numS++]);
-   MPI_Irecv(buf_recv[5],buf_size[2],MPI_DOUBLE,pr_neighbour[5],tag,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
-   } else {
-    for(l=0;l<nvar;l++)
-     for(i=ghost;i<mm1;i++)
-      for(j=ghost;j<mm2;j++)
-       for(g=0;g<ghost;g++)
-         f[l][i][j][mm3+g] = f[l][i][j][mm3-1-g]*((l==3)?1:-1);
-    CopyGridToBuffer(f,buf_recv[5],ghost,ghost,mm3,mm1-1,mm2-1,m3-1);
-   }
-
-//  MPI_Barrier(MPI_COMM_WORLD);
+ if(pr_neighbour[4]==-1)
+             {  for(i=ghost;i<mm1;i++)
+                  for(j=ghost;j<mm2;j++)
+                    for(g=0;g<ghost;g++) {
+                       for(l=0;l<nvar;l++) f[l][i][j][g] = f[l][i][j][2*ghost-1-g]*z[l];
+                       nut[i][j][g] = 0;  //можно и через z
+                       }
+             CopyGridToBuffer(f,nut,buf_recv[4],ghost,ghost,0,mm1-1,mm2-1,ghost-1);
+             }
+ else if(pr_neighbour[4]==rank) CopyGridToBuffer(f,nut,buf_recv[4],ghost,ghost,mm3,mm1-1,mm2-1,m3-1);
+         else { CopyGridToBuffer(f,nut,buf_send[4],ghost,ghost,ghost,mm1-1,mm2-1,2*ghost-1);
+                MPI_Isend(buf_send[4],buf_size[2],MPI_DOUBLE,pr_neighbour[4],tag+4,MPI_COMM_WORLD,&SendRequest[req_numS++]);
+//                nmessage("message sent",t_cur);
+                MPI_Irecv(buf_recv[4],buf_size[2],MPI_DOUBLE,pr_neighbour[4],tag+5,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
+//                nmessage("message received",t_cur);
+                }
+//            putlog("bc:reach this=",numlog++);
+ if(pr_neighbour[5]==-1)
+             {  for(i=ghost;i<mm1;i++)
+                  for(j=ghost;j<mm2;j++)
+                    for(g=0;g<ghost;g++) {
+                       for(l=0;l<nvar;l++) f[l][i][j][mm3+g] = f[l][i][j][mm3-1-g]*z[l];
+                       nut[i][j][mm3+g] = 0;
+                    }
+              CopyGridToBuffer(f,nut,buf_recv[5],ghost,ghost,mm3,mm1-1,mm2-1,m3-1);
+              }
+ else if(pr_neighbour[5]==rank) CopyGridToBuffer(f,nut,buf_recv[5],ghost,ghost,0,mm1-1,mm2-1,ghost-1);
+        else { CopyGridToBuffer(f,nut,buf_send[5],ghost,ghost,n3,mm1-1,mm2-1,mm3-1);
+               MPI_Isend(buf_send[5],buf_size[2],MPI_DOUBLE,pr_neighbour[5],tag+5,MPI_COMM_WORLD,&SendRequest[req_numS++]);
+               MPI_Irecv(buf_recv[5],buf_size[2],MPI_DOUBLE,pr_neighbour[5],tag+4,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
+               }
+   //            putlog("bc:reach this=",numlog++);
+//    MPI_Barrier(MPI_COMM_WORLD);
+//    MPI_Startall(req_numR,RecvRequest);
+//    MPI_Testall(req_numR,RecvRequest,&flag,statuses);
+//    MPI_Get_count(statuses,MPI_DOUBLE,&cnt);
     MPI_Waitall(req_numR,RecvRequest,statuses);
+    if(statuses[0].MPI_ERROR) putlog("bc:error during transfer=",numlog);
 
-    CopyBufferToGrid(f,buf_recv[0],0,ghost,ghost,ghost-1,mm2-1,mm3-1);
-    CopyBufferToGrid(f,buf_recv[1],mm1,ghost,ghost,m1-1,mm2-1,mm3-1);
-    CopyBufferToGrid(f,buf_recv[2],ghost,0,ghost,mm1-1,ghost-1,mm3-1);
-    CopyBufferToGrid(f,buf_recv[3],ghost,mm2,ghost,mm1-1,m2-1,mm3-1);
-    CopyBufferToGrid(f,buf_recv[4],ghost,ghost,0,mm1-1,mm2-1,ghost-1);
-    CopyBufferToGrid(f,buf_recv[5],ghost,ghost,mm3,mm1-1,mm2-1,m3-1);
+    CopyBufferToGrid(f,nut,buf_recv[0],0,ghost,ghost,ghost-1,mm2-1,mm3-1);
+    CopyBufferToGrid(f,nut,buf_recv[1],mm1,ghost,ghost,m1-1,mm2-1,mm3-1);
+    CopyBufferToGrid(f,nut,buf_recv[2],ghost,0,ghost,mm1-1,ghost-1,mm3-1);
+    CopyBufferToGrid(f,nut,buf_recv[3],ghost,mm2,ghost,mm1-1,m2-1,mm3-1);
+    CopyBufferToGrid(f,nut,buf_recv[4],ghost,ghost,0,mm1-1,mm2-1,ghost-1);
+    CopyBufferToGrid(f,nut,buf_recv[5],ghost,ghost,mm3,mm1-1,mm2-1,m3-1);
 
    return;
 }
@@ -224,22 +243,25 @@ void  init_conditions(double ****f,double Re)
 // --------------- initial conditions
 //   k1=2*M_PI/l1;  k3=M_PI/l3;
 
-   for(i=0;i<m1;i++)
-   for(j=0;j<m2;j++)
-   for(k=0;k<m3;k++) {
-        f[0][i][j][k]=(0.+Noise*((double)rand()-RAND_MAX/2)/RAND_MAX)*
+   for(i=ghost;i<mm1;i++)
+   for(j=ghost;j<mm2;j++)
+   for(k=ghost;k<mm3;k++) {
+        f[0][i][j][k]=(parabole+Noise*((double)rand()-RAND_MAX/2)/RAND_MAX)*
                        coordin(k,2)*(l3-coordin(k,2))*4/l3/l3;
-        f[1][i][j][k]=NoiseNorm*cos(2*M_PI*coordin(j,1)/l2)*cos(2*M_PI*coordin(k,2)/l3)
+        f[1][i][j][k]=NoiseNorm*cos(2*M_PI*coordin(j,1)/l2)*sin(2*M_PI*coordin(k,2)/l3)
                       + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
                        coordin(k,2)*(l3-coordin(k,2))*4/l3/l3;
         f[2][i][j][k]=NoiseNorm*sin(2*M_PI*coordin(j,1)/l2)*sin(2*M_PI*coordin(k,2)/l3)
                       + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
                        coordin(k,2)*(l3-coordin(k,2))*4/l3/l3;
         f[3][i][j][k]=0;
+        }
+   for(i=0;i<m1;i++)
+   for(j=0;j<m2;j++)
+   for(k=0;k<m3;k++)
         nut[i][j][k]=(
-        (0.39+14.8*exp(-2.13*pow(2*coordin(k,2)-l3,2)))*0.1*0
+//        (0.39+14.8*exp(-2.13*pow(2*coordin(k,2)-l3,2)))*0.1*0
                     +1)/Re;
-   }
 //   struct_func(f,2,2,3);
 }
 
@@ -249,7 +271,6 @@ void init_parallel()
    int divisors[100],kd=0,nd1,nd2;
    int i,j;
    int kp1,kp2,kp3;
-   int pr[3];
    double vtime,mintime;
    double k1=1,                   // time of calculation per node
           k2=1,                   // time of sending per node
@@ -271,9 +292,11 @@ void init_parallel()
          }
   pp[0]=divisors[nd1]; pp[1]=divisors[nd2]; pp[2]=size/pp[0]/pp[1];                  // number of procs along axes
   pr[0] = rank%pp[0]; pr[1] = (rank/pp[0])%pp[1]; pr[2] = (rank/pp[0]/pp[1])%pp[2];  // coordinates of subregion
-  n1 = ceil((double)N1/pp[0]);         if(pr[0]>=N1-pp[0]*(n1-1)) n1--;              // dimensions of subregion
-  n2 = ceil((double)N2/pp[1]);         if(pr[1]>=N2-pp[1]*(n2-1)) n2--;
-  n3 = ceil((double)N3/pp[2]);         if(pr[2]>=N3-pp[2]*(n3-1)) n3--;
+
+/* dimensions of subregion:         global indicies of subregion origin          if there's nonequal subregions*/
+  n1 = floor((double)N1/pp[0]);     n[0] = n1*pr[0] + min(pr[0],N1-pp[0]*n1);    if(pr[0]<N1-pp[0]*n1) n1++;              // dimensions of subregion
+  n2 = floor((double)N2/pp[1]);     n[1] = n2*pr[1] + min(pr[1],N2-pp[1]*n2);    if(pr[1]<N2-pp[1]*n2) n2++;
+  n3 = floor((double)N3/pp[2]);     n[2] = n3*pr[2] + min(pr[2],N3-pp[2]*n3);    if(pr[2]<N3-pp[2]*n3) n3++;
 
    m1 = n1+2*ghost;
    m2 = n2+2*ghost;
@@ -289,13 +312,13 @@ void init_parallel()
   pr_neighbour[2] = (pr[1]>0       ? rank-pp[0]       :-1);
   if(pr[1]==0)       pr_neighbour[2] = rank+pp[0]*(pp[1]-1);     //periodic conditions
   pr_neighbour[3] = (pr[1]<pp[1]-1 ? rank+pp[0]       :-1);
-  if(pr[1]==pp[1]-1) pr_neighbour[2] = rank-pp[0]*(pp[1]-1);     //periodic conditions
+  if(pr[1]==pp[1]-1) pr_neighbour[3] = rank-pp[0]*(pp[1]-1);     //periodic conditions
   pr_neighbour[4] = (pr[2]>0       ? rank-pp[0]*pp[1] :-1);
   pr_neighbour[5] = (pr[2]<pp[2]-1 ? rank+pp[0]*pp[1] :-1);
 
- buf_size[0]=n2*n3*nvar*ghost;
- buf_size[1]=n1*n3*nvar*ghost;
- buf_size[2]=n1*n2*nvar*ghost;
+ buf_size[0]=n2*n3*(nvar+1)*ghost;
+ buf_size[1]=n1*n3*(nvar+1)*ghost;
+ buf_size[2]=n1*n2*(nvar+1)*ghost;
 
  for(i=0;i<nvar-1;i++)
   for(j=0;j<=1;j++) {
@@ -307,6 +330,7 @@ void init_parallel()
    fprintf(iop,"%d\n",rank);
    fprintf(iop,"%d\t%d\t%d\n",pr[0],pr[1],pr[2]);
    fprintf(iop,"%d\t%d\t%d\n",pp[0],pp[1],pp[2]);
+   fprintf(iop,"%d\t%d\t%d\n",n[0],n[1],n[2]);
    for(i=0;i<6;i++)
      fprintf(iop,"%d ",pr_neighbour[i]);
    fprintf(iop,"\n");
@@ -355,10 +379,10 @@ return(tmp/dx);
 double coordin(int i, int dir)
                       //0-x,1-y,2-z
 {
- return dx[dir]*((double)(i-ghost)+0.5);
+ return dx[dir]*((double)(i-ghost)+0.5+n[dir]);
 }
 
- void CopyBufferToGrid(double ****m,double *buffer,int x1,int y1,int z1,int x2,int y2,int z2)
+ void CopyBufferToGrid(double ****m,double ***nut,double *buffer,int x1,int y1,int z1,int x2,int y2,int z2)
  {
    int i,j,k,l,n=0;
    for(l=0;l<nvar;l++)
@@ -366,9 +390,14 @@ double coordin(int i, int dir)
      for(j=y1;j<=y2;j++)
       for(k=z1;k<=z2;k++)
       m[l][i][j][k]=buffer[n++];
+   for(i=x1;i<=x2;i++)
+    for(j=y1;j<=y2;j++)
+     for(k=z1;k<=z2;k++)
+     nut[i][j][k]=buffer[n++];
+
  }
 
- void CopyGridToBuffer(double ****m,double *buffer,int x1,int y1,int z1,int x2,int y2,int z2)
+ void CopyGridToBuffer(double ****m,double ***nut,double *buffer,int x1,int y1,int z1,int x2,int y2,int z2)
  {
    int i,j,k,l,n=0;
    for(l=0;l<nvar;l++)
@@ -376,6 +405,8 @@ double coordin(int i, int dir)
      for(j=y1;j<=y2;j++)
       for(k=z1;k<=z2;k++)
       buffer[n++]=m[l][i][j][k];
+   for(i=x1;i<=x2;i++)
+    for(j=y1;j<=y2;j++)
+     for(k=z1;k<=z2;k++)
+     buffer[n++]=nut[i][j][k];
  }
-
-

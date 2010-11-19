@@ -5,7 +5,13 @@
 int main(int argc, char** argv)
 {
    double dttry, dtdid, dtnext;
-   int i,j,k,l;
+   int i,j,k,l,i2,j2,k2,z=0;
+
+ /* Initialize MPI */
+ MPI_Init(&argc,&argv);
+ /*  Get rank of this process and process group size */
+ MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+ MPI_Comm_size(MPI_COMM_WORLD,&size);           putlog("main:reach this ",numlog++);
 
   NameMessageFile = "message.dat";
   NameErrorFile = "error.dat";
@@ -14,9 +20,9 @@ int main(int argc, char** argv)
   //NameDumpFile = "dump.dat";
   NameEnergyFile = "energy.dat";
   KaskadVarFile = "kaskvar.dat";
-
+                                       numlog=0;
    init_param(argc,argv,&dtnext);       // initilization of parameters
-   Gamma=1e-4;
+   Gamma=1e-3;
 
    ghost=(approx-1)/2;            //radius of approx sample
    dx[0]=l1/N1;
@@ -27,18 +33,15 @@ int main(int argc, char** argv)
    t_cur=0;
    count=0; enter = 0;
 
- /* Initialize MPI */
- MPI_Init(&argc,&argv);
- /*  Get rank of this process and process group size */
- MPI_Comm_rank(MPI_COMM_WORLD,&rank);
- MPI_Comm_size(MPI_COMM_WORLD,&size);
+
 
    nmessage("work has begun",0);
 
-   sprintf(fname,"%s_%d",(argc>1)? argv[1] : argv[0],rank);
+   sprintf(fname,"%s",(argc>1)? argv[1] : argv[0]);
+   sprintf(fname,"%s","shellgrid");
    NameSnapFile = fname;
    sprintf(NameDumpFile ,"%s.dmp",fname);
-   sprintf(fname_stat,"%s.sta",fname);
+   sprintf(fname_stat,"%s_%d.sta",fname,rank);
 
    init_parallel();
 
@@ -59,11 +62,11 @@ int main(int argc, char** argv)
 
    init_conditions(f,Re);
 
-   PulsEn=check(f);
-   boundary_conditions(f);
-   Master printing(f,0,t_cur,count,PulsEn);
+   boundary_conditions(f);                             putlog("main:reach this ",numlog++);
+   dump(f,t_cur,count);                                 putlog("main:reach this ",numlog++);
 
-   dump(f,t_cur,count);
+   if(CheckStep!=0) PulsEn=check(f);                   putlog("main:reach this ",numlog++);
+   if (OutStep!=0) printing(f,0,t_cur,count,PulsEn);   //in parallel version better not to do
 
 /*------------------------ MAIN ITERATIONS -------------------------*/
    while (t_cur < Ttot && !razlet) {
@@ -74,14 +77,20 @@ int main(int argc, char** argv)
         t_cur+=dtdid;
         count++;
         if (CheckStep!=0 && count%CheckStep==0)
+            {
+            boundary_conditions(f1);
             PulsEn=check(f);
+            }
         if (OutStep!=0 && count%OutStep==0)
             {
-            if (CheckStep==0 || count%CheckStep!=0)
+            if (CheckStep!=0 && count%CheckStep!=0)
+                {
+                boundary_conditions(f1);
                 PulsEn=check(f);
-            Master printing(f1,dtdid,t_cur,count,PulsEn);
-            };
-        if (SnapStep!=0 && count%SnapStep==0) 
+                }
+            printing(f1,dtdid,t_cur,count,PulsEn);
+            }
+        if (SnapStep!=0 && count%SnapStep==0)
             snapshot(f,t_cur,count);
         for(l=0;l<nvar;l++)
         for(i=ghost;i<mm1;i++)
@@ -100,7 +109,7 @@ int main(int argc, char** argv)
               }*/
    }
 
-   dump(f,t_cur,count); 
+   dump(f,t_cur,count);
 //   free_mem_2f(s_func,n3+2,kol_masht);
    free_mem_4f(f  ,nvar, m1, m2, m3);
    free_mem_4f(f1 ,nvar, m1, m2, m3);
@@ -110,10 +119,9 @@ int main(int argc, char** argv)
    free_mem_4f(df4,nvar, m1, m2, m3);
    free_mem_4f(df5,nvar, m1, m2, m3);
    free_mem_3f(nut, m1, m2, m3);
-   if(t_cur>Ttot&&!razlet) nmessage("work is succesfully done",t_cur);
+   if(t_cur>=Ttot&&!razlet) nmessage("work is succesfully done",t_cur);
        else nrerror("this is break of scheme",t_cur);
    MPI_Finalize();
+   nmessage("mpi_finalize is done",t_cur);
 return 0;
-}                                   
-
-
+}

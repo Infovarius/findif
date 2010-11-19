@@ -142,4 +142,3 @@ void erase_shell(void)
  free_mem_1f(rk,Ns+1);
  free_mem_1f(nl,Ns+1);
 }
-
