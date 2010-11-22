@@ -425,9 +425,6 @@ int tag=1,v;
 
  for(v=0;v<nvar;v++)
     print_array3d(fd,f1[v],0,m1,0,m2,0,m3);
- print_array3d(fd,B[0],0,m1,0,m2,0,m3);
- print_array3d(fd,B[1],0,m1,0,m2,0,m3);
- print_array3d(fd,B[2],0,m1,0,m2,0,m3);
  print_array3d(fd,nu,0,m1,0,m2,0,m3);
  fclose(fd);
 
