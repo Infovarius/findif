@@ -11,10 +11,10 @@ FILE *fileopen(const char *x, int mode)  //opening of file to ff
                          /*   0-rewrite;>0-append;<0-read    */
 {
 FILE *ff;
-char* s_mode;                              
-if(mode>0) s_mode="a";
-if(mode<0) s_mode="r";
-if(mode==0) s_mode="w";
+char* s_mode;
+if(mode>0) s_mode="ab";
+if(mode<0) s_mode="rb";
+if(mode==0) s_mode="wb";
 if ((ff = fopen(x,s_mode))==NULL)
 	 {
 		nrerror ("Can't open file !\n",t_cur,count);
@@ -132,6 +132,7 @@ int init_data(void)                 //returns code of error
  int i,j,k,l,tmpr;
  float tmpd;
  char tmpc;
+ int _t;
 
  FILE *inp = fileopen(NameInitFile,-1);
  read_tilleq(inp,'n');   if(fscanf(inp,"%lf",&t_cur)==0) error=1;
@@ -143,6 +144,7 @@ int init_data(void)                 //returns code of error
  read_tilleq(inp,'n');   if(fscanf(inp,"%d",&N2)==0) error=1;
  read_tilleq(inp,'n');   if(fscanf(inp,"%d",&N3)==0) error=1;
  read_tilleq(inp,'n');   if(fscanf(inp,"%lf",&Re)==0) error=1;
+ fgetc(inp);  fgetc(inp);
 
  init_parallel();
  operate_memory(1);                     // creating arrays
@@ -150,65 +152,16 @@ int init_data(void)                 //returns code of error
  for(tmpr=0;tmpr<=rank;tmpr++)           //reading until arrays of this process
  {
  for(l=0;l<nvar;l++)                    // reading f
-        {
-        do fscanf(inp,"%c",&tmpc); while (tmpc!='{');
-        for(i=0;i<m1;i++)
-           {
-           do fscanf(inp,"%c",&tmpc); while (tmpc!='{');
-           for(j=0;j<m2;j++)
-               {
-               do fscanf(inp,"%c",&tmpc); while (tmpc!='{');
-               for(k=0;k<m3;k++)
-                  {
-                  if(fscanf(inp,"%g",&tmpd)==0) error=2;
-                  fscanf(inp,"%c",&tmpc);
-                  f[l][i][j][k]=tmpd;
-                  }
-               fscanf(inp,"%c",&tmpc);
-               }
-            fscanf(inp,"%c",&tmpc);
-            }
-        fscanf(inp,"%c",&tmpc);
-        }
- for(l=0;l<6;l++)                    // reading B and j
-        {
-        do fscanf(inp,"%c",&tmpc); while (tmpc!='{');
-        for(i=0;i<m1;i++)
-           {
-           do fscanf(inp,"%c",&tmpc); while (tmpc!='{');
-           for(j=0;j<m2;j++)
-               {
-               do fscanf(inp,"%c",&tmpc); while (tmpc!='{');
-               for(k=0;k<m3;k++)
-                  {
-                  if(fscanf(inp,"%g",&tmpd)==0) error=2;
-                  fscanf(inp,"%c",&tmpc);
-                  B[l%3][i][j][k]=tmpd;
-                  }
-               fscanf(inp,"%c",&tmpc);
-               }
-            fscanf(inp,"%c",&tmpc);
-            }
-        fscanf(inp,"%c",&tmpc);
-        }
- do fscanf(inp,"%c",&tmpc); while (tmpc!='{');   //reading nut
  for(i=0;i<m1;i++)
-     {
-     do fscanf(inp,"%c",&tmpc); while (tmpc!='{');
-     for(j=0;j<m2;j++)
-         {
-         do fscanf(inp,"%c",&tmpc); while (tmpc!='{');
-         for(k=0;k<m3;k++)
-             {
-             if(fscanf(inp,"%g",&tmpd)==0) error=3;
-             fscanf(inp,"%c",&tmpc);
-             nut[i][j][k]=tmpd;
-             }
-         fscanf(inp,"%c",&tmpc);
-         }
-     fscanf(inp,"%c",&tmpc);
-     }
- fscanf(inp,"%c",&tmpc);
+ for(j=0;j<m2;j++)
+       if((_t=fread(f[l][i][j],sizeof(double),m3,inp))<m3) error=2;
+/* for(l=0;l<6;l++)                    // reading B and j
+        for(i=0;i<m1;i++)
+        for(j=0;j<m2;j++)
+             if(fread(B[l%3][i][j],sizeof(double),m3,inp)<m3) error=2;*/
+ for(i=0;i<m1;i++)
+ for(j=0;j<m2;j++)
+       if((_t=fread(nut[i][j],sizeof(double),m3,inp))<m3) error=3;
  }
 fileclose(inp);
 if(error) nrerror("Data couldn't have been read from file!!!",-1,error);
@@ -261,6 +214,22 @@ for(i=beg1;i<beg1+n1;i++) {
     fprintf(ff,i<beg1+n1-1 ? "," : "}\n");
     }
 }
+
+void printbin_array3d(FILE *ff,double ***a,
+        int beg1,int n1,int beg2,int n2,int beg3,int n3)
+{
+int i,j,k;
+long sum=0;
+float tmp;
+for(i=beg1;i<beg1+n1;i++)
+for(j=beg2;j<beg2+n2;j++)
+for(k=beg3;k<beg3+n3;k++)
+   {
+   tmp = a[i][j][k];
+   sum += fwrite(&tmp,sizeof(float),1,ff);
+   }
+if(sum<n1*n2*n3) nrerror("Wrong binary output",t_cur,count);
+} 
 
 void check(double ****f)   //calculate energy of pulsations of all components and know if there's crash
 {
@@ -429,8 +398,8 @@ int tag=1,v;
  Master fprintf(fd,"Reynolds number = %lf\n",Re);
 
  for(v=0;v<nvar;v++)
-    print_array3d(fd,f1[v],0,m1,0,m2,0,m3);
- print_array3d(fd,nu,0,m1,0,m2,0,m3);
+    printbin_array3d(fd,f1[v],0,m1,0,m2,0,m3);
+ printbin_array3d(fd,nu,0,m1,0,m2,0,m3);
  fileclose(fd);
 
  if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);

@@ -69,12 +69,11 @@ void pde(double t, double ****f, double ****df)
        for(m=0;m<3;m++) {
          dv1[l][m]=dr(f[l],i,j,k,m+1,0,dx[m],ghost, approx);
          dv2[l][m]=dr(f[l],i,j,k,m+1,1,dx[m]*dx[m],ghost, approx);
-         for(n=0;n<3;n++) if(n!=m)
-              dA11[l][m][n]=d2cross(f[l],i,j,k,m+1,n+1,ghost,approx);
          }
+        dA11[l][0][1] = dA11[l][1][0] = r_1[i]*d2cross(f[l],i,j,k,2,1,ghost,approx);
+        dA11[l][0][2] = dA11[l][2][0] = d2cross(f[l],i,j,k,3,1,ghost,approx);
+        dA11[l][1][2] = dA11[l][2][1] = r_1[i]*d2cross(f[l],i,j,k,3,2,ghost,approx);
         dv1[l][1] *= r_1[i];     dv2[l][1] *= r_2[i];
-        for(n=0;n<3;n++) {dA11[l][1][n] *= r_1[i];
-                          dA11[l][n][1] *= r_1[i];}
         }
 
        df[4][i][j][k]=f[2][i][j][k]*(dv1[5][0]-dv1[4][1]+f[5][i][j][k]*r_1[i])-f[3][i][j][k]*(dv1[4][2]-dv1[6][0])
@@ -341,10 +340,7 @@ void  init_conditions()
    for(k=0;k<m3;k++)
        {
        node[i][k] = NodeUnknown;
-       for(j=0;j<m2;j++) nut[i][j][k]=(
-//        (0.39+14.8*exp(-2.13*pow(2*coordin(k,2)-l3,2)))*0.1*0
-                    +1.)/Re;
-      if(pr_neighbour[0]!=-1 && i<ghost ||
+       if(pr_neighbour[0]!=-1 && i<ghost ||
            pr_neighbour[1]!=-1 && i>=mm1  ||
            pr_neighbour[4]!=-1 && k<ghost ||
            pr_neighbour[5]!=-1 && k>=mm3) setType(&node[i][k],NodeClued);
@@ -409,7 +405,7 @@ void  init_conditions()
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
        {
-//       if(isType(node[i][k],NodeGhostFluid)) node[i][k] -= NodeGhostFluid;   //temporarily - deleting all fictive cells
+//       if(isType(node[i][k],NodeGhostFluid)) node[i][k] -= NodeGhostFluid;        //turning off fluid fictive cells
        if(isType(node[i][k],NodeFluid)) eta[i][j][k]=1./Rm;
        if(isType(node[i][k],NodeShell)) eta[i][j][k]=etash/Rm;
        if(isType(node[i][k],NodeVacuum)) eta[i][j][k]=etavac/Rm;
@@ -435,19 +431,26 @@ if(!goon) {
                       + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
                        (Rfl*Rfl-pow(coordin(i,0)-rc,2) - pow(coordin(k,2),2))*4/Rfl/Rfl;*/
         f[1][i][j][k]=f[2][i][j][k]=f[3][i][j][k]=0;
+        nut[i][j][k]=(
+//        (0.39+14.8*exp(-2.13*pow(2*coordin(k,2)-l3,2)))*0.1*0
+                    +1.)/Re;
                                         }
       if(isType(node[i][k],NodeFluid)/*||isType(node[i][k],NodeShell)*/ )
-                 {
-/*                 f[4][i][j][k]=coordin(i,0)*cos(coordin(j,1))*sin(coordin(j,1));
-                 f[5][i][j][k]=coordin(i,0)*cos(coordin(j,1))*cos(coordin(j,1));
-                 f[6][i][j][k]=0;*/
-                 }
+                 {   }
+                 f[4][i][j][k]=f[5][i][j][k]=f[6][i][j][k]=0;
                  f[4][i][j][k]=coordin(i,0)*cos(coordin(j,1))*sin(coordin(j,1));
                  f[5][i][j][k]=coordin(i,0)*cos(coordin(j,1))*cos(coordin(j,1));
                  f[6][i][j][k]=0;
+//                 if(!isType(node[i][k],NodeMagn))
+                  if(isType(node[i][k],NodeFluid))
+                     {
+                     f[4][i][j][k]+=0.0*((double)rand()-RAND_MAX/2)/RAND_MAX;
+                     f[5][i][j][k]+=0.0*((double)rand()-RAND_MAX/2)/RAND_MAX;
+                     f[6][i][j][k]+=0.0*((double)rand()-RAND_MAX/2)/RAND_MAX;
+                     }
       }
 //   struct_func(f,2,2,3);
-   nmessage("Arrays were filled with initial values - calculation from beginning",0,0);
+   nmessage("Arrays were filled with initial values - calculation from beginning",-1,-1);
    } else nmessage("Arrays were filled with initial values - calculation is continuing",t_cur,count);
 }
 
@@ -522,7 +525,7 @@ if(!goon) {                       //reading sizes from file when continuing
    for(i=0;i<6;i++)
      fprintf(iop,"%d ",pr_neighbour[i]);
    fprintf(iop,"\n");
-   fclose(iop);
+   fileclose(iop);
 
 }
 

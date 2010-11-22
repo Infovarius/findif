@@ -126,11 +126,13 @@ double interpolation(double,double, double,double,double,double);
 void calculate_curl(double ****mas,double ****out,enum TypeNodes tip);
 /*------- ioutil.c  ------*/
 FILE *fileopen(const char *, int mode);
+void fileclose(FILE *fd);
 void init_param(int argc, char** argv,double *dtnext);
 int init_data(void);
 void print_array1d(FILE *ff,double *a,int beg1,int n1);
 void print_array2d(FILE *ff,double **a,int beg1,int n1,int beg2,int n2);
 void print_array3d(FILE *ff,double ***a,int beg1,int n1,int beg2,int n2,int beg3,int n3);
+void printbin_array3d(FILE *ff,double ***a,int beg1,int n1,int beg2,int n2,int beg3,int n3);
 void check(double ****f);
 void printing(double ****f1,double dtdid,double t_cur,long count,double en);
 void dump(double ****f1,double ***nu,double t_cur,long count);
