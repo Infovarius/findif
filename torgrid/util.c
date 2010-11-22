@@ -11,7 +11,7 @@ void nrerror(char error_text[],double t_cur,long count)
     fprintf(err,"Run-time error of proc#%d at t=%-6.4lf:\n",rank,t_cur);
     fprintf(err,"%s\n",error_text);
     fprintf(err,"...now exiting to system...\n");
-    fclose(err);
+    fileclose(err);
     if(f) operate_memory(-1);
     add_control_point("END");
     MPI_Finalize();
@@ -26,7 +26,7 @@ void nmessage(char msg_text[],double t_cur,long count)
    fprintf(msg,"message of proc#%d at t=%-7.4lf Niter=%-6d time of work=%g sec:\n",rank,
                     t_cur,count,time_now-time_begin);
    fprintf(msg,"%s\n",msg_text);
-   fclose(msg);
+   fileclose(msg);
 }
 
 void add_control_point(char *name_cp)
@@ -73,15 +73,25 @@ int i, j, k;
    for(i = 0; i < mvar; i++)
    for(j = 0; j < n1; j++)
    for(k = 0; k < n2; k++)
+    { 
+    if(!aaa[i][j][k]) {putlog("error at releasing",(long)aaa[i][j][k]);return;}
 	free(aaa[i][j][k]);
+	}
 
    for(i = 0; i < mvar; i++)
    for(j = 0; j < n1; j++)
+    {
+    if(!aaa[i][j]) {putlog("error at releasing",(long)aaa[i][j]);return;}
 	free(aaa[i][j]);
+	}
 
    for(i = 0; i < mvar; i++)
+    {
+    if(!aaa[i]) {putlog("error at releasing",(long)aaa[i]);return;}
 	free(aaa[i]);
+	}
 
+   if(!aaa) {putlog("error at releasing",(long)aaa);return;}
    free(aaa);
 
    return;
@@ -115,12 +125,19 @@ int j, k;
 
    for(j = 0; j < n1; j++)
    for(k = 0; k < n2; k++)
+    {
+    if(!aaa[j][k]) {putlog("error at releasing",(long)aaa[j][k]);return;}
 	free(aaa[j][k]);
+	}
 
    for(j = 0; j < n1; j++)
+    {
+    if(!aaa[j]) {putlog("error at releasing",(long)aaa[j]);return;}
 	free(aaa[j]);
+	}
 
-   free(aaa);
+    if(!aaa) {putlog("error at releasing",(long)aaa);return;}
+	free(aaa);
 
    return;
 }
@@ -146,8 +163,12 @@ void free_mem_2f(double **aa, int n1, int n2)
 int j, k;
 
    for(j = 0; j < n1; j++)
+    {
+    if(!aa[j]) {putlog("error at releasing",(long)aa[j]);return;}
 	free(aa[j]);
+	}
 
+   if(!aa) {putlog("error at releasing",(long)aa);return;}
    free(aa);
 
    return;
@@ -166,6 +187,7 @@ return(a);
 void free_mem_1f(double *a, int n)
 {
 int k;
+   if(!a) {putlog("error at releasing",(long)a);return;}
    free(a);
    return;
 }

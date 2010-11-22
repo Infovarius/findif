@@ -252,7 +252,7 @@ void  boundary_conditions(double ****f, double ***nut)
   for(i=0;i<m1;i++)
      for(j=0;j<m2;j++)
         for(k=0;k<m3;k++)
-          if(isType(node[i][k],NodeGhostFluid)) {
+          if(isType(node[i][k],NodeGhostFluid) && !isType(node[i][k],NodeClued)) {
                 r2=(r1=floor(refr[i][k]))+1;
                 z2=(z1=floor(refz[i][k]))+1;
                 for(l=0;l<nvar;l++)
