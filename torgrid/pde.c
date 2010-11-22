@@ -162,6 +162,8 @@ void  boundary_conditions(double ****f)
    z[0]=z[1]=z[2]=-1; z[3]=1;  //  влияет на вид гран.условий (-1:жесткие, 1:свободные)
 
   /*============================ divertor =================================*/
+  if(t_cur>0)                  // divertors are off till t=1 sec
+  {
   if(n[2]==0)
   for(i=0;i<m1;i++)
     for(j=ghost;j<=ghost;j++)
@@ -169,11 +171,12 @@ void  boundary_conditions(double ****f)
          {
          vrho = f[2][i][j][k]*costh[i][k]+f[0][i][j][k]*sinth[i][k];
          vth  = -f[2][i][j][k]*sinth[i][k]+f[0][i][j][k]*costh[i][k];
-         vphi = sqrt(pow(f[1][i][j][k],2)+pow(vth,2));
+         vphi = sqrt(pow(f[1][i][j][k],2)+vth*vth);           //sqrt(vfi*vfi+vth*vth)
          f[0][i][j][k] = vrho*sinth[i][k]+vphi*costh[i][k]*sin(chi[i][k]);
          f[1][i][j][k] = vphi*cos(chi[i][k]);
          f[2][i][j][k] = vrho*costh[i][k]-vphi*sinth[i][k]*sin(chi[i][k]);
          }
+   }
   /*----------------------- exchanging of ghosts -------------------------*/
  if(pr_neighbour[0]>-1)
   if(pr_neighbour[0]==rank) CopyGridToBuffer(f,nut,buf_recv[0],n1,ghost,ghost,mm1-1,mm2-1,mm3-1);
@@ -250,7 +253,7 @@ void  boundary_conditions(double ****f)
   return;
 }
 
-void  init_conditions(double ****f,double Re)
+void  init_conditions()
 {
    int i,j,k,l;
    double r2, rho, r1, z1;
@@ -279,9 +282,6 @@ void  init_conditions(double ****f,double Re)
                      }
         r1 = coordin(i,0);   z1 = coordin(k,2);
         rho = sqrt(z1*z1+pow(r1-rc,2));
-        sinth[i][k]=(r1-rc)/rho;
-        costh[i][k]=   z1  /rho;
-        chi[i][k]  = chimax*M_PI/180./rho/R;
         refr[i][k] = rc + (r1-rc)*(2*R/rho-1);      //physical coordinates
         refz[i][k] =        z1*(2*R/rho-1);
         refr[i][k] = (refr[i][k]-rc+R)/dx[0]-0.5-n[0]+ghost;
@@ -293,7 +293,13 @@ void  init_conditions(double ****f,double Re)
                        if(k+l>=0&&k+l<m3) if(node[i][k+l]!=3) node[i][k+l] = 2;
                      }
                   }
+        sinth[i][k]=(r1-rc)/rho;                    // for divertor's blade
+        costh[i][k]=   z1  /rho;
+        chi[i][k]  = chimax*M_PI/180.*rho/R;
        }
+
+   for(i=0;i<m1;i++) { r_1[i]=1./coordin(i,0); r_2[i]=r_1[i]*r_1[i]; }
+
    for(i=0;i<m1;i++)
    for(k=0;k<m3;k++)
       if(pr_neighbour[0]!=-1 && i<ghost ||
@@ -304,6 +310,7 @@ void  init_conditions(double ****f,double Re)
 // --------------- initial conditions -----------------------------------------
 //   k1=2*M_PI/lfi;  k3=M_PI/l3;
 
+if(!goon) {
    for(i=0;i<m1;i++)
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
@@ -319,6 +326,9 @@ void  init_conditions(double ****f,double Re)
         f[3][i][j][k]=0;
         }
 //   struct_func(f,2,2,3);
+   Master nmessage("Arrays were filled with initial values - calculation from beginning",t_cur);
+           }
+   else Master nmessage("Arrays were filled with initial values - calculation is continuing",t_cur);
 }
 
 void init_parallel()
@@ -346,7 +356,8 @@ void init_parallel()
                  k3*((kp1-1)*kp2*kp3+kp1*(kp2-1)*kp3+kp1*kp2*(kp3-1));
          if(mintime<0 || vtime<mintime) { mintime=vtime; nd1=i; nd2=j; }
          }
-  pp[0]=divisors[nd1]; pp[1]=divisors[nd2]; pp[2]=size/pp[0]/pp[1];                  // number of procs along axes
+if(!goon) {                       //reading from file when continuing
+  pp[0]=divisors[nd1]; pp[1]=divisors[nd2]; pp[2]=size/pp[0]/pp[1];  }               // number of procs along axes
   pr[0] = rank%pp[0]; pr[1] = (rank/pp[0])%pp[1]; pr[2] = (rank/pp[0]/pp[1])%pp[2];  // coordinates of subregion
 
 /* dimensions of subregion:         global indicies of subregion origin          if there's nonequal subregions*/
@@ -380,7 +391,7 @@ void init_parallel()
    buf_recv[j+2*i] = alloc_mem_1f(buf_size[i]);
   }
 
-   iop=fopen(fname_stat,"w");
+   iop=fopen(NameStatFile,"w");
    fprintf(iop,"%d\n",rank);
    fprintf(iop,"%d\t%d\t%d\n",pr[0],pr[1],pr[2]);
    fprintf(iop,"%d\t%d\t%d\n",pp[0],pp[1],pp[2]);

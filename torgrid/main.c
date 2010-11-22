@@ -6,72 +6,54 @@ int main(int argc, char** argv)
 {
    double dttry, dtdid, dtnext;
    int i,j,k,l,i2,j2,k2;                           FILE *fd;
+   int strl;
 
  /* Initialize MPI */
  MPI_Init(&argc,&argv);
  /*  Get rank of this process and process group size */
  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
- MPI_Comm_size(MPI_COMM_WORLD,&size);           putlog("main:reach this ",numlog++);
+ MPI_Comm_size(MPI_COMM_WORLD,&size);
 
   NameMessageFile = "message.dat";
-  NameErrorFile = "error.dat";
+  NameErrorFile = "error.err";
   NameNuFile = "nut.dat";
   NameVFile  = "vv.dat";
-  //NameDumpFile = "dump.dat";
   NameEnergyFile = "energy.dat";
   KaskadVarFile = "kaskvar.dat";
-                                       numlog=0;
-   init_param(argc,argv,&dtnext);       // initilization of parameters
+  fname = (argc>1)? argv[1] : argv[0];
+  NameSnapFile = fname;
+  strl=strlen(fname);
+  NameCPFile = (char *)calloc(strl+4,sizeof(char));
+  sprintf(NameCPFile,"%s.cp",fname);   NameCPFile[strl+3] = 0;
+  NameDumpFile =(char *)calloc(strl+5,sizeof(char));
+  sprintf(NameDumpFile ,"%s.dmp",fname); NameDumpFile[strl+4] = 0;
+  NameStatFile =(char *)calloc(strl+9,sizeof(char));
+  sprintf(NameStatFile,"%s_%d.sta",fname,rank); NameStatFile[strl+8] = 0;
+
+   init_param(argc,argv,&dtnext);       // initialization of parameters
    Gamma=1e-4;
-
-   ghost=(approx-1)/2;            //radius of approx sample
-   dx[0]=2*R/N1;
-   dx[1]=lfi/N2;
-   dx[2]=2*R/N3;
-
+   ghost=(approx-1)/2;                  //radius of approx sample
    t_cur=0;
    count=0; enter = 0;
 
-   nmessage("work has begun",0);
+/* ---------------------- initialization of arrays --------------------- */
+   goon = (int)(fd=fileopen(NameCPFile,-1));
+   if(goon)
+      { do fscanf(fd,"%s\n",NameInitFile); while (!feof(fd));
+        goon = strcmp(NameInitFile,"END");
+      }
+   if(goon) init_data();
+       else { init_parallel();  operate_memory(1);}
 
-   sprintf(fname,"%s",(argc>1)? argv[1] : argv[0]);
-   NameSnapFile = fname;
-   sprintf(NameDumpFile ,"%s.dmp",fname);
-   sprintf(fname_stat,"%s_%d.sta",fname,rank);
-
-   init_parallel();
-
-   s_func = alloc_mem_2f(n3+2,kol_masht);
-   f  =alloc_mem_4f(nvar, m1, m2, m3);   //f[3]-pressure,f[0..2]-v(vector)
-   f1 =alloc_mem_4f(nvar, m1, m2, m3);
-   df =alloc_mem_4f(nvar, m1, m2, m3);
-   df2=alloc_mem_4f(nvar, m1, m2, m3);
-   df3=alloc_mem_4f(nvar, m1, m2, m3);
-   df4=alloc_mem_4f(nvar, m1, m2, m3);
-   df5=alloc_mem_4f(nvar, m1, m2, m3);
-   r_1=alloc_mem_1f(m1);                  // r^(-1)
-   r_2=alloc_mem_1f(m1);                  // r^(-2)
-   node=alloc_mem_2f(m1, m3);         // kind of nodes
-   refr=alloc_mem_2f(m1, m3);         // reflection of nodes relative circle
-   refz=alloc_mem_2f(m1, m3);
-   sinth=alloc_mem_2f(m1, m3);
-   costh=alloc_mem_2f(m1, m3);
-   chi=alloc_mem_2f(m1, m3);          // angle of blade tilt
-   nut=alloc_mem_3f(m1, m2, m3);
-   averf = alloc_mem_3f(3,m1,m3);
-   vfi = alloc_mem_1f(N3);
-   totvfi = alloc_mem_1f(N3);
+   dx[0]=2*R/N1;
+   dx[1]=lfi/N2;
+   dx[2]=2*R/N3;
+   init_conditions();
 
    init_shell();
 
-   time_begin = MPI_Wtime();
-
-   Master fileopen("error.err",0);
-
-   init_conditions(f,Re);
-   for(i=0;i<m1;i++) { r_1[i]=1./coordin(i,0); r_2[i]=r_1[i]*r_1[i]; }
 //--------------------------------------
-    Master {
+  if(!goon) Master {
       fd=fileopen("coord",rank);
       for(i=0;i<N1+2*ghost;i++) fprintf(fd,"%e ",coordin(i,0));
       fprintf(fd,"\n");
@@ -81,6 +63,7 @@ int main(int argc, char** argv)
       fclose(fd);
      }
 //--------------------------------------
+ if(!goon) {
     if(rank!=0) MPI_Recv("",0,MPI_CHAR,rank-1,1,MPI_COMM_WORLD,statuses);
 
  fd=fileopen("debug",rank);
@@ -94,17 +77,23 @@ int main(int argc, char** argv)
 
  if(rank!=size-1) MPI_Send("",0,MPI_CHAR,rank+1,1,MPI_COMM_WORLD);
              else nmessage("debug is done",t_cur);
+            }
 //--------------------------------------
 
-   boundary_conditions(f);                             putlog("main:reach this ",0);
-   dump(f,t_cur,count);                                 putlog("main:reach this ",1);
+   boundary_conditions(f);
+   if(!goon)  dump(f,t_cur,count);
 
-   if(CheckStep!=0) check(f);                            putlog("main:reach this ",2);
+   time_begin = MPI_Wtime();
+   if(goon) Master nmessage("work has begun",0);
+       else Master nmessage("work continued",t_cur);
+   Master fileopen(NameErrorFile,abs(goon));
+
+   if(CheckStep!=0) check(f);
    if (OutStep!=0) printing(f,0,t_cur,count,PulsEnergy);
 
 /*------------------------ MAIN ITERATIONS -------------------------*/
    while (t_cur < Ttot && !razlet) {
-        pde(t_cur, f, df);                            
+        pde(t_cur, f, df);
         dttry=dtnext;
         timestep(f, df, t_cur, f1, dttry, &dtdid, &dtnext);
         nut_by_flux(f,dtdid);
@@ -143,30 +132,15 @@ int main(int argc, char** argv)
               }*/
    }
 
-   dump(f,t_cur,count);
-//   free_mem_2f(s_func,n3+2,kol_masht);
-   free_mem_4f(f  ,nvar, m1, m2, m3);
-   free_mem_4f(f1 ,nvar, m1, m2, m3);
-   free_mem_4f(df ,nvar, m1, m2, m3);
-   free_mem_4f(df2,nvar, m1, m2, m3);
-   free_mem_4f(df3,nvar, m1, m2, m3);
-   free_mem_4f(df4,nvar, m1, m2, m3);
-   free_mem_4f(df5,nvar, m1, m2, m3);
-   free_mem_3f(nut, m1, m2, m3);
-   free_mem_2f(refr,m1, m3);
-   free_mem_2f(refz,m1, m3);
-   free_mem_2f(sinth,m1, m3);
-   free_mem_2f(costh,m1, m3);
-   free_mem_2f(chi,  m1, m3);
-   free_mem_2f(node,m1, m3);
-   free_mem_3f(averf,3,m1,m3);
-   free_mem_1f(vfi,N3);
-   free_mem_1f(totvfi,N3);
+//   dump(f,t_cur,count);
+
+   operate_memory(-1);
 
    if(t_cur>=Ttot&&!razlet) nmessage("work is succesfully done",t_cur);
        else nrerror("this is break of scheme",t_cur);
    MPI_Barrier(MPI_COMM_WORLD);
    MPI_Finalize();
    nmessage("mpi_finalize is done",t_cur);
+   add_control_point("END");
 return 0;
 }
