@@ -35,7 +35,7 @@ double Gartmann(double rho,double rho0,double ksi)
 
 double vfi_given(double t,double rho,double rho0)
 {
-const double ksi=18L;
+const double ksi=0.001L;
  return( vmod(t)*Gartmann(rho,rho0,ksi) );
 }
 
