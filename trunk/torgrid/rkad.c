@@ -10,7 +10,7 @@
 #define MinScale     (double)1e-7
 
 
-void timestep(double ****f, double ****df, double t, double ****fout,
+void timestep(double ****f, double ****df, double ***nut, double t, double ****fout,
               double dttry, double *dtdid, double *dtnext)
 {
    double dt, err, errs;
@@ -18,7 +18,7 @@ void timestep(double ****f, double ****df, double t, double ****fout,
    dt=dttry;
    for (;;)
    {
-      err = rkck(f, df, t, dt, fout);
+      err = rkck(f, df, nut, t, dt, fout);
       if (VarStep==0 || count%VarStep!=0) {
             *dtdid = dt;
             *dtnext = dt;
@@ -30,7 +30,7 @@ void timestep(double ****f, double ****df, double t, double ****fout,
 
       err *=ErrScale;
       if (err<=1.0)
-         break;
+	 break;
       dt = max(Safety * dt * pow(err, Pshrink), dt*(double)0.1);
       if (t+dt == t)
 	    {
@@ -45,7 +45,7 @@ void timestep(double ****f, double ****df, double t, double ****fout,
       *dtnext = dt * (double)5.0;
 }
 
-double rkck(double ****f, double ****df1, double t, double dt, double ****fout)
+double rkck(double ****f, double ****df1, double ***nut, double t, double dt, double ****fout)
 {
 static double   a2=0.2,a3=0.3,a4=0.6,a5=1.0,a6=0.875,b21=0.2,
 		b31=3.0/40.0,b32=9.0/40.0,b41=0.3,b42 = -0.9,b43=1.2,
@@ -114,24 +114,24 @@ double          dc1=c1-2825.0/27648.0,dc3=c3-18575.0/48384.0,
                                            b65*df5[l][i][j][k]);
    pde(t+a6*dt,fout, df2);
 
-   /*calculating output matrix and error value*/
+ /*calculating output matrix and error value*/
    err = 0.0;
    for(l=0;l<nvar;l++)
    for(i=0;i<m1;i++)
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
-     if(isType(node[i][k],NodeFluid))
+     if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
    {
       fout[l][i][j][k] = f[l][i][j][k]+dt*(c1*df1[l][i][j][k]+
-                                           c3*df3[l][i][j][k]+
-                                           c4*df4[l][i][j][k]+
-                                           c6*df2[l][i][j][k]);
+					   c3*df3[l][i][j][k]+
+					   c4*df4[l][i][j][k]+
+					   c6*df2[l][i][j][k]);
       sca = fabs(f[l][i][j][k])+fabs(dt*df1[l][i][j][k])+MinScale;
       err1 = fabs(dt*(    dc1*df1[l][i][j][k]+
-                          dc3*df3[l][i][j][k]+
-                          dc4*df4[l][i][j][k]+
-                          dc5*df5[l][i][j][k]+
-                          dc6*df2[l][i][j][k]))/sca;
+			  dc3*df3[l][i][j][k]+
+			  dc4*df4[l][i][j][k]+
+			  dc5*df5[l][i][j][k]+
+			  dc6*df2[l][i][j][k]))/sca;
       err = max(err, err1);
    }
    return err;
