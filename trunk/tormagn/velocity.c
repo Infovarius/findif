@@ -25,7 +25,8 @@ double a1=30,amp1=0,amp2=1,t1=0.03;
 
 double chimod(double t,double phi)
 {
- return( (th(-2*exp(-50*t)*(phi-40*M_PI*t))+1)/2 );
+// return( (th(-2*exp(-50*t)*(phi-40*M_PI*t))+1)/2 );
+ return 1;
 }
 
 double Gartmann(double rho,double rho0,double ksi)
@@ -35,7 +36,7 @@ double Gartmann(double rho,double rho0,double ksi)
 
 double vfi_given(double t,double rho,double rho0)
 {
-const double ksi=0.001L;
+const double ksi=18.;
  return( vmod(t)*Gartmann(rho,rho0,ksi) );
 }
 

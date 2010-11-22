@@ -183,7 +183,7 @@ void  boundary_conditions(double ****f)
    znorm=-1; ztau=1;          // rather for Anorm&Atau not Ar,Aphi,Az
 
   /*============================ divertor =================================*/
-  if(t_cur>100)                  // divertors are off till t sec
+  if(t_cur<00)                  // divertors are off till t sec
   if(n[2]==0)
   for(i=0;i<m1;i++)
     for(j=ghost;j<=ghost;j++)
@@ -290,19 +290,16 @@ void  boundary_conditions(double ****f)
                 }
           if(isType(node[i][k],NodeGhostMagn)) {
                 i1=floor(refr_m[i][k]+0.5);
-//                rin = coordin(i1,0); rfict = coordin(i,0);
+                rin = coordin(i1,0); rfict = coordin(i,0);
                 k1=floor(refz_m[i][k]+0.5);
                 An = ( f[4][i1][j][k1]*(i1-i)+f[6][i1][j][k1]*(k1-k) )/
                      ( (i1-i)*(i1-i) + (k1-k)*(k1-k) );
 /*                for(l=4;l<=6;l++)
                    f[l][i][j][k] = z[l]*f[l][i1][j][k1];*/
                 f[4][i][j][k] = ztau*f[4][i1][j][k1] + (znorm-ztau)*An*(i1-i);
-                f[5][i][j][k] = ztau*f[5][i1][j][k1];
-                f[6][i][j][k] = ztau*f[6][i1][j][k1] + (znorm-ztau)*An*(k1-k);
-                if((i1-i)*(k1-k)!=0) {
-                                     f[4][i][j][k] = -f[4][i1][j][k1];
-                                     f[6][i][j][k] = -f[6][i1][j][k1];
-                                     }
+//                f[5][i][j][k] = ztau*f[5][i1][j][k1];
+                f[5][i][j][k] = f[5][i1][j][k1] *
+                              (rin+rfict-(i-i1)*dx[0]) / (rin+rfict+(i-i1)*dx[0]) ;  
 /*                switch (i1-i)
                 {
                   case -1: case -3: case -5:
@@ -322,6 +319,11 @@ void  boundary_conditions(double ****f)
                            f[5][i][j][k]+= f[5][i2][j][k1] * (rin*rin-rfict*rfict)*(13*rfict+7*rin)/2./rfict/(2*rfict+3*rin)/(7*rfict+3*rin);
                   break;
                 }*/
+                f[6][i][j][k] = ztau*f[6][i1][j][k1] + (znorm-ztau)*An*(k1-k);
+                if((i1-i)*(k1-k)!=0) {
+                                     f[4][i][j][k] = -f[4][i1][j][k1];
+                                     f[6][i][j][k] = -f[6][i1][j][k1];
+                                     }
                 }
         }
 
@@ -394,6 +396,7 @@ void  init_conditions()
                           {setType(&node[i][k],NodeGhostMagn);
                            refz_m[i][k] = 2*mm3-k-1;}
         if(!isType(node[i][k],NodeGhostMagn)) setType(&node[i][k],NodeMagn);
+                                         else node[i][k] -= NodeGhostMagn;      //temporarily - deleting all fictive cells
      //for divertor's blade
         sinth[i][k]=(r1-rc)/rho;
         costh[i][k]=   z1  /rho;
@@ -406,6 +409,7 @@ void  init_conditions()
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
        {
+       if(isType(node[i][k],NodeGhostFluid)) node[i][k] -= NodeGhostFluid;
        if(isType(node[i][k],NodeFluid)) eta[i][j][k]=1./Rm;
        if(isType(node[i][k],NodeShell)) eta[i][j][k]=etash/Rm;
        if(isType(node[i][k],NodeVacuum)) eta[i][j][k]=etavac/Rm;
@@ -432,15 +436,15 @@ if(!goon) {
                        (Rfl*Rfl-pow(coordin(i,0)-rc,2) - pow(coordin(k,2),2))*4/Rfl/Rfl;*/
         f[1][i][j][k]=f[2][i][j][k]=f[3][i][j][k]=0;
                                         }
-      if(isType(node[i][k],NodeMagn)/*||isType(node[i][k],NodeShell)*/ )
+      if(isType(node[i][k],NodeFluid)/*||isType(node[i][k],NodeShell)*/ )
                  {
-                 f[4][i][j][k]=((double)rand()-RAND_MAX/2)/RAND_MAX;
-                 f[5][i][j][k]=((double)rand()-RAND_MAX/2)/RAND_MAX;
-                 f[6][i][j][k]=((double)rand()-RAND_MAX/2)/RAND_MAX;
+/*                 f[4][i][j][k]=coordin(i,0)*cos(coordin(j,1))*sin(coordin(j,1));
+                 f[5][i][j][k]=coordin(i,0)*cos(coordin(j,1))*cos(coordin(j,1));
+                 f[6][i][j][k]=0;*/
                  }
-/*                 f[4][i][j][k]=1;
-                 f[5][i][j][k]=0.1;
-                 f[6][i][j][k]=1;*/
+                 f[4][i][j][k]=coordin(i,0)*cos(coordin(j,1))*sin(coordin(j,1));
+                 f[5][i][j][k]=coordin(i,0)*cos(coordin(j,1))*cos(coordin(j,1));
+                 f[6][i][j][k]=0;
       }
 //   struct_func(f,2,2,3);
    nmessage("Arrays were filled with initial values - calculation from beginning",0,0);

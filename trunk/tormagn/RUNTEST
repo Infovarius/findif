@@ -3,7 +3,7 @@
 6.283185307	| streamwise length (full round)
 4		| distance from centre to axis of torus
 1		| inner radius of torus (with fluid)
-1.3		| outer radius of torus (with shell)
+1		| outer radius of torus (with shell)
 3		| radius of region to be modelled
 
 ---------  Hydrodynamical parameters ------------------------------
