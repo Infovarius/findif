@@ -26,7 +26,7 @@ enum  TypeNodes {NodeUnknown=0,NodeClued=1,
                                /*NodeFluid=8,*/ NodeGhostFluid=16};       // for hydrodynamics
 LEVEL double ***averf;
 LEVEL double *totvfi, *vfi;
-LEVEL double Gamma, lfi, R, rc, Re;
+LEVEL double Gamma, lfi, R, rc, Re, p1;
 
 LEVEL int    m1, m2, m3, mm1, mm2, mm3, n1, n2, n3, N1, N2, N3, Ns,
              approx, ghost, nvar;

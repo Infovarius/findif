@@ -56,7 +56,7 @@ void pde(double t, double ****f, double ****df)
 		     ;
       df[2][i][j][k]=nut[i][j][k]*(dv2[2][0]+dv2[2][1]+dv2[2][2]+r_1[i]*dv1[2][0]
 				   -f[2][i][j][k]*r_2[i]+2*dv1[1][1]*r_1[i])
-		     +1-dp1[1]//-dw/r_1[i] -2*w*f[1][i][j][k]                   //forces of inertion
+		     +p1/r_1[i]*0+p1/rc-dp1[1]//-dw/r_1[i] -2*w*f[1][i][j][k]                   //forces of inertion
 //                     -(j+n[2]<=ghost+2 ? (coordin(i,0)-rc)*f[2][i][j][k] :0)            //helical force
 		     + (dn1[0]-f[1][i][j][k])*dv1[2][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[2][1]
@@ -214,8 +214,7 @@ void  boundary_conditions(double ****f, double ***nut)
 		}
 
     MPI_Waitall(req_numR,RecvRequest,statuses);
-    if(statuses[0].MPI_ERROR) putlog("bc:error during transfer=",numlog);
-
+  if(statuses[0].MPI_ERROR) putlog("bc:error during transfer=",numlog++);
   if(pr_neighbour[0]>-1) CopyBufferToGrid(f,nut,buf_recv[0],0,0,0,ghost-1,m2-1,m3-1);
   if(pr_neighbour[1]>-1) CopyBufferToGrid(f,nut,buf_recv[1],mm1,0,0,m1-1,m2-1,m3-1);
 
@@ -234,7 +233,8 @@ void  boundary_conditions(double ****f, double ***nut)
 	       }
 
     MPI_Waitall(req_numR,RecvRequest,statuses);
-    if(statuses[0].MPI_ERROR) putlog("bc:error during transfer=",numlog);
+  if(statuses[0].MPI_ERROR) putlog("bc:error during transfer=",numlog++);
+											  
 
   if(pr_neighbour[4]>-1) CopyBufferToGrid(f,nut,buf_recv[4],0,0,0,m1-1,m2-1,ghost-1);
   if(pr_neighbour[5]>-1) CopyBufferToGrid(f,nut,buf_recv[5],0,0,mm3,m1-1,m2-1,m3-1);
@@ -310,9 +310,9 @@ void  init_conditions()
                    if(isType(node[i][k],NodeGhostFluid)) node[i][k] -= NodeGhostFluid;
                    for(l=-ghost;l<=ghost;l++)
                      { if(i+l>=0&&i+l<m1) if(!isType(node[i+l][k],NodeFluid))
-                                              setType(&node[i+l][k],NodeGhostFluid);
+                                             setType(&node[i+l][k],NodeGhostFluid);
                        if(k+l>=0&&k+l<m3) if(!isType(node[i][k+l],NodeFluid))
-                                              setType(&node[i][k+l],NodeGhostFluid);
+                                             setType(&node[i][k+l],NodeGhostFluid);
                      }
                   }
      //for divertor's blade
@@ -321,7 +321,7 @@ void  init_conditions()
         chi[i][k]  = chimax*M_PI/180.*rho/R;
        }
 
-   for(i=0;i<m1;i++) { r_1[i] = rc/(rc*(dx[0]*(i-ghost+0.5+n[0])-R)+1); r_2[i] = r_1[i]*r_1[i]; } 
+   for(i=0;i<m1;i++) { r_1[i] = rc/(rc*(dx[0]*(i-ghost+0.5+n[0])-R)+1); r_2[i] = r_1[i]*r_1[i]; }
 
 // --------------- initial conditions -----------------------------------------
 //   k1=2*M_PI/lfi;  k3=M_PI/l3;

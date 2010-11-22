@@ -312,7 +312,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
 //                     l,      totmf[0],mf[0],    totmf[1],mf[1],       totmf[2],mf[2]);
        Master printf("%d  maxf=%e \tmaxdf=%e \tmax(df/f)=%e\n",
                        l,      totmf[0],  totmf[1],      totmf[2]);
-       Master fprintf(fen,"\t %e \t %e",totmf[0],totmf[1]);
+       Master fprintf(fen,"\t %10.10g \t %10.10g",totmf[0],totmf[1]);
        }
   // --------------- quadratic norma of arrays --------------------------------------
    for(l=0;l<nvar;l++) {
@@ -323,7 +323,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
          if(isType(node[i][k],NodeFluid))
             mf[0] += fabs(1+coordin(i,0)*rc)*pow(f1[l][i][j][k],2);
        MPI_Allreduce(&mf, &totmf, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
-       Master fprintf(fen,"\t %e",totmf[0]/N1/N2/N3);
+       Master fprintf(fen,"\t %10.10g",totmf[0]/N1/N2/N3);
        }
 
          Master fprintf(fen,"\n");
