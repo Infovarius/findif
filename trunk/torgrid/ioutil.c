@@ -247,7 +247,6 @@ void printing(double ****f1,double dtdid,double t_cur,long count,double en)
 double temp, div, totdiv;
 int i,j,k,l;
 double mf[3], totmf[3], toten;     //mf[0]=max(f), mf[1]=max(df), mf[2]=max(df/f)
-double *totvfi, *vfi, *avernu;
 FILE *fv,*fnu,*fen,*fkv;
 
 //clrscr();
@@ -308,8 +307,8 @@ Master printf("t=%g dtdid=%g NIter=%d maxdiv=%g(local=%g)\n", t_cur, dtdid, coun
          Master printf("number of runge-kutt calculations=%d\n",enter);
 
  // -------------------- average profile of velocity ---------------------
-         vfi = alloc_mem_1f(N3);        for(i=0;i<N3;i++)    vfi[i]=0;
-         totvfi = alloc_mem_1f(N3);     for(i=0;i<N3;i++) totvfi[i]=0;
+         for(i=0;i<N3;i++)    vfi[i]=0;
+         for(i=0;i<N3;i++) totvfi[i]=0;
          for(i=0;i<m1;i++)
             for(j=ghost;j<mm2;j++)
                for(k=0;k<m3;k++)

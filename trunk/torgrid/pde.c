@@ -8,13 +8,27 @@ if(order==2) return ((a)*(a)+(b)*(b)+(c)*(c));
    else  return  pow(((a)*(a)+(b)*(b)+(c)*(c)),order/2.);
 }
 
+void omega(double t, double *w, double *dw)
+{
+double a=1,
+       omega0=1,
+       t_begin=0.1,
+       t_end=omega0/a+t_begin;
+if(t<t_end && t>t_begin) *dw=-a;
+                    else *dw=0;
+if(t<t_begin) *w=omega0;
+ else if(t<t_end) *w=omega0-a*(t-t_begin);
+ else *w=0;
+}
+
 void pde(double t, double ****f, double ****df)
 {
    int i,j,k,l,m;
-   double dv1[3][3],dv2[3][3],dp1[3],dp2[3],dn1[3];
+   double dv1[3][3],dv2[3][3],dp1[3],dp2[3],dn1[3],w,dw;
 
    boundary_conditions(f);
 
+   omega(t,&w,&dw);
    for(i=0;i<m1;i++)
    for(j=ghost;j<mm2;j++)
    for(k=0;k<m3;k++)
@@ -32,12 +46,14 @@ void pde(double t, double ****f, double ****df)
 
       df[0][i][j][k]=nut[i][j][k]*(dv2[0][0]+dv2[0][1]+dv2[0][2]+r_1[i]*dv1[0][0]
                                    -f[0][i][j][k]*r_2[i]+2*dv1[1][1]*r_1[i])
-                     -dp1[0]
+                     -dp1[0]+w*w/r_1[i]       +2*w*f[1][i][j][k]                   //forces of inertion
+                     +coordin(k,2)*f[1][i][j][k]                                   //helical force
                      -f[0][i][j][k]*dv1[0][0]-f[1][i][j][k]*dv1[0][1]
                      -f[2][i][j][k]*dv1[0][2]+r_2[i]*f[1][i][j][k]*f[1][i][j][k];
       df[1][i][j][k]=nut[i][j][k]*(dv2[1][0]+dv2[1][1]+dv2[1][2]+r_1[i]*dv1[1][0]
                                    -f[1][i][j][k]*r_2[i]+2*dv1[1][1]*r_1[i])
-                     -dp1[1]*r_1[i] + omega*omega/r_1[i]                                  //pushing gradient of pressure
+                     -dp1[1]*r_1[i]-dw/r_1[i] -2*w*f[0][i][j][k]                   //forces of inertion
+                     -(coordin(i,2)-rc)*f[1][i][j][k]                                   //helical force
                      -f[0][i][j][k]*dv1[1][0]-f[1][i][j][k]*dv1[1][1]
                      -f[2][i][j][k]*dv1[1][2]-r_1[i]*f[0][i][j][k]*f[1][i][j][k];
       df[2][i][j][k]=nut[i][j][k]*(dv2[2][0]+dv2[2][1]+dv2[2][2]+r_1[i]*dv1[2][0])
