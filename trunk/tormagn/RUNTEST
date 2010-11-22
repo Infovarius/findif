@@ -1,10 +1,13 @@
-2
----------  Phisical paramerets ------------------------------
-1		| Reynolds number
-
+3
+---------  Geometry parameters ------------------------------------
 6.283185307	| streamwise length (full round)
-5		| distance from centre to axis of torus
-1		| radius of torus
+4		| distance from centre to axis of torus
+1		| inner radius of torus (with fluid)
+1.3		| outer radius of torus (with shell)
+3		| radius of region to be modelled
+
+---------  Hydrodynamical parameters ------------------------------
+1		| Reynolds number
 
 0		| init profile: 0 - zero, 1 - parabole
 0.0		| amplitude of initial random noise
@@ -12,12 +15,17 @@
 10		| maximal level of fluctuation after which nut is on
 45		| maximal angle of blade tilt (degrees)
 
----------  Schem (aproximation) parameters ------------------
-100		| mesh point in R 
-100		| mesh point in PHI
-100		| mesh point in Z
-4		| variables number
-7		| aproxx order
+---------   Magnetic parameters   -----------------------------
+1		| magnetic Reynolds number
+0.2		| magnetic diffusivity in conducting shell
+5		| magnetic diffusivity in poorly counducting medium(vacuum) outside
+
+---------  Scheme (approximation) parameters ------------------
+20		| mesh point in R
+20		| mesh point in PHI
+20		| mesh point in Z
+7		| variables number
+3		| sample width
 0.001		| initial timestep
 
 ---------  Shell model parameters  --------------------------
@@ -31,4 +39,4 @@
 100		| steps to snaps (SnapStep)
 10		| steps of checking divergence (CheckStep)
 1		| test of time step (VarStep)
-5		| Total time
+100		| Total time
