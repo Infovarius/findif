@@ -42,15 +42,13 @@ int main(int argc, char** argv)
       { do fscanf(fd,"%s\n",NameInitFile); while (!feof(fd));
         goon = strcmp(NameInitFile,"END");
       }
-   if(goon) init_data();
+   if(goon) {if(init_data()) nrerror("error of reading initial arrays",0);}
        else { init_parallel();  operate_memory(1);}
 
    dx[0]=2*R/N1;
    dx[1]=lfi/N2;
    dx[2]=2*R/N3;
    init_conditions();
-
-   init_shell();
 
 //--------------------------------------
   if(!goon) Master {
@@ -132,7 +130,9 @@ int main(int argc, char** argv)
               }*/
    }
 
-//   dump(f,t_cur,count);
+   printing(f1,dtdid,t_cur,count,PulsEnergy);
+   dump(f,t_cur,count);
+   add_control_point("END");
 
    operate_memory(-1);
 
@@ -141,6 +141,5 @@ int main(int argc, char** argv)
    MPI_Barrier(MPI_COMM_WORLD);
    MPI_Finalize();
    nmessage("mpi_finalize is done",t_cur);
-   add_control_point("END");
 return 0;
 }
