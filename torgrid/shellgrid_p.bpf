@@ -1,0 +1,12 @@
+USELIB("wmpi1.lib");
+USEUNIT("goy.c");
+USEUNIT("main.c");
+USEUNIT("pde.c");
+USEUNIT("ioutil.c");
+USEUNIT("rkad.c");
+USEUNIT("struct_func.c");
+USEUNIT("util.c");
+//---------------------------------------------------------------------------
+This file is used by the project manager only and should be treated like the project file
+
+main
