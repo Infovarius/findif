@@ -114,6 +114,7 @@ double coordin(int, int);
 double interpolation(double,double, double,double,double,double);
 /*------- ioutil.c  ------*/
 FILE *fileopen(const char *, int mode);
+void fileclose(FILE *fd);
 void init_param(int argc, char** argv,double *dtnext);
 int init_data(void);
 void print_array1d(FILE *ff,double *a,int beg1,int n1);

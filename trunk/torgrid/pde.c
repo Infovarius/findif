@@ -53,7 +53,7 @@ void pde(double t, double ****f, double ****df)
       df[2][i][j][k]=nut[i][j][k]*(dv2[2][0]+dv2[2][1]+dv2[2][2]+r_1[i]*dv1[2][0]
                                    -f[2][i][j][k]*r_2[i]+2*dv1[1][1]*r_1[i])
                      +1-dp1[1]*r_1[i]//-dw/r_1[i] -2*w*f[1][i][j][k]                   //forces of inertion
-//                     -(j<=ghost+2 ? (coordin(i,2)-rc)*f[2][i][j][k] :0)            //helical force
+//                     -(j+n[2]<=ghost+2 ? (coordin(i,0)-rc)*f[2][i][j][k] :0)            //helical force
                      -f[1][i][j][k]*dv1[2][0]-f[2][i][j][k]*dv1[2][1]
                      -f[3][i][j][k]*dv1[2][2]-r_1[i]*f[1][i][j][k]*f[2][i][j][k];
       df[3][i][j][k]=nut[i][j][k]*(dv2[3][0]+dv2[3][1]+dv2[3][2]+r_1[i]*dv1[3][0])
@@ -126,7 +126,7 @@ for(j=0;j<n3;j++)
     printf("   totEn=%lf\n",en);
     }  */
 //time_step_shell(dt);
-for(k=0;k<n3;k++)
+for(k=0;k<m3;k++)
    {
 /*   double tmp = maschtab*pow(
            (nl[2]*s_func[k][0] + nl[1]*s_func[k][1] + nl[0]*s_func[k][2])*pow(dx[2],4),
@@ -135,7 +135,7 @@ for(k=0;k<n3;k++)
    for(i=0;i<m1;i++)
        for(j=ghost;j<mm2;j++)
           if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
-            nut[i][j][k+ghost] = (1. + tmp)/Re;
+            nut[i][j][k] = (1. + tmp)/Re;
    }
 }
 
@@ -314,7 +314,7 @@ if(!goon) {
                     +1)/Re;
         }
 //   struct_func(f,2,2,3);
-   nmessage("Arrays were filled with initial values - calculation from beginning",0,0);
+   nmessage("Arrays were filled with initial values - calculation from beginning",-1,-1);
    } else nmessage("Arrays were filled with initial values - calculation is continuing",t_cur,count);
 }
 
@@ -389,7 +389,7 @@ if(!goon) {                       //reading sizes from file when continuing
    for(i=0;i<6;i++)
      fprintf(iop,"%d ",pr_neighbour[i]);
    fprintf(iop,"\n");
-   fclose(iop);
+   fileclose(iop);
 
 }
 
