@@ -1,11 +1,11 @@
-2
----------  Physical paramereters ------------------------------
-1		| Reynolds number
-
-6.283185307	| streamwise length (full round)
+3
+---------  Geometry paramereters ------------------------------
+6.283185307	| streamwise length (not angle)
 3		| distance from centre to axis of torus
 1		| radius of torus
 
+---------  Physical paramereters ------------------------------
+1		| Reynolds number
 1		| init profile: 0 - zero, 1 - parabole
 0.00		| amplitude of initial random noise
 0.0		| amplitude of initial normal noise
@@ -22,13 +22,13 @@
 
 ---------  Shell model parameters  --------------------------
 15		| number of shells (Ns)
-1000000 	| scaling factor in nu turbulent (maschtab)
+10000	 	| scaling factor in nu turbulent (maschtab)
 2		| quotient of shell wavenumbers (lambda)
 3		| maximal size of averaging vicinity (max_okr)
 
 ---------  Output parameters  -------------------------------
 10		| steps to statistics output (OutStep)
-1000		| steps to snaps (SnapStep)
+100		| steps to snaps (SnapStep)
 10		| steps of checking divergence (CheckStep)
 1		| test of time step (VarStep)
 5		| Total time

@@ -85,16 +85,16 @@ double d;
      Ttot=1.;
      }
     else {
-      if(fscanf(iop,"%d",&ver)<1 || ver>2) nrerror("parameters' file has wrong version",0,0);
-      read_token(iop,&Re);
+      if(fscanf(iop,"%d",&ver)<1 || ver!=3) nrerror("parameters' file has wrong version",0,0);
       read_token(iop,&lfi);
       read_token(iop,&rc);
       read_token(iop,&R);
+      read_token(iop,&Re);
       read_token(iop,&parabole);
       read_token(iop,&Noise);
       read_token(iop,&NoiseNorm);
       read_token(iop,&UpLimit);
-      if(ver==2) read_token(iop,&chimax);
+      if(ver>=2) read_token(iop,&chimax);
       read_token(iop,&d);         N1 = (int)d;
       read_token(iop,&d);         N2 = (int)d;
       read_token(iop,&d);         N3 = (int)d;
@@ -159,7 +159,7 @@ int init_data(void)                 //returns code of error
                   if(fscanf(inp,"%g",&tmpd)==0) error=2;
                   fscanf(inp,"%c",&tmpc);
                   f[l][i][j][k]=tmpd;
-                  }
+		  }
                fscanf(inp,"%c",&tmpc);
                }
             fscanf(inp,"%c",&tmpc);
@@ -258,7 +258,7 @@ for(l=0;l<=2;l++)
   for(i=0;i<m1;i++)
     for(k=0;k<m3;k++)
        if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
-           TotalEnergy += pow(averf[l][i][k],2.);
+           TotalEnergy += fabs(1+coordin(i,0)*rc)*pow(averf[l][i][k],2.);
 TotalEnergy += 1.;   //if zero average field
 razlet = (PulsEnergy/TotalEnergy>UpLimit);
 }
@@ -321,7 +321,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
         for(j=ghost;j<m2;j++)
          for(k=0;k<mm3;k++)
          if(isType(node[i][k],NodeFluid))
-            mf[0] += coordin(i,0)*pow(f1[l][i][j][k],2);
+            mf[0] += fabs(1+coordin(i,0)*rc)*pow(f1[l][i][j][k],2);
        MPI_Allreduce(&mf, &totmf, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
        Master fprintf(fen,"\t %e",totmf[0]/N1/N2/N3);
        }
@@ -334,7 +334,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
          for(i=0;i<N3;i++)    vfi[i]=0;
          for(i=0;i<N3;i++) totvfi[i]=0;
          for(i=0;i<m1;i++)
-            for(j=ghost;j<mm2;j++)
+	    for(j=ghost;j<mm2;j++)
                for(k=0;k<m3;k++)
                 if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
                    vfi[k-ghost+n[2]] += f[2][i][j][k];
@@ -367,7 +367,7 @@ int tag=1,v;
 
  for(v=0;v<nvar;v++)
     print_array3d(fd,f1[v],0,m1,0,m2,0,m3);
- print_array3d(fd,nut,0,m1,0,m2,0,m3);
+ print_array3d(fd,nu,0,m1,0,m2,0,m3);
  fileclose(fd);
 
  if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
@@ -384,6 +384,7 @@ long tag=count,v;
 FILE *fd;
 
  sprintf(str,"%s_%d_%d.snp",NameSnapFile,size,count);
+ boundary_conditions(f1,nut);
 
  if(rank!=0) MPI_Recv(message,0,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);
 
@@ -398,7 +399,7 @@ FILE *fd;
 
  for(v=0;v<nvar;v++)
     print_array3d(fd,f1[v],0,m1,0,m2,0,m3);
- print_array3d(fd,nut,0,m1,0,m2,0,m3);
+ print_array3d(fd,nu,0,m1,0,m2,0,m3);
  fclose(fd);
                   
  if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
@@ -406,3 +407,4 @@ FILE *fd;
  Master {nmessage("snap is done",t_cur,count);
                    add_control_point(str);}
 }
+												  

@@ -34,31 +34,40 @@ void pde(double t, double ****f, double ****df)
    for(k=0;k<m3;k++)
      if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
      {
-      for(m=0;m<3;m++)
+      for(m=0;m<3;m++) {
          dp1[m]=dr(f[0],i,j,k,m+1,0,dx[m],ghost, approx);
+         dn1[m]=dr(nut,i,j,k,m+1,0,dx[m],ghost, approx);
+      }
       for(l=1;l<=3;l++) {
        for(m=0;m<3;m++) {
          dv1[l][m]=dr(f[l],i,j,k,m+1,0,dx[m],ghost, approx);
          dv2[l][m]=dr(f[l],i,j,k,m+1,1,dx[m]*dx[m],ghost, approx);
          }
-       dv1[l][1] *= r_1[i];     dv2[l][1] *= r_2[i];
       }
 
       df[1][i][j][k]=nut[i][j][k]*(dv2[1][0]+dv2[1][1]+dv2[1][2]+r_1[i]*dv1[1][0]
-                                   -f[1][i][j][k]*r_2[i]+2*dv1[2][1]*r_1[i])
-                     -dp1[0]//+w*w/r_1[i]       +2*w*f[2][i][j][k]                   //forces of inertion
+				   -f[1][i][j][k]*r_2[i]-2*dv1[2][1]*r_1[i])
+		     -dp1[0]//+w*w/r_1[i]       +2*w*f[2][i][j][k]                   //forces of inertion
 //                     +(j+n[2]<=ghost+2 ? coordin(k,2)*f[2][i][j][k] : 0)                //helical force
-                     -f[1][i][j][k]*dv1[1][0]-f[2][i][j][k]*dv1[1][1]
-                     -f[3][i][j][k]*dv1[1][2]+r_2[i]*f[2][i][j][k]*f[2][i][j][k];
+		     + (dn1[0]-f[1][i][j][k])*dv1[1][0]
+		     + (dn1[1]-f[2][i][j][k])*dv1[1][1]
+		     + (dn1[2]-f[3][i][j][k])*dv1[1][2]
+		     - (dn1[1]-f[2][i][j][k])*r_1[i]*f[2][i][j][k]
+		     ;
       df[2][i][j][k]=nut[i][j][k]*(dv2[2][0]+dv2[2][1]+dv2[2][2]+r_1[i]*dv1[2][0]
-                                   -f[2][i][j][k]*r_2[i]+2*dv1[1][1]*r_1[i])
-                     +1-dp1[1]*r_1[i]//-dw/r_1[i] -2*w*f[1][i][j][k]                   //forces of inertion
+				   -f[2][i][j][k]*r_2[i]+2*dv1[1][1]*r_1[i])
+		     +1-dp1[1]//-dw/r_1[i] -2*w*f[1][i][j][k]                   //forces of inertion
 //                     -(j+n[2]<=ghost+2 ? (coordin(i,0)-rc)*f[2][i][j][k] :0)            //helical force
-                     -f[1][i][j][k]*dv1[2][0]-f[2][i][j][k]*dv1[2][1]
-                     -f[3][i][j][k]*dv1[2][2]-r_1[i]*f[1][i][j][k]*f[2][i][j][k];
+		     + (dn1[0]-f[1][i][j][k])*dv1[2][0]
+		     + (dn1[1]-f[2][i][j][k])*dv1[2][1]
+		     + (dn1[2]-f[3][i][j][k])*dv1[2][2]
+		     + (dn1[1]-f[1][i][j][k])*r_1[i]*f[2][i][j][k]
+		     ;
       df[3][i][j][k]=nut[i][j][k]*(dv2[3][0]+dv2[3][1]+dv2[3][2]+r_1[i]*dv1[3][0])
-                     -dp1[2]
-                     -f[1][i][j][k]*dv1[3][0]-f[2][i][j][k]*dv1[3][1]-f[3][i][j][k]*dv1[3][2];
+		     -dp1[2]
+		     + (dn1[0]-f[1][i][j][k])*dv1[3][0]
+		     + (dn1[1]-f[2][i][j][k])*dv1[3][1]
+		     + (dn1[2]-f[3][i][j][k])*dv1[3][2];
       df[0][i][j][k]= -(dv1[1][0]+dv1[2][1]+dv1[3][2]+f[1][i][j][k]*r_1[i])/Gamma;
 //      df[0][i][j][k] = df[1][i][j][k] = df[2][i][j][k] = df[3][i][j][k] = 0;
 
@@ -134,7 +143,7 @@ for(k=0;k<m3;k++)
    for(i=0;i<m1;i++)
      {
      r1 = coordin(i,0);   z1 = coordin(k,2);
-     rho = 1 - sqrt(pow(r1-rc,2) + z1*z1)/R;
+     rho = 1 - sqrt(r1*r1 + z1*z1)/R;
      if(rho<0) tmp = 0;
 //	  else tmp = sqrt(2*Re)*(0.32*rho*(1-rho)+0.013*(2*rho-1)*(2*rho-1)*rho);   // Шлихтинг
           else tmp = sqrt(2*Re)*0.276467*rho*(2.08 - 2.8*rho + rho*rho)*(0.64 - 1.2*rho + rho*rho);   // Рейнольдс
@@ -278,7 +287,7 @@ void  init_conditions()
    for(k=0;k<m3;k++)
        {
         r1 = coordin(i,0);   z1 = coordin(k,2);
-        rho=sqrt(pow(r1-rc,2) + z1*z1);
+        rho=sqrt(r1*r1 + z1*z1);
      //regions
         if(rho>R) setType(&node[i][k],NodeVacuum);
           else    setType(&node[i][k],NodeFluid);
@@ -292,10 +301,10 @@ void  init_conditions()
                                               setType(&node[i][k+l],NodeGhostFluid);
                      }
             }
-        refr[i][k] = rc + (r1-rc)*(2*R/rho-1);      //physical coordinates
-        refz[i][k] =        z1*(2*R/rho-1);
-        refr[i][k] = (refr[i][k]-rc+R)/dx[0]-0.5-n[0]+ghost;   // simulation indices
-        refz[i][k] = (refz[i][k]+R   )/dx[2]-0.5-n[2]+ghost;
+        refr[i][k] = r1*(2*R/rho-1);      //physical coordinates
+        refz[i][k] = z1*(2*R/rho-1);
+        refr[i][k] = (refr[i][k]+R)/dx[0]-0.5-n[0]+ghost;   // simulation indices
+        refz[i][k] = (refz[i][k]+R)/dx[2]-0.5-n[2]+ghost;
         if(fabs(refr[i][k]-i)<1 && fabs(refz[i][k]-k)<1 && !isType(node[i][k],NodeFluid))
                  { setType(&node[i][k],NodeFluid);
                    if(isType(node[i][k],NodeGhostFluid)) node[i][k] -= NodeGhostFluid;
@@ -306,12 +315,13 @@ void  init_conditions()
                                               setType(&node[i][k+l],NodeGhostFluid);
                      }
                   }
-        sinth[i][k]=(r1-rc)/rho;                    // for divertor's blade
-        costh[i][k]=   z1  /rho;
+     //for divertor's blade
+        sinth[i][k]=r1/rho;
+        costh[i][k]=   z1/rho;
         chi[i][k]  = chimax*M_PI/180.*rho/R;
        }
 
-   for(i=0;i<m1;i++) { r_1[i]=1./coordin(i,0); r_2[i]=r_1[i]*r_1[i]; }
+   for(i=0;i<m1;i++) { r_1[i] = rc/(rc*(dx[0]*(i-ghost+0.5+n[0])-R)+1); r_2[i] = r_1[i]*r_1[i]; } 
 
 // --------------- initial conditions -----------------------------------------
 //   k1=2*M_PI/lfi;  k3=M_PI/l3;
@@ -324,12 +334,12 @@ if(!goon) {
 	f[0][i][j][k]=0;
 	f[1][i][j][k]=NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/R)
 		      + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
-		       (R*R-pow(coordin(i,0)-rc,2) - pow(coordin(k,2),2))/R/R;
+		       (R*R-pow(coordin(i,0),2) - pow(coordin(k,2),2))/R/R;
 	f[2][i][j][k]=(parabole+Noise*((double)rand()-RAND_MAX/2)/RAND_MAX)*
-		       (R*R-pow(coordin(i,0)-rc,2) - pow(coordin(k,2),2))/R/R;
+		       (R*R-pow(coordin(i,0),2) - pow(coordin(k,2),2))/R/R;
 	f[3][i][j][k]=NoiseNorm*sin(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/R)
 		      + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
-		       (R*R-pow(coordin(i,0)-rc,2) - pow(coordin(k,2),2))/R/R;
+		       (R*R-pow(coordin(i,0),2) - pow(coordin(k,2),2))/R/R;
 	}
    for(i=0;i<m1;i++)
    for(j=0;j<m2;j++)
@@ -458,7 +468,7 @@ double coordin(int i, int dir)
 {
  switch (dir)
  {
-   case 0:  return dx[dir]*(i-ghost+0.5+n[dir])+rc-R;
+   case 0:  return dx[dir]*(i-ghost+0.5+n[dir])-R;
    case 1:  return dx[dir]*(i-ghost+0.5+n[dir]);
    case 2:  return dx[dir]*(i-ghost+0.5+n[dir])-R;
  }

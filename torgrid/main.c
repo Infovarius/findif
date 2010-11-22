@@ -39,7 +39,11 @@ int main(int argc, char** argv)
    count=0; enter = 0;
 
 /* ---------------------- initialization of arrays --------------------- */
-   goon = ((fd=fopen(NameCPFile,"r"))>0);
+   goon = ((fd=fopen(NameCPFile,"r+"))>0);
+   if(fd==NULL) { //putlog("File of cp were not opened",goon);
+                  Master if((fd=fopen(NameCPFile,"w+"))!=NULL) ;//putlog("File cp was successfully created",1);
+                }
+           else ;//putlog("File of control points opened=",(long)fd);
    if(goon)
       { do fscanf(fd,"%s\n",NameInitFile); while (!feof(fd));
         goon = strcmp(NameInitFile,"END");
@@ -54,7 +58,7 @@ int main(int argc, char** argv)
    init_conditions();
 
 //--------------------------------------
-  if(!goon) Master {
+  Master {
       fd=fileopen("coord",rank);
       for(i=0;i<N1+2*ghost;i++) fprintf(fd,"%e ",coordin(i,0));
       fprintf(fd,"\n");
