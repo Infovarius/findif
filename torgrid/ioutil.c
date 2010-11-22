@@ -5,6 +5,7 @@
 #include "head.h"
 
 double UpLimit;     //after this limit there's dump
+#define PREC 5
 
 FILE *fileopen(const char *x, int mode)  //opening of file to ff
                          /*   0-rewrite;>0-append;<0-read    */
@@ -22,6 +23,12 @@ if ((ff = fopen(x,s_mode))==NULL)
 return(ff);
 }
 
+void fileclose(FILE *fd)        // closing file with checking
+{
+if(fd==NULL) putlog("It was endeavor to close unopened file",1);
+        else fclose(fd);
+}
+
 void putlog(char msg_text[],long num)
 {
    FILE *log;
@@ -32,7 +39,7 @@ void putlog(char msg_text[],long num)
    fprintf(log,"message at t=%-7.4lf Niter=%-6d time of work=%g sec\n",
                     t_cur,count,time_now-time_begin);
    fprintf(log,"%s %d\n",msg_text,num);
-   fclose(log);
+   fileclose(log);
 }
 
 void read_token(FILE *inp,double *param)
@@ -40,10 +47,10 @@ void read_token(FILE *inp,double *param)
 char str[256],*pstr;
  do fgets(str,256,inp); while(strchr(str,'|')==NULL);
  if(strchr(str,'|')==NULL) return;
- if(sscanf(str,"%lf",param)==0) nrerror("Input of parameter error",0,0);
+ if(sscanf(str,"%lf",param)==0) nrerror("Input of parameter error",-1,-1);
  pstr=strtok(str,"|");
  pstr=strtok((char *)NULL,"|");
- printf("%g\t->\t%s",*param,pstr);
+ Master printf("%g\t->\t%s",*param,pstr);
 }
 
 void init_param(int argc, char** argv,double *dtnext)
@@ -53,7 +60,7 @@ FILE *iop;
 double d;
  if(argc<2 || (iop=fopen(argv[1],"r"))==NULL) //no ini file
     {
-     nrerror("Start from no ini file!",0,0);
+     nrerror("Start from no ini file!",-1,-1);
      Re=10.;
      lfi=3.;
      rc=3.;
@@ -94,7 +101,7 @@ double d;
       read_token(iop,&d);         nvar = (int)d;
       read_token(iop,&d);         approx = (int)d;
       read_token(iop,dtnext);
-      read_token(iop,&d);         Ns = (int)d;
+      read_token(iop,&d);         Ns = (int)d;   //shell
       read_token(iop,&maschtab);
       read_token(iop,&lambda);
       read_token(iop,&d);         max_okr = (int)d;
@@ -103,7 +110,7 @@ double d;
       read_token(iop,&d);         CheckStep = (int)d;
       read_token(iop,&d);         VarStep = (int)d;
       read_token(iop,&Ttot);
-      fclose(iop);
+      fileclose(iop);
       Master nmessage("Parameters were extracted from file",0,0);
       }
 }
@@ -119,18 +126,19 @@ int init_data(void)                 //returns code of error
  int error=0;
  int i,j,k,l,tmpr;
  float tmpd;
- char tmpc;
+ char tmpc;	 
+ double Re1;		  // prioritet in parameter for runtest.dat
 
  FILE *inp = fileopen(NameInitFile,-1);
  read_tilleq(inp,'n');   if(fscanf(inp,"%lf",&t_cur)==0) error=1;
  read_tilleq(inp,'n');   if(fscanf(inp,"%ld",&count)==0) error=1;
  read_tilleq(inp,'n');   if(fscanf(inp,"%c%d%c%d%c%d%c",&tmpc,&pp[0],&tmpc,&pp[1],&tmpc,&pp[2],&tmpc)<7) error=1;
                          //no need unless process distribution is written
- if(pp[0]*pp[1]*pp[2]!=size) nrerror("Wrong number of processors in data file. Can't read data.",0,0);
+ if(pp[0]*pp[1]*pp[2]!=size) nrerror("Wrong number of processors in data file. Can't read data.",-1,-1);
  read_tilleq(inp,'n');   if(fscanf(inp,"%d",&N1)==0) error=1;
  read_tilleq(inp,'n');   if(fscanf(inp,"%d",&N2)==0) error=1;
  read_tilleq(inp,'n');   if(fscanf(inp,"%d",&N3)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%lf",&Re)==0) error=1;
+ read_tilleq(inp,'n');   if(fscanf(inp,"%lf",&Re1)==0) error=1;
 
  init_parallel();
  operate_memory(1);                     // creating arrays
@@ -177,8 +185,8 @@ int init_data(void)                 //returns code of error
      }
  fscanf(inp,"%c",&tmpc);
  }
-fclose(inp);
-if(error) nrerror("Data couldn't have been read from file!!!",0,0);
+fileclose(inp);
+if(error) nrerror("Data couldn't have been read from file!!!",-1,error);
      else Master nmessage("Data has been read from file",t_cur,count);
 return(error);
 }
@@ -189,7 +197,7 @@ int i;
 fprintf(ff,"{");
 for(i=beg1;i<beg1+n1;i++)
         {
-        fprintf(ff,"%0.10f",a[i]);
+        fprintf(ff,"%0.*G",PREC,a[i]);
         fprintf(ff,i<beg1+n1-1 ? "," : "}\n");
         }
 }
@@ -203,7 +211,7 @@ for(i=beg1;i<beg1+n1;i++)
     fprintf(ff,"{");
     for(j=beg2;j<beg2+n2;j++)
         {
-        fprintf(ff,"%0.10f",a[i][j]);
+        fprintf(ff,"%0.*G",PREC,a[i][j]);
         fprintf(ff,j<beg2+n2-1 ? "," : "}");
         }
     fprintf(ff,i<beg1+n1-1 ? "," : "}\n");
@@ -220,7 +228,7 @@ for(i=beg1;i<beg1+n1;i++) {
     for(j=beg2;j<beg2+n2;j++) {
         fprintf(ff,"{");
         for(k=beg3;k<beg3+n3;k++) {
-            fprintf(ff,"%0.10f",a[i][j][k]);
+            fprintf(ff,"%0.*G",PREC,a[i][j][k]);
             fprintf(ff,k<beg3+n3-1 ? "," : "}");
             }
         fprintf(ff,j<beg2+n2-1 ? "," : "}");
@@ -319,8 +327,8 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
        }
 
          Master fprintf(fen,"\n");
-         Master fclose(fen);
-         Master printf("number of runge-kutt calculations=%d\n",enter);
+   Master fileclose(fen);
+   Master printf("number of runge-kutt calculations=%d\n",enter);
 
  // -------------------- average profile of velocity ---------------------
          for(i=0;i<N3;i++)    vfi[i]=0;
@@ -335,14 +343,14 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
                  fv = fileopen(NameVFile,count);
                  fprintf(fv,"{%8.8f}\t",t_cur);
                  print_array1d(fv,totvfi,0,N3);
-                 fclose(fv);
+                 fileclose(fv);
                 }
 }
 
 void dump(double ****f1,double ***nu,double t_cur,long count)
 {
 FILE *fd;
-char *message;
+char *message="dump";
 int tag=1,v;
 
  if(rank!=0) MPI_Recv(message,0,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);
@@ -360,10 +368,11 @@ int tag=1,v;
  for(v=0;v<nvar;v++)
     print_array3d(fd,f1[v],0,m1,0,m2,0,m3);
  print_array3d(fd,nut,0,m1,0,m2,0,m3);
- fclose(fd);
+ fileclose(fd);
 
  if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
-             else {nmessage("dump is done",t_cur,count);
+ MPI_Barrier(MPI_COMM_WORLD);
+ Master {nmessage("dump is done",t_cur,count);
                    add_control_point(NameDumpFile);}
 }
 
@@ -372,7 +381,6 @@ void snapshot(double ****f1,double ***nu,double t_cur,long count)
 char str[256];
 char message[10]="message";
 long tag=count,v;
-int i, j, l;
 FILE *fd;
 
  sprintf(str,"%s_%d_%d.snp",NameSnapFile,size,count);
@@ -394,6 +402,7 @@ FILE *fd;
  fclose(fd);
                   
  if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
-             else {nmessage("snap is done",t_cur,count);
+ MPI_Barrier(MPI_COMM_WORLD);
+ Master {nmessage("snap is done",t_cur,count);
                    add_control_point(str);}
 }

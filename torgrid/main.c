@@ -31,7 +31,7 @@ int main(int argc, char** argv)
   NameStatFile =(char *)calloc(strl+9,sizeof(char));
   sprintf(NameStatFile,"%s_%d.sta",fname,rank); NameStatFile[strl+8] = 0;
 
-   Master nmessage("--------------------------------------------------------------------------",0,0);
+   Master nmessage("--------------------------------------------------------------------------",-1,-1);
    init_param(argc,argv,&dtnext);       // initialization of parameters
    Gamma=1e-4;
    ghost=(approx-1)/2;                  //radius of approx sample
@@ -44,9 +44,9 @@ int main(int argc, char** argv)
       { do fscanf(fd,"%s\n",NameInitFile); while (!feof(fd));
         goon = strcmp(NameInitFile,"END");
       }
-   if(goon) {if(init_data()) nrerror("error of reading initial arrays",0,0);}
+   if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
        else { init_parallel();  operate_memory(1);}
-   fclose(fd);
+   fileclose(fd);
 
    dx[0]=2*R/N1;
    dx[1]=lfi/N2;
@@ -140,7 +140,7 @@ int main(int argc, char** argv)
    if(rank==size-1) add_control_point("END");
 
    operate_memory(-1);
-//   Master fclose(NameErrorFile);
+//   Master fileclose(NameErrorFile);
 
    if(t_cur>=Ttot&&!razlet) nmessage("work is succesfully done",t_cur,count);
        else nrerror("this is break of scheme",t_cur,count);
