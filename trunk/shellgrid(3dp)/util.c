@@ -6,39 +6,35 @@ void nrerror(char error_text[],double t_cur)
 {
     FILE *err;
     nmessage(error_text,t_cur);
-    err=fileopen("error.err",0);
+    err=fileopen(NameErrorFile,0);
 
     fprintf(err,"Run-time error of proc#%d at t=%-6.4lf:\n",rank,t_cur);
     fprintf(err,"%s\n",error_text);
     fprintf(err,"...now exiting to system...\n");
     fclose(err);
+    if(count>0) operate_memory(-1);
+    add_control_point("END");
     MPI_Finalize();
     exit(1);
-}
-
-void Test_Errors_warn(int *code)
-{
-  char buf[MPI_MAX_ERROR_STRING+1];
-  int  result_len;
-  static int in_handler = 0;
-
-  if (in_handler) return;
-  in_handler = 1;
-  /* Преобразование кода ошибки в сообщение и печать*/
-  MPI_Error_string( *code, buf, &result_len );
-  printf( "%s\n", buf );
-  in_handler = 0;
 }
 
 void nmessage(char msg_text[],double t_cur)
 {
    FILE *msg;
-   msg=fileopen("message.dat",1);
+   msg=fileopen(NameMessageFile,1);
    time_now = (t_cur==0)?time_begin:MPI_Wtime();
-   fprintf(msg,"message of proc#%d at t=%-7.4lf Niter=%-6d time of work=%g sec\n",rank,
+   fprintf(msg,"message of proc#%d at t=%-7.4lf Niter=%-6d time of work=%g sec:\n",rank,
                     t_cur,count,time_now-time_begin);
    fprintf(msg,"%s\n",msg_text);
    fclose(msg);
+}
+
+void add_control_point(char *name_cp)
+{
+FILE *cpf=fileopen(NameCPFile,1);
+Master { if(cpf==NULL) cpf=fileopen(NameCPFile,0);
+         fprintf(cpf,"%s\n",name_cp);
+         fclose(cpf);}
 }
 
 double ****alloc_mem_4f(int mvar, int n1, int n2, int n3)
@@ -47,24 +43,24 @@ int i, j, k;
 double  ****aaa;
 
    aaa = (double ****)calloc(mvar, sizeof(double ***));
-   if(aaa == NULL)  nrerror("\nAlloc_mem: unsuffitient memory!\n\a",0);
+   if(aaa == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",0);
 
    for(i = 0; i < mvar; i++) {
       aaa[i] = (double ***)calloc(n1, sizeof(double **));
-      if(aaa[i] == NULL) nrerror("\nAlloc_mem: unsuffitient memory!\n\a",0);
+      if(aaa[i] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",0);
    }
 
    for(i = 0; i < mvar; i++)
    for(j = 0; j < n1; j++) {
       aaa[i][j] = (double **)calloc(n2, sizeof(double *));
-      if(aaa[i][j] == NULL) nrerror("\nAlloc_mem: unsuffitient memory!\n\a",0);
+      if(aaa[i][j] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",0);
    }
 
 	for(i = 0; i < mvar; i++)
    for(j = 0; j < n1; j++)
    for(k = 0; k < n2; k++) {
 		aaa[i][j][k] = (double *)calloc(n3, sizeof(double));
-		if(aaa[i][j][k] == NULL) nrerror("\nAlloc_mem: unsuffitient memory!\n\a",0);
+		if(aaa[i][j][k] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",0);
       }
 
 return(aaa);
@@ -96,17 +92,17 @@ int i, j;
 double  ***aaa;
 
    aaa = (double ***)calloc(mvar, sizeof(double **));
-   if(aaa == NULL)  nrerror("\nAlloc_mem: unsuffitient memory!\n\a",0);
+   if(aaa == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",0);
 
    for(i = 0; i < mvar; i++) {
       aaa[i] = (double **)calloc(n1, sizeof(double *));
-      if(aaa[i] == NULL) nrerror("\nAlloc_mem: unsuffitient memory!\n\a",0);
+      if(aaa[i] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",0);
    }
 
    for(i = 0; i < mvar; i++)
    for(j = 0; j < n1; j++) {
       aaa[i][j] = (double *)calloc(n2, sizeof(double));
-      if(aaa[i][j] == NULL) nrerror("\nAlloc_mem: unsuffitient memory!\n\a",0);
+      if(aaa[i][j] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",0);
    }
 
 return(aaa);
@@ -134,11 +130,11 @@ int i;
 double  **aa;
 
    aa = (double **)calloc(mvar, sizeof(double *));
-   if(aa == NULL)  nrerror("\nAlloc_mem: unsuffitient memory!\n\a",0);
+   if(aa == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",0);
 
    for(i = 0; i < mvar; i++) {
       aa[i] = (double *)calloc(n1, sizeof(double));
-      if(aa[i] == NULL) nrerror("\nAlloc_mem: unsuffitient memory!\n\a",0);
+      if(aa[i] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",0);
    }
 
 return(aa);
@@ -161,7 +157,7 @@ double *alloc_mem_1f(int n)
 double  *a;
 
    a = (double *)calloc(n, sizeof(double));
-   if(a == NULL)  nrerror("\nAlloc_mem: unsuffitient memory!\n\a",0);
+   if(a == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",0);
 
 return(a);
 }
@@ -173,4 +169,37 @@ int k;
    return;
 }
 
-
+void operate_memory(int dir)
+{
+int n=max(n1,max(n2,n3));
+ if(dir>0)
+   {   s_func = alloc_mem_2f(n3+2,kol_masht);
+       f  =alloc_mem_4f(nvar, m1, m2, m3);   //f[3]-pressure,f[0..2]-v(vector)
+       f1 =alloc_mem_4f(nvar, m1, m2, m3);
+       df =alloc_mem_4f(nvar, m1, m2, m3);
+       df2=alloc_mem_4f(nvar, m1, m2, m3);
+       df3=alloc_mem_4f(nvar, m1, m2, m3);
+       df4=alloc_mem_4f(nvar, m1, m2, m3);
+       df5=alloc_mem_4f(nvar, m1, m2, m3);
+       nut=alloc_mem_3f(m1, m2, m3);
+  averf = alloc_mem_2f(3,n);
+       vx = alloc_mem_1f(N3);
+       totvx = alloc_mem_1f(N3);
+       avernu = alloc_mem_1f(N3);
+    } else
+   {
+       free_mem_2f(s_func,n3+2,kol_masht);
+       free_mem_4f(f  ,nvar, m1, m2, m3);
+       free_mem_4f(f1 ,nvar, m1, m2, m3);
+       free_mem_4f(df ,nvar, m1, m2, m3);
+       free_mem_4f(df2,nvar, m1, m2, m3);
+       free_mem_4f(df3,nvar, m1, m2, m3);
+       free_mem_4f(df4,nvar, m1, m2, m3);
+       free_mem_4f(df5,nvar, m1, m2, m3);
+       free_mem_3f(nut, m1, m2, m3);
+  free_mem_2f(averf,3,n);
+       free_mem_1f(vx,N3);
+       free_mem_1f(totvx,N3);
+       free_mem_1f(avernu,N3);
+    }   
+}
