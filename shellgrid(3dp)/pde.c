@@ -43,33 +43,32 @@ void pde(double t, double ****f, double ****df)
 
 double deviation(double ****f,int i,int j,int k)
 {
-const size_okr=min(1,ghost);
-double flux;
+const int size_okr=min(1,ghost);
+double flux = 0;
 int kol=0,l;
    for(l=1;l<=size_okr;l++)
             {
-            flux = 0;
-            if(i>0)
+            if(i-l>0)
                {flux += norma(f[0][i][j][k]-f[0][i-l][j][k],f[1][i][j][k]-f[1][i-l][j][k],f[2][i][j][k]-f[2][i-l][j][k],2);
             	kol++;
                }
-            if(i<m1)
+            if(i+l<m1)
                {flux += norma(f[0][i][j][k]-f[0][i+l][j][k],f[1][i][j][k]-f[1][i+l][j][k],f[2][i][j][k]-f[2][i+l][j][k],2);
             	kol++;
                }
-            if(j>0)
+            if(j-l>0)
                {flux += norma(f[0][i][j][k]-f[0][i][j-l][k],f[1][i][j][k]-f[1][i][j-l][k],f[2][i][j][k]-f[2][i][j-l][k],2);
             	kol++;
                }
-            if(j<m2)
+            if(j+l<m2)
                {flux += norma(f[0][i][j][k]-f[0][i][j+l][k],f[1][i][j][k]-f[1][i][j+l][k],f[2][i][j][k]-f[2][i][j+l][k],2);
             	kol++;
                }
-            if(k>0)
+            if(k-l>0)
                {flux += norma(f[0][i][j][k]-f[0][i][j][k-l],f[1][i][j][k]-f[1][i][j][k-l],f[2][i][j][k]-f[2][i][j][k-l],2);
                 kol++;
                }
-            if(k<m3)
+            if(k+l<m3)
                {flux += norma(f[0][i][j][k]-f[0][i][j][k+l],f[1][i][j][k]-f[1][i][j][k+l],f[2][i][j][k]-f[2][i][j][k+l],2);
                 kol++;
                }
@@ -136,7 +135,7 @@ void  boundary_conditions(double ****f)
                 MPI_Isend(buf_send[0],buf_size[0],MPI_DOUBLE,pr_neighbour[0],tag,MPI_COMM_WORLD,&SendRequest[req_numS++]);
                 MPI_Irecv(buf_recv[0],buf_size[0],MPI_DOUBLE,pr_neighbour[0],tag+1,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
                 }
-//            putlog("bc:reach this=",numlog++);
+
  if(pr_neighbour[1]==-1)
              {  for(j=ghost;j<mm2;j++)
                   for(k=ghost;k<mm3;k++)
@@ -151,7 +150,7 @@ void  boundary_conditions(double ****f)
                 MPI_Isend(buf_send[1],buf_size[0],MPI_DOUBLE,pr_neighbour[1],tag+1,MPI_COMM_WORLD,&SendRequest[req_numS++]);
                 MPI_Irecv(buf_recv[1],buf_size[0],MPI_DOUBLE,pr_neighbour[1],tag,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
                 }
-//            putlog("bc:reach this=",numlog++);
+
    // spanwise surfaces
        //periodic conditions for velocities and pressure
  if(pr_neighbour[2]==-1)
@@ -168,7 +167,7 @@ void  boundary_conditions(double ****f)
                 MPI_Isend(buf_send[2],buf_size[1],MPI_DOUBLE,pr_neighbour[2],tag+2,MPI_COMM_WORLD,&SendRequest[req_numS++]);
                 MPI_Irecv(buf_recv[2],buf_size[1],MPI_DOUBLE,pr_neighbour[2],tag+3,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
                 }
-//            putlog("bc:reach this=",numlog++);
+
  if(pr_neighbour[3]==-1)
              {  for(i=ghost;i<mm1;i++)
                   for(k=ghost;k<mm3;k++)
@@ -183,7 +182,7 @@ void  boundary_conditions(double ****f)
                 MPI_Isend(buf_send[3],buf_size[1],MPI_DOUBLE,pr_neighbour[3],tag+3,MPI_COMM_WORLD,&SendRequest[req_numS++]);
                 MPI_Irecv(buf_recv[3],buf_size[1],MPI_DOUBLE,pr_neighbour[3],tag+2,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
                 }
-//            putlog("bc:reach this=",numlog++);
+
    // on horizontal surfaces
       //sticking for velocities and free conditions for pressure
  if(pr_neighbour[4]==-1)
@@ -198,11 +197,9 @@ void  boundary_conditions(double ****f)
  else if(pr_neighbour[4]==rank) CopyGridToBuffer(f,nut,buf_recv[4],ghost,ghost,mm3,mm1-1,mm2-1,m3-1);
          else { CopyGridToBuffer(f,nut,buf_send[4],ghost,ghost,ghost,mm1-1,mm2-1,2*ghost-1);
                 MPI_Isend(buf_send[4],buf_size[2],MPI_DOUBLE,pr_neighbour[4],tag+4,MPI_COMM_WORLD,&SendRequest[req_numS++]);
-//                nmessage("message sent",t_cur);
                 MPI_Irecv(buf_recv[4],buf_size[2],MPI_DOUBLE,pr_neighbour[4],tag+5,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
-//                nmessage("message received",t_cur);
                 }
-//            putlog("bc:reach this=",numlog++);
+
  if(pr_neighbour[5]==-1)
              {  for(i=ghost;i<mm1;i++)
                   for(j=ghost;j<mm2;j++)
@@ -217,7 +214,7 @@ void  boundary_conditions(double ****f)
                MPI_Isend(buf_send[5],buf_size[2],MPI_DOUBLE,pr_neighbour[5],tag+5,MPI_COMM_WORLD,&SendRequest[req_numS++]);
                MPI_Irecv(buf_recv[5],buf_size[2],MPI_DOUBLE,pr_neighbour[5],tag+4,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
                }
-   //            putlog("bc:reach this=",numlog++);
+
 //    MPI_Barrier(MPI_COMM_WORLD);
 //    MPI_Startall(req_numR,RecvRequest);
 //    MPI_Testall(req_numR,RecvRequest,&flag,statuses);
@@ -225,17 +222,17 @@ void  boundary_conditions(double ****f)
     MPI_Waitall(req_numR,RecvRequest,statuses);
     if(statuses[0].MPI_ERROR) putlog("bc:error during transfer=",numlog);
 
-    CopyBufferToGrid(f,nut,buf_recv[0],0,ghost,ghost,ghost-1,mm2-1,mm3-1);
-    CopyBufferToGrid(f,nut,buf_recv[1],mm1,ghost,ghost,m1-1,mm2-1,mm3-1);
-    CopyBufferToGrid(f,nut,buf_recv[2],ghost,0,ghost,mm1-1,ghost-1,mm3-1);
-    CopyBufferToGrid(f,nut,buf_recv[3],ghost,mm2,ghost,mm1-1,m2-1,mm3-1);
-    CopyBufferToGrid(f,nut,buf_recv[4],ghost,ghost,0,mm1-1,mm2-1,ghost-1);
-    CopyBufferToGrid(f,nut,buf_recv[5],ghost,ghost,mm3,mm1-1,mm2-1,m3-1);
+    if(pr_neighbour[0]>-1) CopyBufferToGrid(f,nut,buf_recv[0],0,ghost,ghost,ghost-1,mm2-1,mm3-1);
+    if(pr_neighbour[1]>-1) CopyBufferToGrid(f,nut,buf_recv[1],mm1,ghost,ghost,m1-1,mm2-1,mm3-1);
+    if(pr_neighbour[2]>-1) CopyBufferToGrid(f,nut,buf_recv[2],ghost,0,ghost,mm1-1,ghost-1,mm3-1);
+    if(pr_neighbour[3]>-1) CopyBufferToGrid(f,nut,buf_recv[3],ghost,mm2,ghost,mm1-1,m2-1,mm3-1);
+    if(pr_neighbour[4]>-1) CopyBufferToGrid(f,nut,buf_recv[4],ghost,ghost,0,mm1-1,mm2-1,ghost-1);
+    if(pr_neighbour[5]>-1) CopyBufferToGrid(f,nut,buf_recv[5],ghost,ghost,mm3,mm1-1,mm2-1,m3-1);
 
    return;
 }
 
-void  init_conditions(double ****f,double Re)
+void  init_conditions()
 {
    int i,j,k,l;
 //   double k1,k2,k3;
@@ -263,6 +260,8 @@ void  init_conditions(double ****f,double Re)
 //        (0.39+14.8*exp(-2.13*pow(2*coordin(k,2)-l3,2)))*0.1*0
                     +1)/Re;
 //   struct_func(f,2,2,3);
+   nmessage("Arrays were filled with initial values - calculation from beginning",0);
+   } else nmessage("Arrays were filled with initial values - calculation is continuing",t_cur);
 }
 
 void init_parallel()
@@ -288,9 +287,10 @@ void init_parallel()
          vtime = k1*ceil((double)N1/kp1)*ceil((double)N2/kp2)*ceil((double)N3/kp3)+
                  k2*((kp1-1)*N2*N3+N1*(kp2-1)*N3+N1*N2*(kp3-1))+
                  k3*((kp1-1)*kp2*kp3+kp1*(kp2-1)*kp3+kp1*kp2*(kp3-1));
-         if(mintime==-1 || vtime<mintime) { mintime=vtime; nd1=i; nd2=j; }
+         if(mintime<0 || vtime<mintime) { mintime=vtime; nd1=i; nd2=j; }
          }
-  pp[0]=divisors[nd1]; pp[1]=divisors[nd2]; pp[2]=size/pp[0]/pp[1];                  // number of procs along axes
+if(!goon) {                       //reading from file when continuing
+  pp[0]=divisors[nd1]; pp[1]=divisors[nd2]; pp[2]=size/pp[0]/pp[1];  }               // number of procs along axes
   pr[0] = rank%pp[0]; pr[1] = (rank/pp[0])%pp[1]; pr[2] = (rank/pp[0]/pp[1])%pp[2];  // coordinates of subregion
 
 /* dimensions of subregion:         global indicies of subregion origin          if there's nonequal subregions*/
@@ -326,7 +326,7 @@ void init_parallel()
    buf_recv[j+2*i] = alloc_mem_1f(buf_size[i]);
   }
 
-   iop=fopen(fname_stat,"w");
+   iop=fopen(NameStatFile,"w");
    fprintf(iop,"%d\n",rank);
    fprintf(iop,"%d\t%d\t%d\n",pr[0],pr[1],pr[2]);
    fprintf(iop,"%d\t%d\t%d\n",pp[0],pp[1],pp[2]);
@@ -379,7 +379,13 @@ return(tmp/dx);
 double coordin(int i, int dir)
                       //0-x,1-y,2-z
 {
- return dx[dir]*((double)(i-ghost)+0.5+n[dir]);
+ switch (dir)
+ {
+   case 0:  return dx[dir]*(i-ghost+0.5+n[dir]);
+   case 1:  return dx[dir]*(i-ghost+0.5+n[dir]);
+   case 2:  return dx[dir]*(i-ghost+0.5+n[dir]);
+ }
+    return(0);
 }
 
  void CopyBufferToGrid(double ****m,double ***nut,double *buffer,int x1,int y1,int z1,int x2,int y2,int z2)

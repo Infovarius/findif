@@ -33,12 +33,9 @@ int main(int argc, char** argv)
    t_cur=0;
    count=0; enter = 0;
 
-
-
    nmessage("work has begun",0);
 
    sprintf(fname,"%s",(argc>1)? argv[1] : argv[0]);
-   sprintf(fname,"%s","shellgrid");
    NameSnapFile = fname;
    sprintf(NameDumpFile ,"%s.dmp",fname);
    sprintf(fname_stat,"%s_%d.sta",fname,rank);
@@ -63,13 +60,13 @@ int main(int argc, char** argv)
    init_conditions(f,Re);
 
    boundary_conditions(f);                             putlog("main:reach this ",numlog++);
-   dump(f,t_cur,count);                                 putlog("main:reach this ",numlog++);
+//   dump(f,t_cur,count);                                 putlog("main:reach this ",numlog++);
 
    if(CheckStep!=0) PulsEn=check(f);                   putlog("main:reach this ",numlog++);
    if (OutStep!=0) printing(f,0,t_cur,count,PulsEn);   //in parallel version better not to do
 
 /*------------------------ MAIN ITERATIONS -------------------------*/
-   while (t_cur < Ttot && !razlet) {
+   while (t_cur < Ttot /*&& !razlet*/) {
         pde(t_cur, f, df);
         dttry=dtnext;
         timestep(f, df, t_cur, f1, dttry, &dtdid, &dtnext);
