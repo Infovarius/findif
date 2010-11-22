@@ -1,6 +1,7 @@
 //----------------------- Calculation of PDE right part  ----------//
 #define LEVEL extern
 #include "head.h"
+#define eta0 1
 
 double norma(double a,double b,double c,int order)
 {
@@ -78,13 +79,13 @@ void pde(double t, double ****f, double ****df)
 
        df[4][i][j][k]=f[2][i][j][k]*(dv1[5][0]-dv1[4][1]+f[5][i][j][k]*r_1[i])-f[3][i][j][k]*(dv1[4][2]-dv1[6][0])
                      +eta[i][j][k]*(dv2[4][0]+dv2[4][1]+dv2[4][2]+r_1[i]*dv1[4][0]-f[4][i][j][k]*r_2[i]-2*dv1[5][1]*r_1[i])
-                     +(etavac/Rm-eta[i][j][k])*(dv2[4][0]+dv1[4][0]*r_1[i]-f[4][i][j][k]*r_2[i]-dv1[5][1]*r_1[i]+dA11[5][0][1]+dA11[6][0][2]);
+                     +(eta0/Rm-eta[i][j][k])*(dv2[4][0]+dv1[4][0]*r_1[i]-f[4][i][j][k]*r_2[i]-dv1[5][1]*r_1[i]+dA11[5][0][1]+dA11[6][0][2]);
        df[5][i][j][k]=f[3][i][j][k]*(dv1[6][1]-dv1[5][2])-f[1][i][j][k]*(dv1[5][0]-dv1[4][1]+f[5][i][j][k]*r_1[i])
                      +eta[i][j][k]*(dv2[5][0]+dv2[5][1]+dv2[5][2]+r_1[i]*dv1[5][0]-f[5][i][j][k]*r_2[i]+2*dv1[4][1]*r_1[i])
-                     +(etavac/Rm-eta[i][j][k])*(dv1[4][1]*r_1[i]+dA11[4][0][1]+dv2[5][1]+dA11[6][1][2]);
+                     +(eta0/Rm-eta[i][j][k])*(dv1[4][1]*r_1[i]+dA11[4][0][1]+dv2[5][1]+dA11[6][1][2]);
        df[6][i][j][k]=f[1][i][j][k]*(dv1[4][2]-dv1[6][0])-f[2][i][j][k]*(dv1[6][1]-dv1[5][2])
                      +eta[i][j][k]*(dv2[6][0]+dv2[6][1]+dv2[6][2]+r_1[i]*dv1[6][0])
-                     +(etavac/Rm-eta[i][j][k])*(dv1[4][2]*r_1[i]+dA11[4][0][2]+dA11[5][1][2]+dv2[6][2]);
+                     +(eta0/Rm-eta[i][j][k])*(dv1[4][2]*r_1[i]+dA11[4][0][2]+dA11[5][1][2]+dv2[6][2]);
 /*       df[4][i][j][k]=eta[i][j][k]*(dv2[4][0]+dv2[4][1]+dv2[4][2]+r_1[i]*dv1[4][0]-f[4][i][j][k]*r_2[i]-2*dv1[5][1]*r_1[i]);
        df[5][i][j][k]=f[3][i][j][k]*(dv1[6][1]-dv1[5][2])-f[1][i][j][k]*(dv1[5][0]-dv1[4][1]+f[5][i][j][k]*r_1[i])
                      +eta[i][j][k]*(dv2[5][0]+dv2[5][1]+dv2[5][2]+r_1[i]*dv1[5][0]-f[5][i][j][k]*r_2[i]+2*dv1[4][1]*r_1[i])
@@ -171,14 +172,15 @@ for(k=0;k<n3;k++)
 void  boundary_conditions(double ****f)
 {
    int i, j, k, l, req_numS=0, req_numR=0;
-   int r1,r2,z1,z2;
-   int flag,cnt,z[7],ztemp,tag=10;
+   int i1,i2,k1,k2;
+   int flag,cnt,z[4],znorm,ztau,tag=10;
    double vrho,vphi,vth,An;
+   double rfict,rin;
    char msg_err[100];       //for putlog+mpi_error
    int reslen;
 
    z[0]=1; z[1]=z[2]=z[3]=-1; //  влияет на вид гран.условий (-1:жесткие, 1:свободные)
-   z[4]=-1; z[5]=1;          // rather for Anorm&Atau not Ar,Aphi,Az
+   znorm=-1; ztau=1;          // rather for Anorm&Atau not Ar,Aphi,Az
 
   /*============================ divertor =================================*/
   if(t_cur>100)                  // divertors are off till t sec
@@ -277,28 +279,49 @@ void  boundary_conditions(double ****f)
         for(k=0;k<m3;k++)
         {
           if(isType(node[i][k],NodeGhostFluid)) {
-                r2=(r1=floor(refr_f[i][k]))+1;
-                z2=(z1=floor(refz_f[i][k]))+1;
+                i2=(i1=floor(refr_f[i][k]))+1;
+                k2=(k1=floor(refz_f[i][k]))+1;
                 for(l=0;l<=3;l++)
-                   f[l][i][j][k] = z[l]*( (refr_f[i][k]-r2)*(f[l][r1][j][z1]*(refz_f[i][k]-z2)-f[l][r1][j][z2]*(refz_f[i][k]-z1))
-                                         +(refr_f[i][k]-r1)*(f[l][r2][j][z2]*(refz_f[i][k]-z1)-f[l][r2][j][z1]*(refz_f[i][k]-z2))
+                   f[l][i][j][k] = z[l]*( (refr_f[i][k]-i2)*(f[l][i1][j][k1]*(refz_f[i][k]-k2)-f[l][i1][j][k2]*(refz_f[i][k]-k1))
+                                         +(refr_f[i][k]-i1)*(f[l][i2][j][k2]*(refz_f[i][k]-k1)-f[l][i2][j][k1]*(refz_f[i][k]-k2))
                                         );
-                   nut[i][j][k] = (refr_f[i][k]-r2)*(nut[r1][j][z1]*(refz_f[i][k]-z2)-nut[r1][j][z2]*(refz_f[i][k]-z1))
-                                + (refr_f[i][k]-r1)*(nut[r2][j][z2]*(refz_f[i][k]-z1)-nut[r2][j][z1]*(refz_f[i][k]-z2));
+                   nut[i][j][k] = (refr_f[i][k]-i2)*(nut[i1][j][k1]*(refz_f[i][k]-k2)-nut[i1][j][k2]*(refz_f[i][k]-k1))
+                                + (refr_f[i][k]-i1)*(nut[i2][j][k2]*(refz_f[i][k]-k1)-nut[i2][j][k1]*(refz_f[i][k]-k2));
                 }
           if(isType(node[i][k],NodeGhostMagn)) {
-                r1=floor(refr_m[i][k]+0.5);
-                z1=floor(refz_m[i][k]+0.5);
-                An = ( f[4][r1][j][z1]*(r1-i)+f[6][r1][j][z1]*(z1-k) )/
-                     ( (r1-i)*(r1-i) + (z1-k)*(z1-k) );
+                i1=floor(refr_m[i][k]+0.5);
+//                rin = coordin(i1,0); rfict = coordin(i,0);
+                k1=floor(refz_m[i][k]+0.5);
+                An = ( f[4][i1][j][k1]*(i1-i)+f[6][i1][j][k1]*(k1-k) )/
+                     ( (i1-i)*(i1-i) + (k1-k)*(k1-k) );
 /*                for(l=4;l<=6;l++)
-                   f[l][i][j][k] = z[l]*f[l][r1][j][z1];*/
-//                ztemp = ((r1-i)*(z1-k)==0) ? z[5] : z[4];
-                ztemp = z[5];
-                f[4][i][j][k] = ztemp*f[4][r1][j][z1] + (z[4]-ztemp)*An*(r1-i);
-                f[5][i][j][k] = z[5]*f[5][r1][j][z1] *
-                               (coordin(r1,0)+coordin(i,0)-(i-r1)*dx[0]) / (coordin(r1,0)+coordin(i,0)+(i-r1)*dx[0]);
-                f[6][i][j][k] = ztemp*f[6][r1][j][z1] + (z[4]-ztemp)*An*(z1-k);
+                   f[l][i][j][k] = z[l]*f[l][i1][j][k1];*/
+                f[4][i][j][k] = ztau*f[4][i1][j][k1] + (znorm-ztau)*An*(i1-i);
+                f[5][i][j][k] = ztau*f[5][i1][j][k1];
+                f[6][i][j][k] = ztau*f[6][i1][j][k1] + (znorm-ztau)*An*(k1-k);
+                if((i1-i)*(k1-k)!=0) {
+                                     f[4][i][j][k] = -f[4][i1][j][k1];
+                                     f[6][i][j][k] = -f[6][i1][j][k1];
+                                     }
+/*                switch (i1-i)
+                {
+                  case -1: case -3: case -5:
+                           f[5][i][j][k] = f[5][i1][j][k1] *
+                              (rin+rfict-(i-i1)*dx[0]) / (rin+rfict+(i-i1)*dx[0]); //simple condition but doesn't work
+                  break;
+                  case 1:  f[5][i][j][k] = f[5][i1][j][k1] * rfict*(3*rin-rfict) / (rin*(3*rfict-rin));
+                  break;
+                  case 3: f[5][i][j][k] = f[5][i1][j][k1] * (1. + (rin*rin-rfict*rfict)/6./rfict/rin);
+                           i2 = (2*i1+i)/3;
+                           f[5][i][j][k]+= f[5][i2][j][k1] * 3.*(rin*rin-rfict*rfict)*(3*rfict+rin)/2./rfict/(5*rfict+rin)/(rfict+2*rin);
+                  break;
+                  case 5: f[5][i][j][k] = f[5][i1][j][k1] * (1. + (rin*rin-rfict*rfict)/10./rfict/rin);
+                           i2 = (4*i1+i)/5;
+                           f[5][i][j][k]+= f[5][i2][j][k1] * (rin*rin-rfict*rfict)/rfict/(rfict+4*rin);
+                           i2 = (3*i1+2*i)/5;
+                           f[5][i][j][k]+= f[5][i2][j][k1] * (rin*rin-rfict*rfict)*(13*rfict+7*rin)/2./rfict/(2*rfict+3*rin)/(7*rfict+3*rin);
+                  break;
+                }*/
                 }
         }
 
@@ -409,15 +432,15 @@ if(!goon) {
                        (Rfl*Rfl-pow(coordin(i,0)-rc,2) - pow(coordin(k,2),2))*4/Rfl/Rfl;*/
         f[1][i][j][k]=f[2][i][j][k]=f[3][i][j][k]=0;
                                         }
-      if(isType(node[i][k],NodeFluid)/*||isType(node[i][k],NodeShell)*/ )
+      if(isType(node[i][k],NodeMagn)/*||isType(node[i][k],NodeShell)*/ )
                  {
-                 f[4][i][j][k]=coordin(i,0)*cos(coordin(j,1))*sin(coordin(j,1));
-                 f[5][i][j][k]=coordin(i,0)*cos(coordin(j,1))*cos(coordin(j,1));
-                 f[6][i][j][k]=0;
-/*          f[4][i][j][k]=0;
-          f[5][i][j][k]=0;
-          f[6][i][j][k]=coordin(i,0);*/
+                 f[4][i][j][k]=((double)rand()-RAND_MAX/2)/RAND_MAX;
+                 f[5][i][j][k]=((double)rand()-RAND_MAX/2)/RAND_MAX;
+                 f[6][i][j][k]=((double)rand()-RAND_MAX/2)/RAND_MAX;
                  }
+/*                 f[4][i][j][k]=1;
+                 f[5][i][j][k]=0.1;
+                 f[6][i][j][k]=1;*/
       }
 //   struct_func(f,2,2,3);
    nmessage("Arrays were filled with initial values - calculation from beginning",0,0);

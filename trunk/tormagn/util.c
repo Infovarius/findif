@@ -31,9 +31,10 @@ void nmessage(char msg_text[],double t_cur,long count)
 
 void add_control_point(char *name_cp)
 {
-FILE *cpf=fileopen(NameCPFile,1);
-if(rank==size-1) 
-       { if(cpf==NULL) cpf=fileopen(NameCPFile,0);
+FILE *cpf;
+if(rank==size-1)
+       { cpf = fileopen(NameCPFile,1);
+         if(cpf==NULL) cpf=fileopen(NameCPFile,0);
          fprintf(cpf,"%s\n",name_cp);
          fclose(cpf);}
 }

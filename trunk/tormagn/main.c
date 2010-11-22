@@ -48,6 +48,7 @@ int main(int argc, char** argv)
       }
    if(goon) {if(init_data()) nrerror("error of reading initial arrays",0,0);}
        else { init_parallel();  operate_memory(1);}
+   fclose(fd);
 
    dx[0]=2*R/N1;
    dx[1]=lfi/N2;
@@ -98,20 +99,20 @@ int main(int argc, char** argv)
 
 /*------------------------ MAIN ITERATIONS -------------------------*/
    while (t_cur < Ttot && !razlet) {
- /*      for(i=0;i<m1;i++)
+/*       for(i=0;i<m1;i++)
          for(j=ghost;j<=ghost;j++)
             for(k=0;k<m3;k++)
             {
-            r1 = coordin(i,0);  phi1 = coordin(j,1);  z1 = coordin(k,2);
+            r1 = coordin(i,0);  /*phi1 = coordin(j,1);  z1 = coordin(k,2);
             rho=sqrt(pow(r1-rc,2) + z1*z1);
             vrho = 0;
-            vth  = vtheta_given(t_cur,rho,Rfl,phi1);
+/*            vth  = vtheta_given(t_cur,rho,Rfl,phi1);
             vphi = vfi_given(t_cur,rho,Rfl);
-            vphi = sqrt(vphi*vphi+vth*vth);
-            f[1][i][j][k] = vrho*sinth[i][k]+vphi*costh[i][k]*sin(chi[i][k]);
-            f[2][i][j][k] = vphi*cos(chi[i][k]);
-            f[3][i][j][k] = vrho*costh[i][k]-vphi*sinth[i][k]*sin(chi[i][k]);
-            }               */
+            vth = 0; vphi = vfi_given(0.2,rho,Rfl);
+            f[1][i][j][k] = vrho*sinth[i][k]+vth*costh[i][k];
+            f[2][i][j][k] = vphi;
+            f[3][i][j][k] = vrho*costh[i][k]-vth*sinth[i][k];
+            }                   */
         pde(t_cur, f, df);
         dttry=dtnext;
         timestep(f, df, t_cur, f1, dttry, &dtdid, &dtnext);
@@ -129,7 +130,7 @@ int main(int argc, char** argv)
                 {
                 boundary_conditions(f1);
                 check(f1);
-                }
+                }                               
               else boundary_conditions(f1);
             printing(f1,dtdid,t_cur,count,PulsEnergy);
             }
@@ -157,6 +158,7 @@ int main(int argc, char** argv)
    if(rank==size-1) add_control_point("END");
 
    operate_memory(-1);
+//   Master fclose(NameErrorFile);
 
    if(t_cur>=Ttot&&!razlet) nmessage("work is succesfully done",t_cur,count);
        else nrerror("this is break of scheme",t_cur,count);
