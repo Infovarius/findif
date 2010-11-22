@@ -55,5 +55,5 @@ void print_CPU_usage()
    fprintf(f,"%9.4Lf%%",100*Tick[i].sum_time/sum2);
    fprintf(f,"\n");
    }
- fclose(f);
+ fileclose(f);
 }
