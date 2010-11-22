@@ -2,7 +2,7 @@
 //#define LEVEL extern
 //#include "head.h"
 #include <math.h>
-#define Vmax 0.849931
+#define Vmax 0.829289
 
 double ch(double x)
 {
