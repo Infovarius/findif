@@ -396,7 +396,7 @@ void  init_conditions()
                           {setType(&node[i][k],NodeGhostMagn);
                            refz_m[i][k] = 2*mm3-k-1;}
         if(!isType(node[i][k],NodeGhostMagn)) setType(&node[i][k],NodeMagn);
-                                         else node[i][k] -= NodeGhostMagn;      //temporarily - deleting all fictive cells
+//                                         else node[i][k] -= NodeGhostMagn;      //temporarily - deleting all fictive cells
      //for divertor's blade
         sinth[i][k]=(r1-rc)/rho;
         costh[i][k]=   z1  /rho;
@@ -409,7 +409,7 @@ void  init_conditions()
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
        {
-       if(isType(node[i][k],NodeGhostFluid)) node[i][k] -= NodeGhostFluid;
+//       if(isType(node[i][k],NodeGhostFluid)) node[i][k] -= NodeGhostFluid;   //temporarily - deleting all fictive cells
        if(isType(node[i][k],NodeFluid)) eta[i][j][k]=1./Rm;
        if(isType(node[i][k],NodeShell)) eta[i][j][k]=etash/Rm;
        if(isType(node[i][k],NodeVacuum)) eta[i][j][k]=etavac/Rm;
