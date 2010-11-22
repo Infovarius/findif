@@ -67,7 +67,7 @@ int main(int argc, char** argv)
       for(i=0;i<N2+2*ghost;i++) fprintf(fd,"%e ",coordin(i,1));
       fprintf(fd,"\n");
       for(i=0;i<N3+2*ghost;i++) fprintf(fd,"%e ",coordin(i,2));
-      fclose(fd);
+      fileclose(fd);
      }
 //--------------------------------------
  if(!goon) {
@@ -80,7 +80,7 @@ int main(int argc, char** argv)
  print_array2d(fd,node,0,m1,0,m3);
  print_array2d(fd,refr,0,m1,0,m3);
  print_array2d(fd,refz,0,m1,0,m3);
- fclose(fd);
+ fileclose(fd);
 
  if(rank!=size-1) MPI_Send("",0,MPI_CHAR,rank+1,1,MPI_COMM_WORLD);
              else nmessage("nodes has been dumped",t_cur,count);
