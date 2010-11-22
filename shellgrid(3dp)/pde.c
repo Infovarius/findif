@@ -320,7 +320,7 @@ if(!goon) {                       //reading from file when continuing
  buf_size[1]=n1*n3*(nvar+1)*ghost;
  buf_size[2]=n1*n2*(nvar+1)*ghost;
 
- for(i=0;i<nvar-1;i++)
+ for(i=0;i<3;i++)           //3-D
   for(j=0;j<=1;j++) {
    buf_send[j+2*i] = alloc_mem_1f(buf_size[i]);
    buf_recv[j+2*i] = alloc_mem_1f(buf_size[i]);

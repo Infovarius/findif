@@ -7,20 +7,24 @@
 
 LEVEL char *NameMessageFile;
 LEVEL char *NameErrorFile;
-LEVEL char *NameInitFile;
+LEVEL char NameInitFile[200];
 LEVEL char *NameNuFile;
 LEVEL char *NameVFile;
-LEVEL char NameDumpFile[80];
+LEVEL char *NameDumpFile;
 LEVEL char *NameSnapFile;
 LEVEL char *NameEnergyFile;
 LEVEL char *KaskadVarFile;
-LEVEL char  fname[80], fname_stat[80];
+LEVEL char *NameCPFile;
+LEVEL char *NameStatFile;
+//LEVEL char NameControlPoint[80];
+LEVEL char *fname;
 
-LEVEL double ****f, ****f1, ****df, ****df2, ****df3, ****df4, ****df5,**s_func,
+LEVEL double ****f, ****f1, ***nut, ****df, ****df2, ****df3, ****df4, ****df5, **s_func,
              dx[3];
 
-LEVEL double ***nut,
-             Gamma, l1, l2, l3, p1, p2,Re;
+LEVEL double **averf;
+LEVEL double *totvx, *vx, *avernu;
+LEVEL double Gamma, l1, l2, l3, p1, p2,Re;
 
 LEVEL int    m1, m2, m3, mm1, mm2, mm3, n1, n2, n3, N1, N2, N3, Ns,
              approx, ghost, nvar;
@@ -34,7 +38,9 @@ LEVEL double time_begin,time_now;
 
 LEVEL long enter;
 LEVEL char razlet;
-LEVEL double TotalEnergy, PulsEn;
+LEVEL double TotalEnergy, PulsEnergy;
+
+LEVEL int goon;                       // continue calculation
 LEVEL int CheckStep;  //each CheckStep divergence of program is checking
 LEVEL int OutStep;    //each OutStep result is printing
 LEVEL int SnapStep;   //each SnapStep snapshot is done
@@ -50,9 +56,9 @@ LEVEL long numlog;
 LEVEL int rank, size;
 LEVEL MPI_Request SendRequest[256],RecvRequest[256];
 LEVEL MPI_Status statuses[256];
-LEVEL double *buf_send[6], *buf_recv[6], buf_size[3];
-LEVEL int pr_neighbour[6],pp[3],n[3];
-LEVEL int pr[3];
+LEVEL double *buf_send[6], *buf_recv[6], buf_size[3];    //6=2*(nvar-1)
+LEVEL int pr_neighbour[6],pp[3],n[3];                    //3D
+LEVEL int pr[3];                                         //3D
 //void init_parallel();                       in file pde.c
 
 //--------for GOY
@@ -73,6 +79,7 @@ void struct_func(double ****f,int q,double lambda,int size_okr);
 /*------- util.c  -----------*/
 void nrerror(char[],double);
 void nmessage(char [],double);
+void add_control_point(char *);
 double ****alloc_mem_4f(int, int, int, int);
 void   free_mem_4f(double ****, int, int, int, int);
 double ***alloc_mem_3f(int, int, int);
@@ -81,6 +88,7 @@ double **alloc_mem_2f(int, int);
 void   free_mem_2f(double **, int, int);
 double *alloc_mem_1f(int);
 void   free_mem_1f(double *, int);
+void operate_memory(int dir);
 /*------- rkad.c  -----------*/
 void timestep(double ****f, double ****df, double t, double ****fout,
               double dttry, double *dtdid, double *dtnext);
@@ -91,7 +99,7 @@ double norma(double a,double b,double c,int q);
 double deviation(double ****,int,int,int);
 void nut_by_flux(double ****f,double Re);
 void   boundary_conditions(double ****);
-void  init_conditions(double ****,double Re);
+void  init_conditions(void);
 void init_parallel(void);
 double dr(double ***, int, int, int, int, int, double, int, int);
 double coordin(int, int);
@@ -104,7 +112,7 @@ int init_data(double *Re,double *t_cur,long *count);
 void print_array1d(FILE *ff,double *a,int beg1,int n1);
 void print_array2d(FILE *ff,double **a,int beg1,int n1,int beg2,int n2);
 void print_array3d(FILE *ff,double ***a,int beg1,int n1,int beg2,int n2,int beg3,int n3);
-double check(double ****f);
+void check(double ****f);
 void printing(double ****f1,double dtdid,double t_cur,long count,double en);
 void dump(double ****f1,double t_cur,long count);
 void snapshot(double ****f,double t_cur,long count);
