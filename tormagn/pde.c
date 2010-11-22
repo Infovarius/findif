@@ -74,7 +74,7 @@ void pde(double t, double ****f, double ****df)
         dA11[l][0][2] = dA11[l][2][0] = d2cross(f[l],i,j,k,3,1,ghost,approx);
         dA11[l][1][2] = dA11[l][2][1] = r_1[i]*d2cross(f[l],i,j,k,3,2,ghost,approx);
         dv1[l][1] *= r_1[i];     dv2[l][1] *= r_2[i];*/
-        dA11[l][0][1] = dA11[l][1][0] = d2cross(f[l],i,j,k,2,1,ghost,approx);
+        dA11[l][0][1] = dA11[l][1][0] = d2cross(f[l],i,j,k,2,1,ghost,approx);           
         dA11[l][0][2] = dA11[l][2][0] = d2cross(f[l],i,j,k,3,1,ghost,approx);
         dA11[l][1][2] = dA11[l][2][1] = d2cross(f[l],i,j,k,3,2,ghost,approx);// for cylindrical case
         }
@@ -134,7 +134,7 @@ int kol=0,l;
            };
    flux /= kol;
 return(flux);
-}                             
+}
 
 void nut_by_flux(double ****f,double dt) //calculating nu_turbulent by velocity fluctuations
 {
@@ -294,7 +294,6 @@ void  boundary_conditions(double ****f)
                 }
           if(isType(node[i][k],NodeGhostMagn)) {
                 i1=floor(refr_m[i][k]+0.5);
-                rin = coordin(i1,0); rfict = coordin(i,0);
                 k1=floor(refz_m[i][k]+0.5);
                 An = ( f[4][i1][j][k1]*(i1-i)+f[6][i1][j][k1]*(k1-k) )/
                      ( (i1-i)*(i1-i) + (k1-k)*(k1-k) );
@@ -302,8 +301,7 @@ void  boundary_conditions(double ****f)
                    f[l][i][j][k] = z[l]*f[l][i1][j][k1];*/
                 f[4][i][j][k] = ztau*f[4][i1][j][k1] + (znorm-ztau)*An*(i1-i);
 //                f[5][i][j][k] = ztau*f[5][i1][j][k1];
-                f[5][i][j][k] = f[5][i1][j][k1] *
-                              (rin+rfict-(i-i1)*dx[0]) / (rin+rfict+(i-i1)*dx[0]) ;
+                f[5][i][j][k] = f[5][i1][j][k1];
 /*                switch (i1-i)
                 {
                   case -1: case -3: case -5:
@@ -444,15 +442,15 @@ if(!goon) {
       if(isType(node[i][k],NodeFluid)/*||isType(node[i][k],NodeShell)*/ )
                  {   }
                  f[4][i][j][k]=f[5][i][j][k]=f[6][i][j][k]=0;
-                 f[4][i][j][k]=coordin(i,0)/*cos(coordin(j,1))*sin(coordin(j,1))*/;
-                 f[5][i][j][k]=coordin(i,0)/*cos(coordin(j,1))*cos(coordin(j,1))*/;
+                 /*f[4][i][j][k]=coordin(i,0)*cos(coordin(j,1))*sin(coordin(j,1))*/;
+                 /*f[5][i][j][k]=coordin(i,0)*cos(coordin(j,1))*cos(coordin(j,1))*/;
                  f[6][i][j][k]=0;
 //                 if(!isType(node[i][k],NodeMagn))
                   if(isType(node[i][k],NodeFluid))
                      {
-                     f[4][i][j][k]+=0.01*((double)rand()-RAND_MAX/2)/RAND_MAX;
-                     f[5][i][j][k]+=0.01*((double)rand()-RAND_MAX/2)/RAND_MAX;
-                     f[6][i][j][k]+=0.01*((double)rand()-RAND_MAX/2)/RAND_MAX;
+                     f[4][i][j][k]+=0.1*((double)rand()-RAND_MAX/2)/RAND_MAX;
+                     f[5][i][j][k]+=0.1*((double)rand()-RAND_MAX/2)/RAND_MAX;
+                     f[6][i][j][k]+=0.1*((double)rand()-RAND_MAX/2)/RAND_MAX;
                      }
       }
 //   struct_func(f,2,2,3);
@@ -640,7 +638,6 @@ void calculate_curl(double ****f,double ****b,enum TypeNodes tip)
       for(l=0;l<=2;l++) {
        for(m=0;m<3;m++)
          dA[l][m]=dr(f[l],i,j,k,m+1,0,dx[m],ghost, approx);
-//       dA[l][1] *= r_1[i];
        }
       b[0][i][j][k] = dA[2][1] - dA[1][2];
       b[1][i][j][k] = dA[0][2] - dA[2][0];

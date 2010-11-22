@@ -140,10 +140,14 @@ int main(int argc, char** argv)
                 {
                 boundary_conditions(f1);
                 check(f1);
-                }                               
+                }
               else boundary_conditions(f1);
             printing(f1,dtdid,t_cur,count,PulsEnergy);
             }
+/*  snapshot(df,eta,t_cur,count);
+  printf("%lf\n%lf\n%g\n%g",max1,max2,max3,dtdid);
+  scanf("%d",vphi);
+  exit(0);*/
         if (SnapStep!=0 && count%SnapStep==0)
             snapshot(f1,eta,t_cur,count);
         for(l=0;l<nvar;l++)

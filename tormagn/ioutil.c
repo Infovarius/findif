@@ -50,7 +50,7 @@ char str[256],*pstr;
  if(sscanf(str,"%lf",param)==0) nrerror("Input of parameter error",-1,-1);
  pstr=strtok(str,"|");
  pstr=strtok((char *)NULL,"|");
- printf("%g\t->\t%s",*param,pstr);
+ Master printf("%g\t->\t%s",*param,pstr);
 }
 
 void init_param(int argc, char** argv,double *dtnext)
@@ -131,7 +131,8 @@ int init_data(void)                 //returns code of error
  int error=0;
  int i,j,k,l,tmpr;
  float tmpd;
- char tmpc;
+ char tmpc;	 
+ double Re1;		  // prioritet in parameter for runtest.dat
 
  FILE *inp = fileopen(NameInitFile,-1);
  read_tilleq(inp,'n');   if(fscanf(inp,"%lf",&t_cur)==0) error=1;
@@ -142,7 +143,7 @@ int init_data(void)                 //returns code of error
  read_tilleq(inp,'n');   if(fscanf(inp,"%d",&N1)==0) error=1;
  read_tilleq(inp,'n');   if(fscanf(inp,"%d",&N2)==0) error=1;
  read_tilleq(inp,'n');   if(fscanf(inp,"%d",&N3)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%lf",&Re)==0) error=1;
+ read_tilleq(inp,'n');   if(fscanf(inp,"%lf",&Re1)==0) error=1;
 
  init_parallel();
  operate_memory(1);                     // creating arrays
@@ -170,7 +171,7 @@ int init_data(void)                 //returns code of error
             }
         fscanf(inp,"%c",&tmpc);
         }
- for(l=0;l<6;l++)                    // reading B and j
+/* for(l=0;l<6;l++)                    // reading B and j
         {
         do fscanf(inp,"%c",&tmpc); while (tmpc!='{');
         for(i=0;i<m1;i++)
@@ -190,7 +191,7 @@ int init_data(void)                 //returns code of error
             fscanf(inp,"%c",&tmpc);
             }
         fscanf(inp,"%c",&tmpc);
-        }
+        }*/
  do fscanf(inp,"%c",&tmpc); while (tmpc!='{');   //reading nut
  for(i=0;i<m1;i++)
      {
