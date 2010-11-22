@@ -55,6 +55,8 @@ int main(int argc, char** argv)
    dx[0]=2*R/N1;
    dx[1]=lfi/N2;
    dx[2]=2*R/N3;
+   p1 = 4/Re*rc;
+
    init_conditions();
 
 //--------------------------------------
@@ -86,7 +88,7 @@ int main(int argc, char** argv)
 //--------------------------------------
 
    boundary_conditions(f,nut);
-   
+
    if(!goon)  dump(f,nut,t_cur,count);
 
    time_begin = MPI_Wtime();
