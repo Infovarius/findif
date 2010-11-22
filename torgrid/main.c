@@ -22,7 +22,7 @@ int main(int argc, char** argv)
   KaskadVarFile = "kaskvar.dat";
                                        numlog=0;
    init_param(argc,argv,&dtnext);       // initilization of parameters
-   Gamma=1e-3;
+   Gamma=1e-4;
 
    ghost=(approx-1)/2;            //radius of approx sample
    dx[0]=2*R/N1;
@@ -54,6 +54,9 @@ int main(int argc, char** argv)
    node=alloc_mem_2f(m1, m3);         // kind of nodes
    refr=alloc_mem_2f(m1, m3);         // reflection of nodes relative circle
    refz=alloc_mem_2f(m1, m3);
+   sinth=alloc_mem_2f(m1, m3);
+   costh=alloc_mem_2f(m1, m3);
+   chi=alloc_mem_2f(m1, m3);          // angle of blade tilt
    nut=alloc_mem_3f(m1, m2, m3);
    averf = alloc_mem_3f(3,m1,m3);
    vfi = alloc_mem_1f(N3);
@@ -68,6 +71,16 @@ int main(int argc, char** argv)
    init_conditions(f,Re);
    for(i=0;i<m1;i++) { r_1[i]=1./coordin(i,0); r_2[i]=r_1[i]*r_1[i]; }
 //--------------------------------------
+    Master {
+      fd=fileopen("coord",rank);
+      for(i=0;i<N1+2*ghost;i++) fprintf(fd,"%e ",coordin(i,0));
+      fprintf(fd,"\n");
+      for(i=0;i<N2+2*ghost;i++) fprintf(fd,"%e ",coordin(i,1));
+      fprintf(fd,"\n");
+      for(i=0;i<N3+2*ghost;i++) fprintf(fd,"%e ",coordin(i,2));
+      fclose(fd);
+     }
+//--------------------------------------
     if(rank!=0) MPI_Recv("",0,MPI_CHAR,rank-1,1,MPI_COMM_WORLD,statuses);
 
  fd=fileopen("debug",rank);
@@ -80,18 +93,18 @@ int main(int argc, char** argv)
  fclose(fd);
 
  if(rank!=size-1) MPI_Send("",0,MPI_CHAR,rank+1,1,MPI_COMM_WORLD);
-             else nmessage("dump is done",t_cur);
+             else nmessage("debug is done",t_cur);
 //--------------------------------------
 
-   boundary_conditions(f);                             putlog("main:reach this ",numlog++);
-   dump(f,t_cur,count);                                 putlog("main:reach this ",numlog++);
+   boundary_conditions(f);                             putlog("main:reach this ",0);
+   dump(f,t_cur,count);                                 putlog("main:reach this ",1);
 
-   if(CheckStep!=0) check(f);                            putlog("main:reach this ",numlog++);
-   if (OutStep!=0) printing(f,0,t_cur,count,PulsEnergy);   //in parallel version better not to do
+   if(CheckStep!=0) check(f);                            putlog("main:reach this ",2);
+   if (OutStep!=0) printing(f,0,t_cur,count,PulsEnergy);
 
 /*------------------------ MAIN ITERATIONS -------------------------*/
    while (t_cur < Ttot && !razlet) {
-        pde(t_cur, f, df);
+        pde(t_cur, f, df);                            
         dttry=dtnext;
         timestep(f, df, t_cur, f1, dttry, &dtdid, &dtnext);
         nut_by_flux(f,dtdid);
@@ -142,6 +155,9 @@ int main(int argc, char** argv)
    free_mem_3f(nut, m1, m2, m3);
    free_mem_2f(refr,m1, m3);
    free_mem_2f(refz,m1, m3);
+   free_mem_2f(sinth,m1, m3);
+   free_mem_2f(costh,m1, m3);
+   free_mem_2f(chi,  m1, m3);
    free_mem_2f(node,m1, m3);
    free_mem_3f(averf,3,m1,m3);
    free_mem_1f(vfi,N3);
