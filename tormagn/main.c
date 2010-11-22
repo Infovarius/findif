@@ -1,6 +1,7 @@
 #define LEVEL
 
 #include "head.h"
+#define Tunit 0.36915
 
 int main(int argc, char** argv)
 {
@@ -32,23 +33,24 @@ int main(int argc, char** argv)
   NameStatFile =(char *)calloc(strl+9,sizeof(char));
   sprintf(NameStatFile,"%s_%d.sta",fname,rank); NameStatFile[strl+8] = 0;
 
-   Master nmessage("--------------------------------------------------------------------------",0,0);
+   Master nmessage("--------------------------------------------------------------------------",-1,-1);
    init_param(argc,argv,&dtnext);       // initialization of parameters
    Gamma=1e-4;
    ghost=(approx-1)/2;                  //radius of approx sample
-   MPI_Barrier(MPI_COMM_WORLD);
    t_cur=0;
    count=0; enter = 0;
 
 /* ---------------------- initialization of arrays --------------------- */
-   goon = ((fd=fopen(NameCPFile,"r"))>0);
+   goon = ((fd=fopen(NameCPFile,"r+"))>0);
+   if(fd==NULL) putlog("File were not opened",goon);
+//           else putlog("File handle=",(long)fd);
    if(goon)
       { do fscanf(fd,"%s\n",NameInitFile); while (!feof(fd));
         goon = strcmp(NameInitFile,"END");
       }
-   if(goon) {if(init_data()) nrerror("error of reading initial arrays",0,0);}
+   if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
        else { init_parallel();  operate_memory(1);}
-   fclose(fd);
+   fileclose(fd);
 
    dx[0]=2*R/N1;
    dx[1]=lfi/N2;
@@ -63,7 +65,7 @@ int main(int argc, char** argv)
       for(i=0;i<N2+2*ghost;i++) fprintf(fd,"%e ",coordin(i,1));
       fprintf(fd,"\n");
       for(i=0;i<N3+2*ghost;i++) fprintf(fd,"%e ",coordin(i,2));
-      fclose(fd);
+      fileclose(fd);
      }
 //--------------------------------------
  if(!goon) {
@@ -78,19 +80,20 @@ int main(int argc, char** argv)
  print_array2d(fd,refz_f,0,m1,0,m3);
  print_array2d(fd,refr_m,0,m1,0,m3);
  print_array2d(fd,refz_m,0,m1,0,m3);
- fclose(fd);
+ fileclose(fd);
 
  if(rank!=size-1) MPI_Send("",0,MPI_CHAR,rank+1,1,MPI_COMM_WORLD);
              else nmessage("nodes has been dumped",t_cur,count);
             }
 //--------------------------------------
 
+//   t_cur=0;   time_begin = MPI_Wtime();   dump(f,eta,t_cur,count); exit(1);          // temporarily
    boundary_conditions(f);
 
    if(!goon)  dump(f,eta,t_cur,count);
 
    time_begin = MPI_Wtime();
-   if(!goon) Master nmessage("work has begun",0,0);
+   if(!goon) Master nmessage("work has begun",-1,-1);
        else Master nmessage("work continued",t_cur,count);
    Master fileopen(NameErrorFile,abs(goon));
 
@@ -104,14 +107,14 @@ int main(int argc, char** argv)
             for(k=0;k<m3;k++)
             if(isType(node[i][k],NodeFluid))
             {
-            r1 = coordin(i,0);  /*phi1 = coordin(j,1);*/  z1 = coordin(k,2);
+            r1 = coordin(i,0);  phi1 = coordin(j,1);  z1 = coordin(k,2);
             rho=sqrt(pow(r1-rc,2) + z1*z1);
-            vrho = 0;
             if(rho>=Rfl) continue;
-            vth  = vtheta_given(0.2,rho,Rfl,phi1);
-/*            vphi = vfi_given(t_cur,rho,Rfl);
-            vth = 0;                          */
-            vphi = vfi_given(0.2,rho,Rfl);
+            vrho = 0;
+            vth  = vtheta_given(t_cur*Tunit,rho,Rfl,phi1);
+/*            vphi = vfi_given(t_cur*Tunit,rho,Rfl);
+            vth = 0;                        */
+            vphi = vfi_given(0.2,rho,Rfl);  
             f[1][i][j][k] = vrho*sinth[i][k]+vth*costh[i][k];
             f[2][i][j][k] = vphi;
             f[3][i][j][k] = vrho*costh[i][k]-vth*sinth[i][k];
@@ -161,7 +164,7 @@ int main(int argc, char** argv)
    if(rank==size-1) add_control_point("END");
 
    operate_memory(-1);
-//   Master fclose(NameErrorFile);
+//   Master fileclose(NameErrorFile);
 
    if(t_cur>=Ttot&&!razlet) nmessage("work is succesfully done",t_cur,count);
        else nrerror("this is break of scheme",t_cur,count);
