@@ -22,7 +22,7 @@ void nmessage(char msg_text[],double t_cur,long count)
 {
    FILE *msg;
    msg=fileopen(NameMessageFile,1);
-   time_now = (t_cur==0)?time_begin:MPI_Wtime();
+   time_now = (t_cur<0)?time_begin:MPI_Wtime();
    fprintf(msg,"message of proc#%d at t=%-7.4lf Niter=%-6d time of work=%g sec:\n",rank,
                     t_cur,count,time_now-time_begin);
    fprintf(msg,"%s\n",msg_text);
@@ -32,11 +32,10 @@ void nmessage(char msg_text[],double t_cur,long count)
 void add_control_point(char *name_cp)
 {
 FILE *cpf;
-if(rank==size-1)
-       { cpf = fileopen(NameCPFile,1);
-         if(cpf==NULL) cpf=fileopen(NameCPFile,0);
-         fprintf(cpf,"%s\n",name_cp);
-         fclose(cpf);}
+cpf = fileopen(NameCPFile,1);
+if(cpf==NULL) cpf=fileopen(NameCPFile,0);
+fprintf(cpf,"%s\n",name_cp);
+fileclose(cpf);
 }
 
 double ****alloc_mem_4f(int mvar, int n1, int n2, int n3)

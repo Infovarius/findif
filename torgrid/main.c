@@ -81,7 +81,7 @@ int main(int argc, char** argv)
             }
 //--------------------------------------
 
-   boundary_conditions(f);
+   boundary_conditions(f,nut);
    
    if(!goon)  dump(f,nut,t_cur,count);
 
@@ -95,40 +95,40 @@ int main(int argc, char** argv)
 
 /*------------------------ MAIN ITERATIONS -------------------------*/
    while (t_cur < Ttot && !razlet) {
-        pde(t_cur, f, df);
-        dttry=dtnext;
-        timestep(f, df, t_cur, f1, dttry, &dtdid, &dtnext);
-        nut_by_flux(f,dtdid);
-        t_cur+=dtdid;
-        count++;
-        if (CheckStep!=0 && count%CheckStep==0)
-            {
-            boundary_conditions(f1);
-            check(f1);
-            }
-        if (OutStep!=0 && count%OutStep==0)
-            {
-            if (CheckStep!=0 && count%CheckStep!=0)
-                {
-                boundary_conditions(f1);
-                check(f1);
-                }                               
-              else boundary_conditions(f1);
-            printing(f1,dtdid,t_cur,count,PulsEnergy);
-            }
-        if (SnapStep!=0 && count%SnapStep==0)
-            snapshot(f1,nut,t_cur,count);
-        for(l=0;l<nvar;l++)
-        for(i=0;i<m1;i++)
-        for(j=0;j<m2;j++)
-        for(k=0;k<m3;k++)
-           f[l][i][j][k]=f1[l][i][j][k];
+	pde(t_cur, f, df);
+	dttry=dtnext;
+	timestep(f, df, nut, t_cur, f1, dttry, &dtdid, &dtnext);
+	nut_by_flux(f,nut,dtdid);
+	t_cur+=dtdid;
+	count++;
+	if (CheckStep!=0 && count%CheckStep==0)
+	    {
+	    boundary_conditions(f1,nut);
+	    check(f1);
+	    }
+	if (OutStep!=0 && count%OutStep==0)
+	    {
+	    if (CheckStep!=0 && count%CheckStep!=0)
+		{
+		boundary_conditions(f1,nut);
+		check(f1);
+		}
+	      else boundary_conditions(f1,nut);
+	    printing(f1,dtdid,t_cur,count,PulsEnergy);
+	    }
+	if (SnapStep!=0 && count%SnapStep==0)
+	    snapshot(f1,nut,t_cur,count);
+	for(l=0;l<nvar;l++)
+	for(i=0;i<m1;i++)
+	for(j=0;j<m2;j++)
+	for(k=0;k<m3;k++)
+	   f[l][i][j][k]=f1[l][i][j][k];
 /*        if(kbhit())
-             {
-                switch (getch()) {
-                        case 'd' : dump(f,t_cur,count);  break;
-                        case 'q' : { dump(f,t_cur,count);
-                                     MPI_Finalize();
+	     {
+		switch (getch()) {
+			case 'd' : dump(f,t_cur,count);  break;
+			case 'q' : { dump(f,t_cur,count);
+				     MPI_Finalize();
                                      nrerror("You asked to exit. Here you are...",t_cur);
                                     }
                         }
