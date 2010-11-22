@@ -24,7 +24,7 @@ if(t<t_begin) *w=omega0;
 void pde(double t, double ****f, double ****df)
 {
    int i,j,k,l,m;
-   double dv1[3][3],dv2[3][3],dp1[3],dp2[3],dn1[3],w,dw;
+   double dv1[4][3],dv2[4][3],dp1[3],dn1[3],w,dw;
 
    boundary_conditions(f);
 
@@ -32,50 +32,37 @@ void pde(double t, double ****f, double ****df)
    for(i=0;i<m1;i++)
    for(j=ghost;j<mm2;j++)
    for(k=0;k<m3;k++)
-     if(node[i][k]==3)
+     if(isType(node[i][k],NodeFluid))
      {
-      for(l=0;l<3;l++) {
+      for(m=0;m<3;m++)
+         dp1[m]=dr(f[0],i,j,k,m+1,0,dx[m],ghost, approx);
+      for(l=1;l<=3;l++) {
        for(m=0;m<3;m++) {
          dv1[l][m]=dr(f[l],i,j,k,m+1,0,dx[m],ghost, approx);
          dv2[l][m]=dr(f[l],i,j,k,m+1,1,dx[m]*dx[m],ghost, approx);
          }
        dv1[l][1] *= r_1[i];     dv2[l][1] *= r_2[i];
       }
-      for(m=0;m<3;m++)
-         dp1[m]=dr(f[3],i,j,k,m+1,0,dx[m],ghost, approx);
 
-      df[0][i][j][k]=nut[i][j][k]*(dv2[0][0]+dv2[0][1]+dv2[0][2]+r_1[i]*dv1[0][0]
-                                   -f[0][i][j][k]*r_2[i]+2*dv1[1][1]*r_1[i])
-                     -dp1[0]
-                     -f[0][i][j][k]*dv1[0][0]-f[1][i][j][k]*dv1[0][1]
-                     -f[2][i][j][k]*dv1[0][2]+r_2[i]*f[1][i][j][k]*f[1][i][j][k];
       df[1][i][j][k]=nut[i][j][k]*(dv2[1][0]+dv2[1][1]+dv2[1][2]+r_1[i]*dv1[1][0]
-                                   -f[1][i][j][k]*r_2[i]+2*dv1[0][1]*r_1[i])
-                     +1-dp1[1]*r_1[i]+0*(j+n[2]<=ghost+2?1:0)
-                     -f[0][i][j][k]*dv1[1][0]-f[1][i][j][k]*dv1[1][1]
-                     -f[2][i][j][k]*dv1[1][2]-r_1[i]*f[0][i][j][k]*f[1][i][j][k];
-      df[2][i][j][k]=nut[i][j][k]*(dv2[2][0]+dv2[2][1]+dv2[2][2]+r_1[i]*dv1[2][0])
+                                   -f[1][i][j][k]*r_2[i]+2*dv1[2][1]*r_1[i])
+                     -dp1[0]//+w*w/r_1[i]       +2*w*f[2][i][j][k]                   //forces of inertion
+//                     +(j+n[2]<=ghost+2 ? coordin(k,2)*f[2][i][j][k] : 0)                //helical force
+                     -f[1][i][j][k]*dv1[1][0]-f[2][i][j][k]*dv1[1][1]
+                     -f[3][i][j][k]*dv1[1][2]+r_2[i]*f[2][i][j][k]*f[2][i][j][k];
+      df[2][i][j][k]=nut[i][j][k]*(dv2[2][0]+dv2[2][1]+dv2[2][2]+r_1[i]*dv1[2][0]
+                                   -f[2][i][j][k]*r_2[i]+2*dv1[1][1]*r_1[i])
+                     +1-dp1[1]*r_1[i]//-dw/r_1[i] -2*w*f[1][i][j][k]                   //forces of inertion
+//                     -(j<=ghost+2 ? (coordin(i,2)-rc)*f[2][i][j][k] :0)            //helical force
+                     -f[1][i][j][k]*dv1[2][0]-f[2][i][j][k]*dv1[2][1]
+                     -f[3][i][j][k]*dv1[2][2]-r_1[i]*f[1][i][j][k]*f[2][i][j][k];
+      df[3][i][j][k]=nut[i][j][k]*(dv2[3][0]+dv2[3][1]+dv2[3][2]+r_1[i]*dv1[3][0])
                      -dp1[2]
-                     -f[0][i][j][k]*dv1[2][0]-f[1][i][j][k]*dv1[2][1]-f[2][i][j][k]*dv1[2][2];
-      df[3][i][j][k]= -(dv1[0][0]+dv1[1][1]+dv1[2][2]+f[0][i][j][k]*r_1[i])/Gamma;
-/*      df[0][i][j][k]=nut[i][j][k]*(dv2[0][0]+dv2[0][1]+dv2[0][2]+r_1[i]*dv1[0][0]
-                                   -f[0][i][j][k]*r_2[i]+2*dv1[1][1]*r_1[i])
-                     -dp1[0]+w*w/r_1[i]       +2*w*f[1][i][j][k]                   //forces of inertion
-                     +(j+n[2]<=ghost+2 ? coordin(k,2)*f[1][i][j][k] : 0)                //helical force
-                     -f[0][i][j][k]*dv1[0][0]-f[1][i][j][k]*dv1[0][1]
-                     -f[2][i][j][k]*dv1[0][2]+r_2[i]*f[1][i][j][k]*f[1][i][j][k];
-      df[1][i][j][k]=nut[i][j][k]*(dv2[1][0]+dv2[1][1]+dv2[1][2]+r_1[i]*dv1[1][0]
-                                   -f[1][i][j][k]*r_2[i]+2*dv1[0][1]*r_1[i])
-                     -dp1[1]*r_1[i]-dw/r_1[i] -2*w*f[0][i][j][k]                   //forces of inertion
-                     -(j<=ghost+2 ? (coordin(i,2)-rc)*f[1][i][j][k] :0)            //helical force
-                     -f[0][i][j][k]*dv1[1][0]-f[1][i][j][k]*dv1[1][1]
-                     -f[2][i][j][k]*dv1[1][2]-r_1[i]*f[0][i][j][k]*f[1][i][j][k];
-      df[2][i][j][k]=nut[i][j][k]*(dv2[2][0]+dv2[2][1]+dv2[2][2]+r_1[i]*dv1[2][0])
-                     -dp1[2]
-                     -f[0][i][j][k]*dv1[2][0]-f[1][i][j][k]*dv1[2][1]-f[2][i][j][k]*dv1[2][2];
-      df[3][i][j][k]= -(dv1[0][0]+dv1[1][1]+dv1[2][2]+f[0][i][j][k]*r_1[i])/Gamma;*/
-   }
+                     -f[1][i][j][k]*dv1[3][0]-f[2][i][j][k]*dv1[3][1]-f[3][i][j][k]*dv1[3][2];
+      df[0][i][j][k]= -(dv1[1][0]+dv1[2][1]+dv1[3][2]+f[1][i][j][k]*r_1[i])/Gamma;
+//      df[0][i][j][k] = df[1][i][j][k] = df[2][i][j][k] = df[3][i][j][k] = 0;
 
+  } //global for
    return;
 }
 
@@ -87,27 +74,27 @@ int kol=0,l;
    for(l=1;l<=size_okr;l++)
             {
             if(i-l>0)
-               {flux += norma(f[0][i][j][k]-f[0][i-l][j][k],f[1][i][j][k]-f[1][i-l][j][k],f[2][i][j][k]-f[2][i-l][j][k],2);
+               {flux += norma(f[1][i][j][k]-f[1][i-l][j][k],f[2][i][j][k]-f[2][i-l][j][k],f[3][i][j][k]-f[3][i-l][j][k],2);
             	kol++;
                }
             if(i+l<m1)
-               {flux += norma(f[0][i][j][k]-f[0][i+l][j][k],f[1][i][j][k]-f[1][i+l][j][k],f[2][i][j][k]-f[2][i+l][j][k],2);
+               {flux += norma(f[1][i][j][k]-f[1][i+l][j][k],f[2][i][j][k]-f[2][i+l][j][k],f[3][i][j][k]-f[3][i+l][j][k],2);
             	kol++;
                }
             if(j-l>0)
-               {flux += norma(f[0][i][j][k]-f[0][i][j-l][k],f[1][i][j][k]-f[1][i][j-l][k],f[2][i][j][k]-f[2][i][j-l][k],2);
+               {flux += norma(f[1][i][j][k]-f[1][i][j-l][k],f[2][i][j][k]-f[2][i][j-l][k],f[3][i][j][k]-f[3][i][j-l][k],2);
             	kol++;
                }
             if(j+l<m2)
-               {flux += norma(f[0][i][j][k]-f[0][i][j+l][k],f[1][i][j][k]-f[1][i][j+l][k],f[2][i][j][k]-f[2][i][j+l][k],2);
+               {flux += norma(f[1][i][j][k]-f[1][i][j+l][k],f[2][i][j][k]-f[2][i][j+l][k],f[3][i][j][k]-f[3][i][j+l][k],2);
             	kol++;
                }
             if(k-l>0)
-               {flux += norma(f[0][i][j][k]-f[0][i][j][k-l],f[1][i][j][k]-f[1][i][j][k-l],f[2][i][j][k]-f[2][i][j][k-l],2);
+               {flux += norma(f[1][i][j][k]-f[1][i][j][k-l],f[2][i][j][k]-f[2][i][j][k-l],f[3][i][j][k]-f[3][i][j][k-l],2);
                 kol++;
                }
             if(k+l<m3)
-               {flux += norma(f[0][i][j][k]-f[0][i][j][k+l],f[1][i][j][k]-f[1][i][j][k+l],f[2][i][j][k]-f[2][i][j][k+l],2);
+               {flux += norma(f[1][i][j][k]-f[1][i][j][k+l],f[2][i][j][k]-f[2][i][j][k+l],f[3][i][j][k]-f[3][i][j][k+l],2);
                 kol++;
                }
            };
@@ -147,32 +134,32 @@ for(k=0;k<n3;k++)
    double tmp=0;
    for(i=0;i<m1;i++)
        for(j=ghost;j<mm2;j++)
-          if(node[i][k]==3)
+          if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
             nut[i][j][k+ghost] = (1. + tmp)/Re;
    }
 }
 
 void  boundary_conditions(double ****f)
 {
-   int i, j, k, l, g, req_numS=0, req_numR=0;
+   int i, j, k, l, req_numS=0, req_numR=0;
    int r1,r2,z1,z2;
    int /*flag,cnt,*/z[4],tag=10;
    double vrho,vphi,vth;
-   z[0]=z[1]=z[2]=-1; z[3]=1;  //  влияет на вид гран.условий (-1:жесткие, 1:свободные)
+   z[1]=z[2]=z[3]=-1; z[0]=1;  //  влияет на вид гран.условий (-1:жесткие, 1:свободные)
 
   /*============================ divertor =================================*/
-  if(t_cur>0)                  // divertors are off till t sec
+  if(t_cur<00)                  // divertors are off till t sec
   if(n[2]==0)
   for(i=0;i<m1;i++)
     for(j=ghost;j<=ghost;j++)
       for(k=0;k<m3;k++)
          {
-         vrho = f[2][i][j][k]*costh[i][k]+f[0][i][j][k]*sinth[i][k];
-         vth  = -f[2][i][j][k]*sinth[i][k]+f[0][i][j][k]*costh[i][k];
-         vphi = sqrt(pow(f[1][i][j][k],2)+vth*vth);           //sqrt(vfi*vfi+vth*vth)
-         f[0][i][j][k] = vrho*sinth[i][k]+vphi*costh[i][k]*sin(chi[i][k]);
-         f[1][i][j][k] = vphi*cos(chi[i][k]);
-         f[2][i][j][k] = vrho*costh[i][k]-vphi*sinth[i][k]*sin(chi[i][k]);
+         vrho = f[3][i][j][k]*costh[i][k]+f[1][i][j][k]*sinth[i][k];
+         vth  = -f[3][i][j][k]*sinth[i][k]+f[1][i][j][k]*costh[i][k];
+         vphi = sqrt(pow(f[2][i][j][k],2)+vth*vth);           //sqrt(vfi*vfi+vth*vth)
+         f[1][i][j][k] = vrho*sinth[i][k]+vphi*costh[i][k]*sin(chi[i][k]);
+         f[2][i][j][k] = vphi*cos(chi[i][k]);
+         f[3][i][j][k] = vrho*costh[i][k]-vphi*sinth[i][k]*sin(chi[i][k]);
          }
   /*----------------------- exchanging of ghosts -------------------------*/
  if(pr_neighbour[0]>-1)
@@ -236,7 +223,7 @@ void  boundary_conditions(double ****f)
   for(i=0;i<m1;i++)
      for(j=0;j<m2;j++)
         for(k=0;k<m3;k++)
-          if(node[i][k]==2) {
+          if(isType(node[i][k],NodeGhostFluid)) {
                 r2=(r1=floor(refr[i][k]))+1;
                 z2=(z1=floor(refz[i][k]))+1;
                 for(l=0;l<nvar;l++)
@@ -256,39 +243,46 @@ void  init_conditions()
    double r, rho, r1, z1;
 //   double k1,k2,k3;
 
-// -------- filling of ghost nodes +reflections rel circle + nut ---------------
+// -------- filling of nodes' types +reflections rel circle + nut ---------------
    for(i=0;i<m1;i++)
    for(k=0;k<m3;k++)
        {
        node[i][k] = NodeUnknown;
-       for(j=0;j<m2;j++) nut[i][j][k]=(
-//        (0.39+14.8*exp(-2.13*pow(2*coordin(k,2)-l3,2)))*0.1*0
-                    +1)/Re;
+       if(pr_neighbour[0]!=-1 && i<ghost ||
+           pr_neighbour[1]!=-1 && i>=mm1  ||
+           pr_neighbour[4]!=-1 && k<ghost ||
+           pr_neighbour[5]!=-1 && k>=mm3) setType(&node[i][k],NodeClued);
        }
    for(i=0;i<m1;i++)
    for(k=0;k<m3;k++)
        {
         r1 = coordin(i,0);   z1 = coordin(k,2);
         rho=sqrt(pow(r1-rc,2) + z1*z1);
-        if(rho<R) node[i][k] = NodeInner;
-        if(isType(node[i][k],NodeInner))
+     //regions
+        if(rho>R) setType(&node[i][k],NodeVacuum);
+          else    setType(&node[i][k],NodeFluid);
+     //for hydrodynamics
+        if(isType(node[i][k],NodeFluid))
+            { if(isType(node[i][k],NodeGhostFluid)) node[i][k] -= NodeGhostFluid;
               for(l=-ghost;l<=ghost;l++)
-                     { if(i+l>=0&&i+l<m1) if(!isType(node[i+l][k],NodeInner))
-                                              setType(&node[i+l][k],NodeGhost);
-                       if(k+l>=0&&k+l<m3) if(!isType(node[i][k+l],NodeInner))
-                                              setType(&node[i][k+l],NodeGhost);
+                     { if(i+l>=0&&i+l<m1) if(!isType(node[i+l][k],NodeFluid))
+                                              setType(&node[i+l][k],NodeGhostFluid);
+                       if(k+l>=0&&k+l<m3) if(!isType(node[i][k+l],NodeFluid))
+                                              setType(&node[i][k+l],NodeGhostFluid);
                      }
+            }
         refr[i][k] = rc + (r1-rc)*(2*R/rho-1);      //physical coordinates
         refz[i][k] =        z1*(2*R/rho-1);
-        refr[i][k] = (refr[i][k]-rc+R)/dx[0]-0.5-n[0]+ghost;
+        refr[i][k] = (refr[i][k]-rc+R)/dx[0]-0.5-n[0]+ghost;   // simulation indices
         refz[i][k] = (refz[i][k]+R   )/dx[2]-0.5-n[2]+ghost;
-        if(fabs(refr[i][k]-i)<1 && fabs(refz[i][k]-k)<1 && !isType(node[i][k],NodeInner))
-                 { node[i][k] = NodeInner;
+        if(fabs(refr[i][k]-i)<1 && fabs(refz[i][k]-k)<1 && !isType(node[i][k],NodeFluid))
+                 { setType(&node[i][k],NodeFluid);
+                   if(isType(node[i][k],NodeGhostFluid)) node[i][k] -= NodeGhostFluid;
                    for(l=-ghost;l<=ghost;l++)
-                     { if(i+l>=0&&i+l<m1) if(!isType(node[i+l][k],NodeInner))
-                                              setType(&node[i+l][k],NodeGhost);
-                       if(k+l>=0&&k+l<m3) if(!isType(node[i][k+l],NodeInner))
-                                              setType(&node[i][k+l],NodeGhost);
+                     { if(i+l>=0&&i+l<m1) if(!isType(node[i+l][k],NodeFluid))
+                                              setType(&node[i+l][k],NodeGhostFluid);
+                       if(k+l>=0&&k+l<m3) if(!isType(node[i][k+l],NodeFluid))
+                                              setType(&node[i][k+l],NodeGhostFluid);
                      }
                   }
         sinth[i][k]=(r1-rc)/rho;                    // for divertor's blade
@@ -298,13 +292,6 @@ void  init_conditions()
 
    for(i=0;i<m1;i++) { r_1[i]=1./coordin(i,0); r_2[i]=r_1[i]*r_1[i]; }
 
-   for(i=0;i<m1;i++)
-   for(k=0;k<m3;k++)
-      if(pr_neighbour[0]!=-1 && i<ghost ||
-           pr_neighbour[1]!=-1 && i>=mm1  ||
-           pr_neighbour[4]!=-1 && k<ghost ||
-           pr_neighbour[5]!=-1 && k>=mm3) setType(&node[i][k],NodeClued);
-
 // --------------- initial conditions -----------------------------------------
 //   k1=2*M_PI/lfi;  k3=M_PI/l3;
 
@@ -312,20 +299,23 @@ if(!goon) {
    for(i=0;i<m1;i++)
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
-      if(isType(node[i][k],NodeInner)) {
-        f[0][i][j][k]=(parabole+Noise*((double)rand()-RAND_MAX/2)/RAND_MAX)*
-                       (R*R-pow(coordin(i,0)-rc,2) - pow(coordin(k,2),2))*4/R/R;
-        f[1][i][j][k]=NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/R)
+      if(isType(node[i][k],NodeFluid)) {
+        f[0][i][j][k]=0;
+        f[1][i][j][k]=(parabole+Noise*((double)rand()-RAND_MAX/2)/RAND_MAX)*
+                       (R*R-pow(coordin(i,0)-rc,2) - pow(coordin(k,2),2))/R/R;
+        f[2][i][j][k]=NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/R)
                       + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
-                       (R*R-pow(coordin(i,0)-rc,2) - pow(coordin(k,2),2))*4/R/R;
-        f[2][i][j][k]=NoiseNorm*sin(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/R)
+                       (R*R-pow(coordin(i,0)-rc,2) - pow(coordin(k,2),2))/R/R;
+        f[3][i][j][k]=NoiseNorm*sin(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/R)
                       + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
-                       (R*R-pow(coordin(i,0)-rc,2) - pow(coordin(k,2),2))*4/R/R;
-        f[3][i][j][k]=0;
+                       (R*R-pow(coordin(i,0)-rc,2) - pow(coordin(k,2),2))/R/R;
+        nut[i][j][k]=(
+//        (0.39+14.8*exp(-2.13*pow(2*coordin(k,2)-l3,2)))*0.1*0
+                    +1)/Re;
         }
 //   struct_func(f,2,2,3);
-   nmessage("Arrays were filled with initial values - calculation from beginning",0);
-   } else nmessage("Arrays were filled with initial values - calculation is continuing",t_cur);
+   nmessage("Arrays were filled with initial values - calculation from beginning",0,0);
+   } else nmessage("Arrays were filled with initial values - calculation is continuing",t_cur,count);
 }
 
 void init_parallel()
@@ -353,14 +343,16 @@ void init_parallel()
                  k3*((kp1-1)*kp2*kp3+kp1*(kp2-1)*kp3+kp1*kp2*(kp3-1));
          if(mintime<0 || vtime<mintime) { mintime=vtime; nd1=i; nd2=j; }
          }
-if(!goon) {                       //reading from file when continuing
-  pp[0]=divisors[nd1]; pp[1]=divisors[nd2]; pp[2]=size/pp[0]/pp[1];  }               // number of procs along axes
-  pr[0] = rank%pp[0]; pr[1] = (rank/pp[0])%pp[1]; pr[2] = (rank/pp[0]/pp[1])%pp[2];  // coordinates of subregion
+if(!goon) {                       //reading sizes from file when continuing
+  pp[0]=divisors[nd1]; pp[1]=divisors[nd2]; pp[2]=size/pp[0]/pp[1];                 // number of procs along axes
+          }
+  pr[0] = rank%pp[0]; pr[1] = (rank/pp[0])%pp[1]; pr[2] = (rank/pp[0]/pp[1])%pp[2];  // coordinates of current subregion
 
 /* dimensions of subregion:         global indicies of subregion origin          if there's nonequal subregions*/
   n1 = floor((double)N1/pp[0]);     n[0] = n1*pr[0] + min(pr[0],N1-pp[0]*n1);    if(pr[0]<N1-pp[0]*n1) n1++;              // dimensions of subregion
   n2 = floor((double)N2/pp[1]);     n[1] = n2*pr[1] + min(pr[1],N2-pp[1]*n2);    if(pr[1]<N2-pp[1]*n2) n2++;
   n3 = floor((double)N3/pp[2]);     n[2] = n3*pr[2] + min(pr[2],N3-pp[2]*n3);    if(pr[2]<N3-pp[2]*n3) n3++;
+   if(n1<ghost || n2<ghost || n3<ghost) nrerror("Too small mesh or incorrect number of processes",0,0);
 
    m1 = n1+2*ghost;
    m2 = n2+2*ghost;
@@ -378,9 +370,9 @@ if(!goon) {                       //reading from file when continuing
   pr_neighbour[4] = (pr[2]>0       ? rank-pp[0]*pp[1] :-1);
   pr_neighbour[5] = (pr[2]<pp[2]-1 ? rank+pp[0]*pp[1] :-1);
 
- buf_size[0]=n2*n3*(nvar+1)*ghost;
- buf_size[1]=n1*n3*(nvar+1)*ghost;
- buf_size[2]=n1*n2*(nvar+1)*ghost;
+ buf_size[0]=m2*m3*(nvar+1)*ghost;
+ buf_size[1]=m1*m3*(nvar+1)*ghost;
+ buf_size[2]=m1*m2*(nvar+1)*ghost;
 
  for(i=0;i<3;i++)           //3-D
   for(j=0;j<=1;j++) {
@@ -393,6 +385,7 @@ if(!goon) {                       //reading from file when continuing
    fprintf(iop,"%d\t%d\t%d\n",pr[0],pr[1],pr[2]);
    fprintf(iop,"%d\t%d\t%d\n",pp[0],pp[1],pp[2]);
    fprintf(iop,"%d\t%d\t%d\n",n[0],n[1],n[2]);
+   fprintf(iop,"%d\t%d\t%d\n",n1,n2,n3);
    for(i=0;i<6;i++)
      fprintf(iop,"%d ",pr_neighbour[i]);
    fprintf(iop,"\n");
@@ -433,7 +426,7 @@ switch (sm*dir) {
 	case 14: for(i=0; i<sm; i++) tmp += m[ii][jj+i-sh][kk]*kf7[or][sh][i]; break;
 	case 21: for(i=0; i<sm; i++) tmp += m[ii][jj][kk+i-sh]*kf7[or][sh][i]; break;
 	default :
-    	nrerror("\nNO SUCH SAMPLE for derivative. Bye ...",0);
+    	nrerror("\nNO SUCH SAMPLE for derivative. Bye ...",0,0);
 	}
 return(tmp/dx);
 }
@@ -449,31 +442,3 @@ double coordin(int i, int dir)
  }
     return(0);
 }
-
- void CopyBufferToGrid(double ****m,double ***nut,double *buffer,int x1,int y1,int z1,int x2,int y2,int z2)
- {
-   int i,j,k,l,n=0;
-   for(l=0;l<nvar;l++)
-    for(i=x1;i<=x2;i++)
-     for(j=y1;j<=y2;j++)
-      for(k=z1;k<=z2;k++)
-      m[l][i][j][k]=buffer[n++];
-   for(i=x1;i<=x2;i++)
-    for(j=y1;j<=y2;j++)
-     for(k=z1;k<=z2;k++)
-     nut[i][j][k]=buffer[n++];
- }
-
- void CopyGridToBuffer(double ****m,double ***nut,double *buffer,int x1,int y1,int z1,int x2,int y2,int z2)
- {
-   int i,j,k,l,n=0;
-   for(l=0;l<nvar;l++)
-    for(i=x1;i<=x2;i++)
-     for(j=y1;j<=y2;j++)
-      for(k=z1;k<=z2;k++)
-      buffer[n++]=m[l][i][j][k];
-   for(i=x1;i<=x2;i++)
-    for(j=y1;j<=y2;j++)
-     for(k=z1;k<=z2;k++)
-     buffer[n++]=nut[i][j][k];
- }
