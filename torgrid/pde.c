@@ -15,27 +15,35 @@ void pde(double t, double ****f, double ****df)
 
    boundary_conditions(f);
 
-   for(i=ghost;i<mm1;i++)
+   for(i=0;i<m1;i++)
    for(j=ghost;j<mm2;j++)
-   for(k=ghost;k<mm3;k++) {
-      for(l=0;l<3;l++)
-      for(m=0;m<3;m++) {
+   for(k=0;k<m3;k++)
+     if(node[i][k]==3)
+     {
+      for(l=0;l<3;l++) {
+       for(m=0;m<3;m++) {
          dv1[l][m]=dr(f[l],i,j,k,m+1,0,dx[m],ghost, approx);
          dv2[l][m]=dr(f[l],i,j,k,m+1,1,dx[m]*dx[m],ghost, approx);
+         }
+       dv1[l][1] *= r_1[i];     dv2[l][1] *= r_2[i];
       }
-      for(m=0;m<3;m++) {
+      for(m=0;m<3;m++)
          dp1[m]=dr(f[3],i,j,k,m+1,0,dx[m],ghost, approx);
-         dn1[m]=dr(nut,i,j,k,m+1,0,dx[m],ghost, approx);
-      }
 
-      for(l=0;l<3;l++)
-       df[l][i][j][k]= (dv2[l][0] + dv2[l][1] + dv2[l][2])*nut[i][j][k]
-                        - dp1[l]+(l==0?p1/l1:0)
-                              + (dn1[0]-f[0][i][j][k])*dv1[l][0]
-                              + (dn1[1]-f[1][i][j][k])*dv1[l][1]
-                              + (dn1[2]-f[2][i][j][k])*dv1[l][2];
-      df[3][i][j][k]= (-(dv1[0][0] + dv1[1][1] + dv1[2][2]))/Gamma;
-
+      df[0][i][j][k]=nut[i][j][k]*(dv2[0][0]+dv2[0][1]+dv2[0][2]+r_1[i]*dv1[0][0]
+                                   -f[0][i][j][k]*r_2[i]+2*dv1[1][1]*r_1[i])
+                     -dp1[0]
+                     -f[0][i][j][k]*dv1[0][0]-f[1][i][j][k]*dv1[0][1]
+                     -f[2][i][j][k]*dv1[0][2]+r_2[i]*f[1][i][j][k]*f[1][i][j][k];
+      df[1][i][j][k]=nut[i][j][k]*(dv2[1][0]+dv2[1][1]+dv2[1][2]+r_1[i]*dv1[1][0]
+                                   -f[1][i][j][k]*r_2[i]+2*dv1[1][1]*r_1[i])
+                     -dp1[1]*r_1[i] + omega*omega/r_1[i]                                  //pushing gradient of pressure
+                     -f[0][i][j][k]*dv1[1][0]-f[1][i][j][k]*dv1[1][1]
+                     -f[2][i][j][k]*dv1[1][2]-r_1[i]*f[0][i][j][k]*f[1][i][j][k];
+      df[2][i][j][k]=nut[i][j][k]*(dv2[2][0]+dv2[2][1]+dv2[2][2]+r_1[i]*dv1[2][0])
+                     -dp1[2]
+                     -f[0][i][j][k]*dv1[2][0]-f[1][i][j][k]*dv1[2][1]-f[2][i][j][k]*dv1[2][2];
+      df[3][i][j][k]= -(dv1[0][0]+dv1[1][1]+dv1[2][2]+f[0][i][j][k]*r_1[i])/Gamma;
    }
 
    return;
@@ -46,37 +54,37 @@ double deviation(double ****f,int i,int j,int k)
 const size_okr=min(1,ghost);
 double flux;
 int kol=0,l;
+flux = 0;
    for(l=1;l<=size_okr;l++)
             {
-            flux = 0;
-            if(i>0)
+            if(i-l>0)
                {flux += norma(f[0][i][j][k]-f[0][i-l][j][k],f[1][i][j][k]-f[1][i-l][j][k],f[2][i][j][k]-f[2][i-l][j][k],2);
             	kol++;
                }
-            if(i<m1)
+            if(i+l<m1)
                {flux += norma(f[0][i][j][k]-f[0][i+l][j][k],f[1][i][j][k]-f[1][i+l][j][k],f[2][i][j][k]-f[2][i+l][j][k],2);
             	kol++;
                }
-            if(j>0)
+            if(j-l>0)
                {flux += norma(f[0][i][j][k]-f[0][i][j-l][k],f[1][i][j][k]-f[1][i][j-l][k],f[2][i][j][k]-f[2][i][j-l][k],2);
             	kol++;
                }
-            if(j<m2)
+            if(j+l<m2)
                {flux += norma(f[0][i][j][k]-f[0][i][j+l][k],f[1][i][j][k]-f[1][i][j+l][k],f[2][i][j][k]-f[2][i][j+l][k],2);
             	kol++;
                }
-            if(k>0)
+            if(k-l>0)
                {flux += norma(f[0][i][j][k]-f[0][i][j][k-l],f[1][i][j][k]-f[1][i][j][k-l],f[2][i][j][k]-f[2][i][j][k-l],2);
                 kol++;
                }
-            if(k<m3)
+            if(k+l<m3)
                {flux += norma(f[0][i][j][k]-f[0][i][j][k+l],f[1][i][j][k]-f[1][i][j][k+l],f[2][i][j][k]-f[2][i][j][k+l],2);
                 kol++;
                }
            };
    flux /= kol;
 return(flux);
-}
+}                             
 
 void nut_by_flux(double ****f,double dt) //calculating nu_turbulent by velocity fluctuations
 {
@@ -108,8 +116,9 @@ for(k=0;k<n3;k++)
            (nl[2]*s_func[k][0] + nl[1]*s_func[k][1] + nl[0]*s_func[k][2])*pow(dx[2],4),
                          1./3);*/
    double tmp=0;
-   for(i=ghost;i<mm1;i++)
+   for(i=0;i<m1;i++)
        for(j=ghost;j<mm2;j++)
+          if(node[i][k]==3)
             nut[i][j][k+ghost] = (1. + tmp)/Re;
    }
 }
@@ -117,107 +126,53 @@ for(k=0;k<n3;k++)
 void  boundary_conditions(double ****f)
 {
    int i, j, k, l, g, req_numS=0, req_numR=0;
+   int r1,r2,z1,z2;
    int flag,cnt,z[4],tag=10;
    z[0]=z[1]=z[2]=-1; z[3]=1;  //  влияет на вид гран.условий (1:жесткие, -1:свободные)
-//            putlog("bc:reach this=",numlog++);
-   // streamwise surfaces
-      //periodic conditions for velocities and pressure
- if(pr_neighbour[0]==-1)
-             {  for(j=ghost;j<mm2;j++)
-                  for(k=ghost;k<mm3;k++)
-                    for(g=0;g<ghost;g++) {
-                       for(l=0;l<nvar;l++) f[l][g][j][k] = f[l][n1+g][j][k];
-                       nut[g][j][k] =  nut[n1+g][j][k];
-                       }
-                CopyGridToBuffer(f,nut,buf_recv[0],0,ghost,ghost,ghost-1,mm2-1,mm3-1);
-              }
- else if(pr_neighbour[0]==rank) CopyGridToBuffer(f,nut,buf_recv[0],n1,ghost,ghost,mm1-1,mm2-1,mm3-1);
+
+  /*----------------------- exchanging of ghosts -------------------------*/
+ if(pr_neighbour[0]>-1)
+  if(pr_neighbour[0]==rank) CopyGridToBuffer(f,nut,buf_recv[0],n1,ghost,ghost,mm1-1,mm2-1,mm3-1);
          else { CopyGridToBuffer(f,nut,buf_send[0],ghost,ghost,ghost,2*ghost-1,mm2-1,mm3-1);
                 MPI_Isend(buf_send[0],buf_size[0],MPI_DOUBLE,pr_neighbour[0],tag,MPI_COMM_WORLD,&SendRequest[req_numS++]);
                 MPI_Irecv(buf_recv[0],buf_size[0],MPI_DOUBLE,pr_neighbour[0],tag+1,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
                 }
-//            putlog("bc:reach this=",numlog++);
- if(pr_neighbour[1]==-1)
-             {  for(j=ghost;j<mm2;j++)
-                  for(k=ghost;k<mm3;k++)
-                    for(g=0;g<ghost;g++) {
-                       for(l=0;l<nvar;l++) f[l][mm1+g][j][k] = f[l][ghost+g][j][k];
-                       nut[mm1+g][j][k] =  nut[ghost+g][j][k];
-                       }
-              CopyGridToBuffer(f,nut,buf_recv[1],mm1,ghost,ghost,m1-1,mm2-1,mm3-1);
-              }
- else if(pr_neighbour[1]==rank) CopyGridToBuffer(f,nut,buf_recv[1],ghost,ghost,ghost,2*ghost-1,mm2-1,mm3-1);
+
+ if(pr_neighbour[1]>-1)
+  if(pr_neighbour[1]==rank) CopyGridToBuffer(f,nut,buf_recv[1],ghost,ghost,ghost,2*ghost-1,mm2-1,mm3-1);
          else { CopyGridToBuffer(f,nut,buf_send[1],n1,ghost,ghost,mm1-1,mm2-1,mm3-1);
                 MPI_Isend(buf_send[1],buf_size[0],MPI_DOUBLE,pr_neighbour[1],tag+1,MPI_COMM_WORLD,&SendRequest[req_numS++]);
                 MPI_Irecv(buf_recv[1],buf_size[0],MPI_DOUBLE,pr_neighbour[1],tag,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
                 }
-//            putlog("bc:reach this=",numlog++);
-   // spanwise surfaces
-       //periodic conditions for velocities and pressure
- if(pr_neighbour[2]==-1)
-             {  for(i=ghost;i<mm1;i++)
-                  for(k=ghost;k<mm3;k++)
-                    for(g=0;g<ghost;g++) {
-                       for(l=0;l<nvar;l++) f[l][i][g][k] = f[l][i][n2+g][k];
-                       nut[i][g][k] =  nut[i][n2+g][k];
-                       }
-             CopyGridToBuffer(f,nut,buf_recv[2],ghost,0,ghost,mm1-1,ghost-1,mm3-1);
-              }
- else if(pr_neighbour[2]==rank) CopyGridToBuffer(f,nut,buf_recv[2],ghost,n2,ghost,mm1-1,mm2-1,mm3-1);
+
+ if(pr_neighbour[2]>-1)
+  if(pr_neighbour[2]==rank) CopyGridToBuffer(f,nut,buf_recv[2],ghost,n2,ghost,mm1-1,mm2-1,mm3-1);
          else { CopyGridToBuffer(f,nut,buf_send[2],ghost,ghost,ghost,mm1-1,2*ghost-1,mm3-1);
                 MPI_Isend(buf_send[2],buf_size[1],MPI_DOUBLE,pr_neighbour[2],tag+2,MPI_COMM_WORLD,&SendRequest[req_numS++]);
                 MPI_Irecv(buf_recv[2],buf_size[1],MPI_DOUBLE,pr_neighbour[2],tag+3,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
                 }
-//            putlog("bc:reach this=",numlog++);
- if(pr_neighbour[3]==-1)
-             {  for(i=ghost;i<mm1;i++)
-                  for(k=ghost;k<mm3;k++)
-                    for(g=0;g<ghost;g++) {
-                        for(l=0;l<nvar;l++) f[l][i][mm2+g][k] = f[l][i][ghost+g][k];
-                        nut[i][mm2+g][k] =  nut[i][ghost+g][k];
-                    }
-              CopyGridToBuffer(f,nut,buf_recv[3],ghost,mm2,ghost,mm1-1,m2-1,mm3-1);
-              }
- else if(pr_neighbour[3]==rank) CopyGridToBuffer(f,nut,buf_recv[3],ghost,ghost,ghost,mm1-1,2*ghost-1,mm3-1);
+
+ if(pr_neighbour[3]>-1)
+  if(pr_neighbour[3]==rank) CopyGridToBuffer(f,nut,buf_recv[3],ghost,ghost,ghost,mm1-1,2*ghost-1,mm3-1);
          else { CopyGridToBuffer(f,nut,buf_send[3],ghost,n2,ghost,mm1-1,mm2-1,mm3-1);
                 MPI_Isend(buf_send[3],buf_size[1],MPI_DOUBLE,pr_neighbour[3],tag+3,MPI_COMM_WORLD,&SendRequest[req_numS++]);
                 MPI_Irecv(buf_recv[3],buf_size[1],MPI_DOUBLE,pr_neighbour[3],tag+2,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
                 }
-//            putlog("bc:reach this=",numlog++);
-   // on horizontal surfaces
-      //sticking for velocities and free conditions for pressure
- if(pr_neighbour[4]==-1)
-             {  for(i=ghost;i<mm1;i++)
-                  for(j=ghost;j<mm2;j++)
-                    for(g=0;g<ghost;g++) {
-                       for(l=0;l<nvar;l++) f[l][i][j][g] = f[l][i][j][2*ghost-1-g]*z[l];
-                       nut[i][j][g] = 0;  //можно и через z
-                       }
-             CopyGridToBuffer(f,nut,buf_recv[4],ghost,ghost,0,mm1-1,mm2-1,ghost-1);
-             }
- else if(pr_neighbour[4]==rank) CopyGridToBuffer(f,nut,buf_recv[4],ghost,ghost,mm3,mm1-1,mm2-1,m3-1);
+
+ if(pr_neighbour[4]>-1)
+  if(pr_neighbour[4]==rank) CopyGridToBuffer(f,nut,buf_recv[4],ghost,ghost,mm3,mm1-1,mm2-1,m3-1);
          else { CopyGridToBuffer(f,nut,buf_send[4],ghost,ghost,ghost,mm1-1,mm2-1,2*ghost-1);
                 MPI_Isend(buf_send[4],buf_size[2],MPI_DOUBLE,pr_neighbour[4],tag+4,MPI_COMM_WORLD,&SendRequest[req_numS++]);
-//                nmessage("message sent",t_cur);
                 MPI_Irecv(buf_recv[4],buf_size[2],MPI_DOUBLE,pr_neighbour[4],tag+5,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
-//                nmessage("message received",t_cur);
                 }
-//            putlog("bc:reach this=",numlog++);
- if(pr_neighbour[5]==-1)
-             {  for(i=ghost;i<mm1;i++)
-                  for(j=ghost;j<mm2;j++)
-                    for(g=0;g<ghost;g++) {
-                       for(l=0;l<nvar;l++) f[l][i][j][mm3+g] = f[l][i][j][mm3-1-g]*z[l];
-                       nut[i][j][mm3+g] = 0;
-                    }
-              CopyGridToBuffer(f,nut,buf_recv[5],ghost,ghost,mm3,mm1-1,mm2-1,m3-1);
-              }
- else if(pr_neighbour[5]==rank) CopyGridToBuffer(f,nut,buf_recv[5],ghost,ghost,0,mm1-1,mm2-1,ghost-1);
+
+ if(pr_neighbour[5]>-1)
+  if(pr_neighbour[5]==rank) CopyGridToBuffer(f,nut,buf_recv[5],ghost,ghost,0,mm1-1,mm2-1,ghost-1);
         else { CopyGridToBuffer(f,nut,buf_send[5],ghost,ghost,n3,mm1-1,mm2-1,mm3-1);
                MPI_Isend(buf_send[5],buf_size[2],MPI_DOUBLE,pr_neighbour[5],tag+5,MPI_COMM_WORLD,&SendRequest[req_numS++]);
                MPI_Irecv(buf_recv[5],buf_size[2],MPI_DOUBLE,pr_neighbour[5],tag+4,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
                }
-   //            putlog("bc:reach this=",numlog++);
+
 //    MPI_Barrier(MPI_COMM_WORLD);
 //    MPI_Startall(req_numR,RecvRequest);
 //    MPI_Testall(req_numR,RecvRequest,&flag,statuses);
@@ -225,43 +180,92 @@ void  boundary_conditions(double ****f)
     MPI_Waitall(req_numR,RecvRequest,statuses);
     if(statuses[0].MPI_ERROR) putlog("bc:error during transfer=",numlog);
 
-    CopyBufferToGrid(f,nut,buf_recv[0],0,ghost,ghost,ghost-1,mm2-1,mm3-1);
-    CopyBufferToGrid(f,nut,buf_recv[1],mm1,ghost,ghost,m1-1,mm2-1,mm3-1);
-    CopyBufferToGrid(f,nut,buf_recv[2],ghost,0,ghost,mm1-1,ghost-1,mm3-1);
-    CopyBufferToGrid(f,nut,buf_recv[3],ghost,mm2,ghost,mm1-1,m2-1,mm3-1);
-    CopyBufferToGrid(f,nut,buf_recv[4],ghost,ghost,0,mm1-1,mm2-1,ghost-1);
-    CopyBufferToGrid(f,nut,buf_recv[5],ghost,ghost,mm3,mm1-1,mm2-1,m3-1);
+    if(pr_neighbour[0]>-1) CopyBufferToGrid(f,nut,buf_recv[0],0,ghost,ghost,ghost-1,mm2-1,mm3-1);
+    if(pr_neighbour[1]>-1) CopyBufferToGrid(f,nut,buf_recv[1],mm1,ghost,ghost,m1-1,mm2-1,mm3-1);
+    if(pr_neighbour[2]>-1) CopyBufferToGrid(f,nut,buf_recv[2],ghost,0,ghost,mm1-1,ghost-1,mm3-1);
+    if(pr_neighbour[3]>-1) CopyBufferToGrid(f,nut,buf_recv[3],ghost,mm2,ghost,mm1-1,m2-1,mm3-1);
+    if(pr_neighbour[4]>-1) CopyBufferToGrid(f,nut,buf_recv[4],ghost,ghost,0,mm1-1,mm2-1,ghost-1);
+    if(pr_neighbour[5]>-1) CopyBufferToGrid(f,nut,buf_recv[5],ghost,ghost,mm3,mm1-1,mm2-1,m3-1);
 
-   return;
+/*----------------------- filling of ghost nodes ------------------------------*/
+
+  for(i=0;i<m1;i++)
+     for(j=0;j<m2;j++)
+        for(k=0;k<m3;k++)
+          if(node[i][k]==2) {
+                r2=(r1=floor(refr[i][k]))+1;
+                z2=(z1=floor(refz[i][k]))+1;
+                for(l=0;l<nvar;l++)
+                   f[l][i][j][k] = ( (refr[i][k]-r2)*(f[l][r1][j][z1]*(refz[i][k]-z2)-f[l][r1][j][z2]*(refz[i][k]-z1))
+                                   + (refr[i][k]-r1)*(f[l][r2][j][z2]*(refz[i][k]-z1)-f[l][r2][j][z1]*(refz[i][k]-z2))
+                                    ) * z[l];
+                   nut[i][j][k] = (refr[i][k]-r2)*(nut[r1][j][z1]*(refz[i][k]-z2)-nut[r1][j][z2]*(refz[i][k]-z1))
+                                + (refr[i][k]-r1)*(nut[r2][j][z2]*(refz[i][k]-z1)-nut[r2][j][z1]*(refz[i][k]-z2));
+                }
+
+  return;
 }
 
 void  init_conditions(double ****f,double Re)
 {
    int i,j,k,l;
+   double r2, rho, r1, z1;
 //   double k1,k2,k3;
 
-// --------------- initial conditions
-//   k1=2*M_PI/l1;  k3=M_PI/l3;
-
-   for(i=ghost;i<mm1;i++)
-   for(j=ghost;j<mm2;j++)
-   for(k=ghost;k<mm3;k++) {
-        f[0][i][j][k]=(parabole+Noise*((double)rand()-RAND_MAX/2)/RAND_MAX)*
-                       coordin(k,2)*(l3-coordin(k,2))*4/l3/l3;
-        f[1][i][j][k]=NoiseNorm*cos(2*M_PI*coordin(j,1)/l2)*sin(2*M_PI*coordin(k,2)/l3)
-                      + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
-                       coordin(k,2)*(l3-coordin(k,2))*4/l3/l3;
-        f[2][i][j][k]=NoiseNorm*sin(2*M_PI*coordin(j,1)/l2)*sin(2*M_PI*coordin(k,2)/l3)
-                      + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
-                       coordin(k,2)*(l3-coordin(k,2))*4/l3/l3;
-        f[3][i][j][k]=0;
-        }
+// -------- filling of ghost nodes +reflections rel circle + nut ---------------
    for(i=0;i<m1;i++)
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
-        nut[i][j][k]=(
+       {
+       node[i][k] = 0;
+       nut[i][j][k]=(
 //        (0.39+14.8*exp(-2.13*pow(2*coordin(k,2)-l3,2)))*0.1*0
                     +1)/Re;
+       }
+   for(i=0;i<m1;i++)
+   for(k=0;k<m3;k++)
+       {
+        r2=pow(coordin(i,0)-rc,2) + pow(coordin(k,2),2);
+        if(node[i][k]>0) node[i][k] = (r2<pow(R,2)) ? 3 : node[i][k];
+                    else node[i][k] = (r2<pow(R,2)) ? 3 : 1;
+        if(node[i][k]==3)
+             if(i<ghost || i>=mm1 || k<ghost || k>=mm3) node[i][k]=4;
+             else for(l=-ghost;l<=ghost;l++)
+                     { if(i+l>=0&&i+l<m1) if(node[i+l][k]<2) node[i+l][k] = 2;
+                       if(k+l>=0&&k+l<m3) if(node[i][k+l]<2) node[i][k+l] = 2;
+                     }
+        r1 = coordin(i,0);   z1 = coordin(k,2);
+        rho = sqrt(z1*z1+pow(r1-rc,2));
+        refr[i][k] = rc + (r1-rc)*(2*R/rho-1);      //physical coordinates
+        refz[i][k] =        z1*(2*R/rho-1);
+        refr[i][k] = (refr[i][k]-rc+R)/dx[0]-0.5-n[0]+ghost;
+        refz[i][k] = (refz[i][k]+R   )/dx[2]-0.5-n[2]+ghost;
+        if(fabs(refr[i][k]-i)<1 && fabs(refz[i][k]-k)<1 && node[i][k]<3)
+                 { node[i][k] = 3;
+                   for(l=-ghost;l<=ghost;l++)
+                     { if(i+l>=0&&i+l<m1) if(node[i+l][k]!=3) node[i+l][k] = 2;
+                       if(k+l>=0&&k+l<m3) if(node[i][k+l]!=3) node[i][k+l] = 2;
+                     }
+                  }
+       }
+
+// --------------- initial conditions -----------------------------------------
+//   k1=2*M_PI/lfi;  k3=M_PI/l3;
+
+   for(i=0;i<m1;i++)
+   for(j=0;j<m2;j++)
+   for(k=0;k<m3;k++)
+      if(node[i][k]==3) {
+        f[0][i][j][k]=(parabole+Noise*((double)rand()-RAND_MAX/2)/RAND_MAX)*
+                       (R*R-pow(coordin(i,0)-rc,2) - pow(coordin(k,2),2))*4/R/R;
+        f[1][i][j][k]=NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/R)
+                      + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
+                       (R*R-pow(coordin(i,0)-rc,2) - pow(coordin(k,2),2))*4/R/R;
+        f[2][i][j][k]=NoiseNorm*sin(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/R)
+                      + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
+                       (R*R-pow(coordin(i,0)-rc,2) - pow(coordin(k,2),2))*4/R/R;
+        f[3][i][j][k]=0;
+        }
 //   struct_func(f,2,2,3);
 }
 
@@ -306,9 +310,7 @@ void init_parallel()
    mm3 = ghost+n3;
 
   pr_neighbour[0] = (pr[0]>0       ? rank-1           :-1);                           // neighbours of subregion
-  if(pr[0]==0)       pr_neighbour[0] = rank+(pp[0]-1);           //periodic conditions
   pr_neighbour[1] = (pr[0]<pp[0]-1 ? rank+1           :-1);
-  if(pr[0]==pp[0]-1) pr_neighbour[1] = rank-(pp[0]-1);           //periodic conditions
   pr_neighbour[2] = (pr[1]>0       ? rank-pp[0]       :-1);
   if(pr[1]==0)       pr_neighbour[2] = rank+pp[0]*(pp[1]-1);     //periodic conditions
   pr_neighbour[3] = (pr[1]<pp[1]-1 ? rank+pp[0]       :-1);
@@ -377,9 +379,15 @@ return(tmp/dx);
 }
 
 double coordin(int i, int dir)
-                      //0-x,1-y,2-z
+                      //0-r,1-phi,2-z
 {
- return dx[dir]*((double)(i-ghost)+0.5+n[dir]);
+ switch (dir)
+ {
+   case 0:  return dx[dir]*(i-ghost+0.5+n[dir])+rc-R;
+   case 1:  return dx[dir]*(i-ghost+0.5+n[dir]);
+   case 2:  return dx[dir]*(i-ghost+0.5+n[dir])-R;
+ }
+    return(0);
 }
 
  void CopyBufferToGrid(double ****m,double ***nut,double *buffer,int x1,int y1,int z1,int x2,int y2,int z2)
@@ -394,7 +402,6 @@ double coordin(int i, int dir)
     for(j=y1;j<=y2;j++)
      for(k=z1;k<=z2;k++)
      nut[i][j][k]=buffer[n++];
-
  }
 
  void CopyGridToBuffer(double ****m,double ***nut,double *buffer,int x1,int y1,int z1,int x2,int y2,int z2)
