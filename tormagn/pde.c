@@ -78,13 +78,13 @@ void pde(double t, double ****f, double ****df)
 
        df[4][i][j][k]=f[2][i][j][k]*(dv1[5][0]-dv1[4][1]+f[5][i][j][k]*r_1[i])-f[3][i][j][k]*(dv1[4][2]-dv1[6][0])
                      +eta[i][j][k]*(dv2[4][0]+dv2[4][1]+dv2[4][2]+r_1[i]*dv1[4][0]-f[4][i][j][k]*r_2[i]-2*dv1[5][1]*r_1[i])
-                     +(1./Rm-eta[i][j][k])*(dv2[4][0]+dv1[4][0]*r_1[i]-f[4][i][j][k]*r_2[i]-dv1[5][1]*r_1[i]+dA11[5][0][1]+dA11[6][0][2]);
+                     +(etavac/Rm-eta[i][j][k])*(dv2[4][0]+dv1[4][0]*r_1[i]-f[4][i][j][k]*r_2[i]-dv1[5][1]*r_1[i]+dA11[5][0][1]+dA11[6][0][2]);
        df[5][i][j][k]=f[3][i][j][k]*(dv1[6][1]-dv1[5][2])-f[1][i][j][k]*(dv1[5][0]-dv1[4][1]+f[5][i][j][k]*r_1[i])
                      +eta[i][j][k]*(dv2[5][0]+dv2[5][1]+dv2[5][2]+r_1[i]*dv1[5][0]-f[5][i][j][k]*r_2[i]+2*dv1[4][1]*r_1[i])
-                     +(1./Rm-eta[i][j][k])*(dv1[4][1]*r_1[i]+dA11[4][0][1]+dv2[5][1]+dA11[6][1][2]);
+                     +(etavac/Rm-eta[i][j][k])*(dv1[4][1]*r_1[i]+dA11[4][0][1]+dv2[5][1]+dA11[6][1][2]);
        df[6][i][j][k]=f[1][i][j][k]*(dv1[4][2]-dv1[6][0])-f[2][i][j][k]*(dv1[6][1]-dv1[5][2])
                      +eta[i][j][k]*(dv2[6][0]+dv2[6][1]+dv2[6][2]+r_1[i]*dv1[6][0])
-                     +(1./Rm-eta[i][j][k])*(dv1[4][2]*r_1[i]+dA11[4][0][2]+dA11[5][1][2]+dv2[6][2]);
+                     +(etavac/Rm-eta[i][j][k])*(dv1[4][2]*r_1[i]+dA11[4][0][2]+dA11[5][1][2]+dv2[6][2]);
 /*       df[4][i][j][k]=eta[i][j][k]*(dv2[4][0]+dv2[4][1]+dv2[4][2]+r_1[i]*dv1[4][0]-f[4][i][j][k]*r_2[i]-2*dv1[5][1]*r_1[i]);
        df[5][i][j][k]=f[3][i][j][k]*(dv1[6][1]-dv1[5][2])-f[1][i][j][k]*(dv1[5][0]-dv1[4][1]+f[5][i][j][k]*r_1[i])
                      +eta[i][j][k]*(dv2[5][0]+dv2[5][1]+dv2[5][2]+r_1[i]*dv1[5][0]-f[5][i][j][k]*r_2[i]+2*dv1[4][1]*r_1[i])
@@ -293,11 +293,11 @@ void  boundary_conditions(double ****f)
                      ( (r1-i)*(r1-i) + (z1-k)*(z1-k) );
 /*                for(l=4;l<=6;l++)
                    f[l][i][j][k] = z[l]*f[l][r1][j][z1];*/
-//                if((r1-i)*(z1-k)) ztemp = z[5]; else ztemp = z[4];
-                ztemp = ((r1-i)*(z1-k)==0) ? z[5] : z[4];
+//                ztemp = ((r1-i)*(z1-k)==0) ? z[5] : z[4];
                 ztemp = z[5];
                 f[4][i][j][k] = ztemp*f[4][r1][j][z1] + (z[4]-ztemp)*An*(r1-i);
-                f[5][i][j][k] = z[5]*f[5][r1][j][z1] * (2*(rc-R)-(i-r1)*dx[0]) / (2*(rc-R)+(i-r1)*dx[0]);
+                f[5][i][j][k] = z[5]*f[5][r1][j][z1] *
+                               (coordin(r1,0)+coordin(i,0)-(i-r1)*dx[0]) / (coordin(r1,0)+coordin(i,0)+(i-r1)*dx[0]);
                 f[6][i][j][k] = ztemp*f[6][r1][j][z1] + (z[4]-ztemp)*An*(z1-k);
                 }
         }
@@ -383,9 +383,9 @@ void  init_conditions()
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
        {
-       if(isType(node[i][k],NodeFluid)) eta[i][j][k]=1./Rm/etavac;
-       if(isType(node[i][k],NodeShell)) eta[i][j][k]=etash/Rm/etavac;
-       if(isType(node[i][k],NodeVacuum)) eta[i][j][k]=1./Rm;
+       if(isType(node[i][k],NodeFluid)) eta[i][j][k]=1./Rm;
+       if(isType(node[i][k],NodeShell)) eta[i][j][k]=etash/Rm;
+       if(isType(node[i][k],NodeVacuum)) eta[i][j][k]=etavac/Rm;
        for(l=0;l<3;l++) B[l][i][j][k] = 0;
        }
 
@@ -409,7 +409,7 @@ if(!goon) {
                        (Rfl*Rfl-pow(coordin(i,0)-rc,2) - pow(coordin(k,2),2))*4/Rfl/Rfl;*/
         f[1][i][j][k]=f[2][i][j][k]=f[3][i][j][k]=0;
                                         }
-      if(isType(node[i][k],NodeMagn))
+      if(isType(node[i][k],NodeFluid)/*||isType(node[i][k],NodeShell)*/ )
                  {
                  f[4][i][j][k]=coordin(i,0)*cos(coordin(j,1))*sin(coordin(j,1));
                  f[5][i][j][k]=coordin(i,0)*cos(coordin(j,1))*cos(coordin(j,1));
@@ -449,15 +449,16 @@ void init_parallel()
                  k3*((kp1-1)*kp2*kp3+kp1*(kp2-1)*kp3+kp1*kp2*(kp3-1));
          if(mintime<0 || vtime<mintime) { mintime=vtime; nd1=i; nd2=j; }
          }
-if(!goon) {                       //reading from file when continuing
+if(!goon) {                       //reading sizes from file when continuing
   pp[0]=divisors[nd1]; pp[1]=divisors[nd2]; pp[2]=size/pp[0]/pp[1];                 // number of procs along axes
           }
-  pr[0] = rank%pp[0]; pr[1] = (rank/pp[0])%pp[1]; pr[2] = (rank/pp[0]/pp[1])%pp[2];  // coordinates of subregion
+  pr[0] = rank%pp[0]; pr[1] = (rank/pp[0])%pp[1]; pr[2] = (rank/pp[0]/pp[1])%pp[2];  // coordinates of current subregion
 
 /* dimensions of subregion:         global indicies of subregion origin          if there's nonequal subregions*/
   n1 = floor((double)N1/pp[0]);     n[0] = n1*pr[0] + min(pr[0],N1-pp[0]*n1);    if(pr[0]<N1-pp[0]*n1) n1++;              // dimensions of subregion
   n2 = floor((double)N2/pp[1]);     n[1] = n2*pr[1] + min(pr[1],N2-pp[1]*n2);    if(pr[1]<N2-pp[1]*n2) n2++;
   n3 = floor((double)N3/pp[2]);     n[2] = n3*pr[2] + min(pr[2],N3-pp[2]*n3);    if(pr[2]<N3-pp[2]*n3) n3++;
+   if(n1<ghost || n2<ghost || n3<ghost) nrerror("Too small mesh or incorrect number of processes",0,0);
 
    m1 = n1+2*ghost;
    m2 = n2+2*ghost;
