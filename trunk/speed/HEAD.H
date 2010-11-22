@@ -139,3 +139,8 @@ void putlog(char msg_text[],long num);
 /*--------- velocity.c ----------*/
 double vfi_given(double t,double rho,double rho0);
 double vtheta_given(double t,double rho,double rho0,double phi);
+/*------------ testspeed.c ------*/
+void start_tick(int num_stage,char *inname);
+void finish_tick(int nomer);
+void init_timers();
+void print_CPU_usage();

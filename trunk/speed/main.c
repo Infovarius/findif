@@ -16,6 +16,7 @@ int main(int argc, char** argv)
  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
  MPI_Comm_size(MPI_COMM_WORLD,&size);
 
+start_tick(0,"init");
   NameMessageFile = "message.dat";
   NameErrorFile = "error.err";
   NameNuFile = "nut.dat";
@@ -54,6 +55,7 @@ int main(int argc, char** argv)
    dx[1]=lfi/N2;
    dx[2]=2*R/N3;
    init_conditions();
+   init_timers();
 
 //--------------------------------------
   if(!goon) Master {
@@ -96,9 +98,11 @@ int main(int argc, char** argv)
 
    if(CheckStep!=0) check(f);
    if(!goon) if (OutStep!=0) printing(f,0,t_cur,count,PulsEnergy);
+finish_tick(0);
 
 /*------------------------ MAIN ITERATIONS -------------------------*/
    while (t_cur < Ttot && !razlet) {
+ start_tick(10,"");
        for(i=0;i<m1;i++)
          for(j=0;j<m2;j++)
             for(k=0;k<m3;k++)
@@ -108,17 +112,20 @@ int main(int argc, char** argv)
             rho=sqrt(pow(r1-rc,2) + z1*z1);
             vrho = 0;
             if(rho>=Rfl) continue;
-            vth  = vtheta_given(0.2,rho,Rfl,phi1);
-/*            vphi = vfi_given(t_cur,rho,Rfl);
-            vth = 0;                          */
-            vphi = vfi_given(0.2,rho,Rfl);
+            vth  = vtheta_given(t_cur,rho,Rfl,phi1);
+            vphi = vfi_given(t_cur,rho,Rfl);
+/*            vth = 0;
+            vphi = vfi_given(0.2,rho,Rfl);      */
             f[1][i][j][k] = vrho*sinth[i][k]+vth*costh[i][k];
             f[2][i][j][k] = vphi;
             f[3][i][j][k] = vrho*costh[i][k]-vth*sinth[i][k];
             }
-        pde(t_cur, f, df);
+    finish_tick(10);   start_tick(11,"");
+        start_tick(7,"outpde");  pde(t_cur, f, df); finish_tick(7);
         dttry=dtnext;
+    finish_tick(11);   start_tick(12,"");
         timestep(f, df, t_cur, f1, dttry, &dtdid, &dtnext);
+    finish_tick(12);   start_tick(13,"");
         nut_by_flux(f,dtdid);
         t_cur+=dtdid;
         count++;
@@ -133,12 +140,13 @@ int main(int argc, char** argv)
                 {
                 boundary_conditions(f1);
                 check(f1);
-                }                               
+                }
               else boundary_conditions(f1);
             printing(f1,dtdid,t_cur,count,PulsEnergy);
             }
         if (SnapStep!=0 && count%SnapStep==0)
             snapshot(f1,eta,t_cur,count);
+    finish_tick(13);   start_tick(14,"exch");
         for(l=0;l<nvar;l++)
         for(i=0;i<m1;i++)
         for(j=0;j<m2;j++)
@@ -154,11 +162,13 @@ int main(int argc, char** argv)
                                     }
                         }
               }*/
+    finish_tick(14); 
    }
 
    printing(f1,dtdid,t_cur,count,PulsEnergy);
    snapshot(f,eta,t_cur,count);
    if(rank==size-1) add_control_point("END");
+   print_CPU_usage();
 
    operate_memory(-1);
 //   Master fclose(NameErrorFile);
