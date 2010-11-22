@@ -28,7 +28,6 @@ int main(int argc, char** argv)
    dx[0]=2*R/N1;
    dx[1]=lfi/N2;
    dx[2]=2*R/N3;
-   omega=1;
 
    t_cur=0;
    count=0; enter = 0;
@@ -57,6 +56,8 @@ int main(int argc, char** argv)
    refz=alloc_mem_2f(m1, m3);
    nut=alloc_mem_3f(m1, m2, m3);
    averf = alloc_mem_3f(3,m1,m3);
+   vfi = alloc_mem_1f(N3);
+   totvfi = alloc_mem_1f(N3);
 
    init_shell();
 
@@ -143,6 +144,8 @@ int main(int argc, char** argv)
    free_mem_2f(refz,m1, m3);
    free_mem_2f(node,m1, m3);
    free_mem_3f(averf,3,m1,m3);
+   free_mem_1f(vfi,N3);
+   free_mem_1f(totvfi,N3);
 
    if(t_cur>=Ttot&&!razlet) nmessage("work is succesfully done",t_cur);
        else nrerror("this is break of scheme",t_cur);

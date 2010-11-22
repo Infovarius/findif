@@ -20,7 +20,8 @@ LEVEL double ****f, ****f1, ***nut, ****df, ****df2, ****df3, ****df4, ****df5, 
              dx[3], *r_1, *r_2, **node, **refr, **refz;
                               //1-outside;2-ghost node;3-integrating area
 LEVEL double ***averf;
-LEVEL double Gamma, lfi, R, rc, omega, Re;
+LEVEL double *totvfi, *vfi;
+LEVEL double Gamma, lfi, R, rc, Re;
 
 LEVEL int    m1, m2, m3, mm1, mm2, mm3, n1, n2, n3, N1, N2, N3, Ns,
              approx, ghost, nvar;
