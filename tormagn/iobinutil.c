@@ -326,7 +326,8 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g) maxdivB=%g(local=%g)\
        MPI_Allreduce(&mf, &totmf, 3, MPI_DOUBLE , MPI_MAX, MPI_COMM_WORLD);
        Master printf("%d  maxf=%e(loc=%e) \tmaxdf=%e(loc=%e) \tmax(df/f)=%e(loc=%e)\n",
                        l,      totmf[0],mf[0],    totmf[1],mf[1],       totmf[2],mf[2]);
-       Master fprintf(fen,"\t %e \t %e",totmf[0],totmf[1]);
+//       Master fprintf(fen,"\t %e \t %e",totmf[0],totmf[1]);
+       Master fprintf(fen,"\t %e \t %e",f1[l][ghost][ghost][ghost],f1[l][mm1-1][ghost][ghost]);
        }
    for(l=0;l<3;l++) {
        mf[0]=mf[1]=mf[2]=0;
@@ -340,7 +341,8 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g) maxdivB=%g(local=%g)\
        MPI_Allreduce(&mf, &totmf, 1, MPI_DOUBLE , MPI_MAX, MPI_COMM_WORLD);
        Master printf("%d  maxB=%e(loc=%e)\n",
                        l,      totmf[0],mf[0]);
-       Master fprintf(fen,"\t %e",totmf[0]);
+//       Master fprintf(fen,"\t %e",totmf[0]);
+       Master fprintf(fen,"\t %e",B[l][ghost][ghost][ghost]);
        }
   // --------------- quadratic norma of arrays --------------------------------------
    for(l=0;l<nvar;l++) {
@@ -350,7 +352,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g) maxdivB=%g(local=%g)\
          for(k=0;k<mm3;k++)
          if((l<=3 && isType(node[i][k],NodeFluid) || l>=4&& isType(node[i][k],NodeMagn))
             && !isType(node[i][k],NodeClued))
-	    mf[0] += fabs(coordin(i,0)+(rc==0?0:(1./rc)))*pow(f1[l][i][j][k],2);
+	    mf[0] += fabs(1+coordin(i,0)*rc)*pow(f1[l][i][j][k],2);
        MPI_Allreduce(&mf, &totmf, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
        Master fprintf(fen,"\t %e",totmf[0]/N1/N2/N3);
        }
@@ -360,7 +362,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g) maxdivB=%g(local=%g)\
         for(j=ghost;j<m2;j++)
          for(k=0;k<mm3;k++)
          if(isType(node[i][k],NodeMagn))
-	    mf[0] += fabs(coordin(i,0)+(rc==0?0:(1./rc)))*pow(B[l][i][j][k],2);
+	    mf[0] += fabs(1+coordin(i,0)*rc)*pow(B[l][i][j][k],2);
        MPI_Allreduce(&mf, &totmf, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
        Master fprintf(fen,"\t %e",totmf[0]/N1/N2/N3);
        }
@@ -392,7 +394,7 @@ FILE *fd;
 char *message="dump";
 int tag=1,v;
 
- boundary_conditions(f1);
+// boundary_conditions(f1);
 
  if(rank!=0) MPI_Recv(message,0,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);
 
@@ -450,4 +452,5 @@ FILE *fd;
  Master {nmessage("snap is done",t_cur,count);
                    add_control_point(str);}
 }
+
 
