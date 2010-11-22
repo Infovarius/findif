@@ -17,7 +17,7 @@ LEVEL char *KaskadVarFile;
 LEVEL char  fname[80], fname_stat[80];
 
 LEVEL double ****f, ****f1, ***nut, ****df, ****df2, ****df3, ****df4, ****df5, **s_func,
-             dx[3], *r_1, *r_2, **node, **refr, **refz;
+             dx[3], *r_1, *r_2, **node, **refr, **refz, **sinth, **costh, **chi;
                               //1-outside;2-ghost node;3-integrating area
 LEVEL double ***averf;
 LEVEL double *totvfi, *vfi;
@@ -27,6 +27,7 @@ LEVEL int    m1, m2, m3, mm1, mm2, mm3, n1, n2, n3, N1, N2, N3, Ns,
              approx, ghost, nvar;
 
 LEVEL double Noise, NoiseNorm, parabole;
+LEVEL double chimax;           //maximal angle of blade tilt
 LEVEL double maschtab;
 
 LEVEL double t_cur,Ttot;

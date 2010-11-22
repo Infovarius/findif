@@ -48,7 +48,7 @@ char str[256],*pstr;
 
 void init_param(int argc, char** argv,double *dtnext)
 {
-int error=0;
+int error=0,ver;
 FILE *iop;
 double d;
  if(argc<2 || (iop=fopen(argv[1],"r"))==NULL) //no ini file
@@ -76,7 +76,8 @@ double d;
      SnapStep = 100;
      Ttot=1.;
      }
-    else {       nmessage("Parameters were extracted from file",0);
+    else {
+      if(fscanf(iop,"%d",&ver)<1 || ver>2) nrerror("parameters' file has wrong version",0);
       read_token(iop,&Re);
       read_token(iop,&lfi);
       read_token(iop,&rc);
@@ -85,6 +86,7 @@ double d;
       read_token(iop,&Noise);
       read_token(iop,&NoiseNorm);
       read_token(iop,&UpLimit);
+      if(ver==2) read_token(iop,&chimax);
       read_token(iop,&d);         N1 = (int)d;
       read_token(iop,&d);         N2 = (int)d;
       read_token(iop,&d);         N3 = (int)d;
@@ -101,6 +103,7 @@ double d;
       read_token(iop,&d);         VarStep = (int)d;
       read_token(iop,&Ttot);
       fclose(iop);
+      nmessage("Parameters were extracted from file",0);
       }
 }
 
@@ -258,9 +261,9 @@ for(i=0;i<m1;i++)
       for(k=0;k<m3;k++)
         if(node[i][k]==3)
            {
-           temp=0;
-           for(l=0;l<3;l++)
-            temp+=dr(f1[l],i,j,k,l+1,0,dx[l],ghost, approx);
+           temp=dr(f1[0],i,j,k,1,0,dx[0],ghost, approx)
+               +dr(f1[1],i,j,k,2,0,dx[1],ghost, approx)*r_1[i]
+               +dr(f1[2],i,j,k,3,0,dx[2],ghost, approx)+f1[0][i][j][k]*r_1[i];
            if (fabs(temp)>div) div=fabs(temp);
            }
 MPI_Allreduce(&div, &totdiv, 1, MPI_DOUBLE , MPI_MAX, MPI_COMM_WORLD);

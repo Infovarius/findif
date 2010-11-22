@@ -7,7 +7,7 @@
 #define Pshrink      (double)-0.25
 #define ErrCon       (double)1.89e-4
 #define ErrScale     (double)1e4
-#define MinScale     (double)1e-4
+#define MinScale     (double)1e-7
 
 
 void timestep(double ****f, double ****df, double t, double ****fout,
@@ -25,6 +25,7 @@ void timestep(double ****f, double ****df, double t, double ****fout,
             return;
             }
 
+      MPI_Barrier(MPI_COMM_WORLD);
       MPI_Allreduce(&err, &errs, 1, MPI_DOUBLE , MPI_MAX, MPI_COMM_WORLD);
       err=errs;
 

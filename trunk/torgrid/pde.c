@@ -46,20 +46,34 @@ void pde(double t, double ****f, double ****df)
 
       df[0][i][j][k]=nut[i][j][k]*(dv2[0][0]+dv2[0][1]+dv2[0][2]+r_1[i]*dv1[0][0]
                                    -f[0][i][j][k]*r_2[i]+2*dv1[1][1]*r_1[i])
-                     -dp1[0]+w*w/r_1[i]       +2*w*f[1][i][j][k]                   //forces of inertion
-                     +coordin(k,2)*f[1][i][j][k]                                   //helical force
+                     -dp1[0]
                      -f[0][i][j][k]*dv1[0][0]-f[1][i][j][k]*dv1[0][1]
                      -f[2][i][j][k]*dv1[0][2]+r_2[i]*f[1][i][j][k]*f[1][i][j][k];
       df[1][i][j][k]=nut[i][j][k]*(dv2[1][0]+dv2[1][1]+dv2[1][2]+r_1[i]*dv1[1][0]
                                    -f[1][i][j][k]*r_2[i]+2*dv1[1][1]*r_1[i])
-                     -dp1[1]*r_1[i]-dw/r_1[i] -2*w*f[0][i][j][k]                   //forces of inertion
-                     -(coordin(i,2)-rc)*f[1][i][j][k]                                   //helical force
+                     +1-dp1[1]*r_1[i]+0*(j+n[2]<=ghost+2?1:0)
                      -f[0][i][j][k]*dv1[1][0]-f[1][i][j][k]*dv1[1][1]
                      -f[2][i][j][k]*dv1[1][2]-r_1[i]*f[0][i][j][k]*f[1][i][j][k];
       df[2][i][j][k]=nut[i][j][k]*(dv2[2][0]+dv2[2][1]+dv2[2][2]+r_1[i]*dv1[2][0])
                      -dp1[2]
                      -f[0][i][j][k]*dv1[2][0]-f[1][i][j][k]*dv1[2][1]-f[2][i][j][k]*dv1[2][2];
       df[3][i][j][k]= -(dv1[0][0]+dv1[1][1]+dv1[2][2]+f[0][i][j][k]*r_1[i])/Gamma;
+/*      df[0][i][j][k]=nut[i][j][k]*(dv2[0][0]+dv2[0][1]+dv2[0][2]+r_1[i]*dv1[0][0]
+                                   -f[0][i][j][k]*r_2[i]+2*dv1[1][1]*r_1[i])
+                     -dp1[0]+w*w/r_1[i]       +2*w*f[1][i][j][k]                   //forces of inertion
+                     +(j+n[2]<=ghost+2 ? coordin(k,2)*f[1][i][j][k] : 0)                //helical force
+                     -f[0][i][j][k]*dv1[0][0]-f[1][i][j][k]*dv1[0][1]
+                     -f[2][i][j][k]*dv1[0][2]+r_2[i]*f[1][i][j][k]*f[1][i][j][k];
+      df[1][i][j][k]=nut[i][j][k]*(dv2[1][0]+dv2[1][1]+dv2[1][2]+r_1[i]*dv1[1][0]
+                                   -f[1][i][j][k]*r_2[i]+2*dv1[1][1]*r_1[i])
+                     -dp1[1]*r_1[i]-dw/r_1[i] -2*w*f[0][i][j][k]                   //forces of inertion
+                     -(j<=ghost+2 ? (coordin(i,2)-rc)*f[1][i][j][k] :0)            //helical force
+                     -f[0][i][j][k]*dv1[1][0]-f[1][i][j][k]*dv1[1][1]
+                     -f[2][i][j][k]*dv1[1][2]-r_1[i]*f[0][i][j][k]*f[1][i][j][k];
+      df[2][i][j][k]=nut[i][j][k]*(dv2[2][0]+dv2[2][1]+dv2[2][2]+r_1[i]*dv1[2][0])
+                     -dp1[2]
+                     -f[0][i][j][k]*dv1[2][0]-f[1][i][j][k]*dv1[2][1]-f[2][i][j][k]*dv1[2][2];
+      df[3][i][j][k]= -(dv1[0][0]+dv1[1][1]+dv1[2][2]+f[0][i][j][k]*r_1[i])/Gamma;*/
    }
 
    return;
@@ -67,7 +81,7 @@ void pde(double t, double ****f, double ****df)
 
 double deviation(double ****f,int i,int j,int k)
 {
-const size_okr=min(1,ghost);
+const int size_okr=min(1,ghost);
 double flux;
 int kol=0,l;
 flux = 0;
@@ -143,9 +157,23 @@ void  boundary_conditions(double ****f)
 {
    int i, j, k, l, g, req_numS=0, req_numR=0;
    int r1,r2,z1,z2;
-   int flag,cnt,z[4],tag=10;
-   z[0]=z[1]=z[2]=-1; z[3]=1;  //  влияет на вид гран.условий (1:жесткие, -1:свободные)
+   int /*flag,cnt,*/z[4],tag=10;
+   double vrho,vphi,vth;
+   z[0]=z[1]=z[2]=-1; z[3]=1;  //  влияет на вид гран.условий (-1:жесткие, 1:свободные)
 
+  /*============================ divertor =================================*/
+  if(n[2]==0)
+  for(i=0;i<m1;i++)
+    for(j=ghost;j<=ghost;j++)
+      for(k=0;k<m3;k++)
+         {
+         vrho = f[2][i][j][k]*costh[i][k]+f[0][i][j][k]*sinth[i][k];
+         vth  = -f[2][i][j][k]*sinth[i][k]+f[0][i][j][k]*costh[i][k];
+         vphi = sqrt(pow(f[1][i][j][k],2)+pow(vth,2));
+         f[0][i][j][k] = vrho*sinth[i][k]+vphi*costh[i][k]*sin(chi[i][k]);
+         f[1][i][j][k] = vphi*cos(chi[i][k]);
+         f[2][i][j][k] = vrho*costh[i][k]-vphi*sinth[i][k]*sin(chi[i][k]);
+         }
   /*----------------------- exchanging of ghosts -------------------------*/
  if(pr_neighbour[0]>-1)
   if(pr_neighbour[0]==rank) CopyGridToBuffer(f,nut,buf_recv[0],n1,ghost,ghost,mm1-1,mm2-1,mm3-1);
@@ -245,13 +273,15 @@ void  init_conditions(double ****f,double Re)
         if(node[i][k]>0) node[i][k] = (r2<pow(R,2)) ? 3 : node[i][k];
                     else node[i][k] = (r2<pow(R,2)) ? 3 : 1;
         if(node[i][k]==3)
-             if(i<ghost || i>=mm1 || k<ghost || k>=mm3) node[i][k]=4;
-             else for(l=-ghost;l<=ghost;l++)
+              for(l=-ghost;l<=ghost;l++)
                      { if(i+l>=0&&i+l<m1) if(node[i+l][k]<2) node[i+l][k] = 2;
                        if(k+l>=0&&k+l<m3) if(node[i][k+l]<2) node[i][k+l] = 2;
                      }
         r1 = coordin(i,0);   z1 = coordin(k,2);
         rho = sqrt(z1*z1+pow(r1-rc,2));
+        sinth[i][k]=(r1-rc)/rho;
+        costh[i][k]=   z1  /rho;
+        chi[i][k]  = chimax*M_PI/180./rho/R;
         refr[i][k] = rc + (r1-rc)*(2*R/rho-1);      //physical coordinates
         refz[i][k] =        z1*(2*R/rho-1);
         refr[i][k] = (refr[i][k]-rc+R)/dx[0]-0.5-n[0]+ghost;
@@ -264,6 +294,12 @@ void  init_conditions(double ****f,double Re)
                      }
                   }
        }
+   for(i=0;i<m1;i++)
+   for(k=0;k<m3;k++)
+      if(pr_neighbour[0]!=-1 && i<ghost ||
+           pr_neighbour[1]!=-1 && i>=mm1  ||
+           pr_neighbour[4]!=-1 && k<ghost ||
+           pr_neighbour[5]!=-1 && k>=mm3) node[i][k]=4;
 
 // --------------- initial conditions -----------------------------------------
 //   k1=2*M_PI/lfi;  k3=M_PI/l3;
@@ -308,7 +344,7 @@ void init_parallel()
          vtime = k1*ceil((double)N1/kp1)*ceil((double)N2/kp2)*ceil((double)N3/kp3)+
                  k2*((kp1-1)*N2*N3+N1*(kp2-1)*N3+N1*N2*(kp3-1))+
                  k3*((kp1-1)*kp2*kp3+kp1*(kp2-1)*kp3+kp1*kp2*(kp3-1));
-         if(mintime==-1 || vtime<mintime) { mintime=vtime; nd1=i; nd2=j; }
+         if(mintime<0 || vtime<mintime) { mintime=vtime; nd1=i; nd2=j; }
          }
   pp[0]=divisors[nd1]; pp[1]=divisors[nd2]; pp[2]=size/pp[0]/pp[1];                  // number of procs along axes
   pr[0] = rank%pp[0]; pr[1] = (rank/pp[0])%pp[1]; pr[2] = (rank/pp[0]/pp[1])%pp[2];  // coordinates of subregion
