@@ -160,11 +160,11 @@ for(k=0;k<n3;k++)
 /*   double tmp = maschtab*pow(
            (nl[2]*s_func[k][0] + nl[1]*s_func[k][1] + nl[0]*s_func[k][2])*pow(dx[2],4),
                          1./3);*/
-   double tmp=0;
+/*   double tmp=0;
    for(i=0;i<m1;i++)
        for(j=ghost;j<mm2;j++)
           if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
-            nut[i][j][k+ghost] = (1. + tmp)/Re;
+            nut[i][j][k+ghost] = (1. + tmp)/Re;*/
    }
 }
 
@@ -392,7 +392,8 @@ void  init_conditions()
                           {setType(&node[i][k],NodeGhostMagn);
                            refz_m[i][k] = 2*mm3-k-1;}
         if(!isType(node[i][k],NodeGhostMagn)) setType(&node[i][k],NodeMagn);
-//                                         else node[i][k] -= NodeGhostMagn;      //temporarily - deleting all fictive cells
+//                                         else node[i][k] -= NodeGhostMagn;
+                                          //deleting fictive cells-for constant outside field
      //for divertor's blade
         sinth[i][k]=(r1-rc)/rho;
         costh[i][k]=   z1  /rho;
@@ -444,9 +445,9 @@ if(!goon) {
 //                 if(!isType(node[i][k],NodeMagn))
                   if(isType(node[i][k],NodeFluid))
                      {
-                     f[4][i][j][k]+=0.0*((double)rand()-RAND_MAX/2)/RAND_MAX;
-                     f[5][i][j][k]+=0.0*((double)rand()-RAND_MAX/2)/RAND_MAX;
-                     f[6][i][j][k]+=0.0*((double)rand()-RAND_MAX/2)/RAND_MAX;
+                     f[4][i][j][k]+=0.01*((double)rand()-RAND_MAX/2)/RAND_MAX;
+                     f[5][i][j][k]+=0.01*((double)rand()-RAND_MAX/2)/RAND_MAX;
+                     f[6][i][j][k]+=0.01*((double)rand()-RAND_MAX/2)/RAND_MAX;
                      }
       }
 //   struct_func(f,2,2,3);
@@ -516,7 +517,7 @@ if(!goon) {                       //reading sizes from file when continuing
    buf_recv[j+2*i] = alloc_mem_1f(buf_size[i]);
   }
 
-   iop=fopen(NameStatFile,"w");
+/*   iop=fopen(NameStatFile,"w");
    fprintf(iop,"%d\n",rank);
    fprintf(iop,"%d\t%d\t%d\n",pr[0],pr[1],pr[2]);
    fprintf(iop,"%d\t%d\t%d\n",pp[0],pp[1],pp[2]);
@@ -525,7 +526,7 @@ if(!goon) {                       //reading sizes from file when continuing
    for(i=0;i<6;i++)
      fprintf(iop,"%d ",pr_neighbour[i]);
    fprintf(iop,"\n");
-   fileclose(iop);
+   fileclose(iop);*/
 
 }
 

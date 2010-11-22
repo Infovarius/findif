@@ -50,7 +50,7 @@ char str[256],*pstr;
  if(sscanf(str,"%lf",param)==0) nrerror("Input of parameter error",-1,-1);
  pstr=strtok(str,"|");
  pstr=strtok((char *)NULL,"|");
- printf("%g\t->\t%s",*param,pstr);
+ Master printf("%g\t->\t%s",*param,pstr);
 }
 
 void init_param(int argc, char** argv,double *dtnext)
@@ -120,31 +120,31 @@ double d;
       }
 }
 
-void read_tilleq(FILE *ffff,char echo)
+void read_tilleq(FILE *ffff,char lim, char echo)
 {char ch;
-  if (echo=='n') while ((ch=(char)fgetc(ffff))!='=');
-         else    while ((ch=(char)fgetc(ffff))!='=') printf("%c",ch);
+  if (echo=='n') while ((ch=(char)fgetc(ffff))!=lim);
+         else    while ((ch=(char)fgetc(ffff))!=lim) printf("%c",ch);
 }
 
 int init_data(void)                 //returns code of error
 {
  int error=0;
  int i,j,k,l,tmpr;
- float tmpd;
+ float tmpf;
  char tmpc;
- int _t;
 
  FILE *inp = fileopen(NameInitFile,-1);
- read_tilleq(inp,'n');   if(fscanf(inp,"%lf",&t_cur)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%ld",&count)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%c%d%c%d%c%d%c",&tmpc,&pp[0],&tmpc,&pp[1],&tmpc,&pp[2],&tmpc)<7) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%lf",&t_cur)==0) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%ld",&count)==0) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%c%d%c%d%c%d%c",&tmpc,&pp[0],&tmpc,&pp[1],&tmpc,&pp[2],&tmpc)<7) error=1;
                          //no need unless process distribution is written
  if(pp[0]*pp[1]*pp[2]!=size) nrerror("Wrong number of processors in data file. Can't read data.",-1,-1);
- read_tilleq(inp,'n');   if(fscanf(inp,"%d",&N1)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%d",&N2)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%d",&N3)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%lf",&Re)==0) error=1;
- fgetc(inp);  fgetc(inp);
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%d",&N1)==0) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%d",&N2)==0) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%d",&N3)==0) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%lf",&Re)==0) error=1;
+// fgetc(inp);  fgetc(inp);
+ read_tilleq(inp,0x0A,'n');
 
  init_parallel();
  operate_memory(1);                     // creating arrays
@@ -152,16 +152,25 @@ int init_data(void)                 //returns code of error
  for(tmpr=0;tmpr<=rank;tmpr++)           //reading until arrays of this process
  {
  for(l=0;l<nvar;l++)                    // reading f
- for(i=0;i<m1;i++)
- for(j=0;j<m2;j++)
-       if((_t=fread(f[l][i][j],sizeof(double),m3,inp))<m3) error=2;
-/* for(l=0;l<6;l++)                    // reading B and j
         for(i=0;i<m1;i++)
         for(j=0;j<m2;j++)
+        for(k=0;k<m3;k++)
+       {
+       if(fread(&tmpf,sizeof(float),1,inp)<1) error=2;
+       f[l][i][j][k] = tmpf;
+       }
+
+/* for(l=0;l<6;l++)                    // reading B and j
+        for(i=0;i<m1;i++)
+           for(j=0;j<m2;j++)
              if(fread(B[l%3][i][j],sizeof(double),m3,inp)<m3) error=2;*/
  for(i=0;i<m1;i++)
- for(j=0;j<m2;j++)
-       if((_t=fread(nut[i][j],sizeof(double),m3,inp))<m3) error=3;
+     for(j=0;j<m2;j++)
+     for(k=0;k<m3;k++)
+       {
+       if(fread(&tmpf,sizeof(float),1,inp)<1) error=3;
+       nut[i][j][k] = tmpf;
+       }
  }
 fileclose(inp);
 if(error) nrerror("Data couldn't have been read from file!!!",-1,error);
@@ -383,7 +392,7 @@ FILE *fd;
 char *message="dump";
 int tag=1,v;
 
-// boundary_conditions(f1);
+ boundary_conditions(f1);
 
  if(rank!=0) MPI_Recv(message,0,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);
 
@@ -405,7 +414,7 @@ int tag=1,v;
  if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
  MPI_Barrier(MPI_COMM_WORLD);
  Master {nmessage("dump is done",t_cur,count);
-         add_control_point(NameDumpFile);}
+                   add_control_point(NameDumpFile);}
 }
 
 void snapshot(double ****f1,double ***nu,double t_cur,long count)
@@ -432,20 +441,13 @@ FILE *fd;
  Master fprintf(fd,"Reynolds number = %lf\n",Re);
 
  for(v=0;v<nvar;v++)
-    print_array3d(fd,f1[v],0,m1,0,m2,0,m3);
-/* print_array3d(fd,B[0],0,m1,0,m2,0,m3);
- print_array3d(fd,B[1],0,m1,0,m2,0,m3);
- print_array3d(fd,B[2],0,m1,0,m2,0,m3);
- print_array3d(fd,J[0],0,m1,0,m2,0,m3);
- print_array3d(fd,J[1],0,m1,0,m2,0,m3);
- print_array3d(fd,J[2],0,m1,0,m2,0,m3);*/
- print_array3d(fd,nu,0,m1,0,m2,0,m3);
+    printbin_array3d(fd,f1[v],0,m1,0,m2,0,m3);
+ printbin_array3d(fd,nu,0,m1,0,m2,0,m3);
  fileclose(fd);
 
  if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
  MPI_Barrier(MPI_COMM_WORLD);
  Master {nmessage("snap is done",t_cur,count);
-         add_control_point(str);}
+                   add_control_point(str);}
 }
-
 

@@ -32,11 +32,10 @@ void nmessage(char msg_text[],double t_cur,long count)
 void add_control_point(char *name_cp)
 {
 FILE *cpf;
-if(rank==size-1)
-       { cpf = fileopen(NameCPFile,1);
-         if(cpf==NULL) cpf=fileopen(NameCPFile,0);
-         fprintf(cpf,"%s\n",name_cp);
-         fileclose(cpf);}
+cpf = fileopen(NameCPFile,1);
+if(cpf==NULL) cpf=fileopen(NameCPFile,0);
+fprintf(cpf,"%s\n",name_cp);
+fileclose(cpf);
 }
 
 double ****alloc_mem_4f(int mvar, int n1, int n2, int n3)
