@@ -70,21 +70,26 @@ void pde(double t, double ****f, double ****df)
          dv1[l][m]=dr(f[l],i,j,k,m+1,0,dx[m],ghost, approx);
          dv2[l][m]=dr(f[l],i,j,k,m+1,1,dx[m]*dx[m],ghost, approx);
          }
-        dA11[l][0][1] = dA11[l][1][0] = r_1[i]*d2cross(f[l],i,j,k,2,1,ghost,approx);
+/*        dA11[l][0][1] = dA11[l][1][0] = r_1[i]*d2cross(f[l],i,j,k,2,1,ghost,approx);
         dA11[l][0][2] = dA11[l][2][0] = d2cross(f[l],i,j,k,3,1,ghost,approx);
         dA11[l][1][2] = dA11[l][2][1] = r_1[i]*d2cross(f[l],i,j,k,3,2,ghost,approx);
-        dv1[l][1] *= r_1[i];     dv2[l][1] *= r_2[i];
+        dv1[l][1] *= r_1[i];     dv2[l][1] *= r_2[i];*/
+        dA11[l][0][1] = dA11[l][1][0] = d2cross(f[l],i,j,k,2,1,ghost,approx);
+        dA11[l][0][2] = dA11[l][2][0] = d2cross(f[l],i,j,k,3,1,ghost,approx);
+        dA11[l][1][2] = dA11[l][2][1] = d2cross(f[l],i,j,k,3,2,ghost,approx);// for cylindrical case
         }
 
-       df[4][i][j][k]=f[2][i][j][k]*(dv1[5][0]-dv1[4][1]+f[5][i][j][k]*r_1[i])-f[3][i][j][k]*(dv1[4][2]-dv1[6][0])
+       df[4][i][j][k]=Rm*(f[2][i][j][k]*(dv1[5][0]-dv1[4][1]+f[5][i][j][k]*r_1[i])-f[3][i][j][k]*(dv1[4][2]-dv1[6][0]))
+//                      +Rm*f[2][i][j][k]	 // for induced field
                      +eta[i][j][k]*(dv2[4][0]+dv2[4][1]+dv2[4][2]+r_1[i]*dv1[4][0]-f[4][i][j][k]*r_2[i]-2*dv1[5][1]*r_1[i])
-                     +(eta0/Rm-eta[i][j][k])*(dv2[4][0]+dv1[4][0]*r_1[i]-f[4][i][j][k]*r_2[i]-dv1[5][1]*r_1[i]+dA11[5][0][1]+dA11[6][0][2]);
-       df[5][i][j][k]=f[3][i][j][k]*(dv1[6][1]-dv1[5][2])-f[1][i][j][k]*(dv1[5][0]-dv1[4][1]+f[5][i][j][k]*r_1[i])
+                     +(eta0-eta[i][j][k])*(dv2[4][0]+dv1[4][0]*r_1[i]-f[4][i][j][k]*r_2[i]-dv1[5][1]*r_1[i]+dA11[5][0][1]+dA11[6][0][2]);
+       df[5][i][j][k]=Rm*(f[3][i][j][k]*(dv1[6][1]-dv1[5][2])-f[1][i][j][k]*(dv1[5][0]-dv1[4][1]+f[5][i][j][k]*r_1[i]))
+//                     -Rm*f[1][i][j][k]	// for induced field
                      +eta[i][j][k]*(dv2[5][0]+dv2[5][1]+dv2[5][2]+r_1[i]*dv1[5][0]-f[5][i][j][k]*r_2[i]+2*dv1[4][1]*r_1[i])
-                     +(eta0/Rm-eta[i][j][k])*(dv1[4][1]*r_1[i]+dA11[4][0][1]+dv2[5][1]+dA11[6][1][2]);
-       df[6][i][j][k]=f[1][i][j][k]*(dv1[4][2]-dv1[6][0])-f[2][i][j][k]*(dv1[6][1]-dv1[5][2])
+                     +(eta0-eta[i][j][k])*(dv1[4][1]*r_1[i]+dA11[4][0][1]+dv2[5][1]+dA11[6][1][2]);
+       df[6][i][j][k]=Rm*(f[1][i][j][k]*(dv1[4][2]-dv1[6][0])-f[2][i][j][k]*(dv1[6][1]-dv1[5][2]))
                      +eta[i][j][k]*(dv2[6][0]+dv2[6][1]+dv2[6][2]+r_1[i]*dv1[6][0])
-                     +(eta0/Rm-eta[i][j][k])*(dv1[4][2]*r_1[i]+dA11[4][0][2]+dA11[5][1][2]+dv2[6][2]);
+                     +(eta0-eta[i][j][k])*(dv1[4][2]*r_1[i]+dA11[4][0][2]+dA11[5][1][2]+dv2[6][2]);
 /*       df[4][i][j][k]=eta[i][j][k]*(dv2[4][0]+dv2[4][1]+dv2[4][2]+r_1[i]*dv1[4][0]-f[4][i][j][k]*r_2[i]-2*dv1[5][1]*r_1[i]);
        df[5][i][j][k]=f[3][i][j][k]*(dv1[6][1]-dv1[5][2])-f[1][i][j][k]*(dv1[5][0]-dv1[4][1]+f[5][i][j][k]*r_1[i])
                      +eta[i][j][k]*(dv2[5][0]+dv2[5][1]+dv2[5][2]+r_1[i]*dv1[5][0]-f[5][i][j][k]*r_2[i]+2*dv1[4][1]*r_1[i])
@@ -298,7 +303,7 @@ void  boundary_conditions(double ****f)
                 f[4][i][j][k] = ztau*f[4][i1][j][k1] + (znorm-ztau)*An*(i1-i);
 //                f[5][i][j][k] = ztau*f[5][i1][j][k1];
                 f[5][i][j][k] = f[5][i1][j][k1] *
-                              (rin+rfict-(i-i1)*dx[0]) / (rin+rfict+(i-i1)*dx[0]) ;  
+                              (rin+rfict-(i-i1)*dx[0]) / (rin+rfict+(i-i1)*dx[0]) ;
 /*                switch (i1-i)
                 {
                   case -1: case -3: case -5:
@@ -400,16 +405,16 @@ void  init_conditions()
         chi[i][k]  = chimax*M_PI/180.*rho/R;
        }
 
-   for(i=0;i<m1;i++) { r_1[i]=1./coordin(i,0); r_2[i]=r_1[i]*r_1[i]; }
-
+   for(i=0;i<m1;i++) //{ r_1[i]=1./coordin(i,0); r_2[i]=r_1[i]*r_1[i]; }
+                     { r_1[i] = r_2[i] = 0; }     //for cylindrical case
    for(i=0;i<m1;i++)
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
        {
-//       if(isType(node[i][k],NodeGhostFluid)) node[i][k] -= NodeGhostFluid;        //turning off fluid fictive cells
-       if(isType(node[i][k],NodeFluid)) eta[i][j][k]=1./Rm;
-       if(isType(node[i][k],NodeShell)) eta[i][j][k]=etash/Rm;
-       if(isType(node[i][k],NodeVacuum)) eta[i][j][k]=etavac/Rm;
+       if(isType(node[i][k],NodeGhostFluid)) node[i][k] -= NodeGhostFluid;        //deleting fictive cells-for cynematic dynamo
+       if(isType(node[i][k],NodeFluid)) eta[i][j][k]=1.;
+       if(isType(node[i][k],NodeShell)) eta[i][j][k]=etash;
+       if(isType(node[i][k],NodeVacuum)) eta[i][j][k]=etavac;
        for(l=0;l<3;l++) B[l][i][j][k] = 0;
        }
 
@@ -439,8 +444,8 @@ if(!goon) {
       if(isType(node[i][k],NodeFluid)/*||isType(node[i][k],NodeShell)*/ )
                  {   }
                  f[4][i][j][k]=f[5][i][j][k]=f[6][i][j][k]=0;
-                 f[4][i][j][k]=coordin(i,0)*cos(coordin(j,1))*sin(coordin(j,1));
-                 f[5][i][j][k]=coordin(i,0)*cos(coordin(j,1))*cos(coordin(j,1));
+                 f[4][i][j][k]=coordin(i,0)/*cos(coordin(j,1))*sin(coordin(j,1))*/;
+                 f[5][i][j][k]=coordin(i,0)/*cos(coordin(j,1))*cos(coordin(j,1))*/;
                  f[6][i][j][k]=0;
 //                 if(!isType(node[i][k],NodeMagn))
                   if(isType(node[i][k],NodeFluid))
@@ -517,7 +522,7 @@ if(!goon) {                       //reading sizes from file when continuing
    buf_recv[j+2*i] = alloc_mem_1f(buf_size[i]);
   }
 
-/*   iop=fopen(NameStatFile,"w");
+   iop=fopen(NameStatFile,"w");
    fprintf(iop,"%d\n",rank);
    fprintf(iop,"%d\t%d\t%d\n",pr[0],pr[1],pr[2]);
    fprintf(iop,"%d\t%d\t%d\n",pp[0],pp[1],pp[2]);
@@ -526,7 +531,7 @@ if(!goon) {                       //reading sizes from file when continuing
    for(i=0;i<6;i++)
      fprintf(iop,"%d ",pr_neighbour[i]);
    fprintf(iop,"\n");
-   fileclose(iop);*/
+   fileclose(iop);
 
 }
 
@@ -635,10 +640,10 @@ void calculate_curl(double ****f,double ****b,enum TypeNodes tip)
       for(l=0;l<=2;l++) {
        for(m=0;m<3;m++)
          dA[l][m]=dr(f[l],i,j,k,m+1,0,dx[m],ghost, approx);
-       dA[l][1] *= r_1[i];
+//       dA[l][1] *= r_1[i];
        }
       b[0][i][j][k] = dA[2][1] - dA[1][2];
       b[1][i][j][k] = dA[0][2] - dA[2][0];
       b[2][i][j][k] = dA[1][0] - dA[0][1] + f[1][i][j][k]*r_1[i];
     }
-}    
+}

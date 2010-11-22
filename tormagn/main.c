@@ -60,7 +60,7 @@ int main(int argc, char** argv)
    init_conditions();
 
 //--------------------------------------
-  if(!goon) Master {
+  Master {
       fd=fileopen("coord",rank);
       for(i=0;i<N1+2*ghost;i++) fprintf(fd,"%e ",coordin(i,0));
       fprintf(fd,"\n");
@@ -103,6 +103,7 @@ int main(int argc, char** argv)
    if(!goon) if (OutStep!=0) printing(f,0,t_cur,count,PulsEnergy);
 
 /*------------------------ MAIN ITERATIONS -------------------------*/
+
    while (t_cur < Ttot && !razlet) {
        for(i=0;i<m1;i++)
          for(j=0;j<m2;j++)
@@ -114,9 +115,10 @@ int main(int argc, char** argv)
             if(rho>=Rfl) continue;         // nonstationary time=t_cur*Tunit, max magnitude=0.0971883
             vrho = 0;
             vth  = vtheta_given(0.3,rho,Rfl,phi1);  // time=0.3 for amplitude~1
+            //vth *= rc*r_1[i];        // for toroidal case (for cylinder mult.=1)  
 /*            vphi = vfi_given(t_cur*Tunit,rho,Rfl);
             vth = 0;                        */
-            vphi = vfi_given(0.0971883,rho,Rfl);  
+            vphi = vfi_given(0.0971883,rho,Rfl);
             f[1][i][j][k] = vrho*sinth[i][k]+vth*costh[i][k];
             f[2][i][j][k] = vphi;
             f[3][i][j][k] = vrho*costh[i][k]-vth*sinth[i][k];
