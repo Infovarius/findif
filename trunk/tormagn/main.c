@@ -107,9 +107,10 @@ int main(int argc, char** argv)
             r1 = coordin(i,0);  /*phi1 = coordin(j,1);*/  z1 = coordin(k,2);
             rho=sqrt(pow(r1-rc,2) + z1*z1);
             vrho = 0;
+            if(rho>=Rfl) continue;
             vth  = vtheta_given(0.2,rho,Rfl,phi1);
 /*            vphi = vfi_given(t_cur,rho,Rfl);
-            vth = 0;    */
+            vth = 0;                          */
             vphi = vfi_given(0.2,rho,Rfl);
             f[1][i][j][k] = vrho*sinth[i][k]+vth*costh[i][k];
             f[2][i][j][k] = vphi;
