@@ -12,7 +12,8 @@ void nrerror(char error_text[],double t_cur)
     fprintf(err,"%s\n",error_text);
     fprintf(err,"...now exiting to system...\n");
     fclose(err);
-    operate_memory(-1);
+    if(count>0) operate_memory(-1);
+    add_control_point("END");
     MPI_Finalize();
     exit(1);
 }
@@ -191,6 +192,7 @@ void operate_memory(int dir)
        averf = alloc_mem_3f(3,m1,m3);
        vfi = alloc_mem_1f(N3);
        totvfi = alloc_mem_1f(N3);
+       init_shell();
     } else
    {
 //   free_mem_2f(s_func,n3+2,kol_masht);
@@ -211,6 +213,26 @@ void operate_memory(int dir)
        free_mem_3f(averf,3,m1,m3);
        free_mem_1f(vfi,N3);
        free_mem_1f(totvfi,N3);
-    }   
+       free_mem_1f(vfi,N3);
+       free_mem_1f(vfi,N3);
+       free_mem_1f(r_1,m1);
+       free_mem_1f(r_2,m1);
+       erase_shell();
+    }
 }
 
+int isType(double nod, enum TypeNodes tip)
+{
+  static int tmpnod;
+  tmpnod = floor(nod+0.5);
+  if(tip==NodeUnknown) return (!tmpnod);
+                  else return (tmpnod & tip);
+}
+
+void setType(double *nod, enum TypeNodes tip)
+{
+  static int tmpnod;
+  tmpnod = floor(*nod+0.5);
+  *nod = tmpnod | tip;
+  return;
+}

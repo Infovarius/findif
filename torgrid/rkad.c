@@ -25,7 +25,6 @@ void timestep(double ****f, double ****df, double t, double ****fout,
             return;
             }
 
-      MPI_Barrier(MPI_COMM_WORLD);
       MPI_Allreduce(&err, &errs, 1, MPI_DOUBLE , MPI_MAX, MPI_COMM_WORLD);
       err=errs;
 
@@ -36,7 +35,7 @@ void timestep(double ****f, double ****df, double t, double ****fout,
       if (t+dt == t)
 	    {
 	     dump(f,t,count);
-             nrerror("Stepsize underflow in rk\n\a",t);
+             nrerror("Stepsize underflow in rk\n",t);
             }
    }
    *dtdid = dt;

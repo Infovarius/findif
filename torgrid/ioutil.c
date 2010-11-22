@@ -14,9 +14,11 @@ char* s_mode;
 if(mode>0) s_mode="a";
 if(mode<0) s_mode="r";
 if(mode==0) s_mode="w";
-ff = fopen(x,s_mode);
-/*if ((ff = fopen(x,s_mode))==NULL)
-		nrerror ("Can't open file %s !\n",x);*/
+if ((ff = fopen(x,s_mode))==NULL)
+	 {
+		nrerror ("Can't open file !\n",count);
+		exit(-1);
+	 }
 return(ff);
 }
 
@@ -54,6 +56,7 @@ double d;
      nrerror("Start from no ini file!",0);
      Re=10.;
      lfi=3.;
+     rc=3.;
      R=1.;
      parabole=0.;
      Noise=0.;
@@ -63,7 +66,7 @@ double d;
      N2=10;
      N3=10;
      nvar=4;
-     approx=7;                    //derivatives approximation order
+     approx=7;                    //width of approximation sample
      *dtnext=1e-3;
      Ns=15;
      maschtab=1e6;
@@ -101,7 +104,7 @@ double d;
       read_token(iop,&d);         VarStep = (int)d;
       read_token(iop,&Ttot);
       fclose(iop);
-      nmessage("Parameters were extracted from file",0);
+      Master nmessage("Parameters were extracted from file",0);
       }
 }
 
@@ -111,8 +114,7 @@ void read_tilleq(FILE *ffff,char echo)
          else    while ((ch=(char)fgetc(ffff))!='=') printf("%c",ch);
 }
 
-int init_data()
-                          //returns code of error
+int init_data(void)                 //returns code of error
 {
  int error=0;
  int i,j,k,l,tmpr;
@@ -123,6 +125,7 @@ int init_data()
  read_tilleq(inp,'n');   if(fscanf(inp,"%lf",&t_cur)==0) error=1;
  read_tilleq(inp,'n');   if(fscanf(inp,"%ld",&count)==0) error=1;
  read_tilleq(inp,'n');   if(fscanf(inp,"%c%d%c%d%c%d%c",&tmpc,&pp[0],&tmpc,&pp[1],&tmpc,&pp[2],&tmpc)<7) error=1;
+                         //no need unless process distribution is written
  read_tilleq(inp,'n');   if(fscanf(inp,"%d",&N1)==0) error=1;
  read_tilleq(inp,'n');   if(fscanf(inp,"%d",&N2)==0) error=1;
  read_tilleq(inp,'n');   if(fscanf(inp,"%d",&N3)==0) error=1;
@@ -175,7 +178,7 @@ int init_data()
  }
 fclose(inp);
 if(error) nrerror("Data couldn't have been read from file!!!",0);
-     else nmessage("Data has been read from file",t_cur);
+     else Master nmessage("Data has been read from file",t_cur);
 return(error);
 }
 
@@ -237,7 +240,7 @@ for(l=0;l<=2;l++)
 for(i=0;i<m1;i++)
      for(j=ghost;j<mm2;j++)
         for(k=0;k<m3;k++)
-          if(node[i][k]==3)
+          if(isType(node[i][k],NodeInner))
            {
            PulsEnergy+=deviation(f,i,j,k);
            for(l=0;l<=2;l++) averf[l][i][k] += f[l][i][j][k];
@@ -245,7 +248,7 @@ for(i=0;i<m1;i++)
 for(l=0;l<=2;l++)
   for(i=0;i<m1;i++)
     for(k=0;k<m3;k++)
-       if(node[i][k]==3)
+        if(isType(node[i][k],NodeInner))
            TotalEnergy += pow(averf[l][i][k],2.);
 TotalEnergy += 1.;   //if zero average field
 razlet = (PulsEnergy/TotalEnergy>UpLimit);
@@ -265,7 +268,7 @@ Master printf("program is working %0.2f seconds\n",time_now-time_begin);
 for(i=0;i<m1;i++)
    for(j=ghost;j<mm2;j++)
       for(k=0;k<m3;k++)
-        if(node[i][k]==3)
+        if(isType(node[i][k],NodeInner))
            {
            temp=dr(f1[0],i,j,k,1,0,dx[0],ghost, approx)
                +dr(f1[1],i,j,k,2,0,dx[1],ghost, approx)*r_1[i]
@@ -286,7 +289,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdiv=%g(local=%g)\n", t_cur, dtdid, coun
        for(i=0;i<m1;i++)
         for(j=ghost;j<m2;j++)
          for(k=0;k<mm3;k++)
-         if(node[i][k]==3)
+         if(isType(node[i][k],NodeInner))
           {
             if (fabs(f1[l][i][j][k])>mf[0]) mf[0]=fabs(f1[l][i][j][k]);
             temp=fabs(f[l][i][j][k]-f1[l][i][j][k]);
@@ -295,8 +298,10 @@ Master printf("t=%g dtdid=%g NIter=%d maxdiv=%g(local=%g)\n", t_cur, dtdid, coun
             if (temp>mf[2]) mf[2]=temp;
           }
        MPI_Allreduce(&mf, &totmf, 3, MPI_DOUBLE , MPI_MAX, MPI_COMM_WORLD);
-       Master printf("%d  maxf=%e(loc=%e) \tmaxdf=%e(loc=%e) \tmax(df/f)=%e(loc=%e)\n",
-                       l,      totmf[0],mf[0],    totmf[1],mf[1],       totmf[2],mf[2]);
+//     Master printf("%d  maxf=%e(loc=%e) \tmaxdf=%e(loc=%e) \tmax(df/f)=%e(loc=%e)\n",
+//                     l,      totmf[0],mf[0],    totmf[1],mf[1],       totmf[2],mf[2]);
+       Master printf("%d  maxf=%e \tmaxdf=%e \tmax(df/f)=%e\n",
+                       l,      totmf[0],  totmf[1],      totmf[2]);
        Master fprintf(fen,"\t %e \t %e",totmf[0],totmf[1]);
        }
   // --------------- quadratic norma of arrays --------------------------------------
@@ -305,7 +310,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdiv=%g(local=%g)\n", t_cur, dtdid, coun
        for(i=0;i<m1;i++)
         for(j=ghost;j<m2;j++)
          for(k=0;k<mm3;k++)
-         if(node[i][k]==3)
+         if(isType(node[i][k],NodeInner))
             mf[0] += pow(f1[l][i][j][k],2);
        MPI_Allreduce(&mf, &totmf, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
        Master fprintf(fen,"\t %e",totmf[0]/N1/N2/N3);
@@ -321,7 +326,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdiv=%g(local=%g)\n", t_cur, dtdid, coun
          for(i=0;i<m1;i++)
             for(j=ghost;j<mm2;j++)
                for(k=0;k<m3;k++)
-                if(node[i][k]==3)
+                if(isType(node[i][k],NodeInner))
                    vfi[k-ghost+n[2]] += f[1][i][j][k];
          MPI_Allreduce(vfi, totvfi, N2, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
          Master {for(i=0;i<N3;i++) totvfi[i] /= N1*N3;
@@ -336,7 +341,7 @@ void dump(double ****f1,double t_cur,long count)
 {
 FILE *fd;
 char *message;
-int tag=1;
+int tag=1,v;
 
  if(rank!=0) MPI_Recv(message,0,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);
 
@@ -350,10 +355,8 @@ int tag=1;
  Master fprintf(fd,"Number of points along z = %d\n",N3);
  Master fprintf(fd,"Reynolds number = %lf\n",Re);
 
- print_array3d(fd,f1[0],0,m1,0,m2,0,m3);
- print_array3d(fd,f1[1],0,m1,0,m2,0,m3);
- print_array3d(fd,f1[2],0,m1,0,m2,0,m3);
- print_array3d(fd,f1[3],0,m1,0,m2,0,m3);
+ for(v=0;v<nvar;v++)
+    print_array3d(fd,f1[v],0,m1,0,m2,0,m3);
  print_array3d(fd,nut,0,m1,0,m2,0,m3);
  fclose(fd);
 
@@ -366,8 +369,7 @@ void snapshot(double ****f1,double t_cur,long count)
 {
 char str[256];
 char message[10]="message";
-long tag=count;
-int i, j, l;
+long tag=count,v;
 FILE *fd;
 
  sprintf(str,"%s_%d.snp",NameSnapFile,count);
@@ -384,10 +386,8 @@ FILE *fd;
  Master fprintf(fd,"Number of points along z = %d\n",N3);
  Master fprintf(fd,"Reynolds number = %lf\n",Re);
 
- print_array3d(fd,f1[0],0,m1,0,m2,0,m3);
- print_array3d(fd,f1[1],0,m1,0,m2,0,m3);
- print_array3d(fd,f1[2],0,m1,0,m2,0,m3);
- print_array3d(fd,f1[3],0,m1,0,m2,0,m3);
+ for(v=0;v<nvar;v++)
+    print_array3d(fd,f1[v],0,m1,0,m2,0,m3);
  print_array3d(fd,nut,0,m1,0,m2,0,m3);
  fclose(fd);
                   

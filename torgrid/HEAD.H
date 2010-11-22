@@ -16,12 +16,14 @@ LEVEL char *NameEnergyFile;
 LEVEL char *KaskadVarFile;
 LEVEL char *NameCPFile;
 LEVEL char *NameStatFile;
-//LEVEL char NameControlPoint[80];
 LEVEL char *fname;
 
 LEVEL double ****f, ****f1, ***nut, ****df, ****df2, ****df3, ****df4, ****df5, **s_func,
              dx[3], *r_1, *r_2, **node, **refr, **refz, **sinth, **costh, **chi;
-                              //1-outside;2-ghost node;3-integrating area
+
+enum  TypeNodes {NodeUnknown=0,NodeClued=1,
+                               NodeFluid=8, NodeShell=2, NodeVacuum=4,   // regions
+                               /*NodeFluid=8,*/ NodeGhostFluid=16};       // for hydrodynamics
 LEVEL double ***averf;
 LEVEL double *totvfi, *vfi;
 LEVEL double Gamma, lfi, R, rc, Re;
@@ -39,8 +41,9 @@ LEVEL double time_begin,time_now;
 
 LEVEL long enter;
 LEVEL char razlet;
-LEVEL int goon;                       // continue calculation
 LEVEL double TotalEnergy, PulsEnergy;
+
+LEVEL int goon;                       // continue calculation
 LEVEL int CheckStep;  //each CheckStep divergence of program is checking
 LEVEL int OutStep;    //each OutStep result is printing
 LEVEL int SnapStep;   //each SnapStep snapshot is done
@@ -56,7 +59,7 @@ LEVEL long numlog;
 LEVEL int rank, size;
 LEVEL MPI_Request SendRequest[256],RecvRequest[256];
 LEVEL MPI_Status statuses[256];
-LEVEL double *buf_send[6], *buf_recv[6], buf_size[3];    //6=2*(nvar-1)
+LEVEL double *buf_send[6], *buf_recv[6], buf_size[3];    //6=2*3(D)
 LEVEL int pr_neighbour[6],pp[3],n[3];                    //3D
 LEVEL int pr[3];                                         //3D
 //void init_parallel();                       in file pde.c
@@ -74,6 +77,7 @@ LEVEL double *en_flux;                      //summary of energy in cascade model
 void init_shell(void);
 void sima(double *zza, double *zzb, double *xx, double *yy);
 void time_step_shell(double tm);
+void erase_shell(void);
 /*------- struct_func.c ----*/
 void struct_func(double ****f,int q,double lambda,int size_okr);
 /*------- util.c  -----------*/
@@ -89,6 +93,8 @@ void   free_mem_2f(double **, int, int);
 double *alloc_mem_1f(int);
 void   free_mem_1f(double *, int);
 void operate_memory(int dir);
+int isType(double nod, enum TypeNodes tip);
+void setType(double *nod, enum TypeNodes tip);
 /*------- rkad.c  -----------*/
 void timestep(double ****f, double ****df, double t, double ****fout,
               double dttry, double *dtdid, double *dtnext);
@@ -109,7 +115,7 @@ void CopyGridToBuffer(double ****,double ***,double *,int,int,int,int,int,int);
 /*------- ioutil.c  ------*/
 FILE *fileopen(const char *, int mode);
 void init_param(int argc, char** argv,double *dtnext);
-int init_data();
+int init_data(void);
 void print_array1d(FILE *ff,double *a,int beg1,int n1);
 void print_array2d(FILE *ff,double **a,int beg1,int n1,int beg2,int n2);
 void print_array3d(FILE *ff,double ***a,int beg1,int n1,int beg2,int n2,int beg3,int n3);

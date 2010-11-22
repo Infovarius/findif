@@ -50,7 +50,7 @@ void pde(double t, double ****f, double ****df)
                      -f[0][i][j][k]*dv1[0][0]-f[1][i][j][k]*dv1[0][1]
                      -f[2][i][j][k]*dv1[0][2]+r_2[i]*f[1][i][j][k]*f[1][i][j][k];
       df[1][i][j][k]=nut[i][j][k]*(dv2[1][0]+dv2[1][1]+dv2[1][2]+r_1[i]*dv1[1][0]
-                                   -f[1][i][j][k]*r_2[i]+2*dv1[1][1]*r_1[i])
+                                   -f[1][i][j][k]*r_2[i]+2*dv1[0][1]*r_1[i])
                      +1-dp1[1]*r_1[i]+0*(j+n[2]<=ghost+2?1:0)
                      -f[0][i][j][k]*dv1[1][0]-f[1][i][j][k]*dv1[1][1]
                      -f[2][i][j][k]*dv1[1][2]-r_1[i]*f[0][i][j][k]*f[1][i][j][k];
@@ -65,7 +65,7 @@ void pde(double t, double ****f, double ****df)
                      -f[0][i][j][k]*dv1[0][0]-f[1][i][j][k]*dv1[0][1]
                      -f[2][i][j][k]*dv1[0][2]+r_2[i]*f[1][i][j][k]*f[1][i][j][k];
       df[1][i][j][k]=nut[i][j][k]*(dv2[1][0]+dv2[1][1]+dv2[1][2]+r_1[i]*dv1[1][0]
-                                   -f[1][i][j][k]*r_2[i]+2*dv1[1][1]*r_1[i])
+                                   -f[1][i][j][k]*r_2[i]+2*dv1[0][1]*r_1[i])
                      -dp1[1]*r_1[i]-dw/r_1[i] -2*w*f[0][i][j][k]                   //forces of inertion
                      -(j<=ghost+2 ? (coordin(i,2)-rc)*f[1][i][j][k] :0)            //helical force
                      -f[0][i][j][k]*dv1[1][0]-f[1][i][j][k]*dv1[1][1]
@@ -82,9 +82,8 @@ void pde(double t, double ****f, double ****df)
 double deviation(double ****f,int i,int j,int k)
 {
 const int size_okr=min(1,ghost);
-double flux;
+double flux = 0;
 int kol=0,l;
-flux = 0;
    for(l=1;l<=size_okr;l++)
             {
             if(i-l>0)
@@ -162,8 +161,7 @@ void  boundary_conditions(double ****f)
    z[0]=z[1]=z[2]=-1; z[3]=1;  //  влияет на вид гран.условий (-1:жесткие, 1:свободные)
 
   /*============================ divertor =================================*/
-  if(t_cur>0)                  // divertors are off till t=1 sec
-  {
+  if(t_cur>0)                  // divertors are off till t sec
   if(n[2]==0)
   for(i=0;i<m1;i++)
     for(j=ghost;j<=ghost;j++)
@@ -176,7 +174,6 @@ void  boundary_conditions(double ****f)
          f[1][i][j][k] = vphi*cos(chi[i][k]);
          f[2][i][j][k] = vrho*costh[i][k]-vphi*sinth[i][k]*sin(chi[i][k]);
          }
-   }
   /*----------------------- exchanging of ghosts -------------------------*/
  if(pr_neighbour[0]>-1)
   if(pr_neighbour[0]==rank) CopyGridToBuffer(f,nut,buf_recv[0],n1,ghost,ghost,mm1-1,mm2-1,mm3-1);
@@ -256,41 +253,42 @@ void  boundary_conditions(double ****f)
 void  init_conditions()
 {
    int i,j,k,l;
-   double r2, rho, r1, z1;
+   double r, rho, r1, z1;
 //   double k1,k2,k3;
 
 // -------- filling of ghost nodes +reflections rel circle + nut ---------------
    for(i=0;i<m1;i++)
-   for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
        {
-       node[i][k] = 0;
-       nut[i][j][k]=(
+       node[i][k] = NodeUnknown;
+       for(j=0;j<m2;j++) nut[i][j][k]=(
 //        (0.39+14.8*exp(-2.13*pow(2*coordin(k,2)-l3,2)))*0.1*0
                     +1)/Re;
        }
    for(i=0;i<m1;i++)
    for(k=0;k<m3;k++)
        {
-        r2=pow(coordin(i,0)-rc,2) + pow(coordin(k,2),2);
-        if(node[i][k]>0) node[i][k] = (r2<pow(R,2)) ? 3 : node[i][k];
-                    else node[i][k] = (r2<pow(R,2)) ? 3 : 1;
-        if(node[i][k]==3)
-              for(l=-ghost;l<=ghost;l++)
-                     { if(i+l>=0&&i+l<m1) if(node[i+l][k]<2) node[i+l][k] = 2;
-                       if(k+l>=0&&k+l<m3) if(node[i][k+l]<2) node[i][k+l] = 2;
-                     }
         r1 = coordin(i,0);   z1 = coordin(k,2);
-        rho = sqrt(z1*z1+pow(r1-rc,2));
+        rho=sqrt(pow(r1-rc,2) + z1*z1);
+        if(rho<R) node[i][k] = NodeInner;
+        if(isType(node[i][k],NodeInner))
+              for(l=-ghost;l<=ghost;l++)
+                     { if(i+l>=0&&i+l<m1) if(!isType(node[i+l][k],NodeInner))
+                                              setType(&node[i+l][k],NodeGhost);
+                       if(k+l>=0&&k+l<m3) if(!isType(node[i][k+l],NodeInner))
+                                              setType(&node[i][k+l],NodeGhost);
+                     }
         refr[i][k] = rc + (r1-rc)*(2*R/rho-1);      //physical coordinates
         refz[i][k] =        z1*(2*R/rho-1);
         refr[i][k] = (refr[i][k]-rc+R)/dx[0]-0.5-n[0]+ghost;
         refz[i][k] = (refz[i][k]+R   )/dx[2]-0.5-n[2]+ghost;
-        if(fabs(refr[i][k]-i)<1 && fabs(refz[i][k]-k)<1 && node[i][k]<3)
-                 { node[i][k] = 3;
+        if(fabs(refr[i][k]-i)<1 && fabs(refz[i][k]-k)<1 && !isType(node[i][k],NodeInner))
+                 { node[i][k] = NodeInner;
                    for(l=-ghost;l<=ghost;l++)
-                     { if(i+l>=0&&i+l<m1) if(node[i+l][k]!=3) node[i+l][k] = 2;
-                       if(k+l>=0&&k+l<m3) if(node[i][k+l]!=3) node[i][k+l] = 2;
+                     { if(i+l>=0&&i+l<m1) if(!isType(node[i+l][k],NodeInner))
+                                              setType(&node[i+l][k],NodeGhost);
+                       if(k+l>=0&&k+l<m3) if(!isType(node[i][k+l],NodeInner))
+                                              setType(&node[i][k+l],NodeGhost);
                      }
                   }
         sinth[i][k]=(r1-rc)/rho;                    // for divertor's blade
@@ -305,7 +303,7 @@ void  init_conditions()
       if(pr_neighbour[0]!=-1 && i<ghost ||
            pr_neighbour[1]!=-1 && i>=mm1  ||
            pr_neighbour[4]!=-1 && k<ghost ||
-           pr_neighbour[5]!=-1 && k>=mm3) node[i][k]=4;
+           pr_neighbour[5]!=-1 && k>=mm3) setType(&node[i][k],NodeClued);
 
 // --------------- initial conditions -----------------------------------------
 //   k1=2*M_PI/lfi;  k3=M_PI/l3;
@@ -314,7 +312,7 @@ if(!goon) {
    for(i=0;i<m1;i++)
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
-      if(node[i][k]==3) {
+      if(isType(node[i][k],NodeInner)) {
         f[0][i][j][k]=(parabole+Noise*((double)rand()-RAND_MAX/2)/RAND_MAX)*
                        (R*R-pow(coordin(i,0)-rc,2) - pow(coordin(k,2),2))*4/R/R;
         f[1][i][j][k]=NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/R)
@@ -326,9 +324,8 @@ if(!goon) {
         f[3][i][j][k]=0;
         }
 //   struct_func(f,2,2,3);
-   Master nmessage("Arrays were filled with initial values - calculation from beginning",t_cur);
-           }
-   else Master nmessage("Arrays were filled with initial values - calculation is continuing",t_cur);
+   nmessage("Arrays were filled with initial values - calculation from beginning",0);
+   } else nmessage("Arrays were filled with initial values - calculation is continuing",t_cur);
 }
 
 void init_parallel()
@@ -385,7 +382,7 @@ if(!goon) {                       //reading from file when continuing
  buf_size[1]=n1*n3*(nvar+1)*ghost;
  buf_size[2]=n1*n2*(nvar+1)*ghost;
 
- for(i=0;i<nvar-1;i++)
+ for(i=0;i<3;i++)           //3-D
   for(j=0;j<=1;j++) {
    buf_send[j+2*i] = alloc_mem_1f(buf_size[i]);
    buf_recv[j+2*i] = alloc_mem_1f(buf_size[i]);
@@ -418,14 +415,14 @@ static double kf7[2][7][7]={{{-49./20.0, 6.0, -15./2.0, 20./3.0, -15./4.0, 6./5.
                      {1./90.0, -3./20.0, 3./2.0, -49./18.0, 3./2.0, -3./20.0, 1./90.0}, {1./90.0, -1./15.0, 1./12.0, 10./9.0, -7./3.0, 19./15.0, -13./180.0},
                      {-13./180.0, 31./60.0, -19./12.0, 47./18.0, -17./12.0, -49./60.0, 137./180.0}, {137./180.0, -27./5.0, 33./2.0, -254./9.0, 117./4.0, -87./5.0, 203./45.0}}};
 
-double dr(double ***m, int ii, int jj, int kk, int dr, int or, double dx, int sh,  int sm)
+double dr(double ***m, int ii, int jj, int kk, int dir, int or, double dx, int sh,  int sm)
 /*        matrix     , point                 , direct, order , differ   , shift , sample */
 /*                                           , 1,2,3 ,  0,1    dx,dx^2  , 0-left , 3,5,7 */
 {
 double tmp=0.0;
 int i;
 
-switch (sm*dr) {
+switch (sm*dir) {
 	case 3 : for(i=0; i<sm; i++) tmp += m[ii+i-sh][jj][kk]*kf3[or][sh][i]; break;
 	case 6 : for(i=0; i<sm; i++) tmp += m[ii][jj+i-sh][kk]*kf3[or][sh][i]; break;
 	case 9 : for(i=0; i<sm; i++) tmp += m[ii][jj][kk+i-sh]*kf3[or][sh][i]; break;
@@ -436,7 +433,7 @@ switch (sm*dr) {
 	case 14: for(i=0; i<sm; i++) tmp += m[ii][jj+i-sh][kk]*kf7[or][sh][i]; break;
 	case 21: for(i=0; i<sm; i++) tmp += m[ii][jj][kk+i-sh]*kf7[or][sh][i]; break;
 	default :
-    	nrerror("\nNO SUCH SAMPLE for derivative Bye ...",0);
+    	nrerror("\nNO SUCH SAMPLE for derivative. Bye ...",0);
 	}
 return(tmp/dx);
 }
