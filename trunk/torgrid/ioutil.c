@@ -14,11 +14,9 @@ char* s_mode;
 if(mode>0) s_mode="a";
 if(mode<0) s_mode="r";
 if(mode==0) s_mode="w";
-if ((ff = fopen(x,s_mode))==NULL)
-	 {
-		printf ("Can't open file %s !\n",x);
-		exit(-1);
-	 }
+ff = fopen(x,s_mode);
+/*if ((ff = fopen(x,s_mode))==NULL)
+		nrerror ("Can't open file %s !\n",x);*/
 return(ff);
 }
 
@@ -48,7 +46,7 @@ char str[256],*pstr;
 
 void init_param(int argc, char** argv,double *dtnext)
 {
-int error=0,ver;
+int ver;
 FILE *iop;
 double d;
  if(argc<2 || (iop=fopen(argv[1],"r"))==NULL) //no ini file
@@ -113,23 +111,28 @@ void read_tilleq(FILE *ffff,char echo)
          else    while ((ch=(char)fgetc(ffff))!='=') printf("%c",ch);
 }
 
-int init_data(double *Re,double *t_cur,long *count)
+int init_data()
                           //returns code of error
 {
  int error=0;
- int i,j,k,l;
+ int i,j,k,l,tmpr;
  float tmpd;
  char tmpc;
- int n1,n2,n3;
 
  FILE *inp = fileopen(NameInitFile,-1);
- read_tilleq(inp,'n');   if(fscanf(inp,"%lf",t_cur)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%ld",count)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%d",&n1)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%d",&n2)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%d",&n3)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%lf",Re)==0) error=1;
-// recreate_arrays(n1,n2,n3);
+ read_tilleq(inp,'n');   if(fscanf(inp,"%lf",&t_cur)==0) error=1;
+ read_tilleq(inp,'n');   if(fscanf(inp,"%ld",&count)==0) error=1;
+ read_tilleq(inp,'n');   if(fscanf(inp,"%c%d%c%d%c%d%c",&tmpc,&pp[0],&tmpc,&pp[1],&tmpc,&pp[2],&tmpc)<7) error=1;
+ read_tilleq(inp,'n');   if(fscanf(inp,"%d",&N1)==0) error=1;
+ read_tilleq(inp,'n');   if(fscanf(inp,"%d",&N2)==0) error=1;
+ read_tilleq(inp,'n');   if(fscanf(inp,"%d",&N3)==0) error=1;
+ read_tilleq(inp,'n');   if(fscanf(inp,"%lf",&Re)==0) error=1;
+
+ init_parallel();
+ operate_memory(1);                     // creating arrays
+
+ for(tmpr=0;tmpr<=rank;tmpr++)           //reading until arrays of this process
+ {
  for(l=0;l<nvar;l++)                    // reading f
         {
         do fscanf(inp,"%c",&tmpc); while (tmpc!='{');
@@ -169,7 +172,10 @@ int init_data(double *Re,double *t_cur,long *count)
      fscanf(inp,"%c",&tmpc);
      }
  fscanf(inp,"%c",&tmpc);
+ }
 fclose(inp);
+if(error) nrerror("Data couldn't have been read from file!!!",0);
+     else nmessage("Data has been read from file",t_cur);
 return(error);
 }
 
@@ -353,6 +359,7 @@ int tag=1;
 
  if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
              else nmessage("dump is done",t_cur);
+ add_control_point(NameDumpFile);
 }
 
 void snapshot(double ****f1,double t_cur,long count)
@@ -386,4 +393,5 @@ FILE *fd;
                   
  if(rank!=size-1) MPI_Send(message,1,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
              else nmessage("snap is done",t_cur);
+ add_control_point(str);            
 }
