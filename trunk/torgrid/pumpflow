@@ -1,21 +1,21 @@
 2
----------  Phisical paramerets ------------------------------
+---------  Physical paramereters ------------------------------
 1		| Reynolds number
 
 6.283185307	| streamwise length (full round)
-5		| distance from centre to axis of torus
+3		| distance from centre to axis of torus
 1		| radius of torus
 
-0		| init profile: 0 - zero, 1 - parabole
-0.0		| amplitude of initial random noise
+1		| init profile: 0 - zero, 1 - parabole
+0.00		| amplitude of initial random noise
 0.0		| amplitude of initial normal noise
 10		| maximal level of fluctuation after which nut is on
 45		| maximal angle of blade tilt (degrees)
 
----------  Schem (aproximation) parameters ------------------
-100		| mesh point in R 
-100		| mesh point in PHI
-100		| mesh point in Z
+---------  Scheme (aproximation) parameters ------------------
+10		| mesh point in R
+10		| mesh point in PHI
+10		| mesh point in Z
 4		| variables number
 7		| aproxx order
 0.001		| initial timestep
@@ -28,7 +28,7 @@
 
 ---------  Output parameters  -------------------------------
 10		| steps to statistics output (OutStep)
-100		| steps to snaps (SnapStep)
+1000		| steps to snaps (SnapStep)
 10		| steps of checking divergence (CheckStep)
 1		| test of time step (VarStep)
 5		| Total time

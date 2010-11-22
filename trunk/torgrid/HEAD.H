@@ -59,7 +59,7 @@ LEVEL long numlog;
 LEVEL int rank, size;
 LEVEL MPI_Request SendRequest[256],RecvRequest[256];
 LEVEL MPI_Status statuses[256];
-LEVEL double *buf_send[6], *buf_recv[6], buf_size[3];    //6=2*3(D)
+LEVEL double *buf_send[6], *buf_recv[6], buf_size[3];    //6=2*(nvar-1)
 LEVEL int pr_neighbour[6],pp[3],n[3];                    //3D
 LEVEL int pr[3];                                         //3D
 //void init_parallel();                       in file pde.c
@@ -81,8 +81,8 @@ void erase_shell(void);
 /*------- struct_func.c ----*/
 void struct_func(double ****f,int q,double lambda,int size_okr);
 /*------- util.c  -----------*/
-void nrerror(char[],double);
-void nmessage(char [],double);
+void nrerror(char *mess,double t_cur,long count);
+void nmessage(char *mess,double t_cur,long count);
 void add_control_point(char *);
 double ****alloc_mem_4f(int, int, int, int);
 void   free_mem_4f(double ****, int, int, int, int);
@@ -95,6 +95,8 @@ void   free_mem_1f(double *, int);
 void operate_memory(int dir);
 int isType(double nod, enum TypeNodes tip);
 void setType(double *nod, enum TypeNodes tip);
+void CopyBufferToGrid(double ****,double ***,double *,int,int,int,int,int,int);
+void CopyGridToBuffer(double ****,double ***,double *,int,int,int,int,int,int);
 /*------- rkad.c  -----------*/
 void timestep(double ****f, double ****df, double t, double ****fout,
               double dttry, double *dtdid, double *dtnext);
@@ -107,11 +109,9 @@ void nut_by_flux(double ****f,double Re);
 void   boundary_conditions(double ****);
 void  init_conditions(void);
 void init_parallel(void);
-double dr(double ***, int, int, int, int, int, double, int, int);
+double dr(double ***m,int ii,int jj,int kk,int dir,int or,double dx,int sh,int sm);
 double coordin(int, int);
 double interpolation(double,double, double,double,double,double);
-void CopyBufferToGrid(double ****,double ***,double *,int,int,int,int,int,int);
-void CopyGridToBuffer(double ****,double ***,double *,int,int,int,int,int,int);
 /*------- ioutil.c  ------*/
 FILE *fileopen(const char *, int mode);
 void init_param(int argc, char** argv,double *dtnext);
@@ -121,6 +121,6 @@ void print_array2d(FILE *ff,double **a,int beg1,int n1,int beg2,int n2);
 void print_array3d(FILE *ff,double ***a,int beg1,int n1,int beg2,int n2,int beg3,int n3);
 void check(double ****f);
 void printing(double ****f1,double dtdid,double t_cur,long count,double en);
-void dump(double ****f1,double t_cur,long count);
-void snapshot(double ****f,double t_cur,long count);
+void dump(double ****f1,double ***nu,double t_cur,long count);
+void snapshot(double ****f,double ***nu,double t_cur,long count);
 void putlog(char msg_text[],long num);

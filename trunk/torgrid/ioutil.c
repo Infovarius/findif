@@ -16,7 +16,7 @@ if(mode<0) s_mode="r";
 if(mode==0) s_mode="w";
 if ((ff = fopen(x,s_mode))==NULL)
 	 {
-		nrerror ("Can't open file !\n",count);
+		nrerror ("Can't open file !\n",t_cur,count);
 		exit(-1);
 	 }
 return(ff);
@@ -40,7 +40,7 @@ void read_token(FILE *inp,double *param)
 char str[256],*pstr;
  do fgets(str,256,inp); while(strchr(str,'|')==NULL);
  if(strchr(str,'|')==NULL) return;
- if(sscanf(str,"%lf",param)==0) nrerror("Input of parameter error",0);
+ if(sscanf(str,"%lf",param)==0) nrerror("Input of parameter error",0,0);
  pstr=strtok(str,"|");
  pstr=strtok((char *)NULL,"|");
  printf("%g\t->\t%s",*param,pstr);
@@ -53,7 +53,7 @@ FILE *iop;
 double d;
  if(argc<2 || (iop=fopen(argv[1],"r"))==NULL) //no ini file
     {
-     nrerror("Start from no ini file!",0);
+     nrerror("Start from no ini file!",0,0);
      Re=10.;
      lfi=3.;
      rc=3.;
@@ -78,7 +78,7 @@ double d;
      Ttot=1.;
      }
     else {
-      if(fscanf(iop,"%d",&ver)<1 || ver>2) nrerror("parameters' file has wrong version",0);
+      if(fscanf(iop,"%d",&ver)<1 || ver>2) nrerror("parameters' file has wrong version",0,0);
       read_token(iop,&Re);
       read_token(iop,&lfi);
       read_token(iop,&rc);
@@ -104,7 +104,7 @@ double d;
       read_token(iop,&d);         VarStep = (int)d;
       read_token(iop,&Ttot);
       fclose(iop);
-      Master nmessage("Parameters were extracted from file",0);
+      Master nmessage("Parameters were extracted from file",0,0);
       }
 }
 
@@ -126,6 +126,7 @@ int init_data(void)                 //returns code of error
  read_tilleq(inp,'n');   if(fscanf(inp,"%ld",&count)==0) error=1;
  read_tilleq(inp,'n');   if(fscanf(inp,"%c%d%c%d%c%d%c",&tmpc,&pp[0],&tmpc,&pp[1],&tmpc,&pp[2],&tmpc)<7) error=1;
                          //no need unless process distribution is written
+ if(pp[0]*pp[1]*pp[2]!=size) nrerror("Wrong number of processors in data file. Can't read data.",0,0);
  read_tilleq(inp,'n');   if(fscanf(inp,"%d",&N1)==0) error=1;
  read_tilleq(inp,'n');   if(fscanf(inp,"%d",&N2)==0) error=1;
  read_tilleq(inp,'n');   if(fscanf(inp,"%d",&N3)==0) error=1;
@@ -177,8 +178,8 @@ int init_data(void)                 //returns code of error
  fscanf(inp,"%c",&tmpc);
  }
 fclose(inp);
-if(error) nrerror("Data couldn't have been read from file!!!",0);
-     else Master nmessage("Data has been read from file",t_cur);
+if(error) nrerror("Data couldn't have been read from file!!!",0,0);
+     else Master nmessage("Data has been read from file",t_cur,count);
 return(error);
 }
 
@@ -228,7 +229,7 @@ for(i=beg1;i<beg1+n1;i++) {
     }
 }
 
-void check(double ****f)   //calculate energy of pulsations and know if there's crash
+void check(double ****f)   //calculate energy of pulsations of all components and know if there's crash
 {
 int i,j,k,l;
 PulsEnergy=0;
@@ -240,15 +241,15 @@ for(l=0;l<=2;l++)
 for(i=0;i<m1;i++)
      for(j=ghost;j<mm2;j++)
         for(k=0;k<m3;k++)
-          if(isType(node[i][k],NodeInner))
+          if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
            {
            PulsEnergy+=deviation(f,i,j,k);
-           for(l=0;l<=2;l++) averf[l][i][k] += f[l][i][j][k];
+           for(l=0;l<=2;l++) averf[l][i][k] += f[l+1][i][j][k];
            }
 for(l=0;l<=2;l++)
   for(i=0;i<m1;i++)
     for(k=0;k<m3;k++)
-        if(isType(node[i][k],NodeInner))
+       if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
            TotalEnergy += pow(averf[l][i][k],2.);
 TotalEnergy += 1.;   //if zero average field
 razlet = (PulsEnergy/TotalEnergy>UpLimit);
@@ -256,7 +257,7 @@ razlet = (PulsEnergy/TotalEnergy>UpLimit);
 
 void printing(double ****f1,double dtdid,double t_cur,long count,double en)
 {
-double temp, div, totdiv;
+double temp, divv, totdivv;
 int i,j,k,l;
 double mf[3], totmf[3], toten;     //mf[0]=max(f), mf[1]=max(df), mf[2]=max(df/f)
 FILE *fv,*fnu,*fen,*fkv;
@@ -268,15 +269,16 @@ Master printf("program is working %0.2f seconds\n",time_now-time_begin);
 for(i=0;i<m1;i++)
    for(j=ghost;j<mm2;j++)
       for(k=0;k<m3;k++)
-        if(isType(node[i][k],NodeInner))
+        if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
            {
-           temp=dr(f1[0],i,j,k,1,0,dx[0],ghost, approx)
-               +dr(f1[1],i,j,k,2,0,dx[1],ghost, approx)*r_1[i]
-               +dr(f1[2],i,j,k,3,0,dx[2],ghost, approx)+f1[0][i][j][k]*r_1[i];
-           if (fabs(temp)>div) div=fabs(temp);
+           temp=dr(f1[1],i,j,k,1,0,dx[0],ghost, approx)
+               +dr(f1[2],i,j,k,2,0,dx[1],ghost, approx)*r_1[i]
+               +dr(f1[3],i,j,k,3,0,dx[2],ghost, approx)+f1[1][i][j][k]*r_1[i];
+           if (fabs(temp)>divv) divv=fabs(temp);
            }
-MPI_Allreduce(&div, &totdiv, 1, MPI_DOUBLE , MPI_MAX, MPI_COMM_WORLD);
-Master printf("t=%g dtdid=%g NIter=%d maxdiv=%g(local=%g)\n", t_cur, dtdid, count, totdiv, div);
+MPI_Allreduce(&divv, &totdivv, 1, MPI_DOUBLE , MPI_MAX, MPI_COMM_WORLD);
+Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
+               t_cur, dtdid, count,   totdivv,   divv    );
 
    MPI_Allreduce(&en, &toten, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
    Master printf("Energy of pulsations=%g (local=%g)\n",toten,en);
@@ -289,7 +291,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdiv=%g(local=%g)\n", t_cur, dtdid, coun
        for(i=0;i<m1;i++)
         for(j=ghost;j<m2;j++)
          for(k=0;k<mm3;k++)
-         if(isType(node[i][k],NodeInner))
+         if(isType(node[i][k],NodeFluid))
           {
             if (fabs(f1[l][i][j][k])>mf[0]) mf[0]=fabs(f1[l][i][j][k]);
             temp=fabs(f[l][i][j][k]-f1[l][i][j][k]);
@@ -310,8 +312,8 @@ Master printf("t=%g dtdid=%g NIter=%d maxdiv=%g(local=%g)\n", t_cur, dtdid, coun
        for(i=0;i<m1;i++)
         for(j=ghost;j<m2;j++)
          for(k=0;k<mm3;k++)
-         if(isType(node[i][k],NodeInner))
-            mf[0] += pow(f1[l][i][j][k],2);
+         if(isType(node[i][k],NodeFluid))
+            mf[0] += coordin(i,0)*pow(f1[l][i][j][k],2);
        MPI_Allreduce(&mf, &totmf, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
        Master fprintf(fen,"\t %e",totmf[0]/N1/N2/N3);
        }
@@ -326,8 +328,8 @@ Master printf("t=%g dtdid=%g NIter=%d maxdiv=%g(local=%g)\n", t_cur, dtdid, coun
          for(i=0;i<m1;i++)
             for(j=ghost;j<mm2;j++)
                for(k=0;k<m3;k++)
-                if(isType(node[i][k],NodeInner))
-                   vfi[k-ghost+n[2]] += f[1][i][j][k];
+                if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
+                   vfi[k-ghost+n[2]] += f[2][i][j][k];
          MPI_Allreduce(vfi, totvfi, N2, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
          Master {for(i=0;i<N3;i++) totvfi[i] /= N1*N3;
                  fv = fileopen(NameVFile,count);
@@ -337,7 +339,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdiv=%g(local=%g)\n", t_cur, dtdid, coun
                 }
 }
 
-void dump(double ****f1,double t_cur,long count)
+void dump(double ****f1,double ***nu,double t_cur,long count)
 {
 FILE *fd;
 char *message;
@@ -347,7 +349,7 @@ int tag=1,v;
 
  fd=fileopen(NameDumpFile,rank);
 
- Master nmessage("dump has been started",t_cur);
+ Master nmessage("dump has been started",t_cur,count);
  Master fprintf(fd,"current time = %0.10f \ncurrent iteration = %ld\n",t_cur,count);
  Master fprintf(fd,"number of processors along axes={%d,%d,%d}\n",pp[0],pp[1],pp[2]);
  Master fprintf(fd,"Number of points along x = %d\n",N1);
@@ -361,24 +363,24 @@ int tag=1,v;
  fclose(fd);
 
  if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
-             else nmessage("dump is done",t_cur);
- add_control_point(NameDumpFile);
+             else {nmessage("dump is done",t_cur,count);
+                   add_control_point(NameDumpFile);}
 }
 
-void snapshot(double ****f1,double t_cur,long count)
+void snapshot(double ****f1,double ***nu,double t_cur,long count)
 {
 char str[256];
 char message[10]="message";
 long tag=count,v;
+int i, j, l;
 FILE *fd;
 
- sprintf(str,"%s_%d.snp",NameSnapFile,count);
+ sprintf(str,"%s_%d_%d.snp",NameSnapFile,size,count);
 
- if(rank!=0) MPI_Recv(message,1,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);
-
+ if(rank!=0) MPI_Recv(message,0,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);
 
  fd=fileopen(str,rank);
- Master nmessage("snap has been started",t_cur);
+ Master nmessage("snap has been started",t_cur,count);
  Master fprintf(fd,"current time = %0.10f \ncurrent iteration = %ld\n",t_cur,count);
  Master fprintf(fd,"number of processors along axes={%d,%d,%d}\n",pp[0],pp[1],pp[2]);
  Master fprintf(fd,"Number of points along x = %d\n",N1);
@@ -391,7 +393,7 @@ FILE *fd;
  print_array3d(fd,nut,0,m1,0,m2,0,m3);
  fclose(fd);
                   
- if(rank!=size-1) MPI_Send(message,1,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
-             else nmessage("snap is done",t_cur);
- add_control_point(str);            
+ if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
+             else {nmessage("snap is done",t_cur,count);
+                   add_control_point(str);}
 }

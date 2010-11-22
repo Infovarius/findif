@@ -2,23 +2,23 @@
 #define LEVEL extern
 #include "head.h"
 
-void nrerror(char error_text[],double t_cur)
+void nrerror(char error_text[],double t_cur,long count)
 {
     FILE *err;
-    nmessage(error_text,t_cur);
+    nmessage(error_text,t_cur,count);
     err=fileopen(NameErrorFile,0);
 
     fprintf(err,"Run-time error of proc#%d at t=%-6.4lf:\n",rank,t_cur);
     fprintf(err,"%s\n",error_text);
     fprintf(err,"...now exiting to system...\n");
     fclose(err);
-    if(count>0) operate_memory(-1);
+    if(f) operate_memory(-1);
     add_control_point("END");
     MPI_Finalize();
     exit(1);
 }
 
-void nmessage(char msg_text[],double t_cur)
+void nmessage(char msg_text[],double t_cur,long count)
 {
    FILE *msg;
    msg=fileopen(NameMessageFile,1);
@@ -31,8 +31,10 @@ void nmessage(char msg_text[],double t_cur)
 
 void add_control_point(char *name_cp)
 {
-FILE *cpf=fileopen(NameCPFile,1);
-Master { if(cpf==NULL) cpf=fileopen(NameCPFile,0);
+FILE *cpf;
+if(rank==size-1)
+       { cpf = fileopen(NameCPFile,1);
+         if(cpf==NULL) cpf=fileopen(NameCPFile,0);
          fprintf(cpf,"%s\n",name_cp);
          fclose(cpf);}
 }
@@ -43,24 +45,24 @@ int i, j, k;
 double  ****aaa;
 
    aaa = (double ****)calloc(mvar, sizeof(double ***));
-   if(aaa == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",0);
+   if(aaa == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",0,0);
 
    for(i = 0; i < mvar; i++) {
          aaa[i] = (double ***)calloc(n1, sizeof(double **));
-         if(aaa[i] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",0);
+         if(aaa[i] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",0,0);
    }
 
    for(i = 0; i < mvar; i++)
    for(j = 0; j < n1; j++) {
          aaa[i][j] = (double **)calloc(n2, sizeof(double *));
-         if(aaa[i][j] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",0);
+         if(aaa[i][j] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",0,0);
    }
 
    for(i = 0; i < mvar; i++)
    for(j = 0; j < n1; j++)
    for(k = 0; k < n2; k++) {
          aaa[i][j][k] = (double *)calloc(n3, sizeof(double));
-         if(aaa[i][j][k] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",0);
+         if(aaa[i][j][k] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",0,0);
       }
 
 return(aaa);
@@ -92,17 +94,17 @@ int i, j;
 double  ***aaa;
 
    aaa = (double ***)calloc(mvar, sizeof(double **));
-   if(aaa == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",0);
+   if(aaa == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",0,0);
 
    for(i = 0; i < mvar; i++) {
          aaa[i] = (double **)calloc(n1, sizeof(double *));
-         if(aaa[i] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",0);
+         if(aaa[i] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",0,0);
    }
 
    for(i = 0; i < mvar; i++)
    for(j = 0; j < n1; j++) {
          aaa[i][j] = (double *)calloc(n2, sizeof(double));
-         if(aaa[i][j] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",0);
+         if(aaa[i][j] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",0,0);
    }
 
 return(aaa);
@@ -130,11 +132,11 @@ int i;
 double  **aa;
 
    aa = (double **)calloc(mvar, sizeof(double *));
-   if(aa == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",0);
+   if(aa == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",0,0);
 
    for(i = 0; i < mvar; i++) {
          aa[i] = (double *)calloc(n1, sizeof(double));
-         if(aa[i] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",0);
+         if(aa[i] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",0,0);
    }
 
 return(aa);
@@ -157,7 +159,7 @@ double *alloc_mem_1f(int n)
 double  *a;
 
    a = (double *)calloc(n, sizeof(double));
-   if(a == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",0);
+   if(a == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",0,0);
 
 return(a);
 }
@@ -223,7 +225,7 @@ void operate_memory(int dir)
 
 int isType(double nod, enum TypeNodes tip)
 {
-  static int tmpnod;
+  int tmpnod;
   tmpnod = floor(nod+0.5);
   if(tip==NodeUnknown) return (!tmpnod);
                   else return (tmpnod & tip);
@@ -231,8 +233,37 @@ int isType(double nod, enum TypeNodes tip)
 
 void setType(double *nod, enum TypeNodes tip)
 {
-  static int tmpnod;
+  int tmpnod;
   tmpnod = floor(*nod+0.5);
   *nod = tmpnod | tip;
   return;
 }
+
+ void CopyBufferToGrid(double ****m,double ***nut,double *buffer,int x1,int y1,int z1,int x2,int y2,int z2)
+ {
+   int i,j,k,l,n=0;
+   for(l=0;l<nvar;l++)
+    for(i=x1;i<=x2;i++)
+     for(j=y1;j<=y2;j++)
+      for(k=z1;k<=z2;k++)
+      m[l][i][j][k]=buffer[n++];
+   for(i=x1;i<=x2;i++)
+    for(j=y1;j<=y2;j++)
+     for(k=z1;k<=z2;k++)
+     nut[i][j][k]=buffer[n++];
+ }
+
+ void CopyGridToBuffer(double ****m,double ***nut,double *buffer,int x1,int y1,int z1,int x2,int y2,int z2)
+ {
+   int i,j,k,l,n=0;
+   for(l=0;l<nvar;l++)
+    for(i=x1;i<=x2;i++)
+     for(j=y1;j<=y2;j++)
+      for(k=z1;k<=z2;k++)
+      buffer[n++]=m[l][i][j][k];
+   for(i=x1;i<=x2;i++)
+    for(j=y1;j<=y2;j++)
+     for(k=z1;k<=z2;k++)
+     buffer[n++]=nut[i][j][k];
+ }
+
