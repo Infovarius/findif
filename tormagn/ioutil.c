@@ -85,7 +85,7 @@ double d;
      Ttot=1.;
      }
     else {
-      if(fscanf(iop,"%d",&ver)<1 || ver!=3) nrerror("parameters' file has wrong version",-1,-1);
+      if(fscanf(iop,"%d",&ver)<1 || ver!=4) nrerror("parameters' file has wrong version",-1,-1);
       read_token(iop,&lfi);        //geometry
       read_token(iop,&rc);
       read_token(iop,&Rfl);

@@ -111,11 +111,11 @@ int main(int argc, char** argv)
             if(isType(node[i][k],NodeFluid))
             {
             r1 = coordin(i,0);  phi1 = coordin(j,1);  z1 = coordin(k,2);
-            rho=sqrt(pow(r1-rc,2) + z1*z1);
+            rho=sqrt(r1*r1 + z1*z1);
             if(rho>=Rfl) continue;         // nonstationary time=t_cur*Tunit, max magnitude=0.0971883
             vrho = 0;
             vth  = vtheta_given(0.3,rho,Rfl,phi1);  // time=0.3 for amplitude~1
-            //vth *= rc*r_1[i];        // for toroidal case (for cylinder mult.=1)  
+            //vth *= r_1[i]/rc;        // for toroidal case (for cylinder mult.=1)  
 /*            vphi = vfi_given(t_cur*Tunit,rho,Rfl);
             vth = 0;                        */
             vphi = vfi_given(0.0971883,rho,Rfl);

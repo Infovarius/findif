@@ -54,7 +54,7 @@ void pde(double t, double ****f, double ****df)
       df[2][i][j][k]=nut[i][j][k]*(dv2[2][0]+dv2[2][1]+dv2[2][2]+r_1[i]*dv1[2][0]
                                    -f[2][i][j][k]*r_2[i]+2*dv1[1][1]*r_1[i])
                      -dp1[1]*r_1[i]-dw/r_1[i] -2*w*f[1][i][j][k]                   //forces of inertion
-                     -(j<=ghost+2 ? (coordin(i,2)-rc)*f[2][i][j][k] :0)            //helical force
+                     -(j<=ghost+2 ? coordin(i,0)*f[2][i][j][k] :0)            //helical force
                      -f[1][i][j][k]*dv1[2][0]-f[2][i][j][k]*dv1[2][1]
                      -f[3][i][j][k]*dv1[2][2]-r_1[i]*f[1][i][j][k]*f[2][i][j][k];
       df[3][i][j][k]=nut[i][j][k]*(dv2[3][0]+dv2[3][1]+dv2[3][2]+r_1[i]*dv1[3][0])
@@ -70,11 +70,7 @@ void pde(double t, double ****f, double ****df)
          dv1[l][m]=dr(f[l],i,j,k,m+1,0,dx[m],ghost, approx);
          dv2[l][m]=dr(f[l],i,j,k,m+1,1,dx[m]*dx[m],ghost, approx);
          }
-/*        dA11[l][0][1] = dA11[l][1][0] = r_1[i]*d2cross(f[l],i,j,k,2,1,ghost,approx);
-        dA11[l][0][2] = dA11[l][2][0] = d2cross(f[l],i,j,k,3,1,ghost,approx);
-        dA11[l][1][2] = dA11[l][2][1] = r_1[i]*d2cross(f[l],i,j,k,3,2,ghost,approx);
-        dv1[l][1] *= r_1[i];     dv2[l][1] *= r_2[i];*/
-        dA11[l][0][1] = dA11[l][1][0] = d2cross(f[l],i,j,k,2,1,ghost,approx);           
+        dA11[l][0][1] = dA11[l][1][0] = d2cross(f[l],i,j,k,2,1,ghost,approx);
         dA11[l][0][2] = dA11[l][2][0] = d2cross(f[l],i,j,k,3,1,ghost,approx);
         dA11[l][1][2] = dA11[l][2][1] = d2cross(f[l],i,j,k,3,2,ghost,approx);// for cylindrical case
         }
@@ -179,7 +175,7 @@ void  boundary_conditions(double ****f)
    int i1,i2,k1,k2;
    int flag,cnt,z[4],znorm,ztau,tag=10;
    double vrho,vphi,vth,An;
-   double rfict,rin;
+   double rfict_1,rin_1,rrel;
    char msg_err[100];       //for putlog+mpi_error
    int reslen;
 
@@ -294,6 +290,7 @@ void  boundary_conditions(double ****f)
                 }
           if(isType(node[i][k],NodeGhostMagn)) {
                 i1=floor(refr_m[i][k]+0.5);
+                rin_1 = r_1[i1]; rfict_1 = r_1[i]; rrel = (rin_1==0)? 1 : rfict_1/rin_1;
                 k1=floor(refz_m[i][k]+0.5);
                 An = ( f[4][i1][j][k1]*(i1-i)+f[6][i1][j][k1]*(k1-k) )/
                      ( (i1-i)*(i1-i) + (k1-k)*(k1-k) );
@@ -301,7 +298,8 @@ void  boundary_conditions(double ****f)
                    f[l][i][j][k] = z[l]*f[l][i1][j][k1];*/
                 f[4][i][j][k] = ztau*f[4][i1][j][k1] + (znorm-ztau)*An*(i1-i);
 //                f[5][i][j][k] = ztau*f[5][i1][j][k1];
-                f[5][i][j][k] = f[5][i1][j][k1];
+                f[5][i][j][k] = f[5][i1][j][k1] *
+                              (rrel+1-rfict_1*(i-i1)*dx[0]) / (rrel+1+rfict_1*(i-i1)*dx[0]) ;  
 /*                switch (i1-i)
                 {
                   case -1: case -3: case -5:
@@ -352,7 +350,7 @@ void  init_conditions()
    for(k=0;k<m3;k++)
        {
         r1 = coordin(i,0);   z1 = coordin(k,2);
-        rho=sqrt(pow(r1-rc,2) + z1*z1);
+        rho=sqrt(r1*r1 + z1*z1);
      //regions
         if(rho>Rsh) setType(&node[i][k],NodeVacuum);
           else if(rho>Rfl) setType(&node[i][k],NodeShell);
@@ -367,10 +365,10 @@ void  init_conditions()
                                               setType(&node[i][k+l],NodeGhostFluid);
                      }
             }
-        refr_f[i][k] = rc + (r1-rc)*(2*Rfl/rho-1);      //physical coordinates
-        refz_f[i][k] =        z1*(2*Rfl/rho-1);
-        refr_f[i][k] = (refr_f[i][k]-rc+R)/dx[0]-0.5-n[0]+ghost;   // simulation indices
-        refz_f[i][k] = (refz_f[i][k]+R   )/dx[2]-0.5-n[2]+ghost;
+        refr_f[i][k] = r1*(2*Rfl/rho-1);      //physical coordinates
+        refz_f[i][k] = z1*(2*Rfl/rho-1);
+        refr_f[i][k] = (refr_f[i][k]+R)/dx[0]-0.5-n[0]+ghost;   // simulation indices
+        refz_f[i][k] = (refz_f[i][k]+R)/dx[2]-0.5-n[2]+ghost;
         if(fabs(refr_f[i][k]-i)<1 && fabs(refz_f[i][k]-k)<1 && !isType(node[i][k],NodeFluid))
                  { setType(&node[i][k],NodeFluid);
                    if(isType(node[i][k],NodeGhostFluid)) node[i][k] -= NodeGhostFluid;
@@ -398,13 +396,12 @@ void  init_conditions()
 //                                         else node[i][k] -= NodeGhostMagn;
                                           //deleting fictive cells-for constant outside field
      //for divertor's blade
-        sinth[i][k]=(r1-rc)/rho;
-        costh[i][k]=   z1  /rho;
+        sinth[i][k]=r1/rho;
+        costh[i][k]=z1/rho;
         chi[i][k]  = chimax*M_PI/180.*rho/R;
        }
 
-   for(i=0;i<m1;i++) //{ r_1[i]=1./coordin(i,0); r_2[i]=r_1[i]*r_1[i]; }
-                     { r_1[i] = r_2[i] = 0; }     //for cylindrical case
+   for(i=0;i<m1;i++) { r_1[i] = rc/(rc*(dx[0]*(i-ghost+0.5+n[0])-R)+1); r_2[i] = r_1[i]*r_1[i]; } 
    for(i=0;i<m1;i++)
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
@@ -427,13 +424,13 @@ if(!goon) {
       if(isType(node[i][k],NodeFluid)) {
         f[0][i][j][k]=0;
 /*        f[1][i][j][k]=Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
-                       (Rfl*Rfl-pow(coordin(i,0)-rc,2) - pow(coordin(k,2),2))*4/Rfl/Rfl;
+                       (Rfl*Rfl-pow(coordin(i,0),2) - pow(coordin(k,2),2))*4/Rfl/Rfl;
         f[2][i][j][k]=NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl)
                       + (parabole+Noise*((double)rand()-RAND_MAX/2)/RAND_MAX)*
-                       (Rfl*Rfl-pow(coordin(i,0)-rc,2) - pow(coordin(k,2),2))*4/Rfl/Rfl;
+                       (Rfl*Rfl-pow(coordin(i,0),2) - pow(coordin(k,2),2))*4/Rfl/Rfl;
         f[3][i][j][k]=NoiseNorm*sin(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl)
                       + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
-                       (Rfl*Rfl-pow(coordin(i,0)-rc,2) - pow(coordin(k,2),2))*4/Rfl/Rfl;*/
+                       (Rfl*Rfl-pow(coordin(i,0),2) - pow(coordin(k,2),2))*4/Rfl/Rfl;*/
         f[1][i][j][k]=f[2][i][j][k]=f[3][i][j][k]=0;
         nut[i][j][k]=(
 //        (0.39+14.8*exp(-2.13*pow(2*coordin(k,2)-l3,2)))*0.1*0
@@ -520,7 +517,7 @@ if(!goon) {                       //reading sizes from file when continuing
    buf_recv[j+2*i] = alloc_mem_1f(buf_size[i]);
   }
 
-   iop=fopen(NameStatFile,"w");
+/*   iop=fopen(NameStatFile,"w");
    fprintf(iop,"%d\n",rank);
    fprintf(iop,"%d\t%d\t%d\n",pr[0],pr[1],pr[2]);
    fprintf(iop,"%d\t%d\t%d\n",pp[0],pp[1],pp[2]);
@@ -529,7 +526,7 @@ if(!goon) {                       //reading sizes from file when continuing
    for(i=0;i<6;i++)
      fprintf(iop,"%d ",pr_neighbour[i]);
    fprintf(iop,"\n");
-   fileclose(iop);
+   fileclose(iop);*/
 
 }
 
@@ -618,7 +615,7 @@ double coordin(int i, int dir)
 {
  switch (dir)
  {
-   case 0:  return dx[dir]*(i-ghost+0.5+n[dir])+rc-R;
+   case 0:  return dx[dir]*(i-ghost+0.5+n[dir])-R;
    case 1:  return dx[dir]*(i-ghost+0.5+n[dir]);
    case 2:  return dx[dir]*(i-ghost+0.5+n[dir])-R;
  }
