@@ -301,10 +301,10 @@ if(!goon) {
    for(k=0;k<m3;k++)
       if(isType(node[i][k],NodeFluid)) {
         f[0][i][j][k]=0;
-        f[1][i][j][k]=(parabole+Noise*((double)rand()-RAND_MAX/2)/RAND_MAX)*
-                       (R*R-pow(coordin(i,0)-rc,2) - pow(coordin(k,2),2))/R/R;
-        f[2][i][j][k]=NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/R)
+        f[1][i][j][k]=NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/R)
                       + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
+                       (R*R-pow(coordin(i,0)-rc,2) - pow(coordin(k,2),2))/R/R;
+        f[2][i][j][k]=(parabole+Noise*((double)rand()-RAND_MAX/2)/RAND_MAX)*
                        (R*R-pow(coordin(i,0)-rc,2) - pow(coordin(k,2),2))/R/R;
         f[3][i][j][k]=NoiseNorm*sin(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/R)
                       + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*

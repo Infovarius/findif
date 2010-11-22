@@ -175,7 +175,7 @@ void operate_memory(int dir)
 {
  if(dir>0)
    {   s_func = alloc_mem_2f(n3+2,kol_masht);
-       f  =alloc_mem_4f(nvar, m1, m2, m3);   //f[3]-pressure,f[0..2]-v(vector)
+       f  =alloc_mem_4f(nvar, m1, m2, m3);   //f[0]-pressure,f[1..3]-v(vector)
        f1 =alloc_mem_4f(nvar, m1, m2, m3);
        df =alloc_mem_4f(nvar, m1, m2, m3);
        df2=alloc_mem_4f(nvar, m1, m2, m3);
