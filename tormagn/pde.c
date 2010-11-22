@@ -85,6 +85,11 @@ void pde(double t, double ****f, double ****df)
        df[6][i][j][k]=f[1][i][j][k]*(dv1[4][2]-dv1[6][0])-f[2][i][j][k]*(dv1[6][1]-dv1[5][2])
                      +eta[i][j][k]*(dv2[6][0]+dv2[6][1]+dv2[6][2]+r_1[i]*dv1[6][0])
                      +(1./Rm-eta[i][j][k])*(dv1[4][2]*r_1[i]+dA11[4][0][2]+dA11[5][1][2]+dv2[6][2]);
+/*       df[4][i][j][k]=eta[i][j][k]*(dv2[4][0]+dv2[4][1]+dv2[4][2]+r_1[i]*dv1[4][0]-f[4][i][j][k]*r_2[i]-2*dv1[5][1]*r_1[i]);
+       df[5][i][j][k]=f[3][i][j][k]*(dv1[6][1]-dv1[5][2])-f[1][i][j][k]*(dv1[5][0]-dv1[4][1]+f[5][i][j][k]*r_1[i])
+                     +eta[i][j][k]*(dv2[5][0]+dv2[5][1]+dv2[5][2]+r_1[i]*dv1[5][0]-f[5][i][j][k]*r_2[i]+2*dv1[4][1]*r_1[i])
+                     +(1./Rm-eta[i][j][k])*(dv1[4][1]*r_1[i]+dA11[4][0][1]+dv2[5][1]+dA11[6][1][2]);
+       df[6][i][j][k]=0;*/
       }
   } //global for
    return;
@@ -290,8 +295,9 @@ void  boundary_conditions(double ****f)
                    f[l][i][j][k] = z[l]*f[l][r1][j][z1];*/
 //                if((r1-i)*(z1-k)) ztemp = z[5]; else ztemp = z[4];
                 ztemp = ((r1-i)*(z1-k)==0) ? z[5] : z[4];
+                ztemp = z[5];
                 f[4][i][j][k] = ztemp*f[4][r1][j][z1] + (z[4]-ztemp)*An*(r1-i);
-                f[5][i][j][k] = z[5]*f[5][r1][j][z1] * (2*coordin(i,0)-(i-r1)*dx[0]) / (2*coordin(i,0)+(i-r1)*dx[0]);
+                f[5][i][j][k] = z[5]*f[5][r1][j][z1] * (2*(rc-R)-(i-r1)*dx[0]) / (2*(rc-R)+(i-r1)*dx[0]);
                 f[6][i][j][k] = ztemp*f[6][r1][j][z1] + (z[4]-ztemp)*An*(z1-k);
                 }
         }
