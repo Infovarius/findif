@@ -89,7 +89,6 @@ int main(int argc, char** argv)
             }
 //--------------------------------------
 
-//   t_cur=0;   time_begin = MPI_Wtime();   dump(f,eta,t_cur,count); exit(1);          // temporarily
    boundary_conditions(f);
 
    if(!goon)  dump(f,eta,t_cur,count);
@@ -112,12 +111,12 @@ int main(int argc, char** argv)
             {
             r1 = coordin(i,0);  phi1 = coordin(j,1);  z1 = coordin(k,2);
             rho=sqrt(r1*r1 + z1*z1);
-            if(rho>=Rfl) continue;         // nonstationary time=t_cur*Tunit, max magnitude=0.0971883
+            if(rho>=Rfl) continue;         // nonstationary time=t_cur*Tunit, max magnitude=0.0990906
             vrho = 0;
             vth  = vtheta_given(0.3,rho,Rfl,phi1)/(1+r1*rc);  // time=0.3 for amplitude~1
 /*            vphi = vfi_given(t_cur*Tunit,rho,Rfl);
             vth = 0;                        */
-            vphi = vfi_given(0.0971883,rho,Rfl);
+            vphi = vfi_given(0.0990906,rho,Rfl);
             f[1][i][j][k] = vrho*sinth[i][k]+vth*costh[i][k];
             f[2][i][j][k] = vphi;
             f[3][i][j][k] = vrho*costh[i][k]-vth*sinth[i][k];
@@ -143,10 +142,6 @@ int main(int argc, char** argv)
               else boundary_conditions(f1);
             printing(f1,dtdid,t_cur,count,PulsEnergy);
             }
-/*  snapshot(df,eta,t_cur,count);
-  printf("%lf\n%lf\n%g\n%g",max1,max2,max3,dtdid);
-  scanf("%d",vphi);
-  exit(0);*/
         if (SnapStep!=0 && count%SnapStep==0)
             snapshot(f1,eta,t_cur,count);
         for(l=0;l<nvar;l++)
