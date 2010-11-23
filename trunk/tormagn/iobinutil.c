@@ -61,42 +61,21 @@ double d;
  if(argc<2 || (iop=fopen(argv[1],"r"))==NULL) //no ini file
     {
      nrerror("Start from no ini file!",-1,-1);
-     Re=10.;
-     lfi=3.;
-     rc=3.;
-     R=1.;
-     parabole=0.;
-     Noise=0.;
-     NoiseNorm=0.;
-     UpLimit=10.;
-     N1=10;
-     N2=10;
-     N3=10;
-     nvar=4;
-     approx=7;                    //width of approximation sample
-     *dtnext=1e-3;
-     Ns=15;
-     maschtab=1e6;
-     lambda = 2.0;
-     max_okr = 3;
-     OutStep = (CheckStep=100)/1;
-     VarStep = 0;
-     SnapStep = 100;
-     Ttot=1.;
      }
     else {
-      if(fscanf(iop,"%d",&ver)<1 || ver!=4) nrerror("parameters' file has wrong version",-1,-1);
+      if(fscanf(iop,"%d",&ver)<1 || ver!=5) nrerror("parameters' file has wrong version",-1,-1);
       read_token(iop,&lfi);        //geometry
       read_token(iop,&rc);
       read_token(iop,&Rfl);
       read_token(iop,&Rsh);
       read_token(iop,&R);
       read_token(iop,&Re);         //hydrodynamical
-      read_token(iop,&parabole);
+      read_token(iop,&Hksi);
       read_token(iop,&Noise);
-      read_token(iop,&NoiseNorm);
+      read_token(iop,&d);         TDV = (int)d;
+      if(ver>=2) read_token(iop,&chi);
+      read_token(iop,&maschtab);
       read_token(iop,&UpLimit);
-      if(ver>=2) read_token(iop,&chimax);
       read_token(iop,&Rm);         //magnetic
       read_token(iop,&etash);
       read_token(iop,&etavac);
@@ -106,10 +85,6 @@ double d;
       read_token(iop,&d);         nvar = (int)d;
       read_token(iop,&d);         approx = (int)d;
       read_token(iop,dtnext);
-      read_token(iop,&d);         Ns = (int)d;   //shell
-      read_token(iop,&maschtab);
-      read_token(iop,&lambda);
-      read_token(iop,&d);         max_okr = (int)d;
       read_token(iop,&d);         OutStep = (int)d;    //output
       read_token(iop,&d);         SnapStep = (int)d;
       read_token(iop,&d);         CheckStep = (int)d;

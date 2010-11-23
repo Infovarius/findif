@@ -192,13 +192,11 @@ void operate_memory(int dir)
        refz_m=alloc_mem_2f(m1, m3);
        sinth=alloc_mem_2f(m1, m3);
        costh=alloc_mem_2f(m1, m3);
-       chi=alloc_mem_2f(m1, m3);          // angle of blade tilt
        nut = alloc_mem_3f(m1, m2, m3);
        eta = alloc_mem_3f(m1, m2, m3);
        averf = alloc_mem_3f(nvar,m1,m3);
        vfi = alloc_mem_1f(N3);
        totvfi = alloc_mem_1f(N3);
-       init_shell();
     } else
    {
 //   free_mem_2f(s_func,n3+2,kol_masht);
@@ -218,7 +216,6 @@ void operate_memory(int dir)
        free_mem_2f(refz_m,m1, m3);
        free_mem_2f(sinth,m1, m3);
        free_mem_2f(costh,m1, m3);
-       free_mem_2f(chi,  m1, m3);
        free_mem_2f(node,m1, m3);
        free_mem_3f(averf,nvar,m1,m3);
        free_mem_1f(vfi,N3);
@@ -226,7 +223,6 @@ void operate_memory(int dir)
        free_mem_1f(r_1,m1);
        free_mem_1f(r_2,m1);
        free_mem_3f(eta,m1,m2,m3);
-       erase_shell();
     }
 }
 
