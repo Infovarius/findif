@@ -181,6 +181,22 @@ for(i=beg1;i<beg1+n1;i++)
     }
 }
 
+void print_array2i(FILE *ff,int **a,int beg1,int n1,int beg2,int n2)
+{
+int i,j;
+fprintf(ff,"{");
+for(i=beg1;i<beg1+n1;i++)
+    {
+    fprintf(ff,"{");
+    for(j=beg2;j<beg2+n2;j++)
+        {
+        fprintf(ff,"%d",a[i][j]);
+        fprintf(ff,j<beg2+n2-1 ? "," : "}");
+        }
+    fprintf(ff,i<beg1+n1-1 ? "," : "}\n");
+    }
+}
+
 void print_array3d(FILE *ff,double ***a,
         int beg1,int n1,int beg2,int n2,int beg3,int n3)
 {
@@ -237,7 +253,7 @@ for(l=0;l<=2;l++)
   for(i=0;i<m1;i++)
     for(k=0;k<m3;k++)
        if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
-           TotalEnergy += pow(averf[l][i][k],2.);
+           TotalEnergy += fabs(1+coordin(i,0)*rc)*pow(averf[l][i][k],2.);
 TotalEnergy += 1.;   //if zero average field
 razlet = (PulsEnergy/TotalEnergy>UpLimit);
 }

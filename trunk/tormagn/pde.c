@@ -73,7 +73,7 @@ void pde(double t, double ****f, double ****df)
 
 double deviation(double ****f,int i,int j,int k)
 {
-const int size_okr=max(1,ghost);
+const int size_okr=max(max_okr,ghost);
 double flux = 0;
 int kol=0,l;
    for(l=1;l<=size_okr;l++)
@@ -172,8 +172,14 @@ void  boundary_conditions(double ****f)
                 MPI_Irecv(buf_recv[3],buf_size[1],MPI_DOUBLE,pr_neighbour[3],tag+2,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
                 }
 
+   MPI_Waitall(req_numS,SendRequest,statuses);
+   if(statuses[0].MPI_ERROR) {putlog("bc:error during send=",numlog++);
+                               MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
+                               msg_err[reslen++] = ','; msg_err[reslen]= 0;
+                               putlog(msg_err,numlog++);
+                               }    else numlog++;
    MPI_Waitall(req_numR,RecvRequest,statuses);
-   if(statuses[0].MPI_ERROR) {putlog("bc:error during transfer=",numlog++);
+   if(statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
@@ -195,8 +201,14 @@ void  boundary_conditions(double ****f)
                 MPI_Irecv(buf_recv[1],buf_size[0],MPI_DOUBLE,pr_neighbour[1],tag,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
                 }
 
+   MPI_Waitall(req_numS,SendRequest,statuses);
+   if(statuses[0].MPI_ERROR) {putlog("bc:error during send=",numlog++);
+                               MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
+                               msg_err[reslen++] = ','; msg_err[reslen]= 0;
+                               putlog(msg_err,numlog++);
+                               }    else numlog++;
   MPI_Waitall(req_numR,RecvRequest,statuses);
-  if(statuses[0].MPI_ERROR) {putlog("bc:error during transfer=",numlog++);
+  if(statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
@@ -218,8 +230,14 @@ void  boundary_conditions(double ****f)
                MPI_Irecv(buf_recv[5],buf_size[2],MPI_DOUBLE,pr_neighbour[5],tag+4,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
                }
 
+   MPI_Waitall(req_numS,SendRequest,statuses);
+   if(statuses[0].MPI_ERROR) {putlog("bc:error during send=",numlog++);
+                               MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
+                               msg_err[reslen++] = ','; msg_err[reslen]= 0;
+                               putlog(msg_err,numlog++);
+                               }    else numlog++;
   MPI_Waitall(req_numR,RecvRequest,statuses);
-  if(statuses[0].MPI_ERROR) {putlog("bc:error during transfer=",numlog++);
+  if(statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
@@ -503,8 +521,68 @@ double dr(double ***m, int ii, int jj, int kk, int dir, int or, double dx, int s
 {
 double tmp=0.0;
 int i;
-
-switch (sm*dir) {
+//start_tick(9);
+if(or==0)
+switch (sm) {
+     case 7 :  switch (dir) {
+                  case 1 : tmp = kf7[or][sh][6]*(m[ii+3][jj][kk]-m[ii-3][jj][kk])
+                               + kf7[or][sh][5]*(m[ii+2][jj][kk]-m[ii-2][jj][kk])
+                               + kf7[or][sh][4]*(m[ii+1][jj][kk]-m[ii-1][jj][kk]); break;
+                  case 2 : tmp = kf7[or][sh][6]*(m[ii][jj+3][kk]-m[ii][jj-3][kk])
+                               + kf7[or][sh][5]*(m[ii][jj+2][kk]-m[ii][jj-2][kk])
+                               + kf7[or][sh][4]*(m[ii][jj+1][kk]-m[ii][jj-1][kk]); break;
+                  case 3 : tmp = kf7[or][sh][6]*(m[ii][jj][kk+3]-m[ii][jj][kk-3])
+                               + kf7[or][sh][5]*(m[ii][jj][kk+2]-m[ii][jj][kk-2])
+                               + kf7[or][sh][4]*(m[ii][jj][kk+1]-m[ii][jj][kk-1]); break;
+                  }; break;
+     case 3 :  switch (dir) {
+                  case 1 : tmp = kf3[or][sh][2]*(m[ii+1][jj][kk]-m[ii-1][jj][kk]); break;
+                  case 2 : tmp = kf3[or][sh][2]*(m[ii][jj+1][kk]-m[ii][jj-1][kk]); break;
+                  case 3 : tmp = kf3[or][sh][2]*(m[ii][jj][kk+1]-m[ii][jj][kk-1]); break;
+                  }; break;
+     case 5 :  switch (dir) {
+                  case 1 : tmp = kf5[or][sh][4]*(m[ii+2][jj][kk]-m[ii-2][jj][kk])
+                               + kf5[or][sh][3]*(m[ii+1][jj][kk]-m[ii-1][jj][kk]); break;
+                  case 2 : tmp = kf5[or][sh][4]*(m[ii][jj+2][kk]-m[ii][jj-2][kk])
+                               + kf5[or][sh][3]*(m[ii][jj+1][kk]-m[ii][jj-1][kk]); break;
+                  case 3 : tmp = kf5[or][sh][4]*(m[ii][jj][kk+2]-m[ii][jj][kk-2])
+                               + kf5[or][sh][3]*(m[ii][jj][kk+1]-m[ii][jj][kk-1]); break;
+                  }; break;
+    }
+if(or==1)
+switch (sm) {
+     case 7 :  switch (dir) {
+                  case 1 : tmp = kf7[or][sh][6]*(m[ii+3][jj][kk]+m[ii-3][jj][kk])
+                               + kf7[or][sh][5]*(m[ii+2][jj][kk]+m[ii-2][jj][kk])
+                               + kf7[or][sh][4]*(m[ii+1][jj][kk]+m[ii-1][jj][kk])
+                               + kf7[or][sh][3]*m[ii][jj][kk]; break;
+                  case 2 : tmp = kf7[or][sh][6]*(m[ii][jj+3][kk]+m[ii][jj-3][kk])
+                               + kf7[or][sh][5]*(m[ii][jj+2][kk]+m[ii][jj-2][kk])
+                               + kf7[or][sh][4]*(m[ii][jj+1][kk]+m[ii][jj-1][kk])
+                               + kf7[or][sh][3]*m[ii][jj][kk]; break;
+                  case 3 : tmp = kf7[or][sh][6]*(m[ii][jj][kk+3]+m[ii][jj][kk-3])
+                               + kf7[or][sh][5]*(m[ii][jj][kk+2]+m[ii][jj][kk-2])
+                               + kf7[or][sh][4]*(m[ii][jj][kk+1]+m[ii][jj][kk-1])
+                               + kf7[or][sh][3]*m[ii][jj][kk]; break;
+                  }; break;
+     case 3 :  switch (dir) {
+                  case 1 : tmp = kf3[or][sh][2]*(m[ii+1][jj][kk]+m[ii-1][jj][kk])+ kf3[or][sh][1]*m[ii][jj][kk]; break;
+                  case 2 : tmp = kf3[or][sh][2]*(m[ii][jj+1][kk]+m[ii][jj-1][kk])+ kf3[or][sh][1]*m[ii][jj][kk]; break;
+                  case 3 : tmp = kf3[or][sh][2]*(m[ii][jj][kk+1]+m[ii][jj][kk-1])+ kf3[or][sh][1]*m[ii][jj][kk]; break;
+                  }; break;
+     case 5 :  switch (dir) {
+                  case 1 : tmp = kf5[or][sh][4]*(m[ii+2][jj][kk]+m[ii-2][jj][kk])
+                               + kf5[or][sh][3]*(m[ii+1][jj][kk]+m[ii-1][jj][kk])
+                               + kf5[or][sh][2]*m[ii][jj][kk]; break;
+                  case 2 : tmp = kf5[or][sh][4]*(m[ii][jj+2][kk]+m[ii][jj-2][kk])
+                               + kf5[or][sh][3]*(m[ii][jj+1][kk]+m[ii][jj-1][kk])
+                               + kf5[or][sh][2]*m[ii][jj][kk]; break;
+                  case 3 : tmp = kf5[or][sh][4]*(m[ii][jj][kk+2]+m[ii][jj][kk-2])
+                               + kf5[or][sh][3]*(m[ii][jj][kk+1]+m[ii][jj][kk-1])
+                               + kf5[or][sh][2]*m[ii][jj][kk]; break;
+                  }; break;
+    }
+/*switch (sm*dir) {
 	case 3 : for(i=0; i<sm; i++) tmp += m[ii+i-sh][jj][kk]*kf3[or][sh][i]; break;
 	case 6 : for(i=0; i<sm; i++) tmp += m[ii][jj+i-sh][kk]*kf3[or][sh][i]; break;
 	case 9 : for(i=0; i<sm; i++) tmp += m[ii][jj][kk+i-sh]*kf3[or][sh][i]; break;
@@ -516,7 +594,7 @@ switch (sm*dir) {
 	case 21: for(i=0; i<sm; i++) tmp += m[ii][jj][kk+i-sh]*kf7[or][sh][i]; break;
 	default :
     	nrerror("\nNO SUCH SAMPLE for derivative. Bye ...",0,0);
-	}
+	} */
 return(tmp/dx);
 }
 

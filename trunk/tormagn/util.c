@@ -141,7 +141,35 @@ double  **aa;
 return(aa);
 }
 
+int **alloc_mem_2i(int mvar, int n1)
+{
+int i;
+int  **aa;
+
+   aa = (int **)calloc(mvar, sizeof(int *));
+   if(aa == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",-1,-1);
+
+   for(i = 0; i < mvar; i++) {
+         aa[i] = (int *)calloc(n1, sizeof(int));
+         if(aa[i] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",-1,-1);
+   }
+
+return(aa);
+}
+
 void free_mem_2f(double **aa, int n1, int n2)
+{
+int j, k;
+
+   for(j = 0; j < n1; j++)
+	free(aa[j]);
+
+   free(aa);
+
+   return;
+}
+
+void free_mem_2i(int **aa, int n1, int n2)
 {
 int j, k;
 
@@ -163,7 +191,24 @@ double  *a;
 return(a);
 }
 
+int *alloc_mem_1i(int n)
+{
+int  *a;
+
+   a = (int *)calloc(n, sizeof(int));
+   if(a == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",-1,-1);
+
+return(a);
+}
+
 void free_mem_1f(double *a, int n)
+{
+int k;
+   free(a);
+   return;
+}
+
+void free_mem_1i(int *a, int n)
 {
 int k;
    free(a);
@@ -185,7 +230,7 @@ void operate_memory(int dir)
        J = alloc_mem_4f(3, m1, m2, m3);      // vector of electric current
        r_1=alloc_mem_1f(m1);                  // r^(-1)
        r_2=alloc_mem_1f(m1);                  // r^(-2)
-       node=alloc_mem_2f(m1, m3);         // kind of nodes
+       node=alloc_mem_2i(m1, m3);         // kind of nodes
        refr_f=alloc_mem_2f(m1, m3);         // reflection of nodes relative inner surface (for hydro)
        refz_f=alloc_mem_2f(m1, m3);
        refr_m=alloc_mem_2f(m1, m3);         // reflection of nodes relative sphere of simulation (for magn)
@@ -215,7 +260,7 @@ void operate_memory(int dir)
        free_mem_2f(refz_m,m1, m3);
        free_mem_2f(sinth,m1, m3);
        free_mem_2f(costh,m1, m3);
-       free_mem_2f(node,m1, m3);
+       free_mem_2i(node,m1, m3);
        free_mem_3f(averf,nvar,m1,m3);
        free_mem_1f(vfi,N3);
        free_mem_1f(totvfi,N3);
@@ -225,19 +270,14 @@ void operate_memory(int dir)
     }
 }
 
-int isType(double nod, enum TypeNodes tip)
+inline int isType(int nod, enum TypeNodes tip)
 {
-  int tmpnod;
-  tmpnod = floor(nod+0.5);
-  if(tip==NodeUnknown) return (!tmpnod);
-                  else return (tmpnod & tip);
+  return (nod & tip);
 }
 
-void setType(double *nod, enum TypeNodes tip)
+inline void setType(int *nod, enum TypeNodes tip)
 {
-  int tmpnod;
-  tmpnod = floor(*nod+0.5);
-  *nod = tmpnod | tip;
+  *nod |= tip;
   return;
 }
 
