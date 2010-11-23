@@ -36,33 +36,8 @@ void pde(double t, double ****f, double ****df)
    {
      if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
      {
-/*      for(m=0;m<3;m++)
-         dp1[m]=dr(f[0],i,j,k,m+1,0,dx[m],ghost, approx);
-      for(l=1;l<=3;l++) {
-       for(m=0;m<3;m++) {
-	 dv1[l][m]=dr(f[l],i,j,k,m+1,0,dx[m],ghost, approx);
-	 dv2[l][m]=dr(f[l],i,j,k,m+1,1,dx[m]*dx[m],ghost, approx);
-	 }
-       dv1[l][1] *= r_1[i];     dv2[l][1] *= r_2[i];
-       }
-      df[1][i][j][k]=nut[i][j][k]*(dv2[1][0]+dv2[1][1]+dv2[1][2]+r_1[i]*dv1[1][0]
-				   -f[1][i][j][k]*r_2[i]-2*dv1[2][1]*r_1[i])
-		     -dp1[0]+w*w/r_1[i]       +2*w*f[2][i][j][k]                   //forces of inertion
-		     +(j+n[2]<=ghost+2 ? coordin(k,2)*f[2][i][j][k] : 0)                //helical force
-		     -f[1][i][j][k]*dv1[1][0]-f[2][i][j][k]*dv1[1][1]
-		     -f[3][i][j][k]*dv1[1][2]+r_1[i]*f[2][i][j][k]*f[2][i][j][k];
-      df[2][i][j][k]=nut[i][j][k]*(dv2[2][0]+dv2[2][1]+dv2[2][2]+r_1[i]*dv1[2][0]
-                                   -f[2][i][j][k]*r_2[i]+2*dv1[1][1]*r_1[i])
-                     -dp1[1]*r_1[i]-dw/r_1[i] -2*w*f[1][i][j][k]                   //forces of inertion
-                     -(j<=ghost+2 ? coordin(i,0)*f[2][i][j][k] :0)            //helical force
-                     -f[1][i][j][k]*dv1[2][0]-f[2][i][j][k]*dv1[2][1]
-                     -f[3][i][j][k]*dv1[2][2]-r_1[i]*f[1][i][j][k]*f[2][i][j][k];
-      df[3][i][j][k]=nut[i][j][k]*(dv2[3][0]+dv2[3][1]+dv2[3][2]+r_1[i]*dv1[3][0])
-                     -dp1[2]
-                     -f[1][i][j][k]*dv1[3][0]-f[2][i][j][k]*dv1[3][1]-f[3][i][j][k]*dv1[3][2];
-      df[0][i][j][k]= -(dv1[1][0]+dv1[2][1]+dv1[3][2]+f[1][i][j][k]*r_1[i])/Gamma;*/
       df[0][i][j][k] = df[1][i][j][k] = df[2][i][j][k] = df[3][i][j][k] = 0;
-      }
+      }   else df[0][i][j][k] = df[1][i][j][k] = df[2][i][j][k] = df[3][i][j][k] = 0;
      if(isType(node[i][k],NodeMagn) && !isType(node[i][k],NodeClued))
       {
       for(l=4;l<=6;l++) {
@@ -91,14 +66,14 @@ void pde(double t, double ****f, double ****df)
                      +eta[i][j][k]*(dv2[5][0]+dv2[5][1]+dv2[5][2]+r_1[i]*dv1[5][0]-f[5][i][j][k]*r_2[i]+2*dv1[4][1]*r_1[i])
                      +(1./Rm-eta[i][j][k])*(dv1[4][1]*r_1[i]+dA11[4][0][1]+dv2[5][1]+dA11[6][1][2]);
        df[6][i][j][k]=0;*/
-      }
+      }   else df[4][i][j][k] = df[5][i][j][k] = df[6][i][j][k] = 0;
   } //global for
    return;
 }
 
 double deviation(double ****f,int i,int j,int k)
 {
-const int size_okr=min(1,ghost);
+const int size_okr=max(1,ghost);
 double flux = 0;
 int kol=0,l;
    for(l=1;l<=size_okr;l++)
@@ -181,21 +156,6 @@ void  boundary_conditions(double ****f)
 
    z[0]=1; z[1]=z[2]=z[3]=-1; //  влияет на вид гран.условий (-1:жесткие, 1:свободные)
    znorm=-1; ztau=1;          // rather for Anorm&Atau not Ar,Aphi,Az
-
-  /*============================ divertor =================================*/
-  if(t_cur<00)                  // divertors are off till t sec
-  if(n[2]==0)
-  for(i=0;i<m1;i++)
-    for(j=ghost;j<=ghost;j++)
-      for(k=0;k<m3;k++)
-         {
-	 vrho = f[3][i][j][k]*costh[i][k]+f[1][i][j][k]*sinth[i][k];
-         vth  = -f[3][i][j][k]*sinth[i][k]+f[1][i][j][k]*costh[i][k];
-         vphi = sqrt(pow(f[2][i][j][k],2)+vth*vth);           //sqrt(vfi*vfi+vth*vth)
-         f[1][i][j][k] = vrho*sinth[i][k]+vphi*costh[i][k]*sin(chi[i][k]);
-         f[2][i][j][k] = vphi*cos(chi[i][k]);
-         f[3][i][j][k] = vrho*costh[i][k]-vphi*sinth[i][k]*sin(chi[i][k]);
-         }
 
   /*-------------------------------- exchanging of ghosts -------------------------------------*/
 // exchanging in phi-direction - periodical directions first
@@ -369,19 +329,9 @@ void  init_conditions()
                      }
             }
         refr_f[i][k] = r1*(2*Rfl/rho-1);      //physical coordinates
-	refz_f[i][k] = z1*(2*Rfl/rho-1);
+        refz_f[i][k] = z1*(2*Rfl/rho-1);
         refr_f[i][k] = (refr_f[i][k]+R)/dx[0]-0.5-n[0]+ghost;   // simulation indices
         refz_f[i][k] = (refz_f[i][k]+R)/dx[2]-0.5-n[2]+ghost;
-        if(fabs(refr_f[i][k]-i)<1 && fabs(refz_f[i][k]-k)<1 && !isType(node[i][k],NodeFluid))
-                 { setType(&node[i][k],NodeFluid);
-                   if(isType(node[i][k],NodeGhostFluid)) node[i][k] -= NodeGhostFluid;
-                   for(l=-ghost;l<=ghost;l++)
-                     { if(i+l>=0&&i+l<m1) if(!isType(node[i+l][k],NodeFluid))
-                                              setType(&node[i+l][k],NodeGhostFluid);
-                       if(k+l>=0&&k+l<m3) if(!isType(node[i][k+l],NodeFluid))
-                                              setType(&node[i][k+l],NodeGhostFluid);
-                     }
-                  }
      //for magnetism
         refr_m[i][k] = i;
         refz_m[i][k] = k;
@@ -401,7 +351,6 @@ void  init_conditions()
      //for divertor's blade
 	sinth[i][k]=r1/rho;
         costh[i][k]=z1/rho;
-        chi[i][k]  = chimax*M_PI/180.*rho/R;
        }
 
    for(i=0;i<m1;i++) { r_1[i] = rc/(rc*(dx[0]*(i-ghost+0.5+n[0])-R)+1); r_2[i] = r_1[i]*r_1[i]; } 
@@ -438,7 +387,7 @@ if(!goon) {
         nut[i][j][k]=(
 //        (0.39+14.8*exp(-2.13*pow(2*coordin(k,2)-l3,2)))*0.1*0
                     +1.)/Re;
-                                        }
+                                        }   else f[0][i][j][k]=f[1][i][j][k]=f[2][i][j][k]=f[3][i][j][k] = 0;
       if(isType(node[i][k],NodeFluid)/*||isType(node[i][k],NodeShell)*/ )
                  {   }
                  f[4][i][j][k]=f[5][i][j][k]=f[6][i][j][k]=0;

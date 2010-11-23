@@ -20,7 +20,7 @@ LEVEL char *fname;
 
 LEVEL double ****f, ****f1, ***nut, ****df, ****df2, ****df3, ****df4, ****df5, ****B, ****J,
              **s_func,dx[3], *r_1, *r_2, **node, **refr_f, **refz_f, **refr_m, **refz_m,
-             **sinth, **costh, **chi, ***eta;
+             **sinth, **costh, ***eta;
 
 enum  TypeNodes {NodeUnknown=0,NodeClued=1,
                                NodeFluid=8, NodeShell=2, NodeVacuum=4,   // regions
@@ -28,13 +28,14 @@ enum  TypeNodes {NodeUnknown=0,NodeClued=1,
                                NodeMagn=32, NodeGhostMagn=64};           // for magnetic effects
 LEVEL double ***averf;
 LEVEL double *totvfi, *vfi;
-LEVEL double Gamma, lfi, R, Rfl, Rsh, rc, Re, Rm, etash, etavac;
+LEVEL double Gamma, lfi, R, Rfl, Rsh, rc, Rm, etash, etavac;
 
-LEVEL int    m1, m2, m3, mm1, mm2, mm3, n1, n2, n3, N1, N2, N3, Ns,
+LEVEL int    m1, m2, m3, mm1, mm2, mm3, n1, n2, n3, N1, N2, N3,
              approx, ghost, nvar;
 
-LEVEL double Noise, NoiseNorm, parabole;
-LEVEL double chimax;           //maximal angle of blade tilt
+LEVEL double Noise, NoiseNorm, Re, Hksi;
+LEVEL int TDV;// TDV = time dependant velocity
+LEVEL double chi;           //maximal angle of blade tilt
 LEVEL double maschtab;
 
 LEVEL double t_cur,Ttot;
@@ -77,17 +78,7 @@ LEVEL int pr[3];                                         //3D
 #define kol_masht 10
 #endif
 LEVEL int max_okr;  //должно быть <=ghost, иначе окрестность выходит из фикт.обл-ти - виснет
-LEVEL double lambda; //multiplier
-LEVEL long num_points[kol_masht];
-LEVEL double *nl,**sha,**shb;
-LEVEL double *f0;                           //flux of energy from grid to shell
-LEVEL double *en_flux;                      //summary of energy in cascade model
 
-/*-------- goy.c  -----------*/
-void init_shell(void);
-void sima(double *zza, double *zzb, double *xx, double *yy);
-void time_step_shell(double tm);
-void erase_shell(void);
 /*------- struct_func.c ----*/
 void struct_func(double ****f,int q,double lambda,int size_okr);
 /*------- util.c  -----------*/
