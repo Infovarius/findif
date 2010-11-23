@@ -298,7 +298,7 @@ void  boundary_conditions(double ****f)
                    f[l][i][j][k] = z[l]*f[l][i1][j][k1];*/
                 f[4][i][j][k] = ztau*f[4][i1][j][k1] + (znorm-ztau)*An*(i1-i);
 //                f[5][i][j][k] = ztau*f[5][i1][j][k1];
-                f[5][i][j][k] = f[5][i1][j][k1] *
+                f[5][i][j][k] = ztau*f[5][i1][j][k1] *
                               (rrel+1-rfict_1*(i-i1)*dx[0]) / (rrel+1+rfict_1*(i-i1)*dx[0]) ;  
 /*                switch (i1-i)
                 {
