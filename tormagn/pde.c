@@ -40,17 +40,17 @@ void pde(double t, double ****f, double ****df)
          dp1[m]=dr(f[0],i,j,k,m+1,0,dx[m],ghost, approx);
       for(l=1;l<=3;l++) {
        for(m=0;m<3;m++) {
-         dv1[l][m]=dr(f[l],i,j,k,m+1,0,dx[m],ghost, approx);
-         dv2[l][m]=dr(f[l],i,j,k,m+1,1,dx[m]*dx[m],ghost, approx);
-         }
+	 dv1[l][m]=dr(f[l],i,j,k,m+1,0,dx[m],ghost, approx);
+	 dv2[l][m]=dr(f[l],i,j,k,m+1,1,dx[m]*dx[m],ghost, approx);
+	 }
        dv1[l][1] *= r_1[i];     dv2[l][1] *= r_2[i];
        }
       df[1][i][j][k]=nut[i][j][k]*(dv2[1][0]+dv2[1][1]+dv2[1][2]+r_1[i]*dv1[1][0]
-                                   -f[1][i][j][k]*r_2[i]+2*dv1[2][1]*r_1[i])
-                     -dp1[0]+w*w/r_1[i]       +2*w*f[2][i][j][k]                   //forces of inertion
-                     +(j+n[2]<=ghost+2 ? coordin(k,2)*f[2][i][j][k] : 0)                //helical force
-                     -f[1][i][j][k]*dv1[1][0]-f[2][i][j][k]*dv1[1][1]
-                     -f[3][i][j][k]*dv1[1][2]+r_2[i]*f[2][i][j][k]*f[2][i][j][k];
+				   -f[1][i][j][k]*r_2[i]-2*dv1[2][1]*r_1[i])
+		     -dp1[0]+w*w/r_1[i]       +2*w*f[2][i][j][k]                   //forces of inertion
+		     +(j+n[2]<=ghost+2 ? coordin(k,2)*f[2][i][j][k] : 0)                //helical force
+		     -f[1][i][j][k]*dv1[1][0]-f[2][i][j][k]*dv1[1][1]
+		     -f[3][i][j][k]*dv1[1][2]+r_1[i]*f[2][i][j][k]*f[2][i][j][k];
       df[2][i][j][k]=nut[i][j][k]*(dv2[2][0]+dv2[2][1]+dv2[2][2]+r_1[i]*dv1[2][0]
                                    -f[2][i][j][k]*r_2[i]+2*dv1[1][1]*r_1[i])
                      -dp1[1]*r_1[i]-dw/r_1[i] -2*w*f[1][i][j][k]                   //forces of inertion
@@ -69,10 +69,10 @@ void pde(double t, double ****f, double ****df)
        for(m=0;m<3;m++) {
          dv1[l][m]=dr(f[l],i,j,k,m+1,0,dx[m],ghost, approx);
          dv2[l][m]=dr(f[l],i,j,k,m+1,1,dx[m]*dx[m],ghost, approx);
-         }
+	 }
         dA11[l][0][1] = dA11[l][1][0] = d2cross(f[l],i,j,k,2,1,ghost,approx);
         dA11[l][0][2] = dA11[l][2][0] = d2cross(f[l],i,j,k,3,1,ghost,approx);
-        dA11[l][1][2] = dA11[l][2][1] = d2cross(f[l],i,j,k,3,2,ghost,approx);// for cylindrical case
+        dA11[l][1][2] = dA11[l][2][1] = d2cross(f[l],i,j,k,3,2,ghost,approx);
         }
 
        df[4][i][j][k]=Rm*(f[2][i][j][k]*(dv1[5][0]-dv1[4][1]+f[5][i][j][k]*r_1[i])-f[3][i][j][k]*(dv1[4][2]-dv1[6][0]))
@@ -159,7 +159,7 @@ for(j=0;j<n3;j++)
 for(k=0;k<m3;k++)
    {
 /*   double tmp = maschtab*pow(
-           (nl[2]*s_func[k][0] + nl[1]*s_func[k][1] + nl[0]*s_func[k][2])*pow(dx[2],4),
+	   (nl[2]*s_func[k][0] + nl[1]*s_func[k][1] + nl[0]*s_func[k][2])*pow(dx[2],4),
                          1./3);*/
 /*   double tmp=0;
    for(i=0;i<m1;i++)
@@ -189,7 +189,7 @@ void  boundary_conditions(double ****f)
     for(j=ghost;j<=ghost;j++)
       for(k=0;k<m3;k++)
          {
-         vrho = f[3][i][j][k]*costh[i][k]+f[1][i][j][k]*sinth[i][k];
+	 vrho = f[3][i][j][k]*costh[i][k]+f[1][i][j][k]*sinth[i][k];
          vth  = -f[3][i][j][k]*sinth[i][k]+f[1][i][j][k]*costh[i][k];
          vphi = sqrt(pow(f[2][i][j][k],2)+vth*vth);           //sqrt(vfi*vfi+vth*vth)
          f[1][i][j][k] = vrho*sinth[i][k]+vphi*costh[i][k]*sin(chi[i][k]);
@@ -249,7 +249,7 @@ void  boundary_conditions(double ****f)
   if(pr_neighbour[4]==rank) CopyGridToBuffer(f,nut,buf_recv[4],0,0,mm3,m1-1,m2-1,m3-1);
          else { CopyGridToBuffer(f,nut,buf_send[4],0,0,ghost,m1-1,m2-1,2*ghost-1);
                 MPI_Isend(buf_send[4],buf_size[2],MPI_DOUBLE,pr_neighbour[4],tag+4,MPI_COMM_WORLD,&SendRequest[req_numS++]);
-                MPI_Irecv(buf_recv[4],buf_size[2],MPI_DOUBLE,pr_neighbour[4],tag+5,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
+		MPI_Irecv(buf_recv[4],buf_size[2],MPI_DOUBLE,pr_neighbour[4],tag+5,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
                 }
  if(pr_neighbour[5]>-1)
   if(pr_neighbour[5]==rank) CopyGridToBuffer(f,nut,buf_recv[5],0,0,0,m1-1,m2-1,ghost-1);
@@ -279,7 +279,7 @@ void  boundary_conditions(double ****f)
 
   for(i=0;i<m1;i++)
      for(j=0;j<m2;j++)
-        for(k=0;k<m3;k++)
+	for(k=0;k<m3;k++)
         {
           if(isType(node[i][k],NodeGhostFluid)) {
                 i2=(i1=floor(refr_f[i][k]))+1;
@@ -309,7 +309,7 @@ void  boundary_conditions(double ****f)
                            f[5][i][j][k] = f[5][i1][j][k1] *
                               (rin+rfict-(i-i1)*dx[0]) / (rin+rfict+(i-i1)*dx[0]); //simple condition but doesn't work
                   break;
-                  case 1:  f[5][i][j][k] = f[5][i1][j][k1] * rfict*(3*rin-rfict) / (rin*(3*rfict-rin));
+		  case 1:  f[5][i][j][k] = f[5][i1][j][k1] * rfict*(3*rin-rfict) / (rin*(3*rfict-rin));
                   break;
                   case 3: f[5][i][j][k] = f[5][i1][j][k1] * (1. + (rin*rin-rfict*rfict)/6./rfict/rin);
                            i2 = (2*i1+i)/3;
@@ -369,7 +369,7 @@ void  init_conditions()
                      }
             }
         refr_f[i][k] = r1*(2*Rfl/rho-1);      //physical coordinates
-        refz_f[i][k] = z1*(2*Rfl/rho-1);
+	refz_f[i][k] = z1*(2*Rfl/rho-1);
         refr_f[i][k] = (refr_f[i][k]+R)/dx[0]-0.5-n[0]+ghost;   // simulation indices
         refz_f[i][k] = (refz_f[i][k]+R)/dx[2]-0.5-n[2]+ghost;
         if(fabs(refr_f[i][k]-i)<1 && fabs(refz_f[i][k]-k)<1 && !isType(node[i][k],NodeFluid))
@@ -399,7 +399,7 @@ void  init_conditions()
 //                                         else node[i][k] -= NodeGhostMagn;
                                           //deleting fictive cells-for constant outside field
      //for divertor's blade
-        sinth[i][k]=r1/rho;
+	sinth[i][k]=r1/rho;
         costh[i][k]=z1/rho;
         chi[i][k]  = chimax*M_PI/180.*rho/R;
        }
@@ -429,7 +429,7 @@ if(!goon) {
 /*        f[1][i][j][k]=Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
                        (Rfl*Rfl-pow(coordin(i,0),2) - pow(coordin(k,2),2))*4/Rfl/Rfl;
         f[2][i][j][k]=NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl)
-                      + (parabole+Noise*((double)rand()-RAND_MAX/2)/RAND_MAX)*
+		      + (parabole+Noise*((double)rand()-RAND_MAX/2)/RAND_MAX)*
                        (Rfl*Rfl-pow(coordin(i,0),2) - pow(coordin(k,2),2))*4/Rfl/Rfl;
         f[3][i][j][k]=NoiseNorm*sin(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl)
                       + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
@@ -581,40 +581,40 @@ int dirr=6-dir1-dir2;
 
 switch (sm*dirr) {
 	case 3 : for(i1=0; i1<sm; i1++)
-                     for(i2=0; i2<sm; i2++)
-                       tmp += m[ii][jj+i1-sh][kk+i2-sh]*kf3[0][sh][i1]*kf3[0][sh][i2]; break;
+		     for(i2=0; i2<sm; i2++)
+		       tmp += m[ii][jj+i1-sh][kk+i2-sh]*kf3[0][sh][i1]*kf3[0][sh][i2]; break;
 	case 6 : for(i1=0; i1<sm; i1++)
-                     for(i2=0; i2<sm; i2++)
-                       tmp += m[ii+i1-sh][jj][kk+i2-sh]*kf3[0][sh][i1]*kf3[0][sh][i2]; break;
+		     for(i2=0; i2<sm; i2++)
+		       tmp += m[ii+i1-sh][jj][kk+i2-sh]*kf3[0][sh][i1]*kf3[0][sh][i2]; break;
 	case 9 : for(i1=0; i1<sm; i1++)
-                     for(i2=0; i2<sm; i2++)
-                       tmp += m[ii+i1-sh][jj+i2-sh][kk]*kf3[0][sh][i1]*kf3[0][sh][i2]; break;
+		     for(i2=0; i2<sm; i2++)
+		       tmp += m[ii+i1-sh][jj+i2-sh][kk]*kf3[0][sh][i1]*kf3[0][sh][i2]; break;
 	case 5 : for(i1=0; i1<sm; i1++)
-                     for(i2=0; i2<sm; i2++)
-                       tmp += m[ii][jj+i1-sh][kk+i2-sh]*kf5[0][sh][i1]*kf5[0][sh][i2]; break;
+		     for(i2=0; i2<sm; i2++)
+		       tmp += m[ii][jj+i1-sh][kk+i2-sh]*kf5[0][sh][i1]*kf5[0][sh][i2]; break;
 	case 10: for(i1=0; i1<sm; i1++)
-                     for(i2=0; i2<sm; i2++)
-                       tmp += m[ii+i1-sh][jj][kk+i2-sh]*kf5[0][sh][i1]*kf5[0][sh][i2]; break;
+		     for(i2=0; i2<sm; i2++)
+		       tmp += m[ii+i1-sh][jj][kk+i2-sh]*kf5[0][sh][i1]*kf5[0][sh][i2]; break;
 	case 15: for(i1=0; i1<sm; i1++)
-                     for(i2=0; i2<sm; i2++)
-                       tmp += m[ii+i1-sh][jj+i2-sh][kk]*kf5[0][sh][i1]*kf5[0][sh][i2]; break;
+		     for(i2=0; i2<sm; i2++)
+		       tmp += m[ii+i1-sh][jj+i2-sh][kk]*kf5[0][sh][i1]*kf5[0][sh][i2]; break;
 	case 7 : for(i1=0; i1<sm; i1++)
-                     for(i2=0; i2<sm; i2++)
-                       tmp += m[ii][jj+i1-sh][kk+i2-sh]*kf7[0][sh][i1]*kf7[0][sh][i2]; break;
+		     for(i2=0; i2<sm; i2++)
+		       tmp += m[ii][jj+i1-sh][kk+i2-sh]*kf7[0][sh][i1]*kf7[0][sh][i2]; break;
 	case 14: for(i1=0; i1<sm; i1++)
-                     for(i2=0; i2<sm; i2++)
-                       tmp += m[ii+i1-sh][jj][kk+i2-sh]*kf7[0][sh][i1]*kf7[0][sh][i2]; break;
+		     for(i2=0; i2<sm; i2++)
+		       tmp += m[ii+i1-sh][jj][kk+i2-sh]*kf7[0][sh][i1]*kf7[0][sh][i2]; break;
 	case 21: for(i1=0; i1<sm; i1++)
-                     for(i2=0; i2<sm; i2++)
-                       tmp += m[ii+i1-sh][jj+i2-sh][kk]*kf7[0][sh][i1]*kf7[0][sh][i2]; break;
+		     for(i2=0; i2<sm; i2++)
+		       tmp += m[ii+i1-sh][jj+i2-sh][kk]*kf7[0][sh][i1]*kf7[0][sh][i2]; break;
 	default :
-    	nrerror("\nNO SUCH SAMPLE for derivative. Bye ...",0,0);
+	nrerror("\nNO SUCH SAMPLE for derivative. Bye ...",0,0);
 	}
 return(tmp/dx[dir1-1]/dx[dir2-1]);
 }
 
 double coordin(int i, int dir)
-                      //0-r,1-phi,2-z
+		      //0-r,1-phi,2-z
 {
  switch (dir)
  {
