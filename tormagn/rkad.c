@@ -15,7 +15,6 @@ void timestep(double ****f, double ****df, double t, double ****fout,
 {
    double dt, err, errs;
 
-start_tick(4,"tstep");
    dt=dttry;
    for (;;)
    {
@@ -44,7 +43,6 @@ start_tick(4,"tstep");
       *dtnext = Safety * dt * pow(err, Pgrow);
    else
       *dtnext = dt * (double)5.0;
-finish_tick(4);
 }
 
 double rkck(double ****f, double ****df1, double t, double dt, double ****fout)
@@ -61,7 +59,6 @@ double          dc1=c1-2825.0/27648.0,dc3=c3-18575.0/48384.0,
 
    int i,j,k,l;
    double err, sca, err1;
-enter++;   
    /*2rd step*/
    for(l=0;l<nvar;l++)
    for(i=0;i<m1;i++)

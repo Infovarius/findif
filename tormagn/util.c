@@ -173,7 +173,7 @@ int k;
 void operate_memory(int dir)
 {
  if(dir>0)
-   {   s_func = alloc_mem_2f(n3+2,kol_masht);
+   {   
        f  =alloc_mem_4f(nvar, m1, m2, m3);   //f[3]-pressure,f[0..2]-v(vector),f[4..6]-potential of induction(vector)
        f1 =alloc_mem_4f(nvar, m1, m2, m3);
        df =alloc_mem_4f(nvar, m1, m2, m3);
@@ -199,7 +199,6 @@ void operate_memory(int dir)
        totvfi = alloc_mem_1f(N3);
     } else
    {
-//   free_mem_2f(s_func,n3+2,kol_masht);
        free_mem_4f(f  ,nvar, m1, m2, m3);
        free_mem_4f(f1 ,nvar, m1, m2, m3);
        free_mem_4f(df ,nvar, m1, m2, m3);

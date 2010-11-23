@@ -20,7 +20,6 @@ int main(int argc, char** argv)
  MPI_Comm_size(MPI_COMM_WORLD,&size);
 
   srand(rank);
-start_tick(0,"init");
   NameMessageFile = "message.dat";
   NameErrorFile = "error.err";
   NameNuFile = "nut.dat";
@@ -62,7 +61,6 @@ start_tick(0,"init");
    dx[1]=lfi/N2;
    dx[2]=2*R/N3;
    init_conditions();
-   init_timers();
 
 //--------------------------------------
   Master {
@@ -105,12 +103,10 @@ start_tick(0,"init");
 
    if(CheckStep!=0) check(f);
    if(!goon) if (OutStep!=0) printing(f,0,t_cur,count,PulsEnergy);
-finish_tick(0);
 
 /*------------------------ MAIN ITERATIONS -------------------------*/
 
    while (t_cur < Ttot && !razlet) {
- start_tick(10,"");
        for(i=0;i<m1;i++)
          for(j=0;j<m2;j++)
             for(k=0;k<m3;k++)
@@ -127,12 +123,9 @@ finish_tick(0);
             f[2][i][j][k] = vphi;
             f[3][i][j][k] = vrho*costh[i][k]-vth*sinth[i][k];
             }    else f[1][i][j][k] = f[2][i][j][k] = f[3][i][j][k] = 0;
-    finish_tick(10);   start_tick(11,"");
         pde(t_cur, f, df);
         dttry=dtnext;
-    finish_tick(11);   start_tick(12,"");
         timestep(f, df, t_cur, f1, dttry, &dtdid, &dtnext);
-    finish_tick(12);   start_tick(13,"");
         nut_by_flux(f,dtdid);
         t_cur+=dtdid;
         count++;
@@ -158,9 +151,9 @@ finish_tick(0);
 /*        if (floor(t_cur/ChangeParamTime)<floor((t_cur+dtdid)/ChangeParamTime))
             {
             Rm = floor(t_cur/ChangeParamTime+0.5)*DeltaParam-190;
+//Rm -= DeltaParam;
             Master nmessage("Rm was changed to",Rm,count);
             }*/
-    finish_tick(13);   start_tick(14,"exch");
         for(l=0;l<nvar;l++)
         for(i=0;i<m1;i++)
         for(j=0;j<m2;j++)
@@ -176,13 +169,11 @@ finish_tick(0);
                                     }
                         }
               }*/
-    finish_tick(14); 
    }
 
    printing(f1,dtdid,t_cur,count,PulsEnergy);
    snapshot(f,eta,t_cur,count);
    if(rank==size-1) add_control_point("END");
-   print_CPU_usage();
 
    operate_memory(-1);
 //   Master fileclose(NameErrorFile);
