@@ -87,6 +87,7 @@ double d;
       read_token(iop,dtnext);
       read_token(iop,&d);         OutStep = (int)d;    //output
       read_token(iop,&d);         SnapStep = (int)d;
+      read_token(iop,&SnapDelta);
       read_token(iop,&d);         CheckStep = (int)d;
       read_token(iop,&d);         VarStep = (int)d;
       read_token(iop,&Ttot);
@@ -415,7 +416,7 @@ FILE *fd;
  Master fprintf(fd,"Number of points along x = %d\n",N1);
  Master fprintf(fd,"Number of points along y = %d\n",N2);
  Master fprintf(fd,"Number of points along z = %d\n",N3);
- Master fprintf(fd,"Reynolds number = %lf\n",Re);
+ Master fprintf(fd,"Reynolds number = %lf\n",Rm);
 
  for(v=0;v<nvar;v++)
     printbin_array3d(fd,f1[v],0,m1,0,m2,0,m3);

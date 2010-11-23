@@ -11,6 +11,7 @@ int main(int argc, char** argv)
    int i,j,k,l,i2,j2,k2;
    FILE *fd;
    int strl;
+   double ChangeParamTime = 3, DeltaParam = 10;         // for iteration on parameters
 
  /* Initialize MPI */
  MPI_Init(&argc,&argv);
@@ -145,6 +146,13 @@ int main(int argc, char** argv)
             }
         if (SnapStep!=0 && count%SnapStep==0)
             snapshot(f1,eta,t_cur,count);
+        if (SnapDelta>5*dtdid && floor(t_cur/SnapDelta)<floor((t_cur+dtdid)/SnapDelta))
+            snapshot(f1,eta,t_cur,count);
+/*        if (floor(t_cur/ChangeParamTime)<floor((t_cur+dtdid)/ChangeParamTime))
+            {
+            Rm = floor(t_cur/ChangeParamTime+0.5)*DeltaParam-190;
+            Master nmessage("Rm was changed to",Rm,count);
+            }*/
         for(l=0;l<nvar;l++)
         for(i=0;i<m1;i++)
         for(j=0;j<m2;j++)
