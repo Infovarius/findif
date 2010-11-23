@@ -266,6 +266,7 @@ for(i=beg1;i<beg1+n1;i++) {
 void check(double ****f)   //calculate energy of pulsations of all components and know if there's crash
 {
 int i,j,k,l;
+start_tick(6,"check_p");
 PulsEnergy=0;
 TotalEnergy=0;
 for(l=0;l<=2;l++)
@@ -287,6 +288,7 @@ for(l=0;l<=2;l++)
            TotalEnergy += pow(averf[l][i][k],2.);
 TotalEnergy += 1.;   //if zero average field
 razlet = (PulsEnergy/TotalEnergy>UpLimit);
+finish_tick(6);
 }
 
 void printing(double ****f1,double dtdid,double t_cur,long count,double en)
@@ -297,6 +299,7 @@ double mf[3], totmf[3], toten;     //mf[0]=max(f), mf[1]=max(df), mf[2]=max(df/f
 FILE *fv,*fnu,*fen,*fkv;
 
 //clrscr();
+start_tick(2,"print_p");
 time_now = MPI_Wtime();
 Master printf("program is working %0.2f seconds\n",time_now-time_begin);
 calculate_curl(&f1[4],B,NodeMagn);
@@ -409,6 +412,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g) maxdivB=%g(local=%g)\
                  print_array1d(fv,totvfi,0,N3);
                  fileclose(fv);
                 }
+finish_tick(2);
 }
 
 void dump(double ****f1,double ***nu,double t_cur,long count)
@@ -449,6 +453,7 @@ char *message="message";
 long tag=count,v;
 FILE *fd;
 
+start_tick(8,"snap_p");
  sprintf(str,"%s_%d_%d.snp",NameSnapFile,size,count);
  boundary_conditions(f1);
 // calculate_curl(&f1[4],B,NodeMagn);
@@ -474,5 +479,6 @@ FILE *fd;
  MPI_Barrier(MPI_COMM_WORLD);
  Master {nmessage("snap is done",t_cur,count);
          add_control_point(str);}
+finish_tick(8);                   
 }
 												  
