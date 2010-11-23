@@ -110,13 +110,13 @@ void CopyGridToBuffer(double ****,double ***,double *,int,int,int,int,int,int);
 /*------- rkad.c  -----------*/
 void timestep(double ****f, double ****df, double t, double ****fout,
               double dttry, double *dtdid, double *dtnext);
-double rkck(double ****, double ****, double, double, double ****);
+double rkck(double ****f, double ****df, double t, double dt, double ****fout);
 /*------- pde.c  -----------*/
-void   pde(double, double ****, double ****);
+void   pde(double t, double ****f, double ****df);
 double norma(double a,double b,double c,int q);
-double deviation(double ****,int,int,int);
+double deviation(double ****f,int,int,int);
 void nut_by_flux(double ****f,double Re);
-void   boundary_conditions(double ****);
+void   boundary_conditions(double ****f);
 void  init_conditions(void);
 void init_parallel(void);
 double dr(double ***m,int ii,int jj,int kk,int dir,int or,double dx,int sh,int sm);
