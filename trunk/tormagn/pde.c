@@ -180,7 +180,7 @@ void  boundary_conditions(double ****f)
    int reslen;
 
    z[0]=1; z[1]=z[2]=z[3]=-1; //  влияет на вид гран.условий (-1:жесткие, 1:свободные)
-   znorm=-1; ztau=1;          // rather for Anorm&Atau not Ar,Aphi,Az
+   znorm=-1; ztau=-1;          // rather for Anorm&Atau not Ar,Aphi,Az
 
   /*============================ divertor =================================*/
   if(t_cur<00)                  // divertors are off till t sec

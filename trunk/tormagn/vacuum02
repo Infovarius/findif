@@ -1,10 +1,10 @@
-3
+4
 ---------  Geometry parameters ------------------------------------
 6.283185307	| streamwise length (full round)
-4		| distance from centre to axis of torus
+0.		| distance from centre to axis of torus
 1		| inner radius of torus (with fluid)
 1		| outer radius of torus (with shell)
-3		| radius of region to be modelled
+2		| radius of region to be modelled
 
 ---------  Hydrodynamical parameters ------------------------------
 1		| Reynolds number
@@ -16,14 +16,14 @@
 45		| maximal angle of blade tilt (degrees)
 
 ---------   Magnetic parameters   -----------------------------
-1		| magnetic Reynolds number
-0.2		| magnetic diffusivity in conducting shell
-5		| magnetic diffusivity in poorly counducting medium(vacuum) outside
+100		| magnetic Reynolds number
+1		| magnetic diffusivity in conducting shell
+0.2		| magnetic diffusivity in poorly counducting medium(vacuum) outside
 
 ---------  Scheme (approximation) parameters ------------------
-64		| mesh point in R
-64		| mesh point in PHI
-64		| mesh point in Z
+32		| mesh point in R
+32		| mesh point in PHI
+32		| mesh point in Z
 7		| variables number
 7		| sample width
 0.001		| initial timestep
@@ -36,7 +36,7 @@
 
 ---------  Output parameters  -------------------------------
 10		| steps to statistics output (OutStep)
-100		| steps to snaps (SnapStep)
+500		| steps to snaps (SnapStep)
 10		| steps of checking divergence (CheckStep)
 1		| test of time step (VarStep)
-100		| Total time
+1000		| Total time
