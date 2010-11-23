@@ -80,7 +80,7 @@ int main(int argc, char** argv)
 
  Master nmessage("nodes outputting has been started",t_cur,count);
 
- print_array2d(fd,node,0,m1,0,m3);
+ print_array2i(fd,node,0,m1,0,m3);
  print_array2d(fd,refr_f,0,m1,0,m3);
  print_array2d(fd,refz_f,0,m1,0,m3);
  print_array2d(fd,refr_m,0,m1,0,m3);
@@ -175,12 +175,12 @@ int main(int argc, char** argv)
    snapshot(f,eta,t_cur,count);
    if(rank==size-1) add_control_point("END");
 
-   operate_memory(-1);
 //   Master fileclose(NameErrorFile);
 
    if(t_cur>=Ttot&&!razlet) nmessage("work is succesfully done",t_cur,count);
        else nrerror("this is break of scheme",t_cur,count);
    MPI_Barrier(MPI_COMM_WORLD);
+   operate_memory(-1);
    MPI_Finalize();
    nmessage("mpi_finalize is done",t_cur,count);
 return 0;
