@@ -19,7 +19,7 @@ LEVEL char *NameStatFile;
 LEVEL char *fname;
 
 LEVEL double ****f, ****f1, ***nut, ****df, ****df2, ****df3, ****df4, ****df5, ****B, ****J,
-             **s_func,dx[3], *r_1, *r_2, **node, **refr_f, **refz_f, **refr_m, **refz_m,
+             dx[3], *r_1, *r_2, **node, **refr_f, **refz_f, **refr_m, **refz_m,
              **sinth, **costh, ***eta;
 
 enum  TypeNodes {NodeUnknown=0,NodeClued=1,
@@ -134,7 +134,8 @@ void putlog(char msg_text[],long num);
 double vfi_given(double t,double rho,double rho0);
 double vtheta_given(double t,double rho,double rho0,double phi);
 /*------------ testspeed.c ------*/
+void init_tick(int num_stage,char *inname);
 void start_tick(int num_stage,char *inname);
-void finish_tick(int nomer);
+void finish_tick(int num_stage);
 void init_timers();
 void print_CPU_usage();
