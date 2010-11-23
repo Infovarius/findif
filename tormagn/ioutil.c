@@ -475,5 +475,4 @@ FILE *fd;
  Master {nmessage("snap is done",t_cur,count);
          add_control_point(str);}
 }
-
-
+												  

@@ -156,7 +156,7 @@ for(j=0;j<n3;j++)
     printf("   totEn=%lf\n",en);
     }  */
 //time_step_shell(dt);
-for(k=0;k<n3;k++)
+for(k=0;k<m3;k++)
    {
 /*   double tmp = maschtab*pow(
            (nl[2]*s_func[k][0] + nl[1]*s_func[k][1] + nl[0]*s_func[k][2])*pow(dx[2],4),
@@ -165,7 +165,7 @@ for(k=0;k<n3;k++)
    for(i=0;i<m1;i++)
        for(j=ghost;j<mm2;j++)
           if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
-            nut[i][j][k+ghost] = (1. + tmp)/Re;*/
+            nut[i][j][k] = (1. + tmp)/Re;*/
    }
 }
 
@@ -180,7 +180,7 @@ void  boundary_conditions(double ****f)
    int reslen;
 
    z[0]=1; z[1]=z[2]=z[3]=-1; //  влияет на вид гран.условий (-1:жесткие, 1:свободные)
-   znorm=-1; ztau=-1;          // rather for Anorm&Atau not Ar,Aphi,Az
+   znorm=-1; ztau=1;          // rather for Anorm&Atau not Ar,Aphi,Az
 
   /*============================ divertor =================================*/
   if(t_cur<00)                  // divertors are off till t sec
@@ -191,7 +191,7 @@ void  boundary_conditions(double ****f)
          {
          vrho = f[3][i][j][k]*costh[i][k]+f[1][i][j][k]*sinth[i][k];
          vth  = -f[3][i][j][k]*sinth[i][k]+f[1][i][j][k]*costh[i][k];
-         vphi = sqrt(pow(f[2][i][j][k],2)+pow(vth,2));                    //=sqrt(vfi^2+vth^2)
+         vphi = sqrt(pow(f[2][i][j][k],2)+vth*vth);           //sqrt(vfi*vfi+vth*vth)
          f[1][i][j][k] = vrho*sinth[i][k]+vphi*costh[i][k]*sin(chi[i][k]);
          f[2][i][j][k] = vphi*cos(chi[i][k]);
          f[3][i][j][k] = vrho*costh[i][k]-vphi*sinth[i][k]*sin(chi[i][k]);
@@ -211,6 +211,7 @@ void  boundary_conditions(double ****f)
                 MPI_Isend(buf_send[3],buf_size[1],MPI_DOUBLE,pr_neighbour[3],tag+3,MPI_COMM_WORLD,&SendRequest[req_numS++]);
                 MPI_Irecv(buf_recv[3],buf_size[1],MPI_DOUBLE,pr_neighbour[3],tag+2,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
                 }
+
    MPI_Waitall(req_numR,RecvRequest,statuses);
    if(statuses[0].MPI_ERROR) {putlog("bc:error during transfer=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
@@ -233,6 +234,7 @@ void  boundary_conditions(double ****f)
                 MPI_Isend(buf_send[1],buf_size[0],MPI_DOUBLE,pr_neighbour[1],tag+1,MPI_COMM_WORLD,&SendRequest[req_numS++]);
                 MPI_Irecv(buf_recv[1],buf_size[0],MPI_DOUBLE,pr_neighbour[1],tag,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
                 }
+
   MPI_Waitall(req_numR,RecvRequest,statuses);
   if(statuses[0].MPI_ERROR) {putlog("bc:error during transfer=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
@@ -255,6 +257,7 @@ void  boundary_conditions(double ****f)
                MPI_Isend(buf_send[5],buf_size[2],MPI_DOUBLE,pr_neighbour[5],tag+5,MPI_COMM_WORLD,&SendRequest[req_numS++]);
                MPI_Irecv(buf_recv[5],buf_size[2],MPI_DOUBLE,pr_neighbour[5],tag+4,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
                }
+
   MPI_Waitall(req_numR,RecvRequest,statuses);
   if(statuses[0].MPI_ERROR) {putlog("bc:error during transfer=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
