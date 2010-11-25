@@ -39,9 +39,9 @@ void pde(double t, double ****f, double ****df)
    for(k=0;k<m3;k++)
      if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
      {
-//      if(j<=ghost && n[1]==0) continue;
+      if(j<=ghost && n[1]==0) continue;
       M = 1./(rc*coordin(i,0)+1);
-      memset(dp1,0,3*sizeof(double));   memset(dn1,0,3*sizeof(double));
+      memset(dp1,0,3*sizeof(double));      memset(dn1,0,3*sizeof(double));
       memset(dv1,0,12*sizeof(double));  memset(dv2,0,12*sizeof(double));
       memset(dA11,0,36*sizeof(double));
       for(m=0;m<3;m++) {
