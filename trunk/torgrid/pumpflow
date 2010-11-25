@@ -1,21 +1,21 @@
 4
 ---------  Geometry paramereters ------------------------------
-1		| streamwise length (not angle)
-0.15		| inverse distance from centre to axis of torus
+6.28		| streamwise length (not angle)
+0		| inverse distance from centre to axis of torus
 1		| radius of torus
 
 ---------  Physical paramereters ------------------------------
-1		| Reynolds number
-1		| init profile: 0 - zero, 1 - parabole
-0.001		| amplitude of initial random noise
-0.01		| amplitude of initial normal noise
+100000		| Reynolds number
+0		| init profile: 0 - zero, 1 - parabole
+0.00		| amplitude of initial random noise
+0.00		| amplitude of initial normal noise
 10		| maximal level of fluctuation after which nut is on
 45		| maximal angle of blade tilt (degrees)
 
 ---------  Scheme (aproximation) parameters ------------------
-128		| mesh point in R
-5		| mesh point in PHI
-128		| mesh point in Z
+64		| mesh point in R
+64		| mesh point in PHI
+64		| mesh point in Z
 4		| variables number
 7		| aproxx order
 0.001		| initial timestep
@@ -24,16 +24,16 @@
 15		| number of shells (Ns)
 0	 	| scaling factor in nu turbulent (maschtab)
 2		| quotient of shell wavenumbers (lambda)
-3		| maximal size of averaging vicinity (max_okr)
+2		| maximal size of averaging vicinity (max_okr)
 
 ---------  Output parameters  -------------------------------
-10		| steps to statistics output (OutStep)
+5		| steps to statistics output (OutStep)
 0		| steps to snaps (SnapStep)
-0.2		| simulation time delta to snap (SnapDelta)
+0.1		| simulation time delta to snap (SnapDelta)
 10		| steps of checking divergence (CheckStep)
-1		| test of time step (VarStep)
-200		| Total time
+2		| test of time step (VarStep)
+20		| Total time
 ---------  Regulators ----------------------------------------
-3		| simulation time delta between parameter changing (ChangeParamTime)
--1		| delta of parameter changing (DeltaParam)
--1		| name of initial file
+0		| simulation time delta between parameter changing (ChangeParamTime)
+1		| delta of parameter changing (DeltaParam)
+0		| name of initial file
