@@ -41,7 +41,6 @@ void putlog(char msg_text[],long num)
    fprintf(log,"%s %d\n",msg_text,num);
    printf("%s %d...",msg_text,num);
    fileclose(log);
-   printf("OK\n");
 }
 
 void read_token(FILE *inp,double *param)
@@ -264,10 +263,10 @@ double mf[3], totmf[3], toten;     //mf[0]=max(f), mf[1]=max(df), mf[2]=max(df/f
 FILE *fv,*fnu,*fen,*fkv;
 
 //clrscr();
+divv = totdivv = 0;
 time_now = MPI_Wtime();
 Master printf("program is working %0.2f seconds\n",time_now-time_begin);
 
-divv = 0;
 for(i=0;i<m1;i++)
       for(k=0;k<m3;k++)
         if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
@@ -298,7 +297,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
             if(f1[l][i][k]!=0) temp/=f1[l][i][k];
             if (temp>mf[2]) mf[2]=temp;
           }
-       MPI_Allreduce(&mf, &totmf, 3, MPI_DOUBLE , MPI_MAX, MPI_COMM_WORLD);
+       MPI_Allreduce(mf, totmf, 3, MPI_DOUBLE , MPI_MAX, MPI_COMM_WORLD);
 //     Master printf("%d  maxf=%e(loc=%e) \tmaxdf=%e(loc=%e) \tmax(df/f)=%e(loc=%e)\n",
 //                     l,      totmf[0],mf[0],    totmf[1],mf[1],       totmf[2],mf[2]);
        Master printf("%d  maxf=%e \tmaxdf=%e \tmax(df/f)=%e\n",
@@ -312,7 +311,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
          for(k=0;k<m3;k++)
          if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
             mf[0] += fabs(1+coordin(i,0)*rc)*pow(f1[l][i][k],2);
-       MPI_Allreduce(&mf, &totmf, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
+       MPI_Allreduce(mf, totmf, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
        Master fprintf(fen,"\t %10.10g",totmf[0]/N1/N3);
        }
 
@@ -361,7 +360,8 @@ int tag=1,v;
  if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
  MPI_Barrier(MPI_COMM_WORLD);
  Master {nmessage("dump is done",t_cur,count);
-                   add_control_point(NameDumpFile);}
+                   //add_control_point(NameDumpFile);
+                   }
 }
 
 void snapshot(double ***f1,double **nu,double t_cur,long count)

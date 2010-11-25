@@ -56,7 +56,7 @@ LEVEL double ChangeParamTime, DeltaParam;  // for iteration on parameters
 LEVEL int num_dump;
 LEVEL long numlog;
 
-#if !defined(max)
+#ifndef max
 #define max(a, b)  (((a) > (b)) ? (a) : (b))
 #define min(a, b)  (((a) < (b)) ? (a) : (b))
 #endif
