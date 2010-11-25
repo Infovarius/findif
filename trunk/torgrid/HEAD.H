@@ -8,7 +8,6 @@
 LEVEL char *NameMessageFile;
 LEVEL char *NameErrorFile;
 LEVEL char NameInitFile[200];
-LEVEL char *NameNuFile;
 LEVEL char *NameVFile;
 LEVEL char *NameDumpFile;
 LEVEL char *NameSnapFile;
@@ -50,14 +49,21 @@ LEVEL int OutStep;    //each OutStep result is printing
 LEVEL int SnapStep;   //each SnapStep snapshot is done
 LEVEL double SnapDelta;  //each SnapDelta of simulation time snapshot is done
 LEVEL int VarStep;    //each VarStep step in RungeKutta varies
+LEVEL double ChangeParamTime, DeltaParam;  // for iteration on parameters
 LEVEL int num_dump;
 LEVEL long numlog;
 
+#if !defined(max)
 #define max(a, b)  (((a) > (b)) ? (a) : (b))
 #define min(a, b)  (((a) < (b)) ? (a) : (b))
+#endif
+#if !defined(min_d)
 #define min_d min(min(dx[0],dx[1]),dx[2])
+#endif
 /*----------------parallel---------------*/
+#if !defined(Master)
 #define Master if(rank==0)
+#endif
 LEVEL int rank, size;
 LEVEL MPI_Request SendRequest[256],RecvRequest[256];
 LEVEL MPI_Status statuses[256];
@@ -67,7 +73,9 @@ LEVEL int pr[3];                                         //3D
 //void init_parallel();                       in file pde.c
 
 //--------for GOY
+#if !defined(kol_masht)
 #define kol_masht 10
+#endif
 LEVEL int max_okr;  //должно быть <=ghost, иначе окрестность выходит из фикт.обл-ти - виснет
 LEVEL double lambda; //multiplier
 LEVEL long num_points[kol_masht];
@@ -125,8 +133,8 @@ void init_param(int argc, char** argv,double *dtnext);
 int init_data(void);
 void print_array1d(FILE *ff,double *a,int beg1,int n1);
 void print_array2d(FILE *ff,double **a,int beg1,int n1,int beg2,int n2);
-void print_array3d(FILE *ff,double ***a,int beg1,int n1,int beg2,int n2,int beg3,int n3);
 void print_array2i(FILE *ff,int **a,int beg1,int n1,int beg2,int n2);
+void print_array3d(FILE *ff,double ***a,int beg1,int n1,int beg2,int n2,int beg3,int n3);
 void check(double ****f);
 void printing(double ****f1,double dtdid,double t_cur,long count,double en);
 void dump(double ****f1,double ***nu,double t_cur,long count);
