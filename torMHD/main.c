@@ -90,7 +90,7 @@ int main(int argc, char** argv)
             }
 //--------------------------------------
 
-   boundary_conditions(f,nut);
+    boundary_conditions(f,nut);
 
    if(!goon) dump(f,eta,t_cur,count);
    time_begin = MPI_Wtime();
@@ -146,20 +146,20 @@ int main(int argc, char** argv)
 
         if (ChangeParamTime!=0 && floor((t_cur-dtdid)/ChangeParamTime)<floor(t_cur/ChangeParamTime))
 		{
-		//Rm = floor(t_cur/ChangeParamTime+0.5)*DeltaParam-190;
-		if(!outed) { snapshot(f,eta,t_cur,count); outed = 1;}
+		   //Rm = floor(t_cur/ChangeParamTime+0.5)*DeltaParam-190;
+		   if(!outed) { snapshot(f,eta,t_cur,count); outed = 1;}
 //                MPI_Barrier(MPI_COMM_WORLD);
-		tmp = (Rm += DeltaParam);
-                tmpC = count;  tmpT = t_cur;
+		    tmp = (Rm += DeltaParam);
+            tmpC = count;  tmpT = t_cur;
 			init_param(argc,argv,&dtnext,1);       // initialization of parameters
 
-		if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
+		    if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
 			if(strcmp(NameInitFile,"-1")==0) goon = 1;
 
-                count = tmpC;  t_cur = tmpT;  Rm = tmp;
-		init_conditions();
+            count = tmpC;  t_cur = tmpT;  Rm = tmp;
+		    init_conditions();									   
             p1 = 4/Re;
-		goon = 1;
+		    goon = 1;
             Master nmessage("parameter was changed to",Rm,count);
    	   	}
 /*        if(kbhit())
