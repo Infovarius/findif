@@ -2,6 +2,8 @@
 #define LEVEL extern
 #include "head.h"
 
+#define EPS 1e-10
+
 double norma(double a,double b,double c,int order)
 {
 if(order==2) return ((a)*(a)+(b)*(b)+(c)*(c));
@@ -77,7 +79,7 @@ void pde(double t, double ****f, double ****df)
 
 double deviation(double ****f,int i,int j,int k)
 {
-const int size_okr=min(max_okr,ghost);
+const int size_okr=max(max_okr,ghost);
 double flux = 0;
 int kol=0,l;
    for(l=1;l<=size_okr;l++)
@@ -145,8 +147,8 @@ for(k=0;k<m3;k++)
      r1 = coordin(i,0);   z1 = coordin(k,2);
      rho = 1 - sqrt(r1*r1 + z1*z1)/R;
      if(rho<0) tmp = 0;
-	  else tmp = sqrt(2*Re)*(0.32*rho*(1-rho)+0.013*(2*rho-1)*(2*rho-1)*rho);   // Шлихтинг
-//          else tmp = sqrt(2*Re)*0.276467*rho*(2.08 - 2.8*rho + rho*rho)*(0.64 - 1.2*rho + rho*rho);   // Рейнольдс
+//	  else tmp = sqrt(2*Re)*(0.32*rho*(1-rho)+0.013*(2*rho-1)*(2*rho-1)*rho);   // Шлихтинг
+          else tmp = sqrt(2*Re)*0.276467*rho*(2.08 - 2.8*rho + rho*rho)*(0.64 - 1.2*rho + rho*rho);   // Рейнольдс
        for(j=ghost;j<mm2;j++)
 	if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
 	  nut[i][j][k] = (1. + maschtab*tmp)/Re;
@@ -335,14 +337,16 @@ void  init_conditions()
         refz[i][k] = z1*(2*R/rho-1);
         refr[i][k] = (refr[i][k]+R)/dx[0]-0.5-n[0]+ghost;   // simulation indices
         refz[i][k] = (refz[i][k]+R)/dx[2]-0.5-n[2]+ghost;
-        if(fabs(refr[i][k]-i)<1 && fabs(refz[i][k]-k)<1 && !isType(node[i][k],NodeFluid))
+        if(fabs(refr[i][k]-i)<1 && fabs(refr[i][k]-(int)refr[i][k])>EPS &&
+           fabs(refz[i][k]-k)<1 && fabs(refz[i][k]-(int)refz[i][k])>EPS &&
+           isType(node[i][k],NodeGhostFluid))
                  { setType(&node[i][k],NodeFluid);
                    if(isType(node[i][k],NodeGhostFluid)) node[i][k] -= NodeGhostFluid;
                    for(l=-ghost;l<=ghost;l++)
                      { if(i+l>=0&&i+l<m1) if(!isType(node[i+l][k],NodeFluid))
-                                              setType(&node[i+l][k],NodeGhostFluid);
+                                             setType(&node[i+l][k],NodeGhostFluid);
                        if(k+l>=0&&k+l<m3) if(!isType(node[i][k+l],NodeFluid))
-                                              setType(&node[i][k+l],NodeGhostFluid);
+                                             setType(&node[i][k+l],NodeGhostFluid);
                      }
                   }
      //for divertor's blade
@@ -351,7 +355,7 @@ void  init_conditions()
         chi[i][k]  = chimax*M_PI/180.*rho/R;
        }
 
-   for(i=0;i<m1;i++) { r_1[i] = rc/(rc*(dx[0]*(i-ghost+0.5+n[0])-R)+1); r_2[i] = r_1[i]*r_1[i]; } 
+   for(i=0;i<m1;i++) { r_1[i] = rc/(rc*(dx[0]*(i-ghost+0.5+n[0])-R)+1); r_2[i] = r_1[i]*r_1[i]; }
 
 // --------------- initial conditions -----------------------------------------
 //   k1=2*M_PI/lfi;  k3=M_PI/l3;
@@ -477,8 +481,67 @@ double dr(double ***m, int ii, int jj, int kk, int dir, int or, double dx, int s
 {
 double tmp=0.0;
 int i;
-
-switch (sm*dir) {
+if(or==0)
+switch (sm) {
+     case 7 :  switch (dir) {
+                  case 1 : tmp = kf7[or][sh][6]*(m[ii+3][jj][kk]-m[ii-3][jj][kk])
+                               + kf7[or][sh][5]*(m[ii+2][jj][kk]-m[ii-2][jj][kk])
+                               + kf7[or][sh][4]*(m[ii+1][jj][kk]-m[ii-1][jj][kk]); break;
+                  case 2 : tmp = kf7[or][sh][6]*(m[ii][jj+3][kk]-m[ii][jj-3][kk])
+                               + kf7[or][sh][5]*(m[ii][jj+2][kk]-m[ii][jj-2][kk])
+                               + kf7[or][sh][4]*(m[ii][jj+1][kk]-m[ii][jj-1][kk]); break;
+                  case 3 : tmp = kf7[or][sh][6]*(m[ii][jj][kk+3]-m[ii][jj][kk-3])
+                               + kf7[or][sh][5]*(m[ii][jj][kk+2]-m[ii][jj][kk-2])
+                               + kf7[or][sh][4]*(m[ii][jj][kk+1]-m[ii][jj][kk-1]); break;
+                  }; break;
+     case 3 :  switch (dir) {
+                  case 1 : tmp = kf3[or][sh][2]*(m[ii+1][jj][kk]-m[ii-1][jj][kk]); break;
+                  case 2 : tmp = kf3[or][sh][2]*(m[ii][jj+1][kk]-m[ii][jj-1][kk]); break;
+                  case 3 : tmp = kf3[or][sh][2]*(m[ii][jj][kk+1]-m[ii][jj][kk-1]); break;
+                  }; break;
+     case 5 :  switch (dir) {
+                  case 1 : tmp = kf5[or][sh][4]*(m[ii+2][jj][kk]-m[ii-2][jj][kk])
+                               + kf5[or][sh][3]*(m[ii+1][jj][kk]-m[ii-1][jj][kk]); break;
+                  case 2 : tmp = kf5[or][sh][4]*(m[ii][jj+2][kk]-m[ii][jj-2][kk])
+                               + kf5[or][sh][3]*(m[ii][jj+1][kk]-m[ii][jj-1][kk]); break;
+                  case 3 : tmp = kf5[or][sh][4]*(m[ii][jj][kk+2]-m[ii][jj][kk-2])
+                               + kf5[or][sh][3]*(m[ii][jj][kk+1]-m[ii][jj][kk-1]); break;
+                  }; break;
+    }
+if(or==1)
+switch (sm) {
+     case 7 :  switch (dir) {
+                  case 1 : tmp = kf7[or][sh][6]*(m[ii+3][jj][kk]+m[ii-3][jj][kk])
+                               + kf7[or][sh][5]*(m[ii+2][jj][kk]+m[ii-2][jj][kk])
+                               + kf7[or][sh][4]*(m[ii+1][jj][kk]+m[ii-1][jj][kk])
+                               + kf7[or][sh][3]*m[ii][jj][kk]; break;
+                  case 2 : tmp = kf7[or][sh][6]*(m[ii][jj+3][kk]+m[ii][jj-3][kk])
+                               + kf7[or][sh][5]*(m[ii][jj+2][kk]+m[ii][jj-2][kk])
+                               + kf7[or][sh][4]*(m[ii][jj+1][kk]+m[ii][jj-1][kk])
+                               + kf7[or][sh][3]*m[ii][jj][kk]; break;
+                  case 3 : tmp = kf7[or][sh][6]*(m[ii][jj][kk+3]+m[ii][jj][kk-3])
+                               + kf7[or][sh][5]*(m[ii][jj][kk+2]+m[ii][jj][kk-2])
+                               + kf7[or][sh][4]*(m[ii][jj][kk+1]+m[ii][jj][kk-1])
+                               + kf7[or][sh][3]*m[ii][jj][kk]; break;
+                  }; break;
+     case 3 :  switch (dir) {
+                  case 1 : tmp = kf3[or][sh][2]*(m[ii+1][jj][kk]+m[ii-1][jj][kk])+ kf3[or][sh][1]*m[ii][jj][kk]; break;
+                  case 2 : tmp = kf3[or][sh][2]*(m[ii][jj+1][kk]+m[ii][jj-1][kk])+ kf3[or][sh][1]*m[ii][jj][kk]; break;
+                  case 3 : tmp = kf3[or][sh][2]*(m[ii][jj][kk+1]+m[ii][jj][kk-1])+ kf3[or][sh][1]*m[ii][jj][kk]; break;
+                  }; break;
+     case 5 :  switch (dir) {
+                  case 1 : tmp = kf5[or][sh][4]*(m[ii+2][jj][kk]+m[ii-2][jj][kk])
+                               + kf5[or][sh][3]*(m[ii+1][jj][kk]+m[ii-1][jj][kk])
+                               + kf5[or][sh][2]*m[ii][jj][kk]; break;
+                  case 2 : tmp = kf5[or][sh][4]*(m[ii][jj+2][kk]+m[ii][jj-2][kk])
+                               + kf5[or][sh][3]*(m[ii][jj+1][kk]+m[ii][jj-1][kk])
+                               + kf5[or][sh][2]*m[ii][jj][kk]; break;
+                  case 3 : tmp = kf5[or][sh][4]*(m[ii][jj][kk+2]+m[ii][jj][kk-2])
+                               + kf5[or][sh][3]*(m[ii][jj][kk+1]+m[ii][jj][kk-1])
+                               + kf5[or][sh][2]*m[ii][jj][kk]; break;
+                  }; break;
+    }
+/*switch (sm*dir) {
 	case 3 : for(i=0; i<sm; i++) tmp += m[ii+i-sh][jj][kk]*kf3[or][sh][i]; break;
 	case 6 : for(i=0; i<sm; i++) tmp += m[ii][jj+i-sh][kk]*kf3[or][sh][i]; break;
 	case 9 : for(i=0; i<sm; i++) tmp += m[ii][jj][kk+i-sh]*kf3[or][sh][i]; break;
@@ -490,7 +553,7 @@ switch (sm*dir) {
 	case 21: for(i=0; i<sm; i++) tmp += m[ii][jj][kk+i-sh]*kf7[or][sh][i]; break;
 	default :
     	nrerror("\nNO SUCH SAMPLE for derivative. Bye ...",0,0);
-	}
+	} */
 return(tmp/dx);
 }
 
