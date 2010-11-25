@@ -47,7 +47,7 @@ int main(int argc, char** argv)
       }
 
    init_param(argc,argv,&dtnext);       // initialization of parameters
-   Gamma=1e-1;
+   Gamma=1e-4;
    ghost=(approx-1)/2+1;                  //radius of approx sample
    t_cur=0;
    count=0; enter = 0;
@@ -94,7 +94,7 @@ int main(int argc, char** argv)
    MPI_Barrier(MPI_COMM_WORLD);
    boundary_conditions(f,nut);
 
-   dump(f,nut,t_cur,count); 
+   dump(f,nut,t_cur,count);
 
    time_begin = MPI_Wtime();
    if(!goon) Master nmessage("work has begun",0,0);
@@ -131,7 +131,7 @@ int main(int argc, char** argv)
         outed = 0;
 	if (SnapStep!=0 && count%SnapStep==0)
 	     { snapshot(f1,nut,t_cur,count); outed=1; }
-	if (SnapDelta>5*dtdid && floor((t_cur-dtdid)/SnapDelta)<floor(t_cur/SnapDelta) && !outed)
+	if (SnapDelta>2*dtdid && floor((t_cur-dtdid)/SnapDelta)<floor(t_cur/SnapDelta) && !outed)
    	     { snapshot(f1,nut,t_cur,count); outed=1; }
         ft = f;  f = f1;  f1 = ft;
         if (count%100==0) {
@@ -173,10 +173,10 @@ int main(int argc, char** argv)
 /*        if(kbhit())
 	     {
 		switch (getch()) {
-			case 'd' : dump(f,t_cur,count);  break;
-			case 'q' : { dump(f,t_cur,count);
+			case 'd' : dump(f,nut,t_cur,count);  break;
+			case 'q' : { dump(f,nut,t_cur,count);
 				     MPI_Finalize();
-                                     nrerror("You asked to exit. Here you are...",t_cur);
+                                     nrerror("You asked to exit. Here you are...",t_cur,count);
                                     }
                         }
               }*/

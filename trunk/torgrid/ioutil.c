@@ -255,9 +255,9 @@ for(l=0;l<=2;l++)
    for(i=0;i<m1;i++)
       for(k=0;k<m3;k++)
         averf[l][i][k] = 0;
-for(i=0;i<m1;i++)
+for(i=ghost;i<mm1;i++)
      for(j=ghost;j<mm2;j++)
-        for(k=0;k<m3;k++)
+        for(k=ghost;k<mm3;k++)
           if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
            {
            PulsEnergy+=deviation(f,i,j,k);
@@ -300,7 +300,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
    MPI_Allreduce(&en, &toten, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
    Master printf("Energy of pulsations=%g (local=%g)\n",toten,en);
    Master fen = fileopen(NameEnergyFile,count);
-   Master fprintf(fen,"%0.10g  \t%0.20g",t_cur,toten);
+   Master fprintf(fen,"%0.10g  \t%0.20g",t_cur,totdivv);
 
   // -------------------Maxima of array components and their changes---------------------------
    for(l=0;l<nvar;l++) {
@@ -340,7 +340,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
    Master printf("number of runge-kutt calculations=%d\n",enter);
 
  // -------------------- average profile of velocity ---------------------
-         for(i=0;i<N3;i++)    vfi[i]=0;
+/*         for(i=0;i<N3;i++)    vfi[i]=0;
          for(i=0;i<N3;i++) totvfi[i]=0;
          for(i=0;i<m1;i++)
 	    for(j=ghost;j<mm2;j++)
@@ -353,7 +353,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
                  fprintf(fv,"{%8.8f}\t",t_cur);
                  print_array1d(fv,totvfi,0,N3);
                  fileclose(fv);
-                }
+                }*/
 }
 
 void dump(double ****f1,double ***nu,double t_cur,long count)
