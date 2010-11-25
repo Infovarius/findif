@@ -1,8 +1,6 @@
 #define LEVEL
 
 #include "head.h"
-#include "time.h"
-
 
 int main(int argc, char** argv)
 {
@@ -10,6 +8,7 @@ int main(int argc, char** argv)
    int i,j,k,l,i2,j2,k2;
    FILE *fd;
    int strl;
+   double ChangeParamTime = 3, DeltaParam = 10;         // for iteration on parameters
 
  /* Initialize MPI */
  MPI_Init(&argc,&argv);
@@ -55,9 +54,10 @@ int main(int argc, char** argv)
        else { init_parallel();  operate_memory(1);}
    fileclose(fd);
 
-   dx[0]=R/N1;
-   dx[1]=lfi/N2;
+   dx[0]=2*R/N1;
+   dx[1]=2*R/N2;
    dx[2]=H/N3;
+
    init_conditions();
 
 //--------------------------------------
@@ -68,20 +68,18 @@ int main(int argc, char** argv)
       for(i=0;i<N2+2*ghost;i++) fprintf(fd,"%e ",coordin(i,1));
       fprintf(fd,"\n");
       for(i=0;i<N3+2*ghost;i++) fprintf(fd,"%e ",coordin(i,2));
-      fclose(fd);
+      fileclose(fd);
      }
 //--------------------------------------
  if(!goon) {
     if(rank!=0) MPI_Recv("",0,MPI_CHAR,rank-1,1,MPI_COMM_WORLD,statuses);
 
- fd=fileopen("node",rank);
+/* fd=fileopen("node",rank);
 
  Master nmessage("nodes outputting has been started",t_cur,count);
 
- print_array2d(fd,node,0,m1,0,m3);
- print_array2d(fd,refr,0,m1,0,m3);
- print_array2d(fd,refz,0,m1,0,m3);
- fclose(fd);
+/ print_array2i(fd,node,0,m1,0,m3);
+ fileclose(fd);*/
 
  if(rank!=size-1) MPI_Send("",0,MPI_CHAR,rank+1,1,MPI_COMM_WORLD);
              else nmessage("nodes has been dumped",t_cur,count);
@@ -89,7 +87,7 @@ int main(int argc, char** argv)
 //--------------------------------------
 
    boundary_conditions(f,nut);
-   
+
    if(!goon)  dump(f,nut,t_cur,count);
 
    time_begin = MPI_Wtime();
@@ -125,9 +123,14 @@ int main(int argc, char** argv)
 	    }
 	if (SnapStep!=0 && count%SnapStep==0)
 	    snapshot(f1,nut,t_cur,count);
-        if (SnapDelta>5*dtdid && floor(t_cur/SnapDelta)>floor((t_cur-dtdid)/SnapDelta))
+        if (SnapDelta>5*dtdid && floor(t_cur/SnapDelta)<floor((t_cur+dtdid)/SnapDelta))
             snapshot(f1,nut,t_cur,count);
-
+/*        if (floor(t_cur/ChangeParamTime)<floor((t_cur+dtdid)/ChangeParamTime))
+            {
+            Re = floor(t_cur/ChangeParamTime+0.5)*DeltaParam-190;
+         //Re -= DeltaParam;
+            Master nmessage("Rm was changed to",Rm,count);
+            }*/
 	for(l=0;l<nvar;l++)
 	for(i=0;i<m1;i++)
 	for(j=0;j<m2;j++)
@@ -149,12 +152,12 @@ int main(int argc, char** argv)
    snapshot(f,nut,t_cur,count);
    if(rank==size-1) add_control_point("END");
 
-   operate_memory(-1);
 //   Master fileclose(NameErrorFile);
 
    if(t_cur>=Ttot&&!razlet) nmessage("work is succesfully done",t_cur,count);
        else nrerror("this is break of scheme",t_cur,count);
    MPI_Barrier(MPI_COMM_WORLD);
+   operate_memory(-1);
    MPI_Finalize();
    nmessage("mpi_finalize is done",t_cur,count);
 return 0;
