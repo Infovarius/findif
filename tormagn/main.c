@@ -6,8 +6,8 @@
 
 int main(int argc, char** argv)
 {
-   double dttry, dtdid, dtnext, tmp;
-   int i,j,k,l;
+   double dttry, dtdid, dtnext, tmp,tmpT;
+   int i,j,k,l,tmpC;
    int outed;
    FILE *fd, *ferror;
    int strl;
@@ -36,14 +36,8 @@ int main(int argc, char** argv)
   sprintf(NameStatFile,"%s_%d.sta",fname,rank); NameStatFile[strl+8] = 0;
 
    Master nmessage("--------------------------------------------------------------------------",-1,-1);
-   init_param(argc,argv,&dtnext);       // initialization of parameters
-   Gamma=1e-4;
-   ghost=(approx-1)/2;                  //radius of approx sample
-   t_cur=0;
-   count=0; enter = 0;
-   timeE1=0;
 
-/* ---------------------- initialization of arrays --------------------- */
+/* ---------------------- reading files and arrays --------------------- */
    goon = ((fd=fopen(NameCPFile,"r+"))>0);
    if(fd==NULL) { //putlog("File of cp were not opened",goon);
                   Master if((fd=fopen(NameCPFile,"w+"))!=NULL) ;//putlog("File cp was successfully created",1);
@@ -53,6 +47,14 @@ int main(int argc, char** argv)
       { do fscanf(fd,"%s\n",NameInitFile); while (!feof(fd));
         goon = strcmp(NameInitFile,"END");
       }
+
+   init_param(argc,argv,&dtnext);       // initialization of parameters
+   Gamma=1e-4;
+   ghost=(approx-1)/2;                  //radius of approx sample
+   t_cur=0;
+   count=0; enter = 0;
+   timeE1=0;
+
    if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
        else { init_parallel();  operate_memory(1);}
    fileclose(fd);
@@ -60,6 +62,7 @@ int main(int argc, char** argv)
    dx[0]=2*R/N1;
    dx[1]=lfi/N2;
    dx[2]=2*R/N3;
+
    init_conditions();
 
 //--------------------------------------
@@ -94,7 +97,7 @@ int main(int argc, char** argv)
 
    boundary_conditions(f);
 
-   if(!goon)  dump(f,eta,t_cur,count);
+//   if(!goon)  dump(f,eta,t_cur,count);
 
    time_begin = MPI_Wtime();
    if(!goon) Master nmessage("work has begun",0,0);
@@ -150,15 +153,33 @@ int main(int argc, char** argv)
         }
 
         if (ChangeParamTime!=0 && floor((t_cur-dtdid)/ChangeParamTime)<floor(t_cur/ChangeParamTime))
-            {
-            //Rm = floor(t_cur/ChangeParamTime+0.5)*DeltaParam-190;
-            if(!outed) { snapshot(f,eta,t_cur,count); outed = 1;}
-            Rm += DeltaParam;
-            goon = 0;
-            init_conditions(); fill_velocity(0.3, f);
-            goon = 1;
-            Master nmessage("Rm was changed to",Rm,count);
-            }
+		{
+		//Rm = floor(t_cur/ChangeParamTime+0.5)*DeltaParam-190;
+		if(!outed) { snapshot(f,eta,t_cur,count); outed = 1;}
+//                MPI_Barrier(MPI_COMM_WORLD);
+		tmp = (Rm += DeltaParam);
+                tmpC = count;  tmpT = t_cur;
+		goon = ((fd=fopen(NameCPFile,"r+"))>0);
+		if(goon)
+			{ do fscanf(fd,"%s\n",NameInitFile); while (!feof(fd));
+//                        putlog(NameInitFile,ftell(fd));
+			goon = strcmp(NameInitFile,"END");
+			}
+		init_param(argc,argv,&dtnext);       // initialization of parameters
+		ghost=(approx-1)/2;                  //radius of approx sample
+		dx[0]=2*R/N1;
+		dx[1]=lfi/N2;
+		dx[2]=2*R/N3;
+
+		if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
+		fileclose(fd);
+
+                count = tmpC;  t_cur = tmpT;  Rm = tmp;
+		init_conditions();
+		fill_velocity(0.3, f);   fill_velocity(0.3, f1);
+		goon = 1;
+		Master nmessage("Rm was changed to",Rm,count);
+   	   	}
 /*        if(kbhit())
              {
                 switch (getch()) {
