@@ -64,7 +64,7 @@ void pde(double t, double ****f, double ****df)
 				   -f[1][i][j][k]*r_2[i]-2*dv1[2][1]*r_1[i])
 		     -dp1[0]/Gamma/f[0][i][j][k]//+w*w/r_1[i]       +2*w*f[2][i][j][k]                   //forces of inertion
                 -(dv1[1][0]<0 ? mu[0]*dv1[1][0]*(dp1[0]*dv1[1][0]+2*f[0][i][j][k]*dv2[1][0]) : 0)
-              +(1 || j+n[1]<=ghost+2  || N2/2<=j+n[1]<=N2/2+2 ? coordin(k,2)*f[2][i][j][k] : 0)                //helical force
+              +(j+n[1]<=ghost+2 || N2/2<=j+n[1]<=N2/2+2 ? coordin(k,2)*f[2][i][j][k] : 0)                //helical force
 		     + (dn1[0]-f[1][i][j][k])*dv1[1][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[1][1]
 		     + (dn1[2]-f[3][i][j][k])*dv1[1][2]
@@ -93,7 +93,7 @@ void pde(double t, double ****f, double ****df)
       df[3][i][j][k]=nut[i][j][k]*(dv2[3][0]+dv2[3][1]+dv2[3][2]+r_1[i]*dv1[3][0])
 		     -dp1[2]/Gamma/f[0][i][j][k]
                 -(dv1[3][2]<0 ? mu[2]*dv1[3][2]*(dp1[2]*dv1[3][2]+2*f[0][i][j][k]*dv2[3][2]) : 0)
-              -(1 || j+n[1]<=ghost+2  || N2/2<=j+n[1]<=N2/2+2 ? (coordin(i,0)-rc)*f[2][i][j][k] :0)            //helical force
+              -(j+n[1]<=ghost+2 || N2/2<=j+n[1]<=N2/2+2 ? (coordin(i,0)-rc)*f[2][i][j][k] :0)            //helical force
 		     + (dn1[0]-f[1][i][j][k])*dv1[3][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[3][1]
 		     + (dn1[2]-f[3][i][j][k])*dv1[3][2]
@@ -160,7 +160,7 @@ calculate_curl(&f[4],B,NodeMagn);
        df[6][i][j][k]=Rm*(f[1][i][j][k]*B[1][i][j][k]-f[2][i][j][k]*B[0][i][j][k])
                      +eta[i][j][k]*(dv2[6][0]+dv2[6][1]+dv2[6][2]+r_1[i]*dv1[6][0])
                      +(eta0-eta[i][j][k])*(dv1[4][2]*r_1[i]+dA11[4][0][2]+dA11[5][1][2]+dv2[6][2]); 
-       
+
    if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
 	   {
 	   // пондеромоторная сила
@@ -177,7 +177,7 @@ calculate_curl(&f[4],B,NodeMagn);
 		     +(dv2[4][0]+dv2[4][1]+dv2[4][2])*B[1][i][j][k])
 		     ;
 	   }
-      }   else df[4][i][j][k] = df[5][i][j][k] = df[6][i][j][k] = 0;
+      } else df[4][i][j][k] = df[5][i][j][k] = df[6][i][j][k] = 0;
    return;
 }
 
@@ -690,7 +690,7 @@ if(!goon) {
                      }
       }
 //   struct_func(f,2,2,3);
-//   fill_velocity(0.3, f);
+   fill_velocity(0.3, f);
    nmessage("Arrays were filled with initial values - calculation from beginning",-1,-1);
    } else nmessage("Arrays were filled with initial values - calculation is continuing",t_cur,count);
 }
