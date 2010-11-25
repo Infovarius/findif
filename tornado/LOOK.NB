@@ -1,0 +1,568 @@
+(************** Content-type: application/mathematica **************
+                     CreatedBy='Mathematica 5.0'
+
+                    Mathematica-Compatible Notebook
+
+This notebook can be used with any Mathematica-compatible
+application, such as Mathematica, MathReader or Publicon. The data
+for the notebook starts with the line containing stars above.
+
+To get the notebook into a Mathematica-compatible application, do
+one of the following:
+
+* Save the data starting with the line of stars above into a file
+  with a name ending in .nb, then open the file inside the
+  application;
+
+* Copy the data starting with the line of stars above to the
+  clipboard, then use the Paste menu command inside the application.
+
+Data for notebooks contains only printable 7-bit ASCII and can be
+sent directly in email or through ftp in text mode.  Newlines can be
+CR, LF or CRLF (Unix, Macintosh or MS-DOS style).
+
+NOTE: If you modify the data for this notebook not in a Mathematica-
+compatible application, you must delete the line below containing
+the word CacheID, otherwise Mathematica-compatible applications may
+try to use invalid cache data.
+
+For more information on notebooks and Mathematica-compatible 
+applications, contact Wolfram Research:
+  web: http://www.wolfram.com
+  email: info@wolfram.com
+  phone: +1-217-398-0700 (U.S.)
+
+Notebook reader applications are available free of charge from 
+Wolfram Research.
+*******************************************************************)
+
+(*CacheID: 232*)
+
+
+(*NotebookFileLineBreakTest
+NotebookFileLineBreakTest*)
+(*NotebookOptionsPosition[     21256,        484]*)
+(*NotebookOutlinePosition[     21901,        506]*)
+(*  CellTagsIndexPosition[     21857,        502]*)
+(*WindowFrame->Normal*)
+
+
+
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[BoxData[
+    StyleBox[\(SetDirectory[
+        ToFileName[\ 
+            Extract["\<FileName\>"\  /. \ 
+                NotebookInformation[
+                  EvaluationNotebook[]], \ {1}, \ \ FrontEnd`FileName]] <> \
+"\<\>"]; Directory[]\),
+      FormatType->StandardForm,
+      FontFamily->"Courier New"]], "Input"],
+
+Cell[BoxData[
+    \("D:\\Home\\Anton\\clusters\\\[CapitalEGrave]\[CapitalIGrave]\
+\[CapitalIGrave]32\\torgrid"\)], "Output"]
+}, Open  ]],
+
+Cell[BoxData[{
+    \(<< Graphics`Graphics`\), "\[IndentingNewLine]", 
+    \(<< Graphics`PlotField`\), "\[IndentingNewLine]", 
+    \(<< Graphics`Legend`\)}], "Input"],
+
+Cell[BoxData[{
+    \(\(dif[l_] := Rest[l - RotateRight[l]];\)\), "\n", 
+    \(\(PrintRange[l_, range_:  All, opts___] := 
+        ListPlot[l, PlotJoined \[Rule] True, PlotRange \[Rule] range, 
+          opts];\)\), "\n", 
+    \(\(PrintAnim[
+          l_] := \(ListPlot[#, PlotJoined \[Rule] True, 
+              PlotRange \[Rule] {Min[l], Max[l]}] &\) /@ l;\)\), "\n", 
+    \(\(AverageTimeProfil[l_List, t_, 
+          dt_:  1] := \(Apply[Plus, #]\/Length[#] &\)[
+          Map[#[\([2]\)] &, 
+            Select[lv, \((t \[LessEqual] \(#[\([1]\)]\)[\([1]\)] < 
+                    t + dt)\) &]]];\)\), "\n", 
+    \(\(Cut3D[l_] := \(Transpose[l, {2, 1, 3}]\)[\([4]\)];\)\), "\n", 
+    \(\(CutList[l_, n_] := 
+        Take[l, {1, \(-1\), 
+            Ceiling[Length[l]/n]}];\)\), "\[IndentingNewLine]", 
+    \(\(Show4[f_, l_List] := 
+        Show[GraphicsArray[Partition[f /@ l, 2]]];\)\)}], "Input"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+    \(\(coor = 
+        ReadList["\<coord\>", Number, 
+          RecordLists \[Rule] True];\)\), "\[IndentingNewLine]", 
+    \(\(ghost = 3;\)\), "\[IndentingNewLine]", 
+    \(bounds = \({\(#\[LeftDoubleBracket]ghost\[RightDoubleBracket] + #\
+\[LeftDoubleBracket]ghost + 1\[RightDoubleBracket]\)\/2, \(#\
+\[LeftDoubleBracket]\(-ghost\)\[RightDoubleBracket] + \
+#\[LeftDoubleBracket]\(-ghost\) - 1\[RightDoubleBracket]\)\/2} &\) /@ 
+        coor\)}], "Input"],
+
+Cell[BoxData[
+    \({{2.`, 4.`}, {0.`, 6.283185`}, {\(-1.`\), 1.`}}\)], "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+    \(\(Off[Thread::tdlen];\)\), "\n", 
+    \(lv = ReadList["\<vv.dat\>"]; 
+    lv = Map[{#\[LeftDoubleBracket]1, 
+              1\[RightDoubleBracket], #\[LeftDoubleBracket]2\
+\[RightDoubleBracket]} &, lv];\), "\n", 
+    \(\(ltm = Flatten[First /@ lv];\)\), "\n", 
+    \({Length[ltm], Last[ltm]}\)}], "Input"],
+
+Cell[BoxData[
+    \({11096, 0.75063702`}\)], "Output"]
+}, Open  ]],
+
+Cell[BoxData[
+    \(\(PrintAnim[CutList[\(#[\([2]\)] &\) /@ lv, 100]];\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(PrintRange[\({First[#], Max[Last[#]]} &\) /@ lv, All, 
+        PlotLabel -> "\<Maximum of stream velocity\>"];\)\)], "Input"],
+
+Cell[BoxData[{
+    \(\(len = 
+        Transpose[
+          Import["\<energy.dat\>", "\<Table\>"]];\)\), "\[IndentingNewLine]", \
+
+    \(ltm = First[len]; 
+    Export["\<timestep.gif\>", 
+      PrintRange[dif[ltm], Automatic, 
+        PlotLabel -> "\<Time step\>"]];\), "\[IndentingNewLine]", 
+    \(\({mvx, mdvx, mvy, mdvy, mvz, mdvz, mp, mdp, mqvx, mqvy, mqvz, 
+          mqp} = \(Transpose[{ltm, #}] &\) /@ 
+          Drop[len, 2];\)\), "\[IndentingNewLine]", 
+    \(\(PrintRange[\@\(mqvx + mqvy + mqvz\), All, 
+        PlotLabel -> "\<total energy\>"];\)\)}], "Input"],
+
+Cell[BoxData[
+    \(\(MapThread[
+        PrintRange[#1, All, 
+            PlotLabel \[Rule] #2] &, {\@{mqvx, mqvy, mqvz, mqp}, {"\<Mean \
+quadratic of vx\>", "\<Mean quadratic of vy\>", "\<Mean quadratic of vz\>", "\
+\<Mean quadratic of p\>"}}];\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(PrintRange /@ \(\@{mdvx, mdvy, mdvz, mdp}\);\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(Clue[m_, n_] := 
+        Block[{l = m}, \[IndentingNewLine]If[n \[Equal] 1, 
+            l = Append[\(Drop[#, \(-ghost\)] &\) /@ Drop[l, \(-1\)], 
+                Last[l]]; 
+            l = Prepend[\(Drop[#, ghost] &\) /@ Drop[l, 1], 
+                First[l]];, \[IndentingNewLine]l = 
+              Append[\(Map[Drop[#, \(-ghost\)] &, #, {n - 1}] &\) /@ 
+                  Drop[l, \(-1\)], Last[l]]; \[IndentingNewLine]l = 
+              Prepend[\(Map[Drop[#, ghost] &, #, {n - 1}] &\) /@ Drop[l, 1], 
+                First[l]];\[IndentingNewLine]]; \[IndentingNewLine]Return[
+            MapThread[Join, l, n - 1]];\[IndentingNewLine]];\)\)], "Input"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(\(\( (*\:0434\:043b\:044f\ \:0441\:0431\:043e\:0440\:043a\:0438\ \:0438\
+\:0437\ \:043e\:0434\:043d\:043e\:0433\:043e\ \:0444\:0430\:0439\:043b\:0430\
+*) \)\(\[IndentingNewLine]\)\(Off[Set::write]; 
+    Off[General::spell1];\[IndentingNewLine]
+    \(dumpRead = ReadList["\<runtest1_22000.snp\>"];\)\[IndentingNewLine]
+    Print[np = dumpRead\[LeftDoubleBracket]3\[RightDoubleBracket]]; 
+    KolProc = Apply[Times, np];\[IndentingNewLine]
+    \(dumpRead = Drop[dumpRead, {3}];\)\[IndentingNewLine]
+    Print[{t, count, n1, n2, n3, Rey} = Take[dumpRead, 6]]; 
+    dumpRead = Drop[dumpRead, 6];\[IndentingNewLine]
+    \({vxm, vym, vzm, pm, nutm} = 
+        Transpose[Partition[dumpRead, 5]];\)\[IndentingNewLine]
+    \(vx = 
+        First[Fold[
+            Map[Function[m, Clue[m, #2]], 
+                Partition[#1, 
+                  np\[LeftDoubleBracket]#2\[RightDoubleBracket]], {1}] &, 
+            vxm, {1, 2, 3}]];\)\n
+    \(vy = 
+        First[Fold[
+            Map[Function[m, Clue[m, #2]], 
+                Partition[#1, 
+                  np\[LeftDoubleBracket]#2\[RightDoubleBracket]], {1}] &, 
+            vym, {1, 2, 3}]];\)\n
+    \(vz = 
+        First[Fold[
+            Map[Function[m, Clue[m, #2]], 
+                Partition[#1, 
+                  np\[LeftDoubleBracket]#2\[RightDoubleBracket]], {1}] &, 
+            vzm, {1, 2, 3}]];\)\n
+    \(p = 
+        First[Fold[
+            Map[Function[m, Clue[m, #2]], 
+                Partition[#1, 
+                  np\[LeftDoubleBracket]#2\[RightDoubleBracket]], {1}] &, 
+            pm, {1, 2, 3}]];\)\n
+    \(nut = 
+        First[Fold[
+            Map[Function[m, Clue[m, #2]], 
+                Partition[#1, 
+                  np\[LeftDoubleBracket]#2\[RightDoubleBracket]], {1}] &, 
+            nutm, {1, 2, 3}]];\)\n
+    \({vri, v\[Phi]i, vzi, 
+          pi} = \(ListInterpolation[#, {{Min[
+                    coor\[LeftDoubleBracket]1\[RightDoubleBracket]], 
+                  Max[coor\[LeftDoubleBracket]1\[RightDoubleBracket]]}, {Min[
+                    coor\[LeftDoubleBracket]2\[RightDoubleBracket]], 
+                  Max[coor\[LeftDoubleBracket]2\[RightDoubleBracket]]}, {Min[
+                    coor\[LeftDoubleBracket]3\[RightDoubleBracket]], 
+                  Max[coor\[LeftDoubleBracket]3\[RightDoubleBracket]]}}] &\) /@ \
+{vx, vy, vz, p};\)\[IndentingNewLine]
+    \(Print[{n1, n2, n3} = Dimensions[vx] - 2  ghost];\)\)\)\)], "Input"],
+
+Cell[BoxData[
+    \({1, 8, 2}\)], "Print"],
+
+Cell[BoxData[
+    \({0.1504839858`, 22000, 20, 100, 20, 1.`}\)], "Print"],
+
+Cell[BoxData[
+    \({20, 100, 20}\)], "Print"]
+}, Open  ]],
+
+Cell[BoxData[
+    \(\(Show4[
+        DensityPlot[
+            If[\((z - Mean[bounds\[LeftDoubleBracket]3\[RightDoubleBracket]])\
+\)\^2 + \((r - Mean[bounds\[LeftDoubleBracket]1\[RightDoubleBracket]])\)\^2 \
+\[LessEqual] \(bounds\[LeftDoubleBracket]1, 2\[RightDoubleBracket] - bounds\
+\[LeftDoubleBracket]1, 1\[RightDoubleBracket]\)\/2, #, 0], {r, 
+              bounds\[LeftDoubleBracket]1, 1\[RightDoubleBracket], 
+              bounds\[LeftDoubleBracket]1, 2\[RightDoubleBracket]}, {z, 
+              bounds\[LeftDoubleBracket]3, 1\[RightDoubleBracket], 
+              bounds\[LeftDoubleBracket]3, 2\[RightDoubleBracket]}, 
+            DisplayFunction \[Rule] Identity] &, {vri[r, 0, z], 
+          v\[Phi]i[r, 0, z], vzi[r, 0, z], pi[r, 0, z]}];\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(Show4[
+        ContourPlot[
+            If[\((z - Mean[bounds\[LeftDoubleBracket]3\[RightDoubleBracket]])\
+\)\^2 + \((r - Mean[bounds\[LeftDoubleBracket]1\[RightDoubleBracket]])\)\^2 \
+\[LessEqual] \(bounds\[LeftDoubleBracket]1, 2\[RightDoubleBracket] - bounds\
+\[LeftDoubleBracket]1, 1\[RightDoubleBracket]\)\/2, #, 0], {r, 
+              bounds\[LeftDoubleBracket]1, 1\[RightDoubleBracket], 
+              bounds\[LeftDoubleBracket]1, 2\[RightDoubleBracket]}, {z, 
+              bounds\[LeftDoubleBracket]3, 1\[RightDoubleBracket], 
+              bounds\[LeftDoubleBracket]3, 2\[RightDoubleBracket]}, 
+            PlotLabel \[Rule] "\<Max=\>" <> ToString[Max[#]] <> "\<; Min=\>" <> 
+                ToString[Min[#]], Contours \[Rule] 20, 
+            DisplayFunction -> Identity, PlotRange \[Rule] All, 
+            FrameTicks \[Rule] {CutList[
+                  Transpose[{Range[
+                        Length[
+                          coor\[LeftDoubleBracket]1\[RightDoubleBracket]]], 
+                      coor\[LeftDoubleBracket]1\[RightDoubleBracket]}], 10], 
+                CutList[
+                  Transpose[{Range[
+                        Length[
+                          coor\[LeftDoubleBracket]3\[RightDoubleBracket]]], 
+                      coor\[LeftDoubleBracket]3\[RightDoubleBracket]}], 10], 
+                None, None}, Axes \[Rule] Automatic, 
+            AxesOrigin \[Rule] {1, 0}] &, {vri[r, 0, z], v\[Phi]i[r, 0, z], 
+          vzi[r, 0, z], pi[r, 0, z]}];\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(Show4[
+        Plot3D[If[\((z - \
+Mean[bounds\[LeftDoubleBracket]3\[RightDoubleBracket]])\)\^2 + \((r - \
+Mean[bounds\[LeftDoubleBracket]1\[RightDoubleBracket]])\)\^2 \[LessEqual] \
+\(bounds\[LeftDoubleBracket]1, 2\[RightDoubleBracket] - bounds\
+\[LeftDoubleBracket]1, 1\[RightDoubleBracket]\)\/2, #, 0], {r, 
+              bounds\[LeftDoubleBracket]1, 1\[RightDoubleBracket], 
+              bounds\[LeftDoubleBracket]1, 2\[RightDoubleBracket]}, {z, 
+              bounds\[LeftDoubleBracket]3, 1\[RightDoubleBracket], 
+              bounds\[LeftDoubleBracket]3, 2\[RightDoubleBracket]}, 
+            PlotRange \[Rule] All, DisplayFunction \[Rule] Identity] &, {vri[
+            r, 0, z], v\[Phi]i[r, 0, z], vzi[r, 0, z], 
+          pi[r, 0, z]}];\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(Plot3D[
+        If[\((z - \
+Mean[bounds\[LeftDoubleBracket]3\[RightDoubleBracket]])\)\^2 + \((r - \
+Mean[bounds\[LeftDoubleBracket]1\[RightDoubleBracket]])\)\^2 \[LessEqual] \
+\(bounds\[LeftDoubleBracket]1, 2\[RightDoubleBracket] - bounds\
+\[LeftDoubleBracket]1, 1\[RightDoubleBracket]\)\/2, v\[Phi]i[r, 0, z], 
+          0], {r, bounds\[LeftDoubleBracket]1, 1\[RightDoubleBracket], 
+          bounds\[LeftDoubleBracket]1, 2\[RightDoubleBracket]}, {z, 
+          bounds\[LeftDoubleBracket]3, 1\[RightDoubleBracket], 
+          bounds\[LeftDoubleBracket]3, 2\[RightDoubleBracket]}, 
+        PlotRange \[Rule] All];\)\)], "Input"],
+
+Cell[BoxData[{
+    \(\(SectionRZ[\[Phi]0_] := 
+        DisplayTogether[\[IndentingNewLine]ContourPlot[
+            If[\((z - Mean[bounds\[LeftDoubleBracket]3\[RightDoubleBracket]])\
+\)\^2 + \((r - Mean[bounds\[LeftDoubleBracket]1\[RightDoubleBracket]])\)\^2 \
+\[LessEqual] \(bounds\[LeftDoubleBracket]1, 2\[RightDoubleBracket] - bounds\
+\[LeftDoubleBracket]1, 1\[RightDoubleBracket]\)\/2, v\[Phi]i[r, \[Phi]0, z], 
+              0], {r, bounds\[LeftDoubleBracket]1, 1\[RightDoubleBracket], 
+              bounds\[LeftDoubleBracket]1, 2\[RightDoubleBracket]}, {z, 
+              bounds\[LeftDoubleBracket]3, 1\[RightDoubleBracket], 
+              bounds\[LeftDoubleBracket]3, 2\[RightDoubleBracket]}, 
+            PlotRange -> All, DisplayFunction -> Identity, 
+            ColorFunction -> \((GrayLevel)\), ContourLines -> False, 
+            Contours -> 30], 
+          PlotVectorField[
+            If[\((z - Mean[bounds\[LeftDoubleBracket]3\[RightDoubleBracket]])\
+\)\^2 + \((r - Mean[bounds\[LeftDoubleBracket]1\[RightDoubleBracket]])\)\^2 \
+\[LessEqual] \(bounds\[LeftDoubleBracket]1, 2\[RightDoubleBracket] - bounds\
+\[LeftDoubleBracket]1, 1\[RightDoubleBracket]\)\/2, {vri[r, \[Phi]0, z], 
+                vzi[r, \[Phi]0, z]}, {0, 0}], {r, 
+              bounds\[LeftDoubleBracket]1, 1\[RightDoubleBracket], 
+              bounds\[LeftDoubleBracket]1, 2\[RightDoubleBracket]}, {z, 
+              bounds\[LeftDoubleBracket]3, 1\[RightDoubleBracket], 
+              bounds\[LeftDoubleBracket]3, 2\[RightDoubleBracket]}, 
+            ScaleFactor -> 0.2, Frame -> True, DisplayFunction -> Identity], 
+          Graphics[
+            Circle[{Mean[bounds\[LeftDoubleBracket]1\[RightDoubleBracket]], 
+                Mean[bounds\[LeftDoubleBracket]3\[RightDoubleBracket]]}, \
+\(bounds\[LeftDoubleBracket]1, 2\[RightDoubleBracket] - bounds\
+\[LeftDoubleBracket]1, 1\[RightDoubleBracket]\)\/2]]];\)\), "\
+\[IndentingNewLine]", 
+    \(\(SectionR\[CapitalPhi][z0_] := 
+        DisplayTogether[\[IndentingNewLine]ContourPlot[
+            If[r > bounds\[LeftDoubleBracket]1, 1\[RightDoubleBracket] \[And] 
+                r < bounds\[LeftDoubleBracket]1, 2\[RightDoubleBracket], 
+              vzi[r, \[Phi], z0], 0], {r, 
+              bounds\[LeftDoubleBracket]1, 1\[RightDoubleBracket], 
+              bounds\[LeftDoubleBracket]1, 2\[RightDoubleBracket]}, {\[Phi], 
+              bounds\[LeftDoubleBracket]2, 1\[RightDoubleBracket], 
+              bounds\[LeftDoubleBracket]2, 2\[RightDoubleBracket]}, 
+            PlotRange -> All, DisplayFunction -> Identity, 
+            ColorFunction -> \((GrayLevel)\), ContourLines -> False, 
+            Contours -> 30], \[IndentingNewLine]PlotVectorField[
+            If[r > bounds\[LeftDoubleBracket]1, 1\[RightDoubleBracket] \[And] 
+                r < bounds\[LeftDoubleBracket]1, 2\[RightDoubleBracket], {vri[
+                  r, \[Phi], z0], v\[Phi]i[r, \[Phi], z0]}, {0, 0}], {r, 
+              bounds\[LeftDoubleBracket]1, 1\[RightDoubleBracket], 
+              bounds\[LeftDoubleBracket]1, 2\[RightDoubleBracket]}, {\[Phi], 
+              bounds\[LeftDoubleBracket]2, 1\[RightDoubleBracket], 
+              bounds\[LeftDoubleBracket]2, 2\[RightDoubleBracket]}, 
+            ScaleFactor -> 0.2, Frame -> True, DisplayFunction -> Identity], 
+          AspectRatio \[Rule] Automatic];\)\), "\[IndentingNewLine]", 
+    \(\(Section\[CapitalPhi]Z[r0_] := 
+        DisplayTogether[\[IndentingNewLine]ContourPlot[
+            If[z > bounds\[LeftDoubleBracket]3, 1\[RightDoubleBracket] \[And] 
+                z < bounds\[LeftDoubleBracket]3, 2\[RightDoubleBracket], 
+              vri[r0, \[Phi], z], 0], {\[Phi], 
+              bounds\[LeftDoubleBracket]2, 1\[RightDoubleBracket], 
+              bounds\[LeftDoubleBracket]2, 2\[RightDoubleBracket]}, {z, 
+              bounds\[LeftDoubleBracket]3, 1\[RightDoubleBracket], 
+              bounds\[LeftDoubleBracket]3, 2\[RightDoubleBracket]}, 
+            PlotRange \[Rule] All, DisplayFunction \[Rule] Identity, 
+            ColorFunction \[Rule] \((GrayLevel)\), 
+            ContourLines \[Rule] False, 
+            Contours \[Rule] 30], \[IndentingNewLine]PlotVectorField[
+            If[z > bounds\[LeftDoubleBracket]3, 1\[RightDoubleBracket] \[And] 
+                z < bounds\[LeftDoubleBracket]3, 
+                    2\[RightDoubleBracket], {v\[Phi]i[r0, \[Phi], z], 
+                vzi[r0, \[Phi], z]}, {0, 0}], {\[Phi], 
+              bounds\[LeftDoubleBracket]2, 1\[RightDoubleBracket], 
+              bounds\[LeftDoubleBracket]2, 2\[RightDoubleBracket]}, {z, 
+              bounds\[LeftDoubleBracket]3, 1\[RightDoubleBracket], 
+              bounds\[LeftDoubleBracket]3, 2\[RightDoubleBracket]}, 
+            ScaleFactor \[Rule] 0.2, Frame \[Rule] True, 
+            DisplayFunction \[Rule] Identity], 
+          AspectRatio \[Rule] Automatic];\)\)}], "Input"],
+
+Cell[BoxData[
+    \(\(DisplayTogetherArray[SectionRZ[0.0  \[Pi]], 
+        SectionR\[CapitalPhi][
+          Mean[bounds\[LeftDoubleBracket]3\[RightDoubleBracket]]], 
+        Section\[CapitalPhi]Z[
+          Mean[bounds\[LeftDoubleBracket]1\[RightDoubleBracket]]], 
+        GraphicsSpacing \[Rule] \(-0.3\)];\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(SectionRZ[0.0  \[Pi]];\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(ShowLegend[
+        SectionRZ[\(10\/n2\) 2  \[Pi]], {GrayLevel, 10, "\<1\>", "\<-1\>", 
+          LegendPosition -> {1.1, \(- .4\)}}];\)\)], "Input"],
+
+Cell[BoxData[{
+    \(\(grvfi = 
+        Table[SectionRZ[\(i\/n2\) 2  \[Pi]], {i, 
+            n2}];\)\), "\[IndentingNewLine]", 
+    \(\(Export["\<profile.gif\>", grvfi];\)\), "\[IndentingNewLine]", 
+    \( (*\(ShowLegend[
+          SectionRZ[\(10\/n2\) 2  \[Pi]], {Hue[#/1.2] &, 
+            10, "\<1\>", "\<-1\>", 
+            LegendPosition -> {1.1, \(- .4\)}}];\)*) \)}], "Input"],
+
+Cell[BoxData[{
+    \(\(dr = ReadList["\<debug\>"];\)\), "\[IndentingNewLine]", 
+    \(\({nm, refr, refz} = 
+        Transpose[Partition[dr, 3]];\)\), "\[IndentingNewLine]", 
+    \(\(node = Clue[nm, 2];\)\), "\[IndentingNewLine]", 
+    \(Off[Set::write]; Off[General::spell1];\), "\[IndentingNewLine]", 
+    \(\(ReadPressure[iter_] := 
+        Block[{i}, \[IndentingNewLine]Clear[dumpRead, pm, p, 
+            ps]; \[IndentingNewLine]dumpRead = 
+            ReadList["\<runtest1_\>" <> 
+                ToString[iter] <> "\<.snp\>"]; \[IndentingNewLine]{t, count, 
+              np, n1, n2, n3, Rey} = Take[dumpRead, 7]; 
+          dumpRead = 
+            Drop[dumpRead, 7]; \[IndentingNewLine]{vxm, vym, vzm, pm, nutm} = 
+            Transpose[Partition[dumpRead, 5]]; \[IndentingNewLine]p = 
+            First[Fold[
+                Map[Function[m, Clue[m, #2]], 
+                    Partition[#1, 
+                      np\[LeftDoubleBracket]#2\[RightDoubleBracket]], {1}] &, 
+                pm, {1, 2, 3}]]; \[IndentingNewLine]ps = 
+            Table[\(\(node /. b_ :> 0 /; b < 3\)\/3\) \((\(#[\([i]\)] &\) /@ 
+                    p)\), {i, ghost + 1, 
+                n2 + ghost}]; \
+\[IndentingNewLine]Return[\(\@Mean[Select[Flatten[#], Positive]] &\) /@ \
+\(ps\^2\)];\[IndentingNewLine]];\)\)}], "Input"],
+
+Cell[BoxData[
+    \(\(lpres = 
+        Table[PrintRange[\(\((# - Mean[#])\) &\)@
+              ReadPressure[niter], {\(-02\), 02}, 
+            PlotLabel \[Rule] niter], {niter, 12000, 13000, 
+            100}];\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(ldifpres = 
+        Table[PrintRange[dif[ReadPressure[niter]], {\(-0.5\), 0.5}, 
+            PlotLabel \[Rule] niter], {niter, 100, 58000, 100}];\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(Export["\<pressure1.gif\>", lpres];\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(Do[SectionRZ[\[Pi]\ i\/100], {i, 10, 200}];\)\)], "Input"],
+
+Cell[BoxData[""], "Input"],
+
+Cell[BoxData[{
+    \(\(dr = 
+        ReadList["\<debug\>"];\)\[IndentingNewLine] (*\(np = 
+          Drop[np, {2}];\)*) \), "\[IndentingNewLine]", 
+    \(\({nm, refr, refz} = 
+        Transpose[Partition[dr, 3]];\)\), "\[IndentingNewLine]", 
+    \(\(nods = First /@ Partition[dr, 3];\)\), "\[IndentingNewLine]", 
+    \(\(rr = Clue[refr, 2];\)\), "\[IndentingNewLine]", 
+    \(\(rz = Clue[refz, 2];\)\), "\[IndentingNewLine]", 
+    \(\(node = Clue[nm, 2];\)\)}], "Input"],
+
+Cell[BoxData[
+    \(\(ListDensityPlot[Transpose[node]];\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(gc = 
+        Graphics[Circle[{n1\/2 + ghost, n1\/2 + ghost}, n1\/2]];\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(DisplayTogether[ListDensityPlot[node], gc];\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(ListDensityPlot /@ {node, rr, rz};\)\)], "Input"],
+
+Cell[BoxData[{
+    \(\(ListContourPlot[node];\)\), "\[IndentingNewLine]", 
+    \(\(ListContourPlot[rr];\)\), "\[IndentingNewLine]", 
+    \(\(ListContourPlot[rz];\)\)}], "Input"]
+},
+FrontEndVersion->"5.0 for Microsoft Windows",
+ScreenRectangle->{{0, 1022}, {0, 681}},
+WindowSize->{918, 570},
+WindowMargins->{{30, Automatic}, {Automatic, -2}}
+]
+
+(*******************************************************************
+Cached data follows.  If you edit this Notebook file directly, not
+using Mathematica, you must remove the line containing CacheID at
+the top of  the file.  The cache data will then be recreated when
+you save this file from within Mathematica.
+*******************************************************************)
+
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+
+(*NotebookFileOutline
+Notebook[{
+
+Cell[CellGroupData[{
+Cell[1776, 53, 321, 8, 70, "Input"],
+Cell[2100, 63, 124, 2, 29, "Output"]
+}, Open  ]],
+Cell[2239, 68, 165, 3, 70, "Input"],
+Cell[2407, 73, 898, 18, 166, "Input"],
+
+Cell[CellGroupData[{
+Cell[3330, 95, 472, 9, 83, "Input"],
+Cell[3805, 106, 81, 1, 29, "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[3923, 112, 325, 7, 90, "Input"],
+Cell[4251, 121, 54, 1, 29, "Output"]
+}, Open  ]],
+Cell[4320, 125, 85, 1, 30, "Input"],
+Cell[4408, 128, 147, 2, 30, "Input"],
+Cell[4558, 132, 571, 13, 93, "Input"],
+Cell[5132, 147, 260, 5, 75, "Input"],
+Cell[5395, 154, 81, 1, 32, "Input"],
+Cell[5479, 157, 676, 11, 150, "Input"],
+
+Cell[CellGroupData[{
+Cell[6180, 172, 2438, 52, 330, "Input"],
+Cell[8621, 226, 42, 1, 25, "Print"],
+Cell[8666, 229, 73, 1, 25, "Print"],
+Cell[8742, 232, 46, 1, 25, "Print"]
+}, Open  ]],
+Cell[8803, 236, 763, 12, 85, "Input"],
+Cell[9569, 250, 1524, 26, 165, "Input"],
+Cell[11096, 278, 783, 13, 85, "Input"],
+Cell[11882, 293, 650, 11, 64, "Input"],
+Cell[12535, 306, 4862, 75, 496, "Input"],
+Cell[17400, 383, 322, 6, 50, "Input"],
+Cell[17725, 391, 59, 1, 30, "Input"],
+Cell[17787, 394, 171, 3, 42, "Input"],
+Cell[17961, 399, 384, 8, 87, "Input"],
+Cell[18348, 409, 1310, 24, 291, "Input"],
+Cell[19661, 435, 226, 5, 30, "Input"],
+Cell[19890, 442, 182, 3, 30, "Input"],
+Cell[20075, 447, 72, 1, 30, "Input"],
+Cell[20150, 450, 80, 1, 42, "Input"],
+Cell[20233, 453, 26, 0, 30, "Input"],
+Cell[20262, 455, 470, 9, 150, "Input"],
+Cell[20735, 466, 70, 1, 30, "Input"],
+Cell[20808, 469, 107, 2, 42, "Input"],
+Cell[20918, 473, 80, 1, 30, "Input"],
+Cell[21001, 476, 71, 1, 30, "Input"],
+Cell[21075, 479, 177, 3, 70, "Input"]
+}
+]
+*)
+
+
+
+(*******************************************************************
+End of Mathematica Notebook file.
+*******************************************************************)
+
