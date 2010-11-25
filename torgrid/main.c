@@ -8,6 +8,7 @@ int main(int argc, char** argv)
    int i,j,k,l,i2,j2,k2;
    FILE *fd;
    int strl;
+   double ChangeParamTime = 3, DeltaParam = 10;         // for iteration on parameters
 
  /* Initialize MPI */
  MPI_Init(&argc,&argv);
@@ -15,6 +16,7 @@ int main(int argc, char** argv)
  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
  MPI_Comm_size(MPI_COMM_WORLD,&size);
 
+  srand(rank);
   NameMessageFile = "message.dat";
   NameErrorFile = "error.err";
   NameNuFile = "nut.dat";
@@ -129,6 +131,13 @@ int main(int argc, char** argv)
 	for(j=0;j<m2;j++)
 	for(k=0;k<m3;k++)
 	   f[l][i][j][k]=f1[l][i][j][k];
+        if (SnapDelta>5*dtdid && floor(t_cur/SnapDelta)<floor((t_cur+dtdid)/SnapDelta))
+            snapshot(f1,eta,t_cur,count);
+/*        if (floor(t_cur/ChangeParamTime)<floor((t_cur+dtdid)/ChangeParamTime))
+            Rm = floor(t_cur/ChangeParamTime+0.5)*DeltaParam-190;
+//Rm -= DeltaParam;
+            Master nmessage("Rm was changed to",Rm,count);
+            }*/
 /*        if(kbhit())
 	     {
 		switch (getch()) {
@@ -145,12 +154,12 @@ int main(int argc, char** argv)
    snapshot(f,nut,t_cur,count);
    if(rank==size-1) add_control_point("END");
 
-   operate_memory(-1);
 //   Master fileclose(NameErrorFile);
 
    if(t_cur>=Ttot&&!razlet) nmessage("work is succesfully done",t_cur,count);
        else nrerror("this is break of scheme",t_cur,count);
    MPI_Barrier(MPI_COMM_WORLD);
+   operate_memory(-1);
    MPI_Finalize();
    nmessage("mpi_finalize is done",t_cur,count);
 return 0;

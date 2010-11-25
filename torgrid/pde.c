@@ -447,7 +447,68 @@ double dr(double ***m, int ii, int jj, int kk, int dir, int or, double dx, int s
 double tmp=0.0;
 int i;
 
-switch (sm*dir) {
+//start_tick(9);
+if(or==0)
+switch (sm) {
+     case 7 :  switch (dir) {
+                  case 1 : tmp = kf7[or][sh][6]*(m[ii+3][jj][kk]-m[ii-3][jj][kk])
+                               + kf7[or][sh][5]*(m[ii+2][jj][kk]-m[ii-2][jj][kk])
+                               + kf7[or][sh][4]*(m[ii+1][jj][kk]-m[ii-1][jj][kk]); break;
+                  case 2 : tmp = kf7[or][sh][6]*(m[ii][jj+3][kk]-m[ii][jj-3][kk])
+                               + kf7[or][sh][5]*(m[ii][jj+2][kk]-m[ii][jj-2][kk])
+                               + kf7[or][sh][4]*(m[ii][jj+1][kk]-m[ii][jj-1][kk]); break;
+                  case 3 : tmp = kf7[or][sh][6]*(m[ii][jj][kk+3]-m[ii][jj][kk-3])
+                               + kf7[or][sh][5]*(m[ii][jj][kk+2]-m[ii][jj][kk-2])
+                               + kf7[or][sh][4]*(m[ii][jj][kk+1]-m[ii][jj][kk-1]); break;
+                  }; break;
+     case 3 :  switch (dir) {
+                  case 1 : tmp = kf3[or][sh][2]*(m[ii+1][jj][kk]-m[ii-1][jj][kk]); break;
+                  case 2 : tmp = kf3[or][sh][2]*(m[ii][jj+1][kk]-m[ii][jj-1][kk]); break;
+                  case 3 : tmp = kf3[or][sh][2]*(m[ii][jj][kk+1]-m[ii][jj][kk-1]); break;
+                  }; break;
+     case 5 :  switch (dir) {
+                  case 1 : tmp = kf5[or][sh][4]*(m[ii+2][jj][kk]-m[ii-2][jj][kk])
+                               + kf5[or][sh][3]*(m[ii+1][jj][kk]-m[ii-1][jj][kk]); break;
+                  case 2 : tmp = kf5[or][sh][4]*(m[ii][jj+2][kk]-m[ii][jj-2][kk])
+                               + kf5[or][sh][3]*(m[ii][jj+1][kk]-m[ii][jj-1][kk]); break;
+                  case 3 : tmp = kf5[or][sh][4]*(m[ii][jj][kk+2]-m[ii][jj][kk-2])
+                               + kf5[or][sh][3]*(m[ii][jj][kk+1]-m[ii][jj][kk-1]); break;
+                  }; break;
+    }
+if(or==1)
+switch (sm) {
+     case 7 :  switch (dir) {
+                  case 1 : tmp = kf7[or][sh][6]*(m[ii+3][jj][kk]+m[ii-3][jj][kk])
+                               + kf7[or][sh][5]*(m[ii+2][jj][kk]+m[ii-2][jj][kk])
+                               + kf7[or][sh][4]*(m[ii+1][jj][kk]+m[ii-1][jj][kk])
+                               + kf7[or][sh][3]*m[ii][jj][kk]; break;
+                  case 2 : tmp = kf7[or][sh][6]*(m[ii][jj+3][kk]+m[ii][jj-3][kk])
+                               + kf7[or][sh][5]*(m[ii][jj+2][kk]+m[ii][jj-2][kk])
+                               + kf7[or][sh][4]*(m[ii][jj+1][kk]+m[ii][jj-1][kk])
+                               + kf7[or][sh][3]*m[ii][jj][kk]; break;
+                  case 3 : tmp = kf7[or][sh][6]*(m[ii][jj][kk+3]+m[ii][jj][kk-3])
+                               + kf7[or][sh][5]*(m[ii][jj][kk+2]+m[ii][jj][kk-2])
+                               + kf7[or][sh][4]*(m[ii][jj][kk+1]+m[ii][jj][kk-1])
+                               + kf7[or][sh][3]*m[ii][jj][kk]; break;
+                  }; break;
+     case 3 :  switch (dir) {
+                  case 1 : tmp = kf3[or][sh][2]*(m[ii+1][jj][kk]+m[ii-1][jj][kk])+ kf3[or][sh][1]*m[ii][jj][kk]; break;
+                  case 2 : tmp = kf3[or][sh][2]*(m[ii][jj+1][kk]+m[ii][jj-1][kk])+ kf3[or][sh][1]*m[ii][jj][kk]; break;
+                  case 3 : tmp = kf3[or][sh][2]*(m[ii][jj][kk+1]+m[ii][jj][kk-1])+ kf3[or][sh][1]*m[ii][jj][kk]; break;
+                  }; break;
+     case 5 :  switch (dir) {
+                  case 1 : tmp = kf5[or][sh][4]*(m[ii+2][jj][kk]+m[ii-2][jj][kk])
+                               + kf5[or][sh][3]*(m[ii+1][jj][kk]+m[ii-1][jj][kk])
+                               + kf5[or][sh][2]*m[ii][jj][kk]; break;
+                  case 2 : tmp = kf5[or][sh][4]*(m[ii][jj+2][kk]+m[ii][jj-2][kk])
+                               + kf5[or][sh][3]*(m[ii][jj+1][kk]+m[ii][jj-1][kk])
+                               + kf5[or][sh][2]*m[ii][jj][kk]; break;
+                  case 3 : tmp = kf5[or][sh][4]*(m[ii][jj][kk+2]+m[ii][jj][kk-2])
+                               + kf5[or][sh][3]*(m[ii][jj][kk+1]+m[ii][jj][kk-1])
+                               + kf5[or][sh][2]*m[ii][jj][kk]; break;
+                  }; break;
+    }
+/*switch (sm*dir) {
 	case 3 : for(i=0; i<sm; i++) tmp += m[ii+i-sh][jj][kk]*kf3[or][sh][i]; break;
 	case 6 : for(i=0; i<sm; i++) tmp += m[ii][jj+i-sh][kk]*kf3[or][sh][i]; break;
 	case 9 : for(i=0; i<sm; i++) tmp += m[ii][jj][kk+i-sh]*kf3[or][sh][i]; break;
@@ -459,12 +520,13 @@ switch (sm*dir) {
 	case 21: for(i=0; i<sm; i++) tmp += m[ii][jj][kk+i-sh]*kf7[or][sh][i]; break;
 	default :
     	nrerror("\nNO SUCH SAMPLE for derivative. Bye ...",0,0);
-	}
+	} */
 return(tmp/dx);
 }
 
 double coordin(int i, int dir)
                       //0-r,1-phi,2-z
+		      //0-r,1-phi,2-z
 {
  switch (dir)
  {

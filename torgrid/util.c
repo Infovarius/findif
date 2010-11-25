@@ -44,24 +44,24 @@ int i, j, k;
 double  ****aaa;
 
    aaa = (double ****)calloc(mvar, sizeof(double ***));
-   if(aaa == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",0,0);
+   if(aaa == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",-1,-1);
 
    for(i = 0; i < mvar; i++) {
          aaa[i] = (double ***)calloc(n1, sizeof(double **));
-         if(aaa[i] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",0,0);
+         if(aaa[i] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",-1,-1);
    }
 
    for(i = 0; i < mvar; i++)
    for(j = 0; j < n1; j++) {
          aaa[i][j] = (double **)calloc(n2, sizeof(double *));
-         if(aaa[i][j] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",0,0);
+         if(aaa[i][j] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",-1,-1);
    }
 
    for(i = 0; i < mvar; i++)
    for(j = 0; j < n1; j++)
    for(k = 0; k < n2; k++) {
          aaa[i][j][k] = (double *)calloc(n3, sizeof(double));
-         if(aaa[i][j][k] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",0,0);
+         if(aaa[i][j][k] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",-1,-1);
       }
 
 return(aaa);
@@ -73,25 +73,15 @@ int i, j, k;
    for(i = 0; i < mvar; i++)
    for(j = 0; j < n1; j++)
    for(k = 0; k < n2; k++)
-    { 
-    if(!aaa[i][j][k]) {putlog("error at releasing",(long)aaa[i][j][k]);return;}
 	free(aaa[i][j][k]);
-	}
 
    for(i = 0; i < mvar; i++)
    for(j = 0; j < n1; j++)
-    {
-    if(!aaa[i][j]) {putlog("error at releasing",(long)aaa[i][j]);return;}
 	free(aaa[i][j]);
-	}
 
    for(i = 0; i < mvar; i++)
-    {
-    if(!aaa[i]) {putlog("error at releasing",(long)aaa[i]);return;}
 	free(aaa[i]);
-	}
 
-   if(!aaa) {putlog("error at releasing",(long)aaa);return;}
    free(aaa);
 
    return;
@@ -103,17 +93,17 @@ int i, j;
 double  ***aaa;
 
    aaa = (double ***)calloc(mvar, sizeof(double **));
-   if(aaa == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",0,0);
+   if(aaa == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",-1,-1);
 
    for(i = 0; i < mvar; i++) {
          aaa[i] = (double **)calloc(n1, sizeof(double *));
-         if(aaa[i] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",0,0);
+         if(aaa[i] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",-1,-1);
    }
 
    for(i = 0; i < mvar; i++)
    for(j = 0; j < n1; j++) {
          aaa[i][j] = (double *)calloc(n2, sizeof(double));
-         if(aaa[i][j] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",0,0);
+         if(aaa[i][j] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",-1,-1);
    }
 
 return(aaa);
@@ -125,19 +115,12 @@ int j, k;
 
    for(j = 0; j < n1; j++)
    for(k = 0; k < n2; k++)
-    {
-    if(!aaa[j][k]) {putlog("error at releasing",(long)aaa[j][k]);return;}
 	free(aaa[j][k]);
-	}
 
    for(j = 0; j < n1; j++)
-    {
-    if(!aaa[j]) {putlog("error at releasing",(long)aaa[j]);return;}
 	free(aaa[j]);
-	}
 
-    if(!aaa) {putlog("error at releasing",(long)aaa);return;}
-	free(aaa);
+   free(aaa);
 
    return;
 }
@@ -148,11 +131,27 @@ int i;
 double  **aa;
 
    aa = (double **)calloc(mvar, sizeof(double *));
-   if(aa == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",0,0);
+   if(aa == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",-1,-1);
 
    for(i = 0; i < mvar; i++) {
          aa[i] = (double *)calloc(n1, sizeof(double));
-         if(aa[i] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",0,0);
+         if(aa[i] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",-1,-1);
+   }
+
+return(aa);
+}
+
+int **alloc_mem_2i(int mvar, int n1)
+{
+int i;
+int  **aa;
+
+   aa = (int **)calloc(mvar, sizeof(int *));
+   if(aa == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",-1,-1);
+
+   for(i = 0; i < mvar; i++) {
+         aa[i] = (int *)calloc(n1, sizeof(int));
+         if(aa[i] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",-1,-1);
    }
 
 return(aa);
@@ -163,12 +162,20 @@ void free_mem_2f(double **aa, int n1, int n2)
 int j, k;
 
    for(j = 0; j < n1; j++)
-    {
-    if(!aa[j]) {putlog("error at releasing",(long)aa[j]);return;}
 	free(aa[j]);
-	}
 
-   if(!aa) {putlog("error at releasing",(long)aa);return;}
+   free(aa);
+
+   return;
+}
+
+void free_mem_2i(int **aa, int n1, int n2)
+{
+int j, k;
+
+   for(j = 0; j < n1; j++)
+	free(aa[j]);
+
    free(aa);
 
    return;
@@ -179,7 +186,17 @@ double *alloc_mem_1f(int n)
 double  *a;
 
    a = (double *)calloc(n, sizeof(double));
-   if(a == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",0,0);
+   if(a == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",-1,-1);
+
+return(a);
+}
+
+int *alloc_mem_1i(int n)
+{
+int  *a;
+
+   a = (int *)calloc(n, sizeof(int));
+   if(a == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",-1,-1);
 
 return(a);
 }
@@ -187,7 +204,13 @@ return(a);
 void free_mem_1f(double *a, int n)
 {
 int k;
-   if(!a) {putlog("error at releasing",(long)a);return;}
+   free(a);
+   return;
+}
+
+void free_mem_1i(int *a, int n)
+{
+int k;
    free(a);
    return;
 }
@@ -205,14 +228,15 @@ void operate_memory(int dir)
        df5=alloc_mem_4f(nvar, m1, m2, m3);
        r_1=alloc_mem_1f(m1);                  // r^(-1)
        r_2=alloc_mem_1f(m1);                  // r^(-2)
-       node=alloc_mem_2f(m1, m3);         // kind of nodes
        refr=alloc_mem_2f(m1, m3);         // reflection of nodes relative circle
        refz=alloc_mem_2f(m1, m3);
+       node=alloc_mem_2i(m1, m3);         // kind of nodes
        sinth=alloc_mem_2f(m1, m3);
        costh=alloc_mem_2f(m1, m3);
        chi=alloc_mem_2f(m1, m3);          // angle of blade tilt
-       nut=alloc_mem_3f(m1, m2, m3);
-       averf = alloc_mem_3f(3,m1,m3);
+       nut = alloc_mem_3f(m1, m2, m3);
+       eta = alloc_mem_3f(m1, m2, m3);
+       averf = alloc_mem_3f(nvar,m1,m3);
        vfi = alloc_mem_1f(N3);
        totvfi = alloc_mem_1f(N3);
        init_shell();
@@ -232,8 +256,8 @@ void operate_memory(int dir)
        free_mem_2f(sinth,m1, m3);
        free_mem_2f(costh,m1, m3);
        free_mem_2f(chi,  m1, m3);
-       free_mem_2f(node,m1, m3);
-       free_mem_3f(averf,3,m1,m3);
+       free_mem_2i(node,m1, m3);
+       free_mem_3f(averf,nvar,m1,m3);
        free_mem_1f(vfi,N3);
        free_mem_1f(totvfi,N3);
        free_mem_1f(vfi,N3);
@@ -244,19 +268,14 @@ void operate_memory(int dir)
     }
 }
 
-int isType(double nod, enum TypeNodes tip)
+inline int isType(int nod, enum TypeNodes tip)
 {
-  int tmpnod;
-  tmpnod = floor(nod+0.5);
-  if(tip==NodeUnknown) return (!tmpnod);
-                  else return (tmpnod & tip);
+  return (nod & tip);
 }
 
-void setType(double *nod, enum TypeNodes tip)
+inline void setType(int *nod, enum TypeNodes tip)
 {
-  int tmpnod;
-  tmpnod = floor(*nod+0.5);
-  *nod = tmpnod | tip;
+  *nod |= tip;
   return;
 }
 
