@@ -246,8 +246,10 @@ int k;
 void operate_memory(int dir)
 {
  if(dir>0)
-   {   s_func = alloc_mem_2f(n3+2,kol_masht);
-       f  =alloc_mem_4f(nvar, m1, m2, m3);   //f[0]-pressure,f[1..3]-v(vector)
+   {
+       f  = alloc_mem_4f(nvar, m1, m2, m3);   //f[0]-pressure,f[1..3]-v(vector)
+       flow=alloc_mem_4f(nvar, m1, m2, m3);   //f[0]-pressure,f[1..3]-v(vector)
+       dflow=alloc_mem_4f(nvar,3/*D*/, m1, m3);   // for precalculation
        f1 =alloc_mem_4f(nvar, m1, m2, m3);
        df =alloc_mem_4f(nvar, m1, m2, m3);
        df2=alloc_mem_4f(nvar, m1, m2, m3);
@@ -266,11 +268,11 @@ void operate_memory(int dir)
        averf = alloc_mem_3f(nvar,m1,m3);
        vfi = alloc_mem_1f(N3);
        totvfi = alloc_mem_1f(N3);
-       init_shell();
     } else
    {
-//   free_mem_2f(s_func,n3+2,kol_masht);
        free_mem_4f(f  ,nvar, m1, m2, m3);
+       free_mem_4f(flow,nvar, m1, m2, m3);
+       free_mem_4f(dflow,nvar,3, m1, m3);   // for precalculation
        free_mem_4f(f1 ,nvar, m1, m2, m3);
        free_mem_4f(df ,nvar, m1, m2, m3);
        free_mem_4f(df2,nvar, m1, m2, m3);
@@ -289,7 +291,6 @@ void operate_memory(int dir)
        free_mem_1f(totvfi,N3);
        free_mem_1f(r_1,m1);
        free_mem_1f(r_2,m1);
-       erase_shell();
     }
 }
 

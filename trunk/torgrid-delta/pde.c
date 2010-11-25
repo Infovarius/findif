@@ -24,7 +24,7 @@ if(t<t_begin) *w=omega0;
 void pde(double t, double ****f, double ****df)
 {
    int i,j,k,l,m;
-   double dv1[4][3],dv2[4][3],dp1[3],dn1[3],w,dw;
+   double dv1[4][3],dv2[4][3],dp1[3],w,dw;
 
    boundary_conditions(f,nut);
 
@@ -36,7 +36,7 @@ void pde(double t, double ****f, double ****df)
      {
       for(m=0;m<3;m++) {
          dp1[m]=dr(f[0],i,j,k,m+1,0,dx[m],ghost, approx);
-         dn1[m]=dr(nut,i,j,k,m+1,0,dx[m],ghost, approx);
+//         dn1[m]=dr(nut,i,j,k,m+1,0,dx[m],ghost, approx);
       }
       for(l=1;l<=3;l++) {
        for(m=0;m<3;m++) {
@@ -47,27 +47,27 @@ void pde(double t, double ****f, double ****df)
 
       df[1][i][j][k]=nut[i][j][k]*(dv2[1][0]+dv2[1][1]+dv2[1][2]+r_1[i]*dv1[1][0]
 				   -f[1][i][j][k]*r_2[i]-2*dv1[2][1]*r_1[i])
-		     -dp1[0]//+w*w/r_1[i]       +2*w*f[2][i][j][k]                   //forces of inertion
+		     -dflow[0][0][i][k]-dp1[0]//+w*w/r_1[i]       +2*w*f[2][i][j][k]                   //forces of inertion
 //                     +(j+n[2]<=ghost+2 ? coordin(k,2)*f[2][i][j][k] : 0)                //helical force
-		     + (dn1[0]-f[1][i][j][k])*dv1[1][0]
-		     + (dn1[1]-f[2][i][j][k])*dv1[1][1]
-		     + (dn1[2]-f[3][i][j][k])*dv1[1][2]
-		     - (dn1[1]-f[2][i][j][k])*r_1[i]*f[2][i][j][k]
+		     - flow[1][i][j][k]*dv1[1][0] - f[1][i][j][k]*dflow[1][0][i][k]
+		     - flow[2][i][j][k]*dv1[1][1]
+		     - flow[3][i][j][k]*dv1[1][2] - f[3][i][j][k]*dflow[1][2][i][k]
+		     + r_1[i]*f[2][i][j][k]*f[2][i][j][k]
 		     ;
       df[2][i][j][k]=nut[i][j][k]*(dv2[2][0]+dv2[2][1]+dv2[2][2]+r_1[i]*dv1[2][0]
 				   -f[2][i][j][k]*r_2[i]+2*dv1[1][1]*r_1[i])
-		     +p1/r_1[i]*0+p1/rc-dp1[1]//-dw/r_1[i] -2*w*f[1][i][j][k]                   //forces of inertion
+		     -dflow[0][1][i][k]-dp1[1]//-dw/r_1[i] -2*w*f[1][i][j][k]                   //forces of inertion
 //                     -(j+n[2]<=ghost+2 ? (coordin(i,0)-rc)*f[2][i][j][k] :0)            //helical force
-		     + (dn1[0]-f[1][i][j][k])*dv1[2][0]
-		     + (dn1[1]-f[2][i][j][k])*dv1[2][1]
-		     + (dn1[2]-f[3][i][j][k])*dv1[2][2]
-		     + (dn1[1]-f[1][i][j][k])*r_1[i]*f[2][i][j][k]
+		     - flow[1][i][j][k]*dv1[2][0] - f[1][i][j][k]*dflow[2][0][i][k]
+		     - flow[2][i][j][k]*dv1[2][1]
+		     - flow[3][i][j][k]*dv1[2][2] - f[3][i][j][k]*dflow[2][2][i][k]
+                     - r_1[i]*f[1][i][j][k]*f[2][i][j][k]
 		     ;
       df[3][i][j][k]=nut[i][j][k]*(dv2[3][0]+dv2[3][1]+dv2[3][2]+r_1[i]*dv1[3][0])
-		     -dp1[2]
-		     + (dn1[0]-f[1][i][j][k])*dv1[3][0]
-		     + (dn1[1]-f[2][i][j][k])*dv1[3][1]
-		     + (dn1[2]-f[3][i][j][k])*dv1[3][2];
+		     -dflow[0][2][i][k]-dp1[2]
+		     - flow[1][i][j][k]*dv1[3][0] - f[1][i][j][k]*dflow[3][0][i][k]
+		     - flow[2][i][j][k]*dv1[3][1]
+                     - flow[3][i][j][k]*dv1[3][2] - f[3][i][j][k]*dflow[3][2][i][k];
       df[0][i][j][k]= -(dv1[1][0]+dv1[2][1]+dv1[3][2]+f[1][i][j][k]*r_1[i])/Gamma;
 //      df[0][i][j][k] = df[1][i][j][k] = df[2][i][j][k] = df[3][i][j][k] = 0;
 
@@ -115,31 +115,8 @@ void nut_by_flux(double ****f, double ***nut, double dt) //calculating nu_turbul
 {
 int i,j,k,l;
 double koef,r1,z1,rho,tmp;
-/*struct_func(f,2,2,3);
-for(i=0;i<n3;i++)
-    {
-    koef=sqrt(s_func[i][0]/(pow(sha[i][1],2.)+pow(shb[i][1],2.)));
-    sha[i][1] *= koef;
-    shb[i][1] *= koef;
-    koef=sqrt(s_func[i][1]/(pow(sha[i][0],2.)+pow(shb[i][0],2.)));
-    sha[i][0] *= koef;
-    shb[i][0] *= koef;
-    }*/
-/*clrscr();
-for(j=0;j<n3;j++)
-    {
-    printf("%lf  %lf",s_func[j][0],s_func[j][1]);
-    double en;
-    for (i=0,en=0; i<=Ns; i++)
-      en+=sha[j][i]*sha[j][i]+shb[j][i]*shb[j][i];
-    printf("   totEn=%lf\n",en);
-    }  */
-//time_step_shell(dt);
 for(k=0;k<m3;k++)
    {
-/*   double tmp = maschtab*pow(
-           (nl[2]*s_func[k][0] + nl[1]*s_func[k][1] + nl[0]*s_func[k][2])*pow(dx[2],4),
-                         1./3);*/
    for(i=0;i<m1;i++)
      {
      r1 = coordin(i,0);   z1 = coordin(k,2);
@@ -365,7 +342,7 @@ if(!goon) {
 	f[1][i][j][k]=NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/R)
 		      + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
 		       (R*R-pow(coordin(i,0),2) - pow(coordin(k,2),2))/R/R;
-	f[2][i][j][k]=(parabole+Noise*((double)rand()-RAND_MAX/2)/RAND_MAX)*
+	f[2][i][j][k]=(Noise*((double)rand()-RAND_MAX/2)/RAND_MAX)*
 		       (R*R-pow(coordin(i,0),2) - pow(coordin(k,2),2))/R/R;
 	f[3][i][j][k]=NoiseNorm*sin(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/R)
 		      + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
@@ -503,4 +480,20 @@ double coordin(int i, int dir)
    case 2:  return dx[dir]*(i-ghost+0.5+n[dir])-R;
  }
     return(0);
+}
+
+void precalc(void)                                // precalculation of main flow derivatives
+{
+int i,j,k,l,m;
+   for(i=0;i<m1;i++)
+   for(k=0;k<m3;k++)
+     if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
+      {
+      for(l=0;l<=3;l++)
+       for(m=0;m<3;m++)
+         if(l==0 || m!=1)       // for velocity there's no need in phi-derivative
+         dflow[l][m][i][k] = dr(f[l],i,j,k,m+1,0,dx[m],ghost, approx);
+      }
+   boundary_conditions(flow,nut);
+   snapshot(flow,nut,0,0);
 }

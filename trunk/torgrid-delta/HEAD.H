@@ -8,17 +8,16 @@
 LEVEL char *NameMessageFile;
 LEVEL char *NameErrorFile;
 LEVEL char NameInitFile[200];
-LEVEL char *NameNuFile;
+LEVEL char *MainFlowFile;
 LEVEL char *NameVFile;
 LEVEL char *NameDumpFile;
 LEVEL char *NameSnapFile;
 LEVEL char *NameEnergyFile;
-LEVEL char *KaskadVarFile;
 LEVEL char *NameCPFile;
 LEVEL char *NameStatFile;
 LEVEL char *fname;
 
-LEVEL double ****f, ****f1, ***nut, ****df, ****df2, ****df3, ****df4, ****df5, **s_func,
+LEVEL double ****flow, ****dflow, ****f, ****f1, ***nut, ****df, ****df2, ****df3, ****df4, ****df5,
              dx[3], *r_1, *r_2, **refr, **refz, **sinth, **costh, **chi;
 LEVEL int **node;
 
@@ -71,17 +70,7 @@ LEVEL int pr[3];                                         //3D
 LEVEL int max_okr;  //должно быть <=ghost, иначе окрестность выходит из фикт.обл-ти - виснет
 LEVEL double lambda; //multiplier
 LEVEL long num_points[kol_masht];
-LEVEL double *nl,**sha,**shb;
-LEVEL double *f0;                           //flux of energy from grid to shell
-LEVEL double *en_flux;                      //summary of energy in cascade model
 
-/*-------- goy.c  -----------*/
-void init_shell(void);
-void sima(double *zza, double *zzb, double *xx, double *yy);
-void time_step_shell(double tm);
-void erase_shell(void);
-/*------- struct_func.c ----*/
-void struct_func(double ****f,int q,double lambda,int size_okr);
 /*------- util.c  -----------*/
 void nrerror(char *mess,double t_cur,long count);
 void nmessage(char *mess,double t_cur,long count);
@@ -112,9 +101,10 @@ void   pde(double t, double ****f, double ****df);
 double norma(double a,double b,double c,int q);
 double deviation(double ****f,int,int,int);
 void nut_by_flux(double ****f, double ***nu, double Re);
-void   boundary_conditions(double ****f, double ***nu);
-void  init_conditions(void);
+void boundary_conditions(double ****f, double ***nu);
+void init_conditions(void);
 void init_parallel(void);
+void precalc(void);
 double dr(double ***m,int ii,int jj,int kk,int dir,int or,double dx,int sh,int sm);
 double coordin(int, int);
 double interpolation(double,double, double,double,double,double);
@@ -122,7 +112,7 @@ double interpolation(double,double, double,double,double,double);
 FILE *fileopen(const char *, int mode);
 void fileclose(FILE *fd);
 void init_param(int argc, char** argv,double *dtnext);
-int init_data(void);
+int init_data(char *fname, double ****f);
 void print_array1d(FILE *ff,double *a,int beg1,int n1);
 void print_array2d(FILE *ff,double **a,int beg1,int n1,int beg2,int n2);
 void print_array3d(FILE *ff,double ***a,int beg1,int n1,int beg2,int n2,int beg3,int n3);
