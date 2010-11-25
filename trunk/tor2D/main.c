@@ -49,7 +49,7 @@ int main(int argc, char** argv)
 
    init_param(argc,argv,&dtnext);       // initialization of parameters
    Gamma=1e-4;
-   ghost=(approx-1)/2;                  //radius of approx sample
+   ghost=(approx-1)/2+3;                  //radius of approx sample
    t_cur=0;
    count=0; enter = 0;
 
@@ -144,7 +144,7 @@ int main(int argc, char** argv)
 		//Rm = floor(t_cur/ChangeParamTime+0.5)*DeltaParam-190;
 		if(!outed) { snapshot(f,nut,t_cur,count); outed = 1;}
 //                MPI_Barrier(MPI_COMM_WORLD);
-		tmp = (Re += DeltaParam);
+		tmp = (rc += DeltaParam);
                 tmpC = count;  tmpT = t_cur;
 		goon = ((fd=fopen(NameCPFile,"r+"))>0);
 		if(goon)
@@ -153,18 +153,18 @@ int main(int argc, char** argv)
 			goon = strcmp(NameInitFile,"END");
 			}
 		init_param(argc,argv,&dtnext);       // initialization of parameters
-		ghost=(approx-1)/2;                  //radius of approx sample
+		ghost=(approx-1)/2+3;                  //radius of approx sample
 		dx[0]=2*R/N1;
 		dx[2]=2*R/N3;
 
 		if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
 		fileclose(fd);
 
-                count = tmpC;  t_cur = tmpT;  Re = tmp;
+                count = tmpC;  t_cur = tmpT;  rc = tmp;
                 p1 = 4/Re;
 		init_conditions();
 		goon = 1;
-            Master nmessage("Re was changed to",Re,count);
+            Master nmessage("parameter was changed to",rc,count);
             }
 /*        if(kbhit())
 	     {
