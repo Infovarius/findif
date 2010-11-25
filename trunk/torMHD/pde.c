@@ -511,7 +511,7 @@ void  init_conditions()
         if(fabs(refr_f[i][k]-i)<1 && fabs(refz_f[i][k]-k)<1 && !isType(node[i][k],NodeFluid))
                  { setType(&node[i][k],NodeFluid);
                    if(isType(node[i][k],NodeGhostFluid)) node[i][k] -= NodeGhostFluid;
-                   for(l=-ghost;l<=ghost;l++)
+                   for(l=-ghost1;l<=ghost1;l++)
                      { if(i+l>=0&&i+l<m1) if(!isType(node[i+l][k],NodeFluid))
                                               setType(&node[i+l][k],NodeGhostFluid);
                        if(k+l>=0&&k+l<m3) if(!isType(node[i][k+l],NodeFluid))
@@ -561,13 +561,13 @@ if(!goon) {
      {
       if(isType(node[i][k],NodeFluid)) {
         f[0][i][j][k]=1;
-        f[1][i][j][k]=Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
+        f[1][i][j][k]=0*Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
                        (Rfl*Rfl-pow(coordin(i,0),2) - pow(coordin(k,2),2))*4/Rfl/Rfl;
         f[2][i][j][k]=NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl)
-		      + (parabole+Noise*((double)rand()-RAND_MAX/2)/RAND_MAX)*
+		      + (parabole+0*Noise*((double)rand()-RAND_MAX/2)/RAND_MAX)*
                        (Rfl*Rfl-pow(coordin(i,0),2) - pow(coordin(k,2),2))*4/Rfl/Rfl;
         f[3][i][j][k]=NoiseNorm*sin(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl)
-                      + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
+                      + 0*Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
                        (Rfl*Rfl-pow(coordin(i,0),2) - pow(coordin(k,2),2))*4/Rfl/Rfl;
 //        f[1][i][j][k]=f[2][i][j][k]=f[3][i][j][k]=0;
         nut[i][j][k]=(
@@ -577,12 +577,12 @@ if(!goon) {
             else f[0][i][j][k]=f[1][i][j][k]=f[2][i][j][k]=f[3][i][j][k] = 0;
       if(isType(node[i][k],NodeFluid)/*||isType(node[i][k],NodeShell)*/ )
                  {   }
-                 f[4][i][j][k]=f[5][i][j][k]=f[6][i][j][k]=0;
+//                 f[4][i][j][k]=f[5][i][j][k]=f[6][i][j][k]=0;
                  /*f[4][i][j][k]=coordin(i,0)*cos(coordin(j,1))*sin(coordin(j,1))*/;
                  /*f[5][i][j][k]=coordin(i,0)*cos(coordin(j,1))*cos(coordin(j,1))*/;
-                 f[6][i][j][k]=0;
-//                 if(!isType(node[i][k],NodeMagn))
-                  if(isType(node[i][k],NodeFluid))
+//                 f[6][i][j][k]=0;
+                  if(isType(node[i][k],NodeMagn))
+//                  if(isType(node[i][k],NodeFluid))
                      {
                      f[4][i][j][k]+=Noise*((double)rand()-RAND_MAX/2)/RAND_MAX + NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl);
                      f[5][i][j][k]+=Noise*((double)rand()-RAND_MAX/2)/RAND_MAX + NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl);
@@ -622,7 +622,7 @@ void init_parallel()
          }
 if(!goon) {                       //reading sizes from file when continuing
   pp[0]=divisors[nd1]; pp[1]=divisors[nd2]; pp[2]=size/pp[0]/pp[1];                 // number of procs along axes
-//  pp[1]=pp[2]=1; pp[0]=size;
+  pp[0]=pp[2]=1; pp[1]=size;
           }
   pr[0] = rank%pp[0]; pr[1] = (rank/pp[0])%pp[1]; pr[2] = (rank/pp[0]/pp[1])%pp[2];  // coordinates of current subregion
 
