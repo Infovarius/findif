@@ -29,8 +29,7 @@ void timestep(double ****f, double ****df, double t, double ****fout,
       err=errs;
 
       err *=ErrScale;
-      if (err<=1.0)
-         break;
+      if (err<=1.0) break;
       dt = max(Safety * dt * pow(err, Pshrink), dt*(double)0.1);
       if (t+dt == t)
 	    {

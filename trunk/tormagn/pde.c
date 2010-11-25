@@ -50,7 +50,6 @@ void pde(double t, double ****f, double ****df)
         dA11[l][1][2] = dA11[l][2][1] = d2cross(f[l],i,j,k,3,2,ghost,approx);
         }
 
-
        df[4][i][j][k]=Rm*(f[2][i][j][k]*(dv1[5][0]-dv1[4][1]+f[5][i][j][k]*r_1[i])-f[3][i][j][k]*(dv1[4][2]-dv1[6][0]))
 //                      +Rm*f[2][i][j][k]	 // for induced field
                      +eta[i][j][k]*(dv2[4][0]+dv2[4][1]+dv2[4][2]+r_1[i]*dv1[4][0]-f[4][i][j][k]*r_2[i]-2*dv1[5][1]*r_1[i])
@@ -75,7 +74,11 @@ void pde(double t, double ****f, double ****df)
 void fill_velocity(double t, double ****f)
 {
 double r1, phi1, z1, rho, vrho, vth, vphi;
-int i,j,k;
+int pp[3];
+int error=0;
+int i,j,k,l;
+float tmpf; double tmpd; int tmpi;  char tmpc;
+FILE *inp;
        for(i=0;i<m1;i++)
          for(j=0;j<m2;j++)
             for(k=0;k<m3;k++)
@@ -85,18 +88,47 @@ int i,j,k;
             rho=sqrt(r1*r1 + z1*z1);
             vrho = 0;
             vth  = vtheta_given(t,rho,Rfl,phi1)/(1+r1*rc);
-/*            vphi = vfi_given(t_cur*Tunit,rho,Rfl);      // nonstationary time=t_cur*Tunit, max magnitude=0.0990906
-            vth = 0;                        */
+//            vphi = vfi_given(t_cur*Tunit,rho,Rfl);      // nonstationary time=t_cur*Tunit, max magnitude=0.0990906
+//            vth = 0;
             vphi = vfi_given(0.0990906,rho,Rfl);
             f[1][i][j][k] = vrho*sinth[i][k]+vth*costh[i][k];
             f[2][i][j][k] = vphi;
             f[3][i][j][k] = vrho*costh[i][k]-vth*sinth[i][k];
             }    else f[1][i][j][k] = f[2][i][j][k] = f[3][i][j][k] = 0;
+
+/* inp = fileopen("velocity.snp",-1);
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%lf",&tmpd)==0) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%ld",&tmpd)==0) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%c%d%c%d%c%d%c",&tmpc,&pp[0],&tmpc,&pp[1],&tmpc,&pp[2],&tmpc)<7) error=1;
+ if(pp[0]*pp[1]*pp[2]!=1) nrerror("Can't read velocity data from many processors.",-1,-1);
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%d",&tmpi)==0) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%d",&tmpi)==0) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%d",&tmpi)==0) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%lf",&tmpi)==0) error=1;
+ read_tilleq(inp,0x0A,'n');
+    if(error) nrerror("Error in reading velocity",t_cur,count);
+// for(tmpr=0;tmpr<=rank;tmpr++)           //reading until arrays of this process
+// {
+ for(l=0;l<=3;l++)                    // reading f
+        for(i=0;i<N1+2*ghost;i++)
+        for(j=0;j<N2+2*ghost;j++)
+        for(k=0;k<N3+2*ghost;k++)
+       {
+       if(fread(&tmpf,sizeof(float),1,inp)<1) nrerror("Error in reading velocity",0.,(k+100*(j+100*i)));
+       if(i>=n[0] && i<n[0]+m1 &&
+          j>=n[1] && j<n[1]+m2 &&
+          k>=n[2] && k<n[2]+m3)
+                {
+                if(isType(node[i-n[0]][k-n[2]],NodeFluid)) f[l][i-n[0]][j-n[1]][k-n[2]] = tmpf;
+                        else f[l][i-n[0]][j-n[1]][k-n[2]] = 0;
+                }
+       }
+  fileclose(inp);            */
 }
 
 double deviation(double ****f,int i,int j,int k)
 {
-const int size_okr=max(1,ghost);
+const int size_okr=min(max_okr,ghost);
 double flux = 0;
 int kol=0,l;
    for(l=1;l<=size_okr;l++)
@@ -197,17 +229,19 @@ void  boundary_conditions(double ****f)
                 }
 
    MPI_Waitall(req_numS,SendRequest,statuses);
-   if(statuses[0].MPI_ERROR) {putlog("bc:error during send=",numlog++);
+   if(req_numS && statuses[0].MPI_ERROR) {putlog("bc:error during send=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
                                }    else numlog++;
+   req_numS = 0;
    MPI_Waitall(req_numR,RecvRequest,statuses);
-   if(statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
+   if(req_numR && statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
                                }    else numlog++;
+   req_numR = 0;
   if(pr_neighbour[2]>-1) CopyBufferToGrid(f,eta,buf_recv[2],0,0,0,m1-1,ghost-1,m3-1);
   if(pr_neighbour[3]>-1) CopyBufferToGrid(f,eta,buf_recv[3],0,mm2,0,m1-1,m2-1,m3-1);
 
@@ -226,17 +260,19 @@ void  boundary_conditions(double ****f)
                 }
 
    MPI_Waitall(req_numS,SendRequest,statuses);
-   if(statuses[0].MPI_ERROR) {putlog("bc:error during send=",numlog++);
+   if(req_numS && statuses[0].MPI_ERROR) {putlog("bc:error during send=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
                                }    else numlog++;
+   req_numS = 0;
   MPI_Waitall(req_numR,RecvRequest,statuses);
-  if(statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
+   if(req_numR && statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
                                }    else numlog++;
+   req_numR = 0;
   if(pr_neighbour[0]>-1) CopyBufferToGrid(f,eta,buf_recv[0],0,0,0,ghost-1,m2-1,m3-1);
   if(pr_neighbour[1]>-1) CopyBufferToGrid(f,eta,buf_recv[1],mm1,0,0,m1-1,m2-1,m3-1);
 
@@ -255,17 +291,19 @@ void  boundary_conditions(double ****f)
                }
 
    MPI_Waitall(req_numS,SendRequest,statuses);
-   if(statuses[0].MPI_ERROR) {putlog("bc:error during send=",numlog++);
+   if(req_numS && statuses[0].MPI_ERROR) {putlog("bc:error during send=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
                                }    else numlog++;
+   req_numS = 0;
   MPI_Waitall(req_numR,RecvRequest,statuses);
-  if(statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
+   if(req_numR && statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
                                }    else numlog++;
+   req_numR = 0;
   if(pr_neighbour[4]>-1) CopyBufferToGrid(f,eta,buf_recv[4],0,0,0,m1-1,m2-1,ghost-1);
   if(pr_neighbour[5]>-1) CopyBufferToGrid(f,eta,buf_recv[5],0,0,mm3,m1-1,m2-1,m3-1);
 
@@ -480,6 +518,7 @@ void init_parallel()
          }
 if(!goon) {                       //reading sizes from file when continuing
   pp[0]=divisors[nd1]; pp[1]=divisors[nd2]; pp[2]=size/pp[0]/pp[1];                 // number of procs along axes
+//  pp[1]=pp[2]=1; pp[0]=size;
           }
   pr[0] = rank%pp[0]; pr[1] = (rank/pp[0])%pp[1]; pr[2] = (rank/pp[0]/pp[1])%pp[2];  // coordinates of current subregion
 
@@ -487,6 +526,18 @@ if(!goon) {                       //reading sizes from file when continuing
   n1 = floor((double)N1/pp[0]);     n[0] = n1*pr[0] + min(pr[0],N1-pp[0]*n1);    if(pr[0]<N1-pp[0]*n1) n1++;              // dimensions of subregion
   n2 = floor((double)N2/pp[1]);     n[1] = n2*pr[1] + min(pr[1],N2-pp[1]*n2);    if(pr[1]<N2-pp[1]*n2) n2++;
   n3 = floor((double)N3/pp[2]);     n[2] = n3*pr[2] + min(pr[2],N3-pp[2]*n3);    if(pr[2]<N3-pp[2]*n3) n3++;
+    {
+   iop=fopen(NameStatFile,"w");
+   fprintf(iop,"%d\n",rank);
+   fprintf(iop,"%d\t%d\t%d\n",pr[0],pr[1],pr[2]);
+   fprintf(iop,"%d\t%d\t%d\n",pp[0],pp[1],pp[2]);
+   fprintf(iop,"%d\t%d\t%d\n",n[0],n[1],n[2]);
+   fprintf(iop,"%d\t%d\t%d\n",n1,n2,n3);
+   for(i=0;i<6;i++)
+     fprintf(iop,"%d ",pr_neighbour[i]);
+   fprintf(iop,"\n");
+   fileclose(iop);
+       }
    if(n1<ghost || n2<ghost || n3<ghost) nrerror("Too small mesh or incorrect number of processes",0,0);
 
    m1 = n1+2*ghost;
@@ -515,17 +566,6 @@ if(!goon) {                       //reading sizes from file when continuing
    buf_recv[j+2*i] = alloc_mem_1f(buf_size[i]);
   }
 
-/*   iop=fopen(NameStatFile,"w");
-   fprintf(iop,"%d\n",rank);
-   fprintf(iop,"%d\t%d\t%d\n",pr[0],pr[1],pr[2]);
-   fprintf(iop,"%d\t%d\t%d\n",pp[0],pp[1],pp[2]);
-   fprintf(iop,"%d\t%d\t%d\n",n[0],n[1],n[2]);
-   fprintf(iop,"%d\t%d\t%d\n",n1,n2,n3);
-   for(i=0;i<6;i++)
-     fprintf(iop,"%d ",pr_neighbour[i]);
-   fprintf(iop,"\n");
-   fileclose(iop);
-   */
 }
 
 static double kf3[2][3][3]={{{-3./2.0, 2.0, -1./2.0}, {-1./2.0, 0.0, 1./2.0}, {1./2.0, -2.0, 3./2.0}},
@@ -556,15 +596,12 @@ switch (sm) {
                   case 1 : tmp = kf7[or][sh][6]*(m[ii+3][jj][kk]-m[ii-3][jj][kk])
                                + kf7[or][sh][5]*(m[ii+2][jj][kk]-m[ii-2][jj][kk])
                                + kf7[or][sh][4]*(m[ii+1][jj][kk]-m[ii-1][jj][kk]); break;
-
                   case 2 : tmp = kf7[or][sh][6]*(m[ii][jj+3][kk]-m[ii][jj-3][kk])
                                + kf7[or][sh][5]*(m[ii][jj+2][kk]-m[ii][jj-2][kk])
                                + kf7[or][sh][4]*(m[ii][jj+1][kk]-m[ii][jj-1][kk]); break;
-
                   case 3 : tmp = kf7[or][sh][6]*(m[ii][jj][kk+3]-m[ii][jj][kk-3])
                                + kf7[or][sh][5]*(m[ii][jj][kk+2]-m[ii][jj][kk-2])
                                + kf7[or][sh][4]*(m[ii][jj][kk+1]-m[ii][jj][kk-1]); break;
-
                   }; break;
      case 3 :  switch (dir) {
                   case 1 : tmp = kf3[or][sh][2]*(m[ii+1][jj][kk]-m[ii-1][jj][kk]); break;
@@ -574,10 +611,8 @@ switch (sm) {
      case 5 :  switch (dir) {
                   case 1 : tmp = kf5[or][sh][4]*(m[ii+2][jj][kk]-m[ii-2][jj][kk])
                                + kf5[or][sh][3]*(m[ii+1][jj][kk]-m[ii-1][jj][kk]); break;
-
                   case 2 : tmp = kf5[or][sh][4]*(m[ii][jj+2][kk]-m[ii][jj-2][kk])
                                + kf5[or][sh][3]*(m[ii][jj+1][kk]-m[ii][jj-1][kk]); break;
-
                   case 3 : tmp = kf5[or][sh][4]*(m[ii][jj][kk+2]-m[ii][jj][kk-2])
                                + kf5[or][sh][3]*(m[ii][jj][kk+1]-m[ii][jj][kk-1]); break;
                   }; break;
@@ -615,7 +650,6 @@ switch (sm) {
                                + kf5[or][sh][2]*m[ii][jj][kk]; break;
                   }; break;
     }
-
 /*switch (sm*dir) {
 	case 3 : for(i=0; i<sm; i++) tmp += m[ii+i-sh][jj][kk]*kf3[or][sh][i]; break;
 	case 6 : for(i=0; i<sm; i++) tmp += m[ii][jj+i-sh][kk]*kf3[or][sh][i]; break;

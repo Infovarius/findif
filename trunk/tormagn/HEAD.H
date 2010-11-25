@@ -126,6 +126,7 @@ void calculate_curl(double ****mas,double ****out,enum TypeNodes tip);
 /*------- ioutil.c  ------*/
 FILE *fileopen(const char *, int mode);
 void fileclose(FILE *fd);
+void read_tilleq(FILE *ffff,char lim, char echo);
 void init_param(int argc, char** argv,double *dtnext);
 int init_data(void);
 void print_array1d(FILE *ff,double *a,int beg1,int n1);
