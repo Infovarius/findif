@@ -4,6 +4,7 @@
 #include <string.h>
 //#include <conio.h>
 #include "mpi.h"
+#define M_PI 3.141592653579893L
 
 LEVEL char *NameMessageFile;
 LEVEL char *NameErrorFile;
@@ -52,12 +53,13 @@ LEVEL int CheckStep;  //each CheckStep divergence of program is checking
 LEVEL int OutStep;    //each OutStep result is printing
 LEVEL int SnapStep;   //each SnapStep snapshot is done
 LEVEL double SnapDelta;  //each SnapDelta of simulation time snapshot is done
+LEVEL double DumpInterval;  // each DumpInterval all essential data is saved
+LEVEL int DumpKeep;   // if to keep all Dumps (0 - only 2 last)
 LEVEL int VarStep;    //each VarStep step in RungeKutta varies
 LEVEL double ChangeParamTime, DeltaParam;  // for iteration on parameters
-LEVEL int num_dump;
 LEVEL long numlog;
 
-#if !defined(max)
+#ifndef max
 #define max(a, b)  (((a) > (b)) ? (a) : (b))
 #define min(a, b)  (((a) < (b)) ? (a) : (b))
 #endif
@@ -71,19 +73,13 @@ LEVEL long numlog;
 LEVEL int rank, size;
 LEVEL MPI_Request SendRequest[256],RecvRequest[256];
 LEVEL MPI_Status statuses[256];
-LEVEL double *buf_send[6], *buf_recv[6], buf_size[3];    //6=2*3(D)
-LEVEL int pr_neighbour[6],pp[3],n[3];                    //3D
+LEVEL double *buf_send[6], *buf_recv[6];                 //6=2*3(D)
+LEVEL int pr_neighbour[6],pp[3],n[3], buf_size[3];       //3D
 LEVEL int pr[3];                                         //3D
 //void init_parallel();                       in file pde.c
 
 //--------for GOY
-#if !defined(kol_masht)
-#define kol_masht 10
-#endif
 LEVEL int max_okr;  //должно быть <=ghost, иначе окрестность выходит из фикт.обл-ти - виснет
-
-/*------- struct_func.c ----*/
-void struct_func(double ****f,int q,double lambda,int size_okr);
 /*------- util.c  -----------*/
 void nrerror(char *mess,double t_cur,long count);
 void nmessage(char *mess,double t_cur,long count);
@@ -111,8 +107,8 @@ void timestep(double ****f, double ****df, double t, double ****fout,
 double rkck(double ****f, double ****df, double t, double dt, double ****fout);
 /*------- pde.c  -----------*/
 void   pde(double t, double ****f, double ****df);
-void fill_velocity(double t, double ****f);
 double norma(double a,double b,double c,int q);
+void fill_velocity(double t, double ****f);
 double deviation(double ****f,int,int,int);
 void nut_by_flux(double ****f,double Re);
 void   boundary_conditions(double ****f);
@@ -127,7 +123,7 @@ void calculate_curl(double ****mas,double ****out,enum TypeNodes tip);
 FILE *fileopen(const char *, int mode);
 void fileclose(FILE *fd);
 void read_tilleq(FILE *ffff,char lim, char echo);
-void init_param(int argc, char** argv,double *dtnext);
+void init_param(int argc, char** argv,double *dtnext,int flag);
 int init_data(void);
 void print_array1d(FILE *ff,double *a,int beg1,int n1);
 void print_array2d(FILE *ff,double **a,int beg1,int n1,int beg2,int n2);

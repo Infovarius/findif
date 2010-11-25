@@ -24,8 +24,8 @@ if(t<t_begin) *w=omega0;
 
 void pde(double t, double ****f, double ****df)
 {
-   int i,j,k,l,m,n;
-   double dv1[7][3],dv2[7][3],dA11[7][3][3],dp1[3],dn1[3],w,dw;
+   int i,j,k,l,m;
+   double dv1[7][3],dv2[7][3],dA11[7][3][3],w,dw;
 
    boundary_conditions(f);
 
@@ -75,11 +75,11 @@ void fill_velocity(double t, double ****f)
 {
 double r1, phi1, z1, rho, vrho, vth, vphi;
 int pp[3];
-int error=0;
+int error=0, tmpr;
 int i,j,k,l;
 float tmpf; double tmpd; int tmpi;  char tmpc;
 FILE *inp;
-       for(i=0;i<m1;i++)
+/*       for(i=0;i<m1;i++)
          for(j=0;j<m2;j++)
             for(k=0;k<m3;k++)
             if(isType(node[i][k],NodeFluid))
@@ -95,24 +95,24 @@ FILE *inp;
             f[2][i][j][k] = vphi;
             f[3][i][j][k] = vrho*costh[i][k]-vth*sinth[i][k];
             }    else f[1][i][j][k] = f[2][i][j][k] = f[3][i][j][k] = 0;
-
-/* inp = fileopen("velocity.snp",-1);
- read_tilleq(inp,'=','n');   if(fscanf(inp,"%lf",&tmpd)==0) error=1;
- read_tilleq(inp,'=','n');   if(fscanf(inp,"%ld",&tmpd)==0) error=1;
- read_tilleq(inp,'=','n');   if(fscanf(inp,"%c%d%c%d%c%d%c",&tmpc,&pp[0],&tmpc,&pp[1],&tmpc,&pp[2],&tmpc)<7) error=1;
+*/
+ inp = fileopen("velocity.snp",-1);
+ read_tilleq(inp,'=','y');   if(fscanf(inp,"%lf",&tmpd)==0) error=1; //	current time
+ read_tilleq(inp,'=','y');   if(fscanf(inp,"%ld",&tmpd)==0) error=1; // current iteration
+ read_tilleq(inp,'=','y');   if(fscanf(inp,"%c%d%c%d%c%d%c",&tmpc,&pp[0],&tmpc,&pp[1],&tmpc,&pp[2],&tmpc)<7) error=1; // number of processors along axes
  if(pp[0]*pp[1]*pp[2]!=1) nrerror("Can't read velocity data from many processors.",-1,-1);
- read_tilleq(inp,'=','n');   if(fscanf(inp,"%d",&tmpi)==0) error=1;
- read_tilleq(inp,'=','n');   if(fscanf(inp,"%d",&tmpi)==0) error=1;
- read_tilleq(inp,'=','n');   if(fscanf(inp,"%d",&tmpi)==0) error=1;
- read_tilleq(inp,'=','n');   if(fscanf(inp,"%lf",&tmpi)==0) error=1;
- read_tilleq(inp,0x0A,'n');
-    if(error) nrerror("Error in reading velocity",t_cur,count);
-// for(tmpr=0;tmpr<=rank;tmpr++)           //reading until arrays of this process
-// {
+ read_tilleq(inp,'=','y');   if(fscanf(inp,"%d",&tmpi)==0) error=1; // Number of points along x
+ read_tilleq(inp,'=','y');   if(fscanf(inp,"%d",&tmpi)==0) error=1; // Number of points along y
+ read_tilleq(inp,'=','y');   if(fscanf(inp,"%d",&tmpi)==0) error=1; // Number of points along z
+ read_tilleq(inp,'=','y');   if(fscanf(inp,"%lf",&tmpd)==0) error=1; //Reynolds number 
+ read_tilleq(inp,0x0A,'y');
+    if(error) nrerror("Error in reading velocity",t_cur,tmpi);
+ for(tmpr=0;tmpr<=0*rank;tmpr++)           //reading until arrays of this process (if rank=0, one processor snap)
+ {
  for(l=0;l<=3;l++)                    // reading f
-        for(i=0;i<N1+2*ghost;i++)
-        for(j=0;j<N2+2*ghost;j++)
-        for(k=0;k<N3+2*ghost;k++)
+    for(i=0;i<N1+2*ghost;i++)
+    for(j=0;j<N2+2*ghost;j++)
+    for(k=0;k<N3+2*ghost;k++)
        {
        if(fread(&tmpf,sizeof(float),1,inp)<1) nrerror("Error in reading velocity",0.,(k+100*(j+100*i)));
        if(i>=n[0] && i<n[0]+m1 &&
@@ -123,7 +123,8 @@ FILE *inp;
                         else f[l][i-n[0]][j-n[1]][k-n[2]] = 0;
                 }
        }
-  fileclose(inp);            */
+ }
+  fileclose(inp);            
 }
 
 double deviation(double ****f,int i,int j,int k)
@@ -203,7 +204,7 @@ void  boundary_conditions(double ****f)
 {
    int i, j, k, l, req_numS=0, req_numR=0;
    int i1,i2,k1,k2;
-   int flag,cnt,z[4],znorm,ztau,tag=10;
+   int z[4],znorm,ztau,tag=10;
    double vrho,vphi,vth,An;
    double rfict_1,rin_1,rrel;
    char msg_err[100];       //for putlog+mpi_error
@@ -377,7 +378,7 @@ void  boundary_conditions(double ****f)
 void  init_conditions()
 {
    int i,j,k,l;
-   double r, rho, r1, z1;
+   double rho, r1, z1;
 //   double k1,k2,k3;
 
 // -------- filling of nodes' types +reflections rel circle + nut ---------------
@@ -588,7 +589,6 @@ double dr(double ***m, int ii, int jj, int kk, int dir, int or, double dx, int s
 /*                                           , 1,2,3 ,  0,1    dx,dx^2  , 0-left , 3,5,7 */
 {
 double tmp=0.0;
-int i;
 
 if(or==0)
 switch (sm) {
@@ -721,7 +721,7 @@ double coordin(int i, int dir)
 
 void calculate_curl(double ****f,double ****b,enum TypeNodes tip)
 {
-   int i,j,k,l,m,n;
+   int i,j,k,l,m;
    double dA[7][3];
    for(l=0;l<=2;l++) for(m=0;m<3;m++) dA[l][m] = 0;
    for(i=ghost;i<mm1;i++)

@@ -53,17 +53,15 @@ char str[256],*pstr;
  if(count==0) Master printf("%g\t->\t%s",*param,pstr);
 }
 
-void init_param(int argc, char** argv,double *dtnext)
+void init_param(int argc, char** argv,double *dtnext,int flag)
 {
 int ver;
 FILE *iop;
 double d;
  if(argc<2 || (iop=fopen(argv[1],"r"))==NULL) //no ini file
-    {
      nrerror("Start from no ini file!",-1,-1);
-     }
-    else {
-      if(fscanf(iop,"%d",&ver)<1 || ver!=7) nrerror("parameters' file has wrong version",-1,-1);
+
+      if(fscanf(iop,"%d",&ver)<1 || ver!=8) nrerror("parameters' file has wrong version",-1,-1);
       read_token(iop,&lfi);        //geometry
       read_token(iop,&rc);
       read_token(iop,&Rfl);
@@ -95,17 +93,30 @@ double d;
       read_token(iop,&ChangeParamTime);
       read_token(iop,&DeltaParam);
       read_token(iop,&d);
+  if(flag)
+     {
       if(d==0)	{
-      		goon = 0;
+      		    goon = 0;
                 strcpy(NameInitFile,"END");
                 }
       else if(d>0)  {
          	goon = 1;
-                sprintf(NameInitFile,"%s_*_%05d.snp",NameSnapFile,(int)d);
+                sprintf(NameInitFile,"%s_%d_%05d.snp",NameSnapFile,size,(int)d);
                 }
-      fileclose(iop);
-//      nmessage("Parameters were extracted from file",t_cur,count);
-      }
+	  else {// without reading (d<0)
+		    goon=0;
+			strcpy(NameInitFile,"-1");
+			}
+     }
+  
+	Master if(!count) nmessage("Parameters were extracted from file",0,0);
+	fileclose(iop);
+   
+	ghost=(approx-1)/2;                  //radius of approx sample
+	dx[0]=2*R/N1;
+	dx[1]=lfi/N2;
+	dx[2]=2*R/N3;
+
 }
 
 void read_tilleq(FILE *ffff,char lim, char echo)
@@ -117,7 +128,7 @@ void read_tilleq(FILE *ffff,char lim, char echo)
 int init_data(void)                 //returns code of error
 {
  int error=0;
- int i,j,k,l,tmpr;
+ int i,j,k,l;
  char fstr[256], pos;
  float tmpf;
  char tmpc;
@@ -260,19 +271,19 @@ for(l=0;l<=2;l++)
    for(i=0;i<m1;i++)
       for(k=0;k<m3;k++)
         averf[l][i][k] = 0;
-for(i=0;i<m1;i++)
+for(i=ghost;i<mm1;i++)
      for(j=ghost;j<mm2;j++)
-        for(k=0;k<m3;k++)
+        for(k=ghost;k<mm3;k++)
           if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
            {
            PulsEnergy+=deviation(f,i,j,k);
-           for(l=0;l<=2;l++) averf[l][i][k] += f[l+1][i][j][k];
+           for(l=0;l<=2;l++) averf[l][i][k] += pow(f[l+1][i][j][k],2.);
            }
-for(l=0;l<=2;l++)
+for(l=1;l<=3;l++)
   for(i=0;i<m1;i++)
     for(k=0;k<m3;k++)
        if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
-           TotalEnergy += fabs(1+coordin(i,0)*rc)*pow(averf[l][i][k],2.);
+           TotalEnergy += fabs(1+coordin(i,0)*rc)*averf[l][i][k];
 TotalEnergy += 1.;   //if zero average field
 razlet = (PulsEnergy/TotalEnergy>UpLimit);    */
 razlet = 0;
@@ -283,7 +294,7 @@ void printing(double ****f1,double dtdid,double t_cur,long count,double en)
 double temp, divv, divB, totdivv, totdivB;
 int i,j,k,l;
 double mf[3], totmf[3], toten;     //mf[0]=max(f), mf[1]=max(df), mf[2]=max(df/f)
-FILE *fv,*fnu,*fen,*fkv;
+FILE *fv,*fen;
 
 //clrscr();
 time_now = MPI_Wtime();
@@ -361,8 +372,8 @@ Master printf("time per iteration per node: %g  includes time for exchanging: %g
    for(l=0;l<nvar;l++) {
        mf[0]=0;
        for(i=0;i<m1;i++)
-        for(j=ghost;j<m2;j++)
-         for(k=0;k<mm3;k++)
+        for(j=ghost;j<mm2;j++)
+         for(k=0;k<m3;k++)
          if((l<=3 && isType(node[i][k],NodeFluid) || l>=4&& isType(node[i][k],NodeMagn))
             && !isType(node[i][k],NodeClued))
 	    mf[0] += fabs(1+coordin(i,0)*rc)*pow(f1[l][i][j][k],2);
@@ -392,7 +403,7 @@ Master printf("time per iteration per node: %g  includes time for exchanging: %g
                for(k=0;k<m3;k++)
                 if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
                    vfi[k-ghost+n[2]] += f[2][i][j][k];
-         MPI_Allreduce(vfi, totvfi, N2, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
+         MPI_Allreduce(vfi, totvfi, N3, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
          Master {for(i=0;i<N3;i++) totvfi[i] /= N1*N3;
                  fv = fileopen(NameVFile,count);
                  fprintf(fv,"{%8.8f}\t",t_cur);
@@ -403,50 +414,63 @@ Master printf("time per iteration per node: %g  includes time for exchanging: %g
 
 void dump(double ****f1,double ***nu,double t_cur,long count)
 {
+char str[256],str1[256];
 FILE *fd;
-char *message="dump";
+char message[10]="dump";
 int tag=1,v;
 
-// boundary_conditions(f1);
+if(DumpKeep)  sprintf(str,"%s_%d_%d.dmp",NameSnapFile,rank,count);
+	else {
+		sprintf(str,"%s%d.dmp",NameSnapFile,rank);
+		sprintf(str1,"%s%d.bak",NameSnapFile,rank);
+		remove(str1);
+		rename(str,str1);
+		}
+// if(rank!=0) MPI_Recv(message,0,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);
 
- if(rank!=0) MPI_Recv(message,0,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);
-
- fd=fileopen(NameDumpFile,rank);
+ fd=fileopen(str,rank);
 
  Master nmessage("dump has been started",t_cur,count);
- Master fprintf(fd,"current time = %0.10f \ncurrent iteration = %ld\n",t_cur,count);
- Master fprintf(fd,"number of processors along axes={%d,%d,%d}\n",pp[0],pp[1],pp[2]);
- Master fprintf(fd,"Number of points along x = %d\n",N1);
- Master fprintf(fd,"Number of points along y = %d\n",N2);
- Master fprintf(fd,"Number of points along z = %d\n",N3);
- Master fprintf(fd,"Reynolds number = %lf\n",Re);
+// Master {
+  fprintf(fd,"current time = %0.10f \ncurrent iteration = %ld\n",t_cur,count);
+  fprintf(fd,"number of processors along axes={%d,%d,%d}\n",pp[0],pp[1],pp[2]);
+  fprintf(fd,"Number of points along x = %d\n",N1);
+  fprintf(fd,"Number of points along y = %d\n",N2);
+  fprintf(fd,"Number of points along z = %d\n",N3);
+  fprintf(fd,"Reynolds number = %lf\n",Re);
+ //}
 
  for(v=0;v<nvar;v++)
     printbin_array3d(fd,f1[v],0,m1,0,m2,0,m3);
  printbin_array3d(fd,nu,0,m1,0,m2,0,m3);
  fileclose(fd);
 
- if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
+// if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
  MPI_Barrier(MPI_COMM_WORLD);
- Master {nmessage("dump is done",t_cur,count);
-                   add_control_point(NameDumpFile);}
+ Master 
+ {    nmessage("dump is done",t_cur,count);
+	  if(DumpKeep)  sprintf(str,"%s_*_%d.dmp",NameSnapFile,count);
+			else 	sprintf(str,"%s*.dmp",NameSnapFile);
+	  add_control_point(str);
+      }
 }
 
 void snapshot(double ****f1,double ***nu,double t_cur,long count)
 {
 char str[256];
-//char *message="message";
-long v;
+char message[10]="message";
+long tag=count,v;
 FILE *fd;
 
- sprintf(str,"%s_%d_%05d.snp",NameSnapFile,rank,count);
+ sprintf(str,"%s_%d_%d.snp",NameSnapFile,size,count);
 // boundary_conditions(f1);
 // calculate_curl(&f1[4],B,NodeMagn);
 // calculate_curl(B,J,NodeMagn);
 
-// if(rank!=0) MPI_Recv(message,0,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);
+ if(rank!=0) MPI_Recv(message,0,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);
 
- fd=fileopen(str,0);
+ fd=fileopen(str,rank);
+ Master {
  nmessage("snap has been started",t_cur,count);
  fprintf(fd,"current time = %0.10f \ncurrent iteration = %ld\n",t_cur,count);
  fprintf(fd,"number of processors along axes={%d,%d,%d}\n",pp[0],pp[1],pp[2]);
@@ -454,18 +478,18 @@ FILE *fd;
  fprintf(fd,"Number of points along y = %d\n",N2);
  fprintf(fd,"Number of points along z = %d\n",N3);
  fprintf(fd,"Reynolds number = %lf\n",Rm);
-
+		}
  for(v=1;v<nvar;v++)
     printbin_array3d(fd,f1[v],0,m1,0,m2,0,m3);
 // printbin_array3d(fd,nu,0,m1,0,m2,0,m3);
  fileclose(fd);
 
-// if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
-// MPI_Barrier(MPI_COMM_WORLD);
- nmessage("snap is done",t_cur,count);
+ if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
+ MPI_Barrier(MPI_COMM_WORLD);
  Master {
-         sprintf(str,"%s_*_%05d.snp",NameSnapFile,count);
-         add_control_point(str);
+ nmessage("snap is done",t_cur,count);
+//         sprintf(str,"%s_*_%05d.snp",NameSnapFile,count);
+//         add_control_point(str);
          }
 }
 
