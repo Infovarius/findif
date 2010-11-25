@@ -37,7 +37,7 @@ void pde(double t, double ****f, double ****df)
    for(i=0;i<m1;i++)
    for(j=ghost;j<mm2;j++)
    for(k=0;k<m3;k++)
-     if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
+     if(0 && isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
      {
       if(j<=ghost && n[1]==0) continue;
       M = 1./(rc*coordin(i,0)+1);
@@ -165,11 +165,11 @@ int i,j,k;
             r1 = coordin(i,0);  phi1 = coordin(j,1);  z1 = coordin(k,2);
             rho=sqrt(r1*r1 + z1*z1);
             vrho = 0;
-            vth  = vtheta_given(0,rho,R,phi1)/(1+r1*rc);
+            vth  = vtheta_given(0,rho,Rfl,phi1)/(1+r1*rc);
 /*            vphi = vfi_given(t_cur*Tunit,rho,Rfl);      // nonstationary time=t_cur*Tunit, max magnitude=0.0990906
             vth = 0;                        */
-            vphi = vfi_given(0,rho,R);
-//            vth = rho*vphi/R;
+            vphi = vfi_given(0,rho,Rfl);
+//            vth = rho*vphi/Rfl;
             f[1][i][j][k] = vrho*sinth[i][k]+vth*costh[i][k];
             f[2][i][j][k] = vphi;
             f[3][i][j][k] = vrho*costh[i][k]-vth*sinth[i][k];
@@ -214,8 +214,8 @@ return(flux);
 
 void nut_by_flux(double ****f,double dt) //calculating nu_turbulent by velocity fluctuations
 {
-int i,j,k,l;
-double koef;
+//int i,j,k,l;
+//double koef;
 /*struct_func(f,2,2,3);
 for(i=0;i<n3;i++)
     {
@@ -236,7 +236,7 @@ for(j=0;j<n3;j++)
     printf("   totEn=%lf\n",en);
     }  */
 //time_step_shell(dt);
-for(k=0;k<m3;k++)
+//for(k=0;k<m3;k++)
    {
 /*   double tmp = maschtab*pow(
 	   (nl[2]*s_func[k][0] + nl[1]*s_func[k][1] + nl[0]*s_func[k][2])*pow(dx[2],4),
@@ -349,7 +349,6 @@ void ghost_filling(double ****f, double ***nut)
                                      }
                 }
         }
-  timeE1+=(MPI_Wtime()-timeE0);
 }
 
 void interprocessor_communication(double ****f, double***nut)
@@ -425,7 +424,7 @@ void interprocessor_communication(double ****f, double***nut)
   if(pr_neighbour[4]==rank) CopyGridToBuffer(f,nut,buf_recv[4],0,0,n3,m1-1,m2-1,mm3-1);
          else { CopyGridToBuffer(f,nut,buf_send[4],0,0,ghost,m1-1,m2-1,2*ghost-1);
                 MPI_Isend(buf_send[4],buf_size[2],MPI_DOUBLE,pr_neighbour[4],tag+4,MPI_COMM_WORLD,&SendRequest[req_numS++]);
-		MPI_Irecv(buf_recv[4],buf_size[2],MPI_DOUBLE,pr_neighbour[4],tag+5,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
+				MPI_Irecv(buf_recv[4],buf_size[2],MPI_DOUBLE,pr_neighbour[4],tag+5,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
                 }
  if(pr_neighbour[5]>-1)
   if(pr_neighbour[5]==rank) CopyGridToBuffer(f,nut,buf_recv[5],0,0,ghost,m1-1,m2-1,2*ghost-1);
@@ -483,9 +482,17 @@ void  boundary_conditions(double ****f, double ***nut)
          f[2][i][j][k] = (R*R-pow(coordin(i,0),2) - pow(coordin(k,2),2))/R/R;*/
          }
 
+   timeE0 = MPI_Wtime();
    interprocessor_communication(f,nut);
+   timeE1+=(MPI_Wtime()-timeE0);
+
    ghost_filling(f,nut);
-   if(pp[0]>2 || pp[2]>2) interprocessor_communication(f,nut);
+   if(pp[0]>2 || pp[2]>2)
+        {
+        timeE0 = MPI_Wtime();
+        interprocessor_communication(f,nut);
+        timeE1+=(MPI_Wtime()-timeE0);
+        }
   return;
 }
 
@@ -607,13 +614,19 @@ if(!goon) {
                   if(isType(node[i][k],NodeMagn))
 //                  if(isType(node[i][k],NodeFluid))
                      {
-                     f[4][i][j][k]+=Noise*((double)rand()-RAND_MAX/2)/RAND_MAX + NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl);
-                     f[5][i][j][k]+=Noise*((double)rand()-RAND_MAX/2)/RAND_MAX + NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl);
-                     f[6][i][j][k]+=Noise*((double)rand()-RAND_MAX/2)/RAND_MAX + NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl);
+                     f[4][i][j][k]=coordin(j,1)+Noise*((double)rand()-RAND_MAX/2)/RAND_MAX + NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl);
+                     f[5][i][j][k]=Noise*((double)rand()-RAND_MAX/2)/RAND_MAX + NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl);
+                     f[6][i][j][k]=Noise*((double)rand()-RAND_MAX/2)/RAND_MAX + NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl);
+                     }
+                   else
+                     {
+                     f1[4][i][j][k]=f[4][i][j][k]=coordin(j,1);
+                     f1[5][i][j][k]=f[5][i][j][k]=0;
+                     f1[6][i][j][k]=f[6][i][j][k]=0;
                      }
       }
 //   struct_func(f,2,2,3);
-//  fill_velocity(0.3, f);
+   fill_velocity(0.3, f);
    nmessage("Arrays were filled with initial values - calculation from beginning",-1,-1);
    } else nmessage("Arrays were filled with initial values - calculation is continuing",t_cur,count);
 }

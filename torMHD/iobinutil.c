@@ -287,7 +287,8 @@ void printing(double ****f1,double dtdid,double t_cur,long count,double en)
 double temp, divv, divB, totdivv, totdivB;
 int i,j,k,l;
 double mf[3], totmf[3], toten;     //mf[0]=max(f), mf[1]=max(df), mf[2]=max(df/f)
-FILE *fv,*fnu,*fen,*fkv;
+//FILE *fv,*fnu,*fen,*fkv;
+FILE *fen;
 
 //clrscr();
 time_now = MPI_Wtime();

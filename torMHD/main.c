@@ -35,6 +35,7 @@ int main(int argc, char** argv)
   NameStatFile =(char *)calloc(strl+9,sizeof(char));
   sprintf(NameStatFile,"%s_%d.sta",fname,rank); NameStatFile[strl+8] = 0;
 
+   numlog = 1;
    Master nmessage("--------------------------------------------------------------------------",-1,-1);
 
 /* ---------------------- reading files and arrays --------------------- */
@@ -53,7 +54,7 @@ int main(int argc, char** argv)
    ghost=(approx-1)/2;                  //radius of approx sample
    t_cur=0;
    count=0; enter = 0;
-   timeE1=0;
+   timeE0=0;   time0 = MPI_Wtime();
 
    if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
        else { init_parallel();  operate_memory(1);}
@@ -98,7 +99,7 @@ int main(int argc, char** argv)
 
    boundary_conditions(f,nut);
 
-//   if(!goon) dump(f,eta,t_cur,count);
+   if(!goon) dump(f,eta,t_cur,count);
    time_begin = MPI_Wtime();
    if(!goon) Master nmessage("work has begun",0,0);
        else Master nmessage("work continued",t_cur,count);
@@ -108,14 +109,14 @@ int main(int argc, char** argv)
    if (OutStep!=0) printing(f,0,t_cur,count,PulsEnergy);
 
 /*------------------------ MAIN ITERATIONS -------------------------*/
-   while ((Ttot==0 || t_cur < Ttot) && !razlet) {
+   while ((t_cur < Ttot || Ttot==0) && !razlet) {
         pde(t_cur, f, df);
         dttry=dtnext;
         timestep(f, df, t_cur, f1, dttry, &dtdid, &dtnext);
   //      nut_by_flux(f,dtdid);
         t_cur+=dtdid;
         count++;
-        if(Ttot!=0 && t_cur >= Ttot) break;
+        if(t_cur >= Ttot && Ttot>0) break;
         if (CheckStep!=0 && count%CheckStep==0)
             {
             boundary_conditions(f1,nut);
