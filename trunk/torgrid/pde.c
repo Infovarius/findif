@@ -77,7 +77,7 @@ void pde(double t, double ****f, double ****df)
 
 double deviation(double ****f,int i,int j,int k)
 {
-const int size_okr=min(1,ghost);
+const int size_okr=max(max_okr,ghost);
 double flux = 0;
 int kol=0,l;
    for(l=1;l<=size_okr;l++)
@@ -161,6 +161,9 @@ void  boundary_conditions(double ****f, double ***nut)
    int r1,r2,z1,z2;
    int /*flag,cnt,*/z[4],tag=10;
    double vrho,vphi,vth;
+   char msg_err[100];       //for putlog+mpi_error
+   int reslen;
+
    z[1]=z[2]=z[3]=-1; z[0]=1;  //  влияет на вид гран.условий (-1:жесткие, 1:свободные)
 
   /*============================ divertor =================================*/
@@ -193,9 +196,18 @@ void  boundary_conditions(double ****f, double ***nut)
 		MPI_Irecv(buf_recv[3],buf_size[1],MPI_DOUBLE,pr_neighbour[3],tag+2,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
 		}
 
+   MPI_Waitall(req_numS,SendRequest,statuses);
+   if(statuses[0].MPI_ERROR) {putlog("bc:error during send=",numlog++);
+                               MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
+                               msg_err[reslen++] = ','; msg_err[reslen]= 0;
+                               putlog(msg_err,numlog++);
+                               }    else numlog++;
     MPI_Waitall(req_numR,RecvRequest,statuses);
-    if(statuses[0].MPI_ERROR) putlog("bc:error during transfer=",numlog++);
-
+   if(statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
+                               MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
+                               msg_err[reslen++] = ','; msg_err[reslen]= 0;
+                               putlog(msg_err,numlog++);
+                               }    else numlog++;
   if(pr_neighbour[2]>-1) CopyBufferToGrid(f,nut,buf_recv[2],0,0,0,m1-1,ghost-1,m3-1);
   if(pr_neighbour[3]>-1) CopyBufferToGrid(f,nut,buf_recv[3],0,mm2,0,m1-1,m2-1,m3-1);
 
@@ -213,8 +225,18 @@ void  boundary_conditions(double ****f, double ***nut)
 		MPI_Irecv(buf_recv[1],buf_size[0],MPI_DOUBLE,pr_neighbour[1],tag,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
 		}
 
+   MPI_Waitall(req_numS,SendRequest,statuses);
+   if(statuses[0].MPI_ERROR) {putlog("bc:error during send=",numlog++);
+                               MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
+                               msg_err[reslen++] = ','; msg_err[reslen]= 0;
+                               putlog(msg_err,numlog++);
+                               }    else numlog++;
     MPI_Waitall(req_numR,RecvRequest,statuses);
-  if(statuses[0].MPI_ERROR) putlog("bc:error during transfer=",numlog++);
+  if(statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
+                               MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
+                               msg_err[reslen++] = ','; msg_err[reslen]= 0;
+                               putlog(msg_err,numlog++);
+                               }    else numlog++;
   if(pr_neighbour[0]>-1) CopyBufferToGrid(f,nut,buf_recv[0],0,0,0,ghost-1,m2-1,m3-1);
   if(pr_neighbour[1]>-1) CopyBufferToGrid(f,nut,buf_recv[1],mm1,0,0,m1-1,m2-1,m3-1);
 
@@ -232,10 +254,18 @@ void  boundary_conditions(double ****f, double ***nut)
 	       MPI_Irecv(buf_recv[5],buf_size[2],MPI_DOUBLE,pr_neighbour[5],tag+4,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
 	       }
 
+   MPI_Waitall(req_numS,SendRequest,statuses);
+   if(statuses[0].MPI_ERROR) {putlog("bc:error during send=",numlog++);
+                               MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
+                               msg_err[reslen++] = ','; msg_err[reslen]= 0;
+                               putlog(msg_err,numlog++);
+                               }    else numlog++;
     MPI_Waitall(req_numR,RecvRequest,statuses);
-  if(statuses[0].MPI_ERROR) putlog("bc:error during transfer=",numlog++);
-											  
-
+  if(statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
+                               MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
+                               msg_err[reslen++] = ','; msg_err[reslen]= 0;
+                               putlog(msg_err,numlog++);
+                               }    else numlog++;
   if(pr_neighbour[4]>-1) CopyBufferToGrid(f,nut,buf_recv[4],0,0,0,m1-1,m2-1,ghost-1);
   if(pr_neighbour[5]>-1) CopyBufferToGrid(f,nut,buf_recv[5],0,0,mm3,m1-1,m2-1,m3-1);
 
@@ -446,7 +476,6 @@ double dr(double ***m, int ii, int jj, int kk, int dir, int or, double dx, int s
 {
 double tmp=0.0;
 int i;
-
 //start_tick(9);
 if(or==0)
 switch (sm) {
@@ -526,7 +555,6 @@ return(tmp/dx);
 
 double coordin(int i, int dir)
                       //0-r,1-phi,2-z
-		      //0-r,1-phi,2-z
 {
  switch (dir)
  {
