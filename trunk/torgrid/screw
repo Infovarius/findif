@@ -5,7 +5,7 @@
 1		| radius of torus
 
 ---------  Physical paramereters ------------------------------
-10		| Reynolds number
+1		| Reynolds number
 0		| init profile: 0 - zero, 1 - parabole
 0.00		| amplitude of initial random noise
 0.00		| amplitude of initial normal noise
@@ -13,9 +13,9 @@
 45		| maximal angle of blade tilt (degrees)
 
 ---------  Scheme (aproximation) parameters ------------------
-64		| mesh point in R
+32		| mesh point in R
 64		| mesh point in PHI
-64		| mesh point in Z
+32		| mesh point in Z
 4		| variables number
 7		| aproxx order
 0.01		| initial timestep
@@ -27,15 +27,15 @@
 2		| maximal size of averaging vicinity (max_okr)
 
 ---------  Output parameters  -------------------------------
-100		| steps to statistics output (OutStep)
+1		| steps to statistics output (OutStep)
 0		| steps to snaps (SnapStep)
-0.5		| simulation time delta to snap (SnapDelta)
+0.1		| simulation time delta to snap (SnapDelta)
 5		| minutes between dumps (DumpInterval)
 0		| keep dumps (DumpKeep)
 10		| steps of checking divergence (CheckStep)
 2		| test of time step (VarStep)
-100		| Total time
+10		| Total time
 ---------  Regulators ----------------------------------------
-10		| simulation time delta between parameter changing (ChangeParamTime)
-10		| delta of parameter changing (DeltaParam)
--1		| name of initial file
+0		| simulation time delta between parameter changing (ChangeParamTime)
+5		| delta of parameter changing (DeltaParam)
+0		| name of initial file
