@@ -179,6 +179,7 @@ void  boundary_conditions(double ****f)
 
    z[0]=1; z[1]=z[2]=z[3]=-1; //  влияет на вид гран.условий (-1:жесткие, 1:свободные)
    znorm=-1; ztau=1;          // rather for Anorm&Atau not Ar,Aphi,Az
+  timeE0=MPI_Wtime();
 
   /*-------------------------------- exchanging of ghosts -------------------------------------*/
 // exchanging in phi-direction - periodical directions first
@@ -330,6 +331,8 @@ void  boundary_conditions(double ****f)
                                      }
                 }
         }
+  timeE1+=(MPI_Wtime()-timeE0);
+
   return;
 }
 
