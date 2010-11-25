@@ -7,7 +7,7 @@
 #define Pshrink      (double)-0.25
 #define ErrCon       (double)1.89e-4
 #define ErrScale     (double)1e4
-#define MinScale     (double)1e-7
+#define MinScale     (double)1e-12
 
 
 void timestep(double ****f, double ****df, double ***nut, double t, double ****fout,
