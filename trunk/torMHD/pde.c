@@ -62,7 +62,7 @@ void pde(double t, double ****f, double ****df)
                      -f[1][i][j][k]*dv1[3][0]-f[2][i][j][k]*dv1[3][1]-f[3][i][j][k]*dv1[3][2];
       df[0][i][j][k]= -(dv1[1][0]+dv1[2][1]+dv1[3][2]+f[1][i][j][k]*r_1[i])/Gamma;*/
       df[0][i][j][k] = df[1][i][j][k] = df[2][i][j][k] = df[3][i][j][k] = 0;
-      }
+      }   else df[0][i][j][k] = df[1][i][j][k] = df[2][i][j][k] = df[3][i][j][k] = 0;
      if(isType(node[i][k],NodeMagn) && !isType(node[i][k],NodeClued))
       {
       for(l=4;l<=6;l++) {
@@ -91,7 +91,7 @@ void pde(double t, double ****f, double ****df)
                      +eta[i][j][k]*(dv2[5][0]+dv2[5][1]+dv2[5][2]+r_1[i]*dv1[5][0]-f[5][i][j][k]*r_2[i]+2*dv1[4][1]*r_1[i])
                      +(1./Rm-eta[i][j][k])*(dv1[4][1]*r_1[i]+dA11[4][0][1]+dv2[5][1]+dA11[6][1][2]);
        df[6][i][j][k]=0;*/
-      }
+      }   else df[4][i][j][k] = df[5][i][j][k] = df[6][i][j][k] = 0;
   } //global for
    return;
 }
@@ -409,7 +409,6 @@ void  init_conditions()
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
        {
-       if(isType(node[i][k],NodeGhostFluid)) node[i][k] -= NodeGhostFluid;        //deleting fictive cells-for cynematic dynamo
        if(isType(node[i][k],NodeFluid)) eta[i][j][k]=1.;
        if(isType(node[i][k],NodeShell)) eta[i][j][k]=etash;
        if(isType(node[i][k],NodeVacuum)) eta[i][j][k]=etavac;
@@ -438,7 +437,7 @@ if(!goon) {
         nut[i][j][k]=(
 //        (0.39+14.8*exp(-2.13*pow(2*coordin(k,2)-l3,2)))*0.1*0
                     +1.)/Re;
-                                        }
+                                        }   else f[0][i][j][k]=f[1][i][j][k]=f[2][i][j][k]=f[3][i][j][k] = 0;
       if(isType(node[i][k],NodeFluid)/*||isType(node[i][k],NodeShell)*/ )
                  {   }
                  f[4][i][j][k]=f[5][i][j][k]=f[6][i][j][k]=0;
