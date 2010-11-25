@@ -249,7 +249,7 @@ for(i=beg1;i<beg1+n1;i++) {
 
 void check(double ****f)   //calculate energy of pulsations of all components and know if there's crash
 {
-int i,j,k,l;
+/*int i,j,k,l;
 PulsEnergy=0;
 TotalEnergy=0;
 for(l=0;l<=2;l++)
@@ -259,16 +259,18 @@ for(l=0;l<=2;l++)
 for(i=ghost;i<mm1;i++)
      for(j=ghost;j<mm2;j++)
         for(k=ghost;k<mm3;k++)
+//          if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
            {
            PulsEnergy+=deviation(f,i,j,k);
            for(l=0;l<=2;l++) averf[l][i][k] += f[l+1][i][j][k];
            }
 for(l=0;l<=2;l++)
-  for(i=ghost;i<mm1;i++)
-    for(k=ghost;k<mm3;k++)
+  for(i=0;i<m1;i++)
+    for(k=0;k<m3;k++)
+       if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
            TotalEnergy += pow(averf[l][i][k],2.);
 TotalEnergy += 1.;   //if zero average field
-razlet = (PulsEnergy/TotalEnergy>UpLimit);
+razlet = (PulsEnergy/TotalEnergy>UpLimit);  */
 }
 
 void printing(double ****f1,double dtdid,double t_cur,long count,double en)
@@ -285,6 +287,7 @@ Master printf("program is working %0.2f seconds\n",time_now-time_begin);
 for(i=ghost;i<mm1;i++)
    for(j=ghost;j<mm2;j++)
       for(k=ghost;k<mm3;k++)
+//        if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
            {
            temp=dr(f1[1],i,j,k,1,0,dx[0],ghost, approx)
                +dr(f1[2],i,j,k,2,0,dx[1],ghost, approx)
@@ -306,6 +309,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
        for(i=ghost;i<mm1;i++)
         for(j=ghost;j<mm2;j++)
          for(k=ghost;k<mm3;k++)
+//         if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
           {
             if (fabs(f1[l][i][j][k])>mf[0]) mf[0]=fabs(f1[l][i][j][k]);
             temp=fabs(f[l][i][j][k]-f1[l][i][j][k]);
@@ -326,6 +330,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
        for(i=ghost;i<mm1;i++)
         for(j=ghost;j<mm2;j++)
          for(k=ghost;k<mm3;k++)
+//         if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
             mf[0] += pow(f1[l][i][j][k],2);
        MPI_Allreduce(&mf, &totmf, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
        Master fprintf(fen,"\t %10.10g",totmf[0]/N1/N2/N3);
@@ -341,6 +346,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
         for(i=ghost;i<mm1;i++)
 	    for(j=ghost;j<mm2;j++)
                for(k=ghost;k<mm3;k++)
+//                if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
                    vfi[k-ghost+n[2]] += f[2][i][j][k];
          MPI_Allreduce(vfi, totvfi, N2, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
          Master {for(i=0;i<N3;i++) totvfi[i] /= N1*N3;
