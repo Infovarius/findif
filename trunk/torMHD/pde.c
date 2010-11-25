@@ -481,7 +481,7 @@ void  boundary_conditions(double ****f, double ***nut)
 /*         f[1][i][j][k] = f[3][i][j][k] = 0;
          f[2][i][j][k] = (R*R-pow(coordin(i,0),2) - pow(coordin(k,2),2))/R/R;*/
          }
-
+   MPI_Barrier(MPI_COMM_WORLD);
    timeE0 = MPI_Wtime();
    interprocessor_communication(f,nut);
    timeE1+=(MPI_Wtime()-timeE0);
@@ -611,7 +611,17 @@ if(!goon) {
                  /*f[4][i][j][k]=coordin(i,0)*cos(coordin(j,1))*sin(coordin(j,1))*/;
                  /*f[5][i][j][k]=coordin(i,0)*cos(coordin(j,1))*cos(coordin(j,1))*/;
 //                 f[6][i][j][k]=0;
-                  if(isType(node[i][k],NodeMagn))
+      }
+//   struct_func(f,2,2,3);
+//   fill_velocity(0.3, f);
+   nmessage("Arrays were filled with initial values - calculation from beginning",-1,-1);
+   } else nmessage("Arrays were filled with initial values - calculation is continuing",t_cur,count);
+
+   for(i=0;i<m1;i++)
+   for(j=0;j<m2;j++)
+   for(k=0;k<m3;k++)
+     {
+		if(isType(node[i][k],NodeMagn))
 //                  if(isType(node[i][k],NodeFluid))
                      {
                      f[4][i][j][k]=coordin(j,1)+Noise*((double)rand()-RAND_MAX/2)/RAND_MAX + NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl);
@@ -624,11 +634,7 @@ if(!goon) {
                      f1[5][i][j][k]=f[5][i][j][k]=0;
                      f1[6][i][j][k]=f[6][i][j][k]=0;
                      }
-      }
-//   struct_func(f,2,2,3);
-//   fill_velocity(0.3, f);
-   nmessage("Arrays were filled with initial values - calculation from beginning",-1,-1);
-   } else nmessage("Arrays were filled with initial values - calculation is continuing",t_cur,count);
+	   }
 }
 
 void init_parallel()

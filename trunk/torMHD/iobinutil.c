@@ -17,8 +17,11 @@ if(mode<0) s_mode="rb";
 if(mode==0) s_mode="wb";
 if ((ff = fopen(x,s_mode))==NULL)
 	 {
-		nrerror ("Can't open file !\n",t_cur,count);
-		exit(-1);
+		s_mode = (char *)malloc(100);
+		sprintf(s_mode,"Can't open file: '%s' \n",x);
+		nmessage (s_mode,t_cur,count);
+		free(s_mode);
+		//exit(-1);
 	 }
 return(ff);
 }
