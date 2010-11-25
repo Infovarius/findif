@@ -373,7 +373,7 @@ int tag=1,v;
  Master fprintf(fd,"Number of points along y = %d\n",N2);
  Master fprintf(fd,"Number of points along z = %d\n",N3);
  Master fprintf(fd,"Reynolds number = %lf\n",Re);
-
+                                               	
  for(v=0;v<nvar;v++)
     print_array3d(fd,f1[v],0,m1,0,m2,0,m3);
  print_array3d(fd,nu,0,m1,0,m2,0,m3);
@@ -382,7 +382,8 @@ int tag=1,v;
  if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
  MPI_Barrier(MPI_COMM_WORLD);
  Master {nmessage("dump is done",t_cur,count);
-                   add_control_point(NameDumpFile);}
+                   //add_control_point(NameDumpFile);
+                   }
 }
 
 void snapshot(double ****f1,double ***nu,double t_cur,long count)
