@@ -48,7 +48,7 @@ int main(int argc, char** argv)
 
    init_param(argc,argv,&dtnext);       // initialization of parameters
    Gamma=1e-4;
-   ghost=(approx-1)/2+1;                  //radius of approx sample
+   ghost=(approx-1)/2+1;                  //ghost=width of fictive layer; approx=diameter of approx sample
    t_cur=0;
    count=0; enter = 0;
 

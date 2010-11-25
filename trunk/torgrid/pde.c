@@ -63,7 +63,7 @@ void pde(double t, double ****f, double ****df)
       df[1][i][j][k]=nut[i][j][k]*(dv2[1][0]+dv2[1][1]+dv2[1][2]+r_1[i]*dv1[1][0]
 				   -f[1][i][j][k]*r_2[i]-2*dv1[2][1]*r_1[i])
 		     -dp1[0]/Gamma/f[0][i][j][k]//+w*w/r_1[i]       +2*w*f[2][i][j][k]                   //forces of inertion
-//                -(dv1[1][0]<0 ? mu[0]*dv1[1][0]*(dp1[0]*dv1[1][0]+2*f[0][i][j][k]*dv2[1][0]) : 0)
+                -(dv1[1][0]<0 ? mu[0]*dv1[1][0]*(dp1[0]*dv1[1][0]+2*f[0][i][j][k]*dv2[1][0]) : 0)
 //                     +(j+n[2]<=ghost+2 ? coordin(k,2)*f[2][i][j][k] : 0)                //helical force
 		     + (dn1[0]-f[1][i][j][k])*dv1[1][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[1][1]
@@ -77,8 +77,8 @@ void pde(double t, double ****f, double ****df)
 		     ;
       df[2][i][j][k]=nut[i][j][k]*(dv2[2][0]+dv2[2][1]+dv2[2][2]+r_1[i]*dv1[2][0]
 				   -f[2][i][j][k]*r_2[i]+2*dv1[1][1]*r_1[i])
-		     + 0*p1*pow(rc*coordin(i,0)+1,-1)-dp1[1]/Gamma/f[0][i][j][k]//-dw/r_1[i] -2*w*f[1][i][j][k]                   //forces of inertion
-//                -(dv1[2][1]<0 ? mu[1]*dv1[2][1]*(dp1[1]*dv1[2][1]+2*f[0][i][j][k]*dv2[2][1]) : 0)
+		     + p1*pow(rc*coordin(i,0)+1,-1)-dp1[1]/Gamma/f[0][i][j][k]//-dw/r_1[i] -2*w*f[1][i][j][k]                   //forces of inertion
+                -(dv1[2][1]<0 ? mu[1]*dv1[2][1]*(dp1[1]*dv1[2][1]+2*f[0][i][j][k]*dv2[2][1]) : 0)
 //                     -(j+n[2]<=ghost+2 ? (coordin(i,0)-rc)*f[2][i][j][k] :0)            //helical force
 		     + (dn1[0]-f[1][i][j][k])*dv1[2][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[2][1]
@@ -92,7 +92,7 @@ void pde(double t, double ****f, double ****df)
 		     ;
       df[3][i][j][k]=nut[i][j][k]*(dv2[3][0]+dv2[3][1]+dv2[3][2]+r_1[i]*dv1[3][0])
 		     -dp1[2]/Gamma/f[0][i][j][k]
-//                -(dv1[3][2]<0 ? mu[2]*dv1[3][2]*(dp1[2]*dv1[3][2]+2*f[0][i][j][k]*dv2[3][2]) : 0)
+                -(dv1[3][2]<0 ? mu[2]*dv1[3][2]*(dp1[2]*dv1[3][2]+2*f[0][i][j][k]*dv2[3][2]) : 0)
 		     + (dn1[0]-f[1][i][j][k])*dv1[3][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[3][1]
 		     + (dn1[2]-f[3][i][j][k])*dv1[3][2]
@@ -229,27 +229,29 @@ void  boundary_conditions(double ****f, double ***nut)
 {
    int i, j, k, l, req_numS=0, req_numR=0;
    int r1,r2,z1,z2;
-   int /*flag,cnt,*/z[4],tag=10;
-   double vrho,vphi,vth;
+   double ftemp[4];
+   int /*flag,cnt,*/z[4],znorm,ztau,tag=10;
+   double vrho,vphi,vth,vn;
    char msg_err[100];       //for putlog+mpi_error
    int reslen;
 
-   z[0]=1; z[1]=z[2]=z[3]=-1; //  влияет на вид гран.условий (-1:жесткие, 1:свободные)
+   z[1]=z[2]=z[3]=-1; z[0]=1;  //  влияет на вид гран.условий (-1:жесткие, 1:свободные)
+   znorm = -1; ztau = -1;
 
   /*============================ divertor =================================*/
-  if(t_cur<0)                  // divertors are off till t sec
+  if(t_cur>0.1)                  // divertors are off till t sec
   if(n[1]==0)
   for(i=0;i<m1;i++)
     for(j=ghost;j<=ghost;j++)
       for(k=0;k<m3;k++)
       if(isType(node[i][k],NodeFluid))
          {
-/*         vrho = f[3][i][j][k]*costh[i][k]+f[1][i][j][k]*sinth[i][k];
+         vrho = f[3][i][j][k]*costh[i][k]+f[1][i][j][k]*sinth[i][k];
          vth  = -f[3][i][j][k]*sinth[i][k]+f[1][i][j][k]*costh[i][k];
          vphi = sqrt(pow(f[2][i][j][k],2)+vth*vth);           //sqrt(vfi*vfi+vth*vth)
          f[1][i][j][k] = vrho*sinth[i][k]+vphi*costh[i][k]*sin(chi[i][k]);
 	 f[2][i][j][k] = vphi*cos(chi[i][k]);
-	 f[3][i][j][k] = vrho*costh[i][k]-vphi*sinth[i][k]*sin(chi[i][k]);*/
+	 f[3][i][j][k] = vrho*costh[i][k]-vphi*sinth[i][k]*sin(chi[i][k]);
 /*         f[1][i][j][k] = f[3][i][j][k] = 0;
          f[2][i][j][k] = (R*R-pow(coordin(i,0),2) - pow(coordin(k,2),2))/R/R;*/
 	 }
@@ -367,9 +369,9 @@ void  boundary_conditions(double ****f, double ***nut)
                 for(l=0;l<nvar;l++)
 		 {
 		 f[l][i][j][k] = 0;
-                   f[l][i][j][k] = ( (refr[i][k]-r2)*(f[l][r1][j][z1]*(refz[i][k]-z2)-f[l][r1][j][z2]*(refz[i][k]-z1))
+                   ftemp[l] = (refr[i][k]-r2)*(f[l][r1][j][z1]*(refz[i][k]-z2)-f[l][r1][j][z2]*(refz[i][k]-z1))
                                    + (refr[i][k]-r1)*(f[l][r2][j][z2]*(refz[i][k]-z1)-f[l][r2][j][z1]*(refz[i][k]-z2))
-                                    ) * z[l];
+                                    ;
 /*                 if(i==r1 && k==z1) f[l][i][j][k] /= (1-(refr[i][k]-r2)*(refz[i][k]-z2)*z[l]);
                  if(i==r1 && k==z2) f[l][i][j][k] /= (1+(refr[i][k]-r2)*(refz[i][k]-z1)*z[l]);
                  if(i==r2 && k==z1) f[l][i][j][k] /= (1-(refr[i][k]-r1)*(refz[i][k]-z1)*z[l]);
@@ -379,6 +381,17 @@ void  boundary_conditions(double ****f, double ***nut)
      
 //                   nut[i][j][k] = (refr[i][k]-r2)*(nut[r1][j][z1]*(refz[i][k]-z2)-nut[r1][j][z2]*(refz[i][k]-z1))
 //                                + (refr[i][k]-r1)*(nut[r2][j][z2]*(refz[i][k]-z1)-nut[r2][j][z1]*(refz[i][k]-z2));
+                vn = ( ftemp[1]*(refr[i][k]-i)+ftemp[3]*(refz[i][k]-k) )/
+                     ( (refr[i][k]-i)*(refr[i][k]-i) + (refz[i][k]-k)*(refz[i][k]-k) );
+/*                for(l=0;l<nvar;l++)
+                   f[l][i][j][k] = z[l]*ftemp[l];*/
+//                rfict_1 = r_1[i]; rrel = 2*R*rfict_1 - 1;
+                f[0][i][j][k] = z[0]*ftemp[0];
+                f[1][i][j][k] = ztau*ftemp[1] + (znorm-ztau)*vn*(refr[i][k]-i);
+                f[2][i][j][k] = ztau*ftemp[2]
+//                             * (rrel+1-rfict_1*(i-i1)*dx[0]) / (rrel+1+rfict_1*(i-i1)*dx[0])
+                              ;
+                f[3][i][j][k] = ztau*ftemp[3] + (znorm-ztau)*vn*(refz[i][k]-k);
                    nut[i][j][k] = 1./Re;
                 }
 
@@ -389,6 +402,7 @@ void  init_conditions()
 {
    int i,j,k,l,ll;
    double r, rho, r1, z1;
+   int ghost1=(approx-1)/2;
 //   double k1,k2,k3;
 
 // -------- filling of nodes' types +reflections rel circle + nut ---------------
@@ -412,8 +426,8 @@ void  init_conditions()
      //for hydrodynamics
         if(isType(node[i][k],NodeFluid))
             { if(isType(node[i][k],NodeGhostFluid)) node[i][k] -= NodeGhostFluid;
-              for(l=-ghost;l<=ghost;l++)
-              for(ll=-ghost;ll<=ghost;ll++)
+              for(l=-ghost1;l<=ghost1;l++)
+              for(ll=-ghost1;ll<=ghost1;ll++)
                    if(i+l>=0&&i+l<m1 && k+ll>=0&&k+ll<m3)
                         if(!isType(node[i+l][k+ll],NodeFluid))
                           setType(&node[i+l][k+ll],NodeGhostFluid);
@@ -429,8 +443,8 @@ void  init_conditions()
            !isType(node[i][k],NodeFluid))
                  { setType(&node[i][k],NodeFluid);
                    if(isType(node[i][k],NodeGhostFluid)) node[i][k] -= NodeGhostFluid;
-              for(l=-ghost;l<=ghost;l++)
-                   for(ll=-ghost;ll<=ghost;ll++)
+              for(l=-ghost1;l<=ghost1;l++)
+                   for(ll=-ghost1;ll<=ghost1;ll++)
                       if(i+l>=0&&i+l<m1 && k+ll>=0&&k+ll<m3)
                          if(!isType(node[i+l][k+ll],NodeFluid))
                            setType(&node[i+l][k+ll],NodeGhostFluid);
@@ -460,7 +474,6 @@ if(!goon) {
 //             f[1][i][j][k]=1-sqrt(pow(coordin(i,0),2) + pow(coordin(k,2),2))/R;
 	f[2][i][j][k]=(parabole+Noise*((double)rand()-RAND_MAX/2)/RAND_MAX)*
 		       (R*R-pow(coordin(i,0),2) - pow(coordin(k,2),2))/R/R;
-	f[2][i][j][k]=sin(2*M_PI*coordin(j,1)/lfi);
 	f[3][i][j][k]=NoiseNorm*sin(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/R)
 		      + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
 		       (R*R-pow(coordin(i,0),2) - pow(coordin(k,2),2))/R/R;
@@ -469,7 +482,7 @@ if(!goon) {
         else
       if(!isType(node[i][k],NodeGhostFluid))
         { f[0][i][j][k]=0;
-          f[1][i][j][k]=f[2][i][j][k]=f[3][i][j][k]= 0;
+          f[1][i][j][k]=f[2][i][j][k]=f[3][i][j][k]= 1e5;
         }  
       }
    for(i=0;i<m1;i++)
@@ -509,7 +522,7 @@ void init_parallel()
          }
 if(!goon) {                       //reading sizes from file when continuing
   pp[0]=divisors[nd1]; pp[1]=divisors[nd2]; pp[2]=size/pp[0]/pp[1];                 // number of procs along axes
-//  pp[1]=pp[2]=1; pp[0]=size;
+  pp[1]=pp[2]=1; pp[0]=size;
           }
   pr[0] = rank%pp[0]; pr[1] = (rank/pp[0])%pp[1]; pr[2] = (rank/pp[0]/pp[1])%pp[2];  // coordinates of current subregion
 
