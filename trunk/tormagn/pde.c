@@ -437,11 +437,12 @@ if(!goon) {
 //                 if(!isType(node[i][k],NodeMagn))
                   if(isType(node[i][k],NodeFluid))
                      {
-                     f[4][i][j][k]+=0.1*((double)rand()-RAND_MAX/2)/RAND_MAX;
-                     f[5][i][j][k]+=0.1*((double)rand()-RAND_MAX/2)/RAND_MAX;
-                     f[6][i][j][k]+=0.1*((double)rand()-RAND_MAX/2)/RAND_MAX;
+                     f[4][i][j][k]+=Noise*((double)rand()-RAND_MAX/2)/RAND_MAX;
+                     f[5][i][j][k]+=Noise*((double)rand()-RAND_MAX/2)/RAND_MAX;
+                     f[6][i][j][k]+=Noise*((double)rand()-RAND_MAX/2)/RAND_MAX;
                      }
       }
+   Master f[4][2*ghost][2*ghost][2*ghost] = 100;   
 //   struct_func(f,2,2,3);
    nmessage("Arrays were filled with initial values - calculation from beginning",-1,-1);
    } else nmessage("Arrays were filled with initial values - calculation is continuing",t_cur,count);

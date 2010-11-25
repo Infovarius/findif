@@ -8,9 +8,10 @@ int main(int argc, char** argv)
 {
    double dttry, dtdid, dtnext;
    int i,j,k,l;
+   int outed;
    FILE *fd, *ferror;
    int strl;
-   double ChangeParamTime = 30, DeltaParam = -2.5;  // for iteration on parameters
+   double ChangeParamTime = 15, DeltaParam = -1;  // for iteration on parameters
    double ****ft;
 
  /* Initialize MPI */
@@ -131,18 +132,22 @@ int main(int argc, char** argv)
               else boundary_conditions(f1);
             printing(f1,dtdid,t_cur,count,PulsEnergy);
             }
+        outed = 0;
         if (SnapStep!=0 && count%SnapStep==0)
-            snapshot(f1,eta,t_cur,count);
-        if (SnapDelta>5*dtdid && floor((t_cur-dtdid)/SnapDelta)<floor(t_cur/SnapDelta))
-            snapshot(f1,eta,t_cur,count);
+            { snapshot(f1,eta,t_cur,count); outed++; }
+        if (SnapDelta>5*dtdid && floor((t_cur-dtdid)/SnapDelta)<floor(t_cur/SnapDelta) && !outed)
+            { snapshot(f1,eta,t_cur,count); outed++; }
+        ft = f;  f = f1;  f1 = ft;
         if (floor((t_cur-dtdid)/ChangeParamTime)<floor(t_cur/ChangeParamTime))
             {
             //Rm = floor(t_cur/ChangeParamTime+0.5)*DeltaParam-190;
+            if(!outed) snapshot(f,eta,t_cur,count);
             Rm += DeltaParam;
-            snapshot(f1,eta,t_cur,count);
+            goon = 0;
+            init_conditions(); fill_velocity(0.3, f);
+            goon = 1;
             Master nmessage("Rm was changed to",Rm,count);
             }
-        ft = f;  f = f1;  f1 = ft;
 /*        if(kbhit())
              {
                 switch (getch()) {
@@ -156,8 +161,7 @@ int main(int argc, char** argv)
    } // end while
 
    printing(f,dtdid,t_cur,count,PulsEnergy);
-   if (SnapDelta>5*dtdid && floor((t_cur-dtdid)/SnapDelta)>=floor(t_cur/SnapDelta))
-	   snapshot(f,eta,t_cur,count);
+   if(!outed) snapshot(f,eta,t_cur,count);
    if(rank==0) add_control_point("END");
 
    Master fileclose(ferror);
