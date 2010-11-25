@@ -6,7 +6,7 @@
 #define Pgrow        (double)-0.2
 #define Pshrink      (double)-0.25
 #define ErrCon       (double)1.89e-4
-#define ErrScale     (double)1e3
+#define ErrScale     (double)1e4
 #define MinScale     (double)1e-12
 
 
@@ -36,12 +36,14 @@ void timestep(double ****f, double ****df, double ***nut, double t, double ****f
 	     dump(f,nut,t,count);
              nrerror("Stepsize underflow in rk\n",t,count);
             }
-   }
+   }     
    *dtdid = dt;
    if (err>ErrCon)
       *dtnext = Safety * dt * pow(err, Pgrow);
    else
       *dtnext = dt * (double)5.0;
+/*      err = rkck(f, df, nut, t, dt, fout);
+      *dtdid = *dtnext = dttry;*/
 }
 
 double rkck(double ****f, double ****df1, double ***nut, double t, double dt, double ****fout)

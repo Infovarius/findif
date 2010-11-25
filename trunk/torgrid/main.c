@@ -47,7 +47,7 @@ int main(int argc, char** argv)
       }
 
    init_param(argc,argv,&dtnext);       // initialization of parameters
-   Gamma=1e-4;
+   Gamma=1e-3;
    ghost=(approx-1)/2;                  //radius of approx sample
    t_cur=0;
    count=0; enter = 0;
@@ -104,7 +104,7 @@ int main(int argc, char** argv)
    if (OutStep!=0) printing(f,0,t_cur,count,PulsEnergy);
 
 /*------------------------ MAIN ITERATIONS -------------------------*/
-   while (t_cur < Ttot && !razlet) {
+   while ((Ttot==0 || t_cur < Ttot) && !razlet) {
 	pde(t_cur, f, df);
 	dttry=dtnext;
 	timestep(f, df, nut, t_cur, f1, dttry, &dtdid, &dtnext);

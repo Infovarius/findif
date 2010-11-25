@@ -27,7 +27,7 @@ void pde(double t, double ****f, double ****df)
 {
    int i,j,k,l,m;
    double M;
-   double dv1[4][3],dv2[4][3],dp1[3],dn1[3],w,dw;
+   double dv1[4][3],dv2[4][3],dp1[3],dA11[4][3][3],dn1[3],w,dw;
 
    boundary_conditions(f,nut);
 
@@ -49,45 +49,54 @@ void pde(double t, double ****f, double ****df)
          dv2[l][m]=dr(f[l],i,j,k,m+1,1,dx[m]*dx[m],ghost, approx);
          }
          dv1[l][1] *= M;     dv2[l][1]  *= M*M;
+        dA11[l][0][1] = dA11[l][1][0] = d2cross(f[l],i,j,k,2,1,ghost,approx);
+        dA11[l][0][2] = dA11[l][2][0] = d2cross(f[l],i,j,k,3,1,ghost,approx);
+        dA11[l][1][2] = dA11[l][2][1] = d2cross(f[l],i,j,k,3,2,ghost,approx);
       }
 
       df[1][i][j][k]=nut[i][j][k]*(dv2[1][0]+dv2[1][1]+dv2[1][2]+r_1[i]*dv1[1][0]
 				   -f[1][i][j][k]*r_2[i]-2*dv1[2][1]*r_1[i])
-		     -dp1[0]//+w*w/r_1[i]       +2*w*f[2][i][j][k]                   //forces of inertion
+		     -dp1[0]/Gamma/f[0][i][j][k]//+w*w/r_1[i]       +2*w*f[2][i][j][k]                   //forces of inertion
 //                     +(j+n[2]<=ghost+2 ? coordin(k,2)*f[2][i][j][k] : 0)                //helical force
-/*		     + (dn1[0]-f[1][i][j][k])*dv1[1][0]
+		     + (dn1[0]-f[1][i][j][k])*dv1[1][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[1][1]
-		     + (dn1[2]-f[3][i][j][k])*dv1[1][2]*/
-                     - dvv(f,1,1,i,j,k,ghost,approx)
-                     - dvv(f,2,1,i,j,k,ghost,approx)
-                     - dvv(f,3,1,i,j,k,ghost,approx)
+		     + (dn1[2]-f[3][i][j][k])*dv1[1][2]
+		+nut[i][j][k]*(dv2[1][0]+dv1[1][0]*r_1[i]-f[1][i][j][k]*r_2[i]-dv1[2][1]*r_1[i]+dA11[2][0][1]+dA11[3][0][2])
+/*                     - dvv(f[1],f[1],1,i,j,k,ghost,approx)
+                     - dvv(f[2],f[1],2,i,j,k,ghost,approx)
+                     - dvv(f[3],f[1],3,i,j,k,ghost,approx)*/
                      - f[1][i][j][k]*f[1][i][j][k]*r_1[i]
 		     - (dn1[1]-f[2][i][j][k])*r_1[i]*f[2][i][j][k]
 		     ;
       df[2][i][j][k]=nut[i][j][k]*(dv2[2][0]+dv2[2][1]+dv2[2][2]+r_1[i]*dv1[2][0]
 				   -f[2][i][j][k]*r_2[i]+2*dv1[1][1]*r_1[i])
-		     + p1*(rc*coordin(i,0)+1)-dp1[1]//-dw/r_1[i] -2*w*f[1][i][j][k]                   //forces of inertion
+		     + p1*(rc*coordin(i,0)+1)-dp1[1]/Gamma/f[0][i][j][k]//-dw/r_1[i] -2*w*f[1][i][j][k]                   //forces of inertion
 //                     -(j+n[2]<=ghost+2 ? (coordin(i,0)-rc)*f[2][i][j][k] :0)            //helical force
-/*		     + (dn1[0]-f[1][i][j][k])*dv1[2][0]
+		     + (dn1[0]-f[1][i][j][k])*dv1[2][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[2][1]
-		     + (dn1[2]-f[3][i][j][k])*dv1[2][2]*/
-                     - dvv(f,1,2,i,j,k,ghost,approx)
-                     - dvv(f,2,2,i,j,k,ghost,approx)
-                     - dvv(f,3,2,i,j,k,ghost,approx)
+		     + (dn1[2]-f[3][i][j][k])*dv1[2][2]
+		+nut[i][j][k]*(dv1[1][1]*r_1[i]+dA11[1][0][1]+dv2[2][1]+dA11[3][1][2])
+/*                     - dvv(f[1],f[2],1,i,j,k,ghost,approx)
+                     - dvv(f[2],f[2],2,i,j,k,ghost,approx)
+                     - dvv(f[3],f[2],3,i,j,k,ghost,approx)*/
                      - f[1][i][j][k]*f[2][i][j][k]*r_1[i]
 		     + (dn1[1]-f[1][i][j][k])*r_1[i]*f[2][i][j][k]
 		     ;
       df[3][i][j][k]=nut[i][j][k]*(dv2[3][0]+dv2[3][1]+dv2[3][2]+r_1[i]*dv1[3][0])
-		     -dp1[2]
-/*		     + (dn1[0]-f[1][i][j][k])*dv1[3][0]
+		     -dp1[2]/Gamma/f[0][i][j][k]
+		     + (dn1[0]-f[1][i][j][k])*dv1[3][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[3][1]
-		     + (dn1[2]-f[3][i][j][k])*dv1[3][2]*/
-                     - dvv(f,1,2,i,j,k,ghost,approx)
-                     - dvv(f,2,2,i,j,k,ghost,approx)
-                     - dvv(f,3,2,i,j,k,ghost,approx)
+		     + (dn1[2]-f[3][i][j][k])*dv1[3][2]
+      		+nut[i][j][k]*(dv1[1][2]*r_1[i]+dA11[1][0][2]+dA11[2][1][2]+dv2[3][2])
+/*                     - dvv(f[1],f[2],1,i,j,k,ghost,approx)
+                     - dvv(f[2],f[2],2,i,j,k,ghost,approx)
+                     - dvv(f[3],f[2],3,i,j,k,ghost,approx)*/
                      - f[1][i][j][k]*f[3][i][j][k]*r_1[i]
                      ;
-      df[0][i][j][k]= -(dv1[1][0]+dv1[2][1]+dv1[3][2]+f[1][i][j][k]*r_1[i])/Gamma;
+      df[0][i][j][k]= -(dvv(f[0],f[1],1,i,j,k,ghost,approx)
+      		       +dvv(f[0],f[2],2,i,j,k,ghost,approx)
+                       +dvv(f[0],f[3],3,i,j,k,ghost,approx)
+                       +f[0][i][j][k]*f[1][i][j][k]*r_1[i]);
 /*      df[1][i][j][k] += Gamma*df[0][i][j][k]*f[1][i][j][k];
       df[2][i][j][k] += Gamma*df[0][i][j][k]*f[2][i][j][k];
       df[3][i][j][k] += Gamma*df[0][i][j][k]*f[3][i][j][k];*/
@@ -397,7 +406,7 @@ if(!goon) {
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
       if(isType(node[i][k],NodeFluid)) {
-	f[0][i][j][k]=0;
+	f[0][i][j][k]=1;
 	f[1][i][j][k]=NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/R)
 		      + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
 		       (R*R-pow(coordin(i,0),2) - pow(coordin(k,2),2))/R/R;
@@ -507,34 +516,34 @@ static double kf7[2][7][7]={{{-49./20.0, 6.0, -15./2.0, 20./3.0, -15./4.0, 6./5.
                      {1./90.0, -3./20.0, 3./2.0, -49./18.0, 3./2.0, -3./20.0, 1./90.0}, {1./90.0, -1./15.0, 1./12.0, 10./9.0, -7./3.0, 19./15.0, -13./180.0},
                      {-13./180.0, 31./60.0, -19./12.0, 47./18.0, -17./12.0, -49./60.0, 137./180.0}, {137./180.0, -27./5.0, 33./2.0, -254./9.0, 117./4.0, -87./5.0, 203./45.0}}};
 
-double dvv(double ****f, int a, int b, int ii, int jj, int kk, int sh, int sm)
-/* find d(v^a v^b)/dx^a with sum for a */
+double dvv(double ***f1, double ***f2, int dir, int ii, int jj, int kk, int sh, int sm)
+/* find d(f1 f2)/dx in dir direction*/
 {
 double tmp;
 switch (sm) {
-     case 7 :  switch (a) {
-                  case 1 : tmp = kf7[0][sh][6]*(f[a][ii+3][jj][kk]*f[b][ii+3][jj][kk]-f[a][ii-3][jj][kk]*f[b][ii-3][jj][kk])
-                               + kf7[0][sh][5]*(f[a][ii+2][jj][kk]*f[b][ii+2][jj][kk]-f[a][ii-2][jj][kk]*f[b][ii-2][jj][kk])
-                               + kf7[0][sh][4]*(f[a][ii+1][jj][kk]*f[b][ii+1][jj][kk]-f[a][ii-1][jj][kk]*f[b][ii-1][jj][kk]); break;
-                  case 2 : tmp = kf7[0][sh][6]*(f[a][ii][jj+3][kk]*f[b][ii][jj+3][kk]-f[a][ii][jj-3][kk]*f[b][ii][jj-3][kk])
-                               + kf7[0][sh][5]*(f[a][ii][jj+2][kk]*f[b][ii][jj+2][kk]-f[a][ii][jj-2][kk]*f[b][ii][jj-2][kk])
-                               + kf7[0][sh][4]*(f[a][ii][jj+1][kk]*f[b][ii][jj+1][kk]-f[a][ii][jj-1][kk]*f[b][ii][jj-1][kk]); break;
-                  case 3 : tmp = kf7[0][sh][6]*(f[a][ii][jj][kk+3]*f[b][ii][jj][kk+3]-f[a][ii][jj][kk-3]*f[b][ii][jj][kk-3])
-                               + kf7[0][sh][5]*(f[a][ii][jj][kk+2]*f[b][ii][jj][kk+2]-f[a][ii][jj][kk-2]*f[b][ii][jj][kk-2])
-                               + kf7[0][sh][4]*(f[a][ii][jj][kk+1]*f[b][ii][jj][kk+1]-f[a][ii][jj][kk-1]*f[b][ii][jj][kk-1]); break;
+     case 7 :  switch (dir) {
+                  case 1 : tmp = kf7[0][sh][6]*(f1[ii+3][jj][kk]*f2[ii+3][jj][kk]-f1[ii-3][jj][kk]*f2[ii-3][jj][kk])
+                               + kf7[0][sh][5]*(f1[ii+2][jj][kk]*f2[ii+2][jj][kk]-f1[ii-2][jj][kk]*f2[ii-2][jj][kk])
+                               + kf7[0][sh][4]*(f1[ii+1][jj][kk]*f2[ii+1][jj][kk]-f1[ii-1][jj][kk]*f2[ii-1][jj][kk]); break;
+                  case 2 : tmp = kf7[0][sh][6]*(f1[ii][jj+3][kk]*f2[ii][jj+3][kk]-f1[ii][jj-3][kk]*f2[ii][jj-3][kk])
+                               + kf7[0][sh][5]*(f1[ii][jj+2][kk]*f2[ii][jj+2][kk]-f1[ii][jj-2][kk]*f2[ii][jj-2][kk])
+                               + kf7[0][sh][4]*(f1[ii][jj+1][kk]*f2[ii][jj+1][kk]-f1[ii][jj-1][kk]*f2[ii][jj-1][kk]); break;
+                  case 3 : tmp = kf7[0][sh][6]*(f1[ii][jj][kk+3]*f2[ii][jj][kk+3]-f1[ii][jj][kk-3]*f2[ii][jj][kk-3])
+                               + kf7[0][sh][5]*(f1[ii][jj][kk+2]*f2[ii][jj][kk+2]-f1[ii][jj][kk-2]*f2[ii][jj][kk-2])
+                               + kf7[0][sh][4]*(f1[ii][jj][kk+1]*f2[ii][jj][kk+1]-f1[ii][jj][kk-1]*f2[ii][jj][kk-1]); break;
                   }; break;
-     case 3 :  switch (a) {
-                  case 1 : tmp = kf3[0][sh][2]*(f[a][ii+1][jj][kk]*f[b][ii+1][jj][kk]-f[a][ii-1][jj][kk]*f[b][ii-1][jj][kk]); break;
-                  case 2 : tmp = kf3[0][sh][2]*(f[a][ii][jj+1][kk]*f[b][ii][jj+1][kk]-f[a][ii][jj-1][kk]*f[b][ii][jj-1][kk]); break;
-                  case 3 : tmp = kf3[0][sh][2]*(f[a][ii][jj][kk+1]*f[b][ii][jj][kk+1]-f[a][ii][jj][kk-1]*f[b][ii][jj][kk-1]); break;
+     case 3 :  switch (dir) {
+                  case 1 : tmp = kf3[0][sh][2]*(f1[ii+1][jj][kk]*f2[ii+1][jj][kk]-f1[ii-1][jj][kk]*f2[ii-1][jj][kk]); break;
+                  case 2 : tmp = kf3[0][sh][2]*(f1[ii][jj+1][kk]*f2[ii][jj+1][kk]-f1[ii][jj-1][kk]*f2[ii][jj-1][kk]); break;
+                  case 3 : tmp = kf3[0][sh][2]*(f1[ii][jj][kk+1]*f2[ii][jj][kk+1]-f1[ii][jj][kk-1]*f2[ii][jj][kk-1]); break;
                   }; break;
-     case 5 :  switch (a) {
-                  case 1 : tmp = kf5[0][sh][4]*(f[a][ii+2][jj][kk]*f[b][ii+2][jj][kk]-f[a][ii-2][jj][kk]*f[b][ii-2][jj][kk])
-                               + kf5[0][sh][3]*(f[a][ii+1][jj][kk]*f[b][ii+1][jj][kk]-f[a][ii-1][jj][kk]*f[b][ii-1][jj][kk]); break;
-                  case 2 : tmp = kf5[0][sh][4]*(f[a][ii][jj+2][kk]*f[b][ii][jj+2][kk]-f[a][ii][jj-2][kk]*f[b][ii][jj-2][kk])
-                               + kf5[0][sh][3]*(f[a][ii][jj+1][kk]*f[b][ii][jj+1][kk]-f[a][ii][jj-1][kk]*f[b][ii][jj-1][kk]); break;
-                  case 3 : tmp = kf5[0][sh][4]*(f[a][ii][jj][kk+2]*f[b][ii][jj][kk+2]-f[a][ii][jj][kk-2]*f[b][ii][jj][kk-2])
-                               + kf5[0][sh][3]*(f[a][ii][jj][kk+1]*f[b][ii][jj][kk+1]-f[a][ii][jj][kk-1]*f[b][ii][jj][kk-1]); break;
+     case 5 :  switch (dir) {
+                  case 1 : tmp = kf5[0][sh][4]*(f1[ii+2][jj][kk]*f2[ii+2][jj][kk]-f1[ii-2][jj][kk]*f2[ii-2][jj][kk])
+                               + kf5[0][sh][3]*(f1[ii+1][jj][kk]*f2[ii+1][jj][kk]-f1[ii-1][jj][kk]*f2[ii-1][jj][kk]); break;
+                  case 2 : tmp = kf5[0][sh][4]*(f1[ii][jj+2][kk]*f2[ii][jj+2][kk]-f1[ii][jj-2][kk]*f2[ii][jj-2][kk])
+                               + kf5[0][sh][3]*(f1[ii][jj+1][kk]*f2[ii][jj+1][kk]-f1[ii][jj-1][kk]*f2[ii][jj-1][kk]); break;
+                  case 3 : tmp = kf5[0][sh][4]*(f1[ii][jj][kk+2]*f2[ii][jj][kk+2]-f1[ii][jj][kk-2]*f2[ii][jj][kk-2])
+                               + kf5[0][sh][3]*(f1[ii][jj][kk+1]*f2[ii][jj][kk+1]-f1[ii][jj][kk-1]*f2[ii][jj][kk-1]); break;
                   }; break;
     }
   return tmp;
@@ -620,6 +629,47 @@ switch (sm) {
     	nrerror("\nNO SUCH SAMPLE for derivative. Bye ...",0,0);
 	} */
 return(tmp/dx);
+}
+
+double d2cross(double ***m, int ii, int jj, int kk, int dir1,int dir2,  int sh, int sm)
+/*             matrix     , point                 , directions of dervs,shift , sample */
+/*                                                , 1, 2, 3           , 0-left, 3,5,7 */
+{         //order ==0 (first),dx=dx[dir1]*dx[dir2]
+double tmp=0.0;
+int i1,i2;
+int dirr=6-dir1-dir2;
+switch (sm*dirr) {
+	case 3 : for(i1=0; i1<sm; i1++)
+		     for(i2=0; i2<sm; i2++)
+		       tmp += m[ii][jj+i1-sh][kk+i2-sh]*kf3[0][sh][i1]*kf3[0][sh][i2]; break;
+	case 6 : for(i1=0; i1<sm; i1++)
+		     for(i2=0; i2<sm; i2++)
+		       tmp += m[ii+i1-sh][jj][kk+i2-sh]*kf3[0][sh][i1]*kf3[0][sh][i2]; break;
+	case 9 : for(i1=0; i1<sm; i1++)
+		     for(i2=0; i2<sm; i2++)
+		       tmp += m[ii+i1-sh][jj+i2-sh][kk]*kf3[0][sh][i1]*kf3[0][sh][i2]; break;
+	case 5 : for(i1=0; i1<sm; i1++)
+		     for(i2=0; i2<sm; i2++)
+		       tmp += m[ii][jj+i1-sh][kk+i2-sh]*kf5[0][sh][i1]*kf5[0][sh][i2]; break;
+	case 10: for(i1=0; i1<sm; i1++)
+		     for(i2=0; i2<sm; i2++)
+		       tmp += m[ii+i1-sh][jj][kk+i2-sh]*kf5[0][sh][i1]*kf5[0][sh][i2]; break;
+	case 15: for(i1=0; i1<sm; i1++)
+		     for(i2=0; i2<sm; i2++)
+		       tmp += m[ii+i1-sh][jj+i2-sh][kk]*kf5[0][sh][i1]*kf5[0][sh][i2]; break;
+	case 7 : for(i1=0; i1<sm; i1++)
+		     for(i2=0; i2<sm; i2++)
+		       tmp += m[ii][jj+i1-sh][kk+i2-sh]*kf7[0][sh][i1]*kf7[0][sh][i2]; break;
+	case 14: for(i1=0; i1<sm; i1++)
+		     for(i2=0; i2<sm; i2++)
+		       tmp += m[ii+i1-sh][jj][kk+i2-sh]*kf7[0][sh][i1]*kf7[0][sh][i2]; break;
+	case 21: for(i1=0; i1<sm; i1++)
+		     for(i2=0; i2<sm; i2++)
+		       tmp += m[ii+i1-sh][jj+i2-sh][kk]*kf7[0][sh][i1]*kf7[0][sh][i2]; break;
+	default :
+	nrerror("\nNO SUCH SAMPLE for derivative. Bye ...",0,0);
+	}
+return(tmp/dx[dir1-1]/dx[dir2-1]);
 }
 
 double coordin(int i, int dir)
