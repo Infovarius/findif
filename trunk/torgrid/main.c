@@ -37,8 +37,8 @@ int main(int argc, char** argv)
 
 /* ---------------------- reading files and arrays --------------------- */
    goon = ((fd=fopen(NameCPFile,"r"))>0);
-   if(fd==NULL) { putlog("File of cp were not opened",2);
-                  Master if((fd=fopen(NameCPFile,"w"))!=NULL) ; putlog("File cp was successfully created",3);
+   Master if(fd==NULL) { putlog("File of cp were not opened",2);
+                  if((fd=fopen(NameCPFile,"w"))!=NULL) ; putlog("File cp was successfully created",3);
                 }
            else putlog("File of control points opened=",(long)fd);
    if(goon)
@@ -94,7 +94,7 @@ int main(int argc, char** argv)
    MPI_Barrier(MPI_COMM_WORLD);
    boundary_conditions(f,nut);
 
-   dump(f,nut,t_cur,count); 
+//   dump(f,nut,t_cur,count);
 
    time_begin = MPI_Wtime();
    if(!goon) Master nmessage("work has begun",0,0);
@@ -113,6 +113,7 @@ int main(int argc, char** argv)
 //     gaussian(f1,f,0);
 	t_cur+=dtdid;
 	count++;
+        if(Ttot!=0 && t_cur >= Ttot) break;
 	if (CheckStep!=0 && count%CheckStep==0)
 	    {
 	    boundary_conditions(f1,nut);

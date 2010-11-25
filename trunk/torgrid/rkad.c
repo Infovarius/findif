@@ -25,8 +25,6 @@ void timestep(double ****f, double ****df, double ***nut, double t, double ****f
             return;
             }
 
-            exit(0);
-
       MPI_Allreduce(&err, &errs, 1, MPI_DOUBLE , MPI_MAX, MPI_COMM_WORLD);
       err=errs;
 
@@ -58,14 +56,8 @@ static double   a2=0.2,a3=0.3,a4=0.6,a5=1.0,a6=0.875,b21=0.2,
 double          dc1=c1-2825.0/27648.0,dc3=c3-18575.0/48384.0,
 		dc4=c4-13525.0/55296.0,dc6=c6-0.25;
    int i,j,k,l;
-   int i1,j1,k1,l1;
    double err, sca, err1;
 enter++;
-   err=0;for(l=0;l<nvar;l++)for(i=0;i<m1;i++)for(j=0;j<m2;j++)for(k=0;k<m3;k++)
-     if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
-      err = max(err,fabs(dt*df1[l][i][j][k])/(fabs(f[l][i][j][k])+fabs(dt*df1[l][i][j][k])+MinScale));
-
-   snapshot(df1,nut,0,1);
    /*2rd step*/
    for(l=0;l<nvar;l++)
    for(i=ghost;i<mm1;i++)
@@ -75,17 +67,6 @@ enter++;
       fout[l][i][j][k] = f[l][i][j][k]+dt*b21*df1[l][i][j][k];
    pde(t+a2*dt,fout, df2);
 
-   err=0;for(l=0;l<nvar;l++)for(i=0;i<m1;i++)for(j=0;j<m2;j++)for(k=0;k<m3;k++)
-//     if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
-     {
-      err1=fabs(dt*df2[l][i][j][k])/(fabs(f[l][i][j][k])+fabs(dt*df1[l][i][j][k])+MinScale);
-      if(err1>err) {
-                err = err1;
-                i1 = i; j1 = j; k1 = k; l1 = l;
-                }
-     }
-
-   snapshot(df2,nut,0,2);
    /*3rd step*/
    for(l=0;l<nvar;l++)
    for(i=ghost;i<mm1;i++)
@@ -96,17 +77,6 @@ enter++;
                                            b32*df2[l][i][j][k]);
    pde(t+a3*dt,fout, df3);
 
-   err=0;for(l=0;l<nvar;l++)for(i=0;i<m1;i++)for(j=0;j<m2;j++)for(k=0;k<m3;k++)
-//     if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
-     {
-      err1=fabs(dt*df3[l][i][j][k])/(fabs(f[l][i][j][k])+fabs(dt*df1[l][i][j][k])+MinScale);
-      if(err1>err) {
-                err = err1;
-                i1 = i; j1 = j; k1 = k; l1 = l;
-                }
-     }
-
-   snapshot(df3,nut,0,3);
    /*4th step*/
    for(l=0;l<nvar;l++)
    for(i=ghost;i<mm1;i++)
@@ -118,18 +88,6 @@ enter++;
                                            b43*df3[l][i][j][k]);
    pde(t+a4*dt,fout, df4);
 
-   err=0;for(l=0;l<nvar;l++)for(i=0;i<m1;i++)for(j=0;j<m2;j++)for(k=0;k<m3;k++)
-//     if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
-     {
-      err1=fabs(dt*df4[l][i][j][k])/(fabs(f[l][i][j][k])+fabs(dt*df1[l][i][j][k])+MinScale);
-      if(err1>err) {
-                err = err1;
-                i1 = i; j1 = j; k1 = k; l1 = l;
-                }
-     }
-
-
-   snapshot(df4,nut,0,4);
    /*5th step*/
    for(l=0;l<nvar;l++)
    for(i=ghost;i<mm1;i++)
@@ -142,17 +100,6 @@ enter++;
                                            b54*df4[l][i][j][k]);
    pde(t+a5*dt,fout, df5);
 
-   err=0;for(l=0;l<nvar;l++)for(i=0;i<m1;i++)for(j=0;j<m2;j++)for(k=0;k<m3;k++)
-//     if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
-     {
-      err1=fabs(dt*df5[l][i][j][k])/(fabs(f[l][i][j][k])+fabs(dt*df1[l][i][j][k])+MinScale);
-      if(err1>err) {
-                err = err1;
-                i1 = i; j1 = j; k1 = k; l1 = l;
-                }
-     }
-
-   snapshot(df5,nut,0,5);
    /*6th step*/
    for(l=0;l<nvar;l++)
    for(i=ghost;i<mm1;i++)
@@ -166,14 +113,13 @@ enter++;
                                            b65*df5[l][i][j][k]);
    pde(t+a6*dt,fout, df2);
 
-   snapshot(df2,nut,0,6);
  /*calculating output matrix and error value*/
    err = 0.0;
    for(l=0;l<nvar;l++)
    for(i=ghost;i<mm1;i++)
    for(j=ghost;j<mm2;j++)
    for(k=ghost;k<mm3;k++)
-//     if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
+     if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
    {
       fout[l][i][j][k] = f[l][i][j][k]+dt*(c1*df1[l][i][j][k]+
 					   c3*df3[l][i][j][k]+
@@ -187,7 +133,5 @@ enter++;
 			  dc6*df2[l][i][j][k]))/sca;
       err = max(err, err1);
    }
-   snapshot(fout,nut,0,10);
-
    return err;
 }

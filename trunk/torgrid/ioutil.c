@@ -280,6 +280,7 @@ double mf[3], totmf[3], toten;     //mf[0]=max(f), mf[1]=max(df), mf[2]=max(df/f
 FILE *fv,*fnu,*fen,*fkv;
 
 //clrscr();
+divv = totdivv = 0;
 time_now = MPI_Wtime();
 Master printf("program is working %0.2f seconds\n",time_now-time_begin);
 
@@ -331,7 +332,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
          for(k=0;k<m3;k++)
          if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
             mf[0] += fabs(1+coordin(i,0)*rc)*pow(f1[l][i][j][k],2);
-       MPI_Allreduce(&mf, &totmf, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
+       MPI_Allreduce(mf, totmf, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
        Master fprintf(fen,"\t %10.10g",totmf[0]/N1/N2/N3);
        }
 
