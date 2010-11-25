@@ -51,7 +51,7 @@ void pde(double t, double ****f, double ****df)
 		     + (dn1[1]-f[1][i][j][k])*r_1[i]*f[2][i][j][k]
 		     ;
       df[3][i][j][k]=nut[i][j][k]*(dv2[3][0]+dv2[3][1]+dv2[3][2]+r_1[i]*dv1[3][0])
-		     +(i<=(ghost+N1/5-1)  ? Gr : 0)
+		     +(i<=(ghost+N1/5-1) && k==ghost  ? Gr*(ghost+N1/5-1-i) : 0)
 		     -dp1[2]
 		     + (dn1[0]-f[1][i][j][k])*dv1[3][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[3][1]
@@ -145,10 +145,12 @@ for(k=0;k<m3;k++)
 void  boundary_conditions(double ****f, double ***nut)
 {
    int i, j, k, l, req_numS=0, req_numR=0;
-   int r1,r2,z1,z2;
+   int i1,i2,k1,k2;
    int /*flag,cnt,*/z[4],tag=10;
-   double vrho,vphi,vth;
+   double vrho,vphi,vth,vn;
+   double znorm, ztau;
    z[1]=z[2]=z[3]=-1; z[0]=1;  //  влияет на вид гран.условий (-1:жесткие, 1:свободные)
+   znorm=-1; ztau=1;          // rather for vnorm&vtau not vr,vphi,vz
 
   /*============================ divertor =================================*/
   if(t_cur<00)                  // divertors are off till t sec
@@ -245,15 +247,16 @@ void  boundary_conditions(double ****f, double ***nut)
      for(j=0;j<m2;j++)
 	for(k=0;k<m3;k++)
 	  if(isType(node[i][k],NodeGhostFluid) && !isType(node[i][k],NodeClued)) {
-		r2=(r1=floor(refr[i][k]))+1;
-		z2=(z1=floor(refz[i][k]))+1;
-		for(l=0;l<nvar;l++)
-		   f[l][i][j][k] = ( (refr[i][k]-r2)*(f[l][r1][j][z1]*(refz[i][k]-z2)-f[l][r1][j][z2]*(refz[i][k]-z1))
-				   + (refr[i][k]-r1)*(f[l][r2][j][z2]*(refz[i][k]-z1)-f[l][r2][j][z1]*(refz[i][k]-z2))
-				    ) * z[l];
+                i1=floor(refr[i][k]+0.5);
+                k1=floor(refz[i][k]+0.5);
+                vn = ( f[1][i1][j][k1]*(i1-i)+f[3][i1][j][k1]*(k1-k) )/
+                     ( (i1-i)*(i1-i) + (k1-k)*(k1-k) );
+                f[1][i][j][k] = ztau*f[1][i1][j][k1] + (znorm-ztau)*vn*(i1-i);
+                f[2][i][j][k] = ztau*f[2][i1][j][k1];
+                f[3][i][j][k] = ztau*f[3][i1][j][k1] + (znorm-ztau)*vn*(k1-k);
 //                   nut[i][j][k] = (refr[i][k]-r2)*(nut[r1][j][z1]*(refz[i][k]-z2)-nut[r1][j][z2]*(refz[i][k]-z1))
 //                                + (refr[i][k]-r1)*(nut[r2][j][z2]*(refz[i][k]-z1)-nut[r2][j][z1]*(refz[i][k]-z2));
-		   nut[i][j][k] = 1./Re;
+	        nut[i][j][k] = 1./Re;
 		}
 
   return;
