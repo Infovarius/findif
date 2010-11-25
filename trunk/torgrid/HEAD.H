@@ -119,15 +119,15 @@ double rkck(double ****f, double ****df, double ***nut, double t, double dt, dou
 /*------- pde.c  -----------*/
 void   pde(double t, double ****f, double ****df);
 double norma(double a,double b,double c,int q);
+void fill_velocity(double t, double ****f);
 double deviation(double ****f,int,int,int);
 void nut_by_flux(double ****f, double ***nu, double Re);
 void gaussian(double ****f, double ****f1, double eps);
 void   boundary_conditions(double ****f, double ***nu);
 void  init_conditions(void);
 void init_parallel(void);
-double dvv(double ***f1, double ***f2, int dir, int ii, int jj, int kk, int sh, int sm);
+double dvv(double ****f, int a, int b, int ii, int jj, int kk, int sh, int sm);
 double dr(double ***m,int ii,int jj,int kk,int dir,int or,double dx,int sh,int sm);
-double d2cross(double ***m, int ii, int jj, int kk, int dir1,int dir2,  int sh, int sm);
 double coordin(int, int);
 double interpolation(double,double, double,double,double,double);
 /*------- ioutil.c  ------*/
@@ -144,3 +144,6 @@ void printing(double ****f1,double dtdid,double t_cur,long count,double en);
 void dump(double ****f1,double ***nu,double t_cur,long count);
 void snapshot(double ****f,double ***nu,double t_cur,long count);
 void putlog(char msg_text[],long num);
+/*-------- velocity.c ------*/
+double vfi_given(double t,double rho,double rho0);
+double vtheta_given(double t,double rho,double rho0,double phi);
