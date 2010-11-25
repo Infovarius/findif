@@ -28,6 +28,7 @@ void pde(double t, double ****f, double ****df)
    double dv1[7][3],dv2[7][3],dA11[7][3][3],dp1[3],dn1[3],w,dw;
 
    boundary_conditions(f);
+start_tick(3);
 
 //   omega(t,&w,&dw);
    for(i=0;i<m1;i++)
@@ -40,16 +41,23 @@ void pde(double t, double ****f, double ****df)
       }   else df[0][i][j][k] = df[1][i][j][k] = df[2][i][j][k] = df[3][i][j][k] = 0;
      if(isType(node[i][k],NodeMagn) && !isType(node[i][k],NodeClued))
       {
+start_tick(15);
       for(l=4;l<=6;l++) {
        for(m=0;m<3;m++) {
+   start_tick(17);
          dv1[l][m]=dr(f[l],i,j,k,m+1,0,dx[m],ghost, approx);
+   finish_tick(17); start_tick(18);
          dv2[l][m]=dr(f[l],i,j,k,m+1,1,dx[m]*dx[m],ghost, approx);
-	 }
+finish_tick(18);
+	 }	start_tick(19);
         dA11[l][0][1] = dA11[l][1][0] = d2cross(f[l],i,j,k,2,1,ghost,approx);
         dA11[l][0][2] = dA11[l][2][0] = d2cross(f[l],i,j,k,3,1,ghost,approx);
         dA11[l][1][2] = dA11[l][2][1] = d2cross(f[l],i,j,k,3,2,ghost,approx);
+finish_tick(19);
         }
 
+
+finish_tick(15);  start_tick(16);
        df[4][i][j][k]=Rm*(f[2][i][j][k]*(dv1[5][0]-dv1[4][1]+f[5][i][j][k]*r_1[i])-f[3][i][j][k]*(dv1[4][2]-dv1[6][0]))
 //                      +Rm*f[2][i][j][k]	 // for induced field
                      +eta[i][j][k]*(dv2[4][0]+dv2[4][1]+dv2[4][2]+r_1[i]*dv1[4][0]-f[4][i][j][k]*r_2[i]-2*dv1[5][1]*r_1[i])
@@ -61,6 +69,7 @@ void pde(double t, double ****f, double ****df)
        df[6][i][j][k]=Rm*(f[1][i][j][k]*(dv1[4][2]-dv1[6][0])-f[2][i][j][k]*(dv1[6][1]-dv1[5][2]))
                      +eta[i][j][k]*(dv2[6][0]+dv2[6][1]+dv2[6][2]+r_1[i]*dv1[6][0])
                      +(eta0-eta[i][j][k])*(dv1[4][2]*r_1[i]+dA11[4][0][2]+dA11[5][1][2]+dv2[6][2]);
+finish_tick(16);                     
 /*       df[4][i][j][k]=eta[i][j][k]*(dv2[4][0]+dv2[4][1]+dv2[4][2]+r_1[i]*dv1[4][0]-f[4][i][j][k]*r_2[i]-2*dv1[5][1]*r_1[i]);
        df[5][i][j][k]=f[3][i][j][k]*(dv1[6][1]-dv1[5][2])-f[1][i][j][k]*(dv1[5][0]-dv1[4][1]+f[5][i][j][k]*r_1[i])
                      +eta[i][j][k]*(dv2[5][0]+dv2[5][1]+dv2[5][2]+r_1[i]*dv1[5][0]-f[5][i][j][k]*r_2[i]+2*dv1[4][1]*r_1[i])
@@ -68,12 +77,13 @@ void pde(double t, double ****f, double ****df)
        df[6][i][j][k]=0;*/
       }   else df[4][i][j][k] = df[5][i][j][k] = df[6][i][j][k] = 0;
   } //global for
+finish_tick(3);
    return;
 }
 
 double deviation(double ****f,int i,int j,int k)
 {
-const int size_okr=max(max_okr,ghost);
+const int size_okr=max(1,ghost);
 double flux = 0;
 int kol=0,l;
    for(l=1;l<=size_okr;l++)
@@ -111,6 +121,7 @@ void nut_by_flux(double ****f,double dt) //calculating nu_turbulent by velocity 
 {
 int i,j,k,l;
 double koef;
+start_tick(5);
 /*struct_func(f,2,2,3);
 for(i=0;i<n3;i++)
     {
@@ -142,6 +153,7 @@ for(k=0;k<m3;k++)
           if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
             nut[i][j][k] = (1. + tmp)/Re;*/
    }
+finish_tick(5);   
 }
 
 void  boundary_conditions(double ****f)
@@ -154,6 +166,7 @@ void  boundary_conditions(double ****f)
    char msg_err[100];       //for putlog+mpi_error
    int reslen;
 
+start_tick(1);
    z[0]=1; z[1]=z[2]=z[3]=-1; //  влияет на вид гран.условий (-1:жесткие, 1:свободные)
    znorm=-1; ztau=1;          // rather for Anorm&Atau not Ar,Aphi,Az
 
@@ -277,7 +290,7 @@ void  boundary_conditions(double ****f)
                      ( (i1-i)*(i1-i) + (k1-k)*(k1-k) );
 /*                for(l=4;l<=6;l++)
                    f[l][i][j][k] = z[l]*f[l][i1][j][k1];*/
-                f[4][i][j][k] = ztau*f[4][i1][j][k1] + (znorm-ztau)*An*(i1-i);
+               f[4][i][j][k] = ztau*f[4][i1][j][k1] + (znorm-ztau)*An*(i1-i);
 //                f[5][i][j][k] = ztau*f[5][i1][j][k1];
                 f[5][i][j][k] = ztau*f[5][i1][j][k1] *
                               (rrel+1-rfict_1*(i-i1)*dx[0]) / (rrel+1+rfict_1*(i-i1)*dx[0]) ;  
@@ -307,7 +320,7 @@ void  boundary_conditions(double ****f)
                                      }
                 }
         }
-
+finish_tick(1);
   return;
 }
 
@@ -594,7 +607,8 @@ switch (sm) {
 	case 21: for(i=0; i<sm; i++) tmp += m[ii][jj][kk+i-sh]*kf7[or][sh][i]; break;
 	default :
     	nrerror("\nNO SUCH SAMPLE for derivative. Bye ...",0,0);
-	} */
+	}*/
+//finish_tick(9);
 return(tmp/dx);
 }
 
@@ -605,8 +619,37 @@ double d2cross(double ***m, int ii, int jj, int kk, int dir1,int dir2,  int sh, 
 double tmp=0.0;
 int i1,i2;
 int dirr=6-dir1-dir2;
-
-switch (sm*dirr) {
+//start_tick(10);
+switch (sm) {
+     case 7 :  switch (dirr) {
+                  case 1 : tmp = kf7[or][sh][6]*(m[ii][jj+3][kk]-m[ii][jj-3][kk])
+                               + kf7[or][sh][5]*(m[ii][jj+2][kk]-m[ii][jj-2][kk])
+                               + kf7[or][sh][4]*(m[ii][jj+1][kk]-m[ii][jj-1][kk]); break;
+                  case 1 : tmp = kf7[or][sh][6]*(m[ii+3][jj][kk]-m[ii-3][jj][kk])
+                               + kf7[or][sh][5]*(m[ii+2][jj][kk]-m[ii-2][jj][kk])
+                               + kf7[or][sh][4]*(m[ii+1][jj][kk]-m[ii-1][jj][kk]); break;
+                  case 2 : tmp = kf7[or][sh][6]*(m[ii][jj+3][kk]-m[ii][jj-3][kk])
+                               + kf7[or][sh][5]*(m[ii][jj+2][kk]-m[ii][jj-2][kk])
+                               + kf7[or][sh][4]*(m[ii][jj+1][kk]-m[ii][jj-1][kk]); break;
+                  case 3 : tmp = kf7[or][sh][6]*(m[ii][jj][kk+3]-m[ii][jj][kk-3])
+                               + kf7[or][sh][5]*(m[ii][jj][kk+2]-m[ii][jj][kk-2])
+                               + kf7[or][sh][4]*(m[ii][jj][kk+1]-m[ii][jj][kk-1]); break;
+                  }; break;
+     case 3 :  switch (dirr) {
+                  case 1 : tmp = kf3[or][sh][2]*(m[ii+1][jj][kk]-m[ii-1][jj][kk]); break;
+                  case 2 : tmp = kf3[or][sh][2]*(m[ii][jj+1][kk]-m[ii][jj-1][kk]); break;
+                  case 3 : tmp = kf3[or][sh][2]*(m[ii][jj][kk+1]-m[ii][jj][kk-1]); break;
+                  }; break;
+     case 5 :  switch (dirr) {
+                  case 1 : tmp = kf5[or][sh][4]*(m[ii+2][jj][kk]-m[ii-2][jj][kk])
+                               + kf5[or][sh][3]*(m[ii+1][jj][kk]-m[ii-1][jj][kk]); break;
+                  case 2 : tmp = kf5[or][sh][4]*(m[ii][jj+2][kk]-m[ii][jj-2][kk])
+                               + kf5[or][sh][3]*(m[ii][jj+1][kk]-m[ii][jj-1][kk]); break;
+                  case 3 : tmp = kf5[or][sh][4]*(m[ii][jj][kk+2]-m[ii][jj][kk-2])
+                               + kf5[or][sh][3]*(m[ii][jj][kk+1]-m[ii][jj][kk-1]); break;
+                  }; break;
+    }
+/*switch (sm*dirr) {
 	case 3 : for(i1=0; i1<sm; i1++)
 		     for(i2=0; i2<sm; i2++)
 		       tmp += m[ii][jj+i1-sh][kk+i2-sh]*kf3[0][sh][i1]*kf3[0][sh][i2]; break;
@@ -636,7 +679,8 @@ switch (sm*dirr) {
 		       tmp += m[ii+i1-sh][jj+i2-sh][kk]*kf7[0][sh][i1]*kf7[0][sh][i2]; break;
 	default :
 	nrerror("\nNO SUCH SAMPLE for derivative. Bye ...",0,0);
-	}
+	}*/
+//finish_tick(10);
 return(tmp/dx[dir1-1]/dx[dir2-1]);
 }
 
