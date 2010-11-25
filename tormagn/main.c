@@ -95,23 +95,22 @@ int main(int argc, char** argv)
             }
 //--------------------------------------
 
+   fill_velocity(0.3, f);    // time=0.3 for amplitude~1
+   fill_velocity(0.3, f1);   // additional array
    boundary_conditions(f);
 
-//   if(!goon)  dump(f,eta,t_cur,count);
-
+   if(!goon)  dump(f,eta,t_cur,count);
    time_begin = MPI_Wtime();
    if(!goon) Master nmessage("work has begun",0,0);
        else Master nmessage("work continued",t_cur,count);
    Master ferror = fileopen(NameErrorFile,abs(goon));
 
    if(CheckStep!=0) check(f);
-   if(!goon) if (OutStep!=0) printing(f,0,t_cur,count,PulsEnergy);
+   if (OutStep!=0) printing(f,0,t_cur,count,PulsEnergy);
 
 /*------------------------ MAIN ITERATIONS -------------------------*/
 
-   fill_velocity(0.3, f);    // time=0.3 for amplitude~1
-   fill_velocity(0.3, f1);   // additional array
-   while (t_cur < Ttot && !razlet) {
+   while ((Ttot==0 || t_cur < Ttot) && !razlet) {
    //   fill_velocity(t_cur, f);
         pde(t_cur, f, df);
         dttry=dtnext;
@@ -119,7 +118,7 @@ int main(int argc, char** argv)
   //      nut_by_flux(f,dtdid);
         t_cur+=dtdid;
         count++;
-        if(t_cur >= Ttot) break;
+        if(Ttot!=0 && t_cur >= Ttot) break;
         if (CheckStep!=0 && count%CheckStep==0)
             {
             boundary_conditions(f1);
@@ -162,7 +161,6 @@ int main(int argc, char** argv)
 		goon = ((fd=fopen(NameCPFile,"r+"))>0);
 		if(goon)
 			{ do fscanf(fd,"%s\n",NameInitFile); while (!feof(fd));
-//                        putlog(NameInitFile,ftell(fd));
 			goon = strcmp(NameInitFile,"END");
 			}
 		init_param(argc,argv,&dtnext);       // initialization of parameters
@@ -171,8 +169,8 @@ int main(int argc, char** argv)
 		dx[1]=lfi/N2;
 		dx[2]=2*R/N3;
 
-		if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
 		fileclose(fd);
+		if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
 
                 count = tmpC;  t_cur = tmpT;  Rm = tmp;
 		init_conditions();

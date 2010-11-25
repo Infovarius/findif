@@ -169,7 +169,7 @@ int init_data(void)                 //returns code of error
 fileclose(inp);
 
 if(error) nrerror("Data couldn't have been read from file!!!",-1,error);
-//     else nmessage("Data has been read from file",t_cur,count);
+     else Master nmessage("Data has been read from file",t_cur,count);
 return(error);
 }
 
@@ -272,7 +272,7 @@ for(l=0;l<=2;l++)
   for(i=0;i<m1;i++)
     for(k=0;k<m3;k++)
        if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
-           TotalEnergy += pow(averf[l][i][k],2.);
+           TotalEnergy += fabs(1+coordin(i,0)*rc)*pow(averf[l][i][k],2.);
 TotalEnergy += 1.;   //if zero average field
 razlet = (PulsEnergy/TotalEnergy>UpLimit);    */
 razlet = 0;
@@ -336,7 +336,7 @@ Master printf("time per iteration per node: %g  includes time for exchanging: %g
             if(f1[l][i][j][k]!=0) temp/=f1[l][i][j][k];
             if (temp>mf[2]) mf[2]=temp;
           }
-       MPI_Allreduce(&mf, &totmf, 3, MPI_DOUBLE , MPI_MAX, MPI_COMM_WORLD);
+       MPI_Allreduce(mf, totmf, 3, MPI_DOUBLE , MPI_MAX, MPI_COMM_WORLD);
        Master printf("%d  maxf=%e(loc=%e) \tmaxdf=%e(loc=%e) \tmax(df/f)=%e(loc=%e)\n",
                        l,      totmf[0],mf[0],    totmf[1],mf[1],       totmf[2],mf[2]);
 //       Master fprintf(fen,"\t %e \t %e",totmf[0],totmf[1]);
@@ -351,7 +351,7 @@ Master printf("time per iteration per node: %g  includes time for exchanging: %g
           {
             if (fabs(B[l][i][j][k])>mf[0]) mf[0]=fabs(B[l][i][j][k]);
           }
-       MPI_Allreduce(&mf, &totmf, 1, MPI_DOUBLE , MPI_MAX, MPI_COMM_WORLD);
+       MPI_Allreduce(mf, totmf, 1, MPI_DOUBLE , MPI_MAX, MPI_COMM_WORLD);
        Master printf("%d  maxB=%e(loc=%e)\n",
                        l,      totmf[0],mf[0]);
 //       Master fprintf(fen,"\t %e",totmf[0]);
@@ -366,7 +366,7 @@ Master printf("time per iteration per node: %g  includes time for exchanging: %g
          if((l<=3 && isType(node[i][k],NodeFluid) || l>=4&& isType(node[i][k],NodeMagn))
             && !isType(node[i][k],NodeClued))
 	    mf[0] += fabs(1+coordin(i,0)*rc)*pow(f1[l][i][j][k],2);
-       MPI_Allreduce(&mf, &totmf, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
+       MPI_Allreduce(mf, totmf, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
        Master fprintf(fen,"\t %e",totmf[0]/N1/N2/N3);
        }
    for(l=0;l<3;l++) {
@@ -376,7 +376,7 @@ Master printf("time per iteration per node: %g  includes time for exchanging: %g
          for(k=0;k<mm3;k++)
          if(isType(node[i][k],NodeMagn))
 	    mf[0] += fabs(1+coordin(i,0)*rc)*pow(B[l][i][j][k],2);
-       MPI_Allreduce(&mf, &totmf, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
+       MPI_Allreduce(mf, totmf, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
        Master fprintf(fen,"\t %e",totmf[0]/N1/N2/N3);
        }
 
@@ -446,7 +446,7 @@ FILE *fd;
 
 // if(rank!=0) MPI_Recv(message,0,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);
 
- fd=fileopen(str,1);
+ fd=fileopen(str,0);
  nmessage("snap has been started",t_cur,count);
  fprintf(fd,"current time = %0.10f \ncurrent iteration = %ld\n",t_cur,count);
  fprintf(fd,"number of processors along axes={%d,%d,%d}\n",pp[0],pp[1],pp[2]);
@@ -461,10 +461,12 @@ FILE *fd;
  fileclose(fd);
 
 // if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
- Master {nmessage("snap is done",t_cur,count);
+// MPI_Barrier(MPI_COMM_WORLD);
+ nmessage("snap is done",t_cur,count);
+ Master {
          sprintf(str,"%s_*_%05d.snp",NameSnapFile,count);
-         add_control_point(str);}
- MPI_Barrier(MPI_COMM_WORLD);
+         add_control_point(str);
+         }
 }
 
 
