@@ -59,7 +59,7 @@ int main(int argc, char** argv)
 
 //--------------------------------------
   Master {
-      fd=fileopen("coord",rank);
+      fd=fileopen("coord",0);
       for(i=0;i<N1+2*ghost;i++) fprintf(fd,"%e ",coordin(i,0));
       fprintf(fd,"\n");
       for(i=0;i<N2+2*ghost;i++) fprintf(fd,"%e ",coordin(i,1));
@@ -68,8 +68,8 @@ int main(int argc, char** argv)
       fileclose(fd);
      }
 //--------------------------------------
-{
-    if(rank!=0) MPI_Recv(&tmpC,1,MPI_INT,rank-1,9,MPI_COMM_WORLD,statuses);
+ if(!goon) {
+    if(rank!=0) MPI_Recv(fname,0,MPI_CHAR,rank-1,1,MPI_COMM_WORLD,statuses);
 
  fd=fileopen("node",rank);
 
@@ -80,15 +80,15 @@ int main(int argc, char** argv)
  print_array2d(fd,refz,0,m1,0,m3);
  fileclose(fd);
 
- if(rank!=size-1) {MPI_Send(&rank,1,MPI_INT,rank+1,9,MPI_COMM_WORLD); }
+ nmessage("nodes outputting ended",t_cur,count);
+ if(rank!=size-1) MPI_Send(fname,0,MPI_CHAR,rank+1,1,MPI_COMM_WORLD);
              else nmessage("nodes has been dumped",t_cur,count);
             }
 
 //--------------------------------------
-
    boundary_conditions(f,nut);
 
-   if(!goon)  dump(f,nut,t_cur,count);
+//   if(!goon)  dump(f,nut,t_cur,count);
 
    time_begin = MPI_Wtime();
    if(!goon) Master nmessage("work has begun",0,0);
@@ -108,7 +108,7 @@ int main(int argc, char** argv)
 	t_cur+=dtdid;
 	time_old = time_now;
 	count++;
-    if(t_cur >= Ttot && Ttot>0) break;
+        if(Ttot!=0 && t_cur >= Ttot) break;
 	if (CheckStep!=0 && count%CheckStep==0)
 	    {
 	    boundary_conditions(f1,nut);
@@ -142,19 +142,19 @@ int main(int argc, char** argv)
         if (ChangeParamTime!=0 && floor((t_cur-dtdid)/ChangeParamTime)<floor(t_cur/ChangeParamTime))
             {
 		//Rm = floor(t_cur/ChangeParamTime+0.5)*DeltaParam-190;
-			if(!outed) { snapshot(f,nut,t_cur,count); outed = 1;}
+		if(!outed) { snapshot(f,nut,t_cur,count); outed = 1;}
 //                MPI_Barrier(MPI_COMM_WORLD);
-			tmp = (Re += DeltaParam);
-			tmpC = count;  tmpT = t_cur;
+		tmp = (Re += DeltaParam);
+                tmpC = count;  tmpT = t_cur;
 			init_param(argc,argv,&dtnext,1);       // initialization of parameters
 
-			if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
+		if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
 			if(strcmp(NameInitFile,"-1")==0) goon = 1;
 
-            count = tmpC;  t_cur = tmpT;  Re = tmp;
+                count = tmpC;  t_cur = tmpT;  Re = tmp;
 			init_conditions();
-            p1 = 4/Re;
-			goon = 1;
+                p1 = 4/Re;
+		goon = 1;
             Master nmessage("parameter was changed to",Re,count);
             }
 /*        if(kbhit())

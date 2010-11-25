@@ -70,8 +70,8 @@ LEVEL long numlog;
 LEVEL int rank, size;
 LEVEL MPI_Request SendRequest[256],RecvRequest[256];
 LEVEL MPI_Status statuses[256];
-LEVEL double *buf_send[6], *buf_recv[6], buf_size[3];    //6=2*3(D)
-LEVEL int pr_neighbour[6],pp[3],n[3];                    //3D
+LEVEL double *buf_send[6], *buf_recv[6];                 //6=2*3(D)
+LEVEL int pr_neighbour[6],pp[3],n[3], buf_size[3];       //3D
 LEVEL int pr[3];                                         //3D
 //void init_parallel();                       in file pde.c
 
