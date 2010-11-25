@@ -12,12 +12,14 @@ FILE *fileopen(const char *x, int mode)  //opening of file to ff
 {
 FILE *ff;
 char* s_mode;
+char msg[100];
 if(mode>0) s_mode="ab";
 if(mode<0) s_mode="rb";
 if(mode==0) s_mode="wb";
 if ((ff = fopen(x,s_mode))==NULL)
 	 {
-		nrerror ("Can't open file !\n",t_cur,count);
+	    sprintf(msg,"Can't open file '%s'!\n",x);
+		nrerror (msg,t_cur,count);
 		exit(-1);
 	 }
 return(ff);
@@ -138,7 +140,7 @@ int init_data(void)                 //returns code of error
 
  pos = strcspn(NameInitFile,"*");
  NameInitFile[pos]=0;
- sprintf(fstr,"%s%d%s",NameInitFile,size,NameInitFile+pos+1);
+ sprintf(fstr,"%s%d%s",NameInitFile,rank+0*size,NameInitFile+pos+1);
 
  inp = fileopen(fstr,-1);
  read_tilleq(inp,'=','n');   if(fscanf(inp,"%lf",&t_cur)==0) error=1;
@@ -156,8 +158,8 @@ int init_data(void)                 //returns code of error
  init_parallel();
  operate_memory(1);                     // creating arrays
 
- for(tmpr=0;tmpr<=rank;tmpr++)           //reading until arrays of this process
- {
+// for(tmpr=0;tmpr<=rank;tmpr++)           //reading until arrays of this process
+// {
  for(l=0;l<nvar;l++)                    // reading f
         for(i=0;i<m1;i++)
         for(j=0;j<m2;j++)
@@ -174,7 +176,7 @@ for(i=0;i<m1;i++)
        if(fread(&tmpf,sizeof(float),1,inp)<1) error=3*(k+100*(j+100*i));
        nut[i][j][k] = tmpf;
        }
- }
+// }
 fileclose(inp);
 
 if(error) nrerror("Data couldn't have been read from file!!!",-1,error);
@@ -331,7 +333,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
             if(f1[l][i][j][k]!=0) temp/=f1[l][i][j][k];
             if (temp>mf[2]) mf[2]=temp;
           }
-       MPI_Allreduce(&mf, &totmf, 3, MPI_DOUBLE , MPI_MAX, MPI_COMM_WORLD);
+       MPI_Allreduce(mf, totmf, 3, MPI_DOUBLE , MPI_MAX, MPI_COMM_WORLD);
 //     Master printf("%d  maxf=%e(loc=%e) \tmaxdf=%e(loc=%e) \tmax(df/f)=%e(loc=%e)\n",
 //                     l,      totmf[0],mf[0],    totmf[1],mf[1],       totmf[2],mf[2]);
        Master printf("%d  maxf=%e \tmaxdf=%e \tmax(df/f)=%e\n",
@@ -378,37 +380,40 @@ FILE *fd;
 char message[10]="dump";
 int tag=1,v;
 
-// boundary_conditions(f1);
-
- if(DumpKeep)  sprintf(str,"%s_%d_%d.dmp",NameSnapFile,size,count);
+if(DumpKeep)  sprintf(str,"%s_%d_%d.dmp",NameSnapFile,rank,count);
 	else {
-		sprintf(str,NameDumpFile);
-		sprintf(str1,"%s.bak",NameDumpFile);
-		Master remove(str1);
-		Master rename(str,str1);
+		sprintf(str,"%s%d.dmp",NameSnapFile,rank);
+		sprintf(str1,"%s%d.bak",NameSnapFile,rank);
+		remove(str1);
+		rename(str,str1);
 		}
- if(rank!=0) MPI_Recv(message,0,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);
+// if(rank!=0) MPI_Recv(message,0,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);
 
  fd=fileopen(str,rank);
 
  Master nmessage("dump has been started",t_cur,count);
- Master fprintf(fd,"current time = %0.10f \ncurrent iteration = %ld\n",t_cur,count);
- Master fprintf(fd,"number of processors along axes={%d,%d,%d}\n",pp[0],pp[1],pp[2]);
- Master fprintf(fd,"Number of points along x = %d\n",N1);
- Master fprintf(fd,"Number of points along y = %d\n",N2);
- Master fprintf(fd,"Number of points along z = %d\n",N3);
- Master fprintf(fd,"Reynolds number = %lf\n",Re);
+// Master {
+  fprintf(fd,"current time = %0.10f \ncurrent iteration = %ld\n",t_cur,count);
+  fprintf(fd,"number of processors along axes={%d,%d,%d}\n",pp[0],pp[1],pp[2]);
+  fprintf(fd,"Number of points along x = %d\n",N1);
+  fprintf(fd,"Number of points along y = %d\n",N2);
+  fprintf(fd,"Number of points along z = %d\n",N3);
+  fprintf(fd,"Reynolds number = %lf\n",Re);
+ //}
 
  for(v=0;v<nvar;v++)
     printbin_array3d(fd,f1[v],0,m1,0,m2,0,m3);
  printbin_array3d(fd,nu,0,m1,0,m2,0,m3);
  fileclose(fd);
 
- if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
+// if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
  MPI_Barrier(MPI_COMM_WORLD);
- Master {nmessage("dump is done",t_cur,count);
-                   add_control_point(str);
-                   }
+ Master 
+ {    nmessage("dump is done",t_cur,count);
+	  if(DumpKeep)  sprintf(str,"%s_*_%d.dmp",NameSnapFile,count);
+			else 	sprintf(str,"%s*.dmp",NameSnapFile);
+	  add_control_point(str);
+      }
 }
 
 void snapshot(double ****f1,double ***nu,double t_cur,long count)
@@ -442,8 +447,8 @@ FILE *fd;
  MPI_Barrier(MPI_COMM_WORLD);
  Master {
 		 nmessage("snap is done",t_cur,count);
-         sprintf(str,"%s_*_%05d.snp",NameSnapFile,count);
-         add_control_point(str);
+//         sprintf(str,"%s_*_%05d.snp",NameSnapFile,count);
+//         add_control_point(str);
          }					 
 }
 

@@ -50,13 +50,12 @@ LEVEL int CheckStep;  //each CheckStep divergence of program is checking
 LEVEL int OutStep;    //each OutStep result is printing
 LEVEL int SnapStep;   //each SnapStep snapshot is done
 LEVEL double SnapDelta;  //each SnapDelta of simulation time snapshot is done
-LEVEL double DumpInterval;  // each DumpInterval all essential data is saved
-LEVEL int DumpKeep;   // if to keep all Dumps (0 - only 2 last)
 LEVEL int VarStep;    //each VarStep step in RungeKutta varies
 LEVEL double ChangeParamTime, DeltaParam;  // for iteration on parameters
+LEVEL int num_dump;
 LEVEL long numlog;
 
-#ifndef max
+#if !defined(max)
 #define max(a, b)  (((a) > (b)) ? (a) : (b))
 #define min(a, b)  (((a) < (b)) ? (a) : (b))
 #endif

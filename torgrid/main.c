@@ -4,7 +4,7 @@
 
 int main(int argc, char** argv)
 {
-   double dttry, dtdid, dtnext, tmp,tmpT, time_old;
+   double dttry, dtdid, dtnext, tmp,tmpT;
    int i,j,k,l,tmpC;
    int outed;
    FILE *fd, *ferror;
@@ -33,13 +33,12 @@ int main(int argc, char** argv)
   NameStatFile =(char *)calloc(strl+9,sizeof(char));
   sprintf(NameStatFile,"%s_%d.sta",fname,rank); NameStatFile[strl+8] = 0;
 
-   numlog = 1;
    Master nmessage("--------------------------------------------------------------------------",0,0);
 
 /* ---------------------- reading files and arrays --------------------- */
-   goon = ((fd=fopen(NameCPFile,"r+"))>0);
-   if(fd==NULL) { //putlog("File of cp were not opened",goon);
-                  Master if((fd=fopen(NameCPFile,"w+"))!=NULL) ;//putlog("File cp was successfully created",1);
+   goon = ((fd=fopen(NameCPFile,"r"))>0);
+   Master if(fd==NULL) { putlog("File of cp were not opened",2);
+                  if((fd=fopen(NameCPFile,"w"))!=NULL) ; putlog("File cp was successfully created",3);
                 }
            else putlog("File of control points opened=",(long)fd);
    if(goon)
@@ -68,8 +67,8 @@ int main(int argc, char** argv)
       fileclose(fd);
      }
 //--------------------------------------
-if(0) {
-    if(rank!=0) MPI_Recv(&tmpC,1,MPI_INT,rank-1,rank-1,MPI_COMM_WORLD,statuses);
+ {
+    if(rank!=0) MPI_Recv(&tmpC,1,MPI_INT,rank-1,9,MPI_COMM_WORLD,statuses);
 
  fd=fileopen("node",rank);
 
@@ -80,7 +79,7 @@ if(0) {
  print_array2d(fd,refz,0,m1,0,m3);
  fileclose(fd);
 
- if(rank!=size-1) {MPI_Send(&rank,1,MPI_INT,rank+1,rank,MPI_COMM_WORLD); }
+ if(rank!=size-1) {MPI_Send(&rank,1,MPI_INT,rank+1,9,MPI_COMM_WORLD); }
              else nmessage("nodes has been dumped",t_cur,count);
             }
 
@@ -88,7 +87,7 @@ if(0) {
 
    boundary_conditions(f,nut);
 
-//   if(!goon)  dump(f,nut,t_cur,count);
+//   dump(f,nut,t_cur,count);
 
    time_begin = MPI_Wtime();
    if(!goon) Master nmessage("work has begun",0,0);
@@ -96,7 +95,7 @@ if(0) {
    Master ferror = fileopen(NameErrorFile,abs(goon));
 
    if(CheckStep!=0) check(f);
-   if(!goon) if (OutStep!=0) printing(f,0,t_cur,count,PulsEnergy);
+   if (OutStep!=0) printing(f,0,t_cur,count,PulsEnergy);
 
 /*------------------------ MAIN ITERATIONS -------------------------*/
    while ((Ttot==0 || t_cur < Ttot) && !razlet) {
@@ -106,9 +105,8 @@ if(0) {
 //	nut_by_flux(f1,nut,dtdid);
 //     gaussian(f1,f,0);
 	t_cur+=dtdid;
-	time_old = time_now;
 	count++;
-    if(t_cur >= Ttot && Ttot>0) break;
+        if(t_cur >= Ttot && Ttot>0) break;
 	if (CheckStep!=0 && count%CheckStep==0)
 	    {
 	    boundary_conditions(f1,nut);
@@ -155,7 +153,7 @@ if(0) {
 			init_conditions();
                 p1 = 4/Re;
 		goon = 1;
-            Master nmessage("Re was changed to",Re,count);
+            Master nmessage("parameter was changed to",Re,count);
             }
 /*        if(kbhit())
 	     {
@@ -167,9 +165,6 @@ if(0) {
                                     }
                         }
               }*/
-	if (OutStep==0 || count%OutStep!=0) time_now=MPI_Wtime();
-	if (DumpInterval>0 && floor((time_now-time_begin)/60/DumpInterval)>floor((time_old-time_begin)/60/DumpInterval))
-		dump(f,nut,t_cur,count);
    } // end while
 
    printing(f1,dtdid,t_cur,count,PulsEnergy);
