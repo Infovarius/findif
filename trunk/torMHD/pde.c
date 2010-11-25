@@ -29,6 +29,7 @@ void pde(double t, double ****f, double ****df)
    double M;
    double dv1[7][3],dv2[7][3],dA11[7][3][3],dp1[3],dn1[3],w,dw;
    double mu[3];
+   double Ha;
 
    boundary_conditions(f,nut);
 
@@ -62,13 +63,14 @@ void pde(double t, double ****f, double ****df)
 
       df[1][i][j][k]=nut[i][j][k]*(dv2[1][0]+dv2[1][1]+dv2[1][2]+r_1[i]*dv1[1][0]
 				   -f[1][i][j][k]*r_2[i]-2*dv1[2][1]*r_1[i])
-		     -dp1[0]/Gamma/f[0][i][j][k]//+w*w/r_1[i]       +2*w*f[2][i][j][k]                   //forces of inertion
+		     -dp1[0]//+w*w/r_1[i]       +2*w*f[2][i][j][k]                   //forces of inertion
                 -(dv1[1][0]<0 ? mu[0]*dv1[1][0]*(dp1[0]*dv1[1][0]+2*f[0][i][j][k]*dv2[1][0]) : 0)
-              +(j+n[1]<=ghost+2 || N2/2<=j+n[1]<=N2/2+2 ? coordin(k,2)*f[2][i][j][k] : 0)                //helical force
+//              +(1 || j+n[1]<=ghost+2 && t_cur>-1 ? tan(chimax*M_PI/180)*coordin(k,2)*f[2][i][j][k] : 0)                //helical force
+//              +(N2/2<=j+n[1]<=N2/2+2 && t_cur>-1 ? tan(chimax*M_PI/180)*coordin(k,2)*f[2][i][j][k] : 0)                //helical force
 		     + (dn1[0]-f[1][i][j][k])*dv1[1][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[1][1]
 		     + (dn1[2]-f[3][i][j][k])*dv1[1][2]
-		+nut[i][j][k]/3*(dv2[1][0]+dv1[1][0]*r_1[i]-f[1][i][j][k]*r_2[i]-dv1[2][1]*r_1[i]+dA11[2][0][1]+dA11[3][0][2])
+//		+nut[i][j][k]/3*(dv2[1][0]+dv1[1][0]*r_1[i]-f[1][i][j][k]*r_2[i]-dv1[2][1]*r_1[i]+dA11[2][0][1]+dA11[3][0][2])
 /*                     - dvv(f[1],f[1],1,i,j,k,(approx-1)/2,approx)
                      - dvv(f[2],f[1],2,i,j,k,(approx-1)/2,approx)
                      - dvv(f[3],f[1],3,i,j,k,(approx-1)/2,approx)*/
@@ -77,13 +79,13 @@ void pde(double t, double ****f, double ****df)
 		     ;
       df[2][i][j][k]=nut[i][j][k]*(dv2[2][0]+dv2[2][1]+dv2[2][2]+r_1[i]*dv1[2][0]
                                    -f[2][i][j][k]*r_2[i]+2*dv1[1][1]*r_1[i])
-			 + (t_cur>-1 ? p1*pow(rc*coordin(i,0)+1,-1):0) - dp1[1]/Gamma/f[0][i][j][k]
+			 + (t_cur>-1 ? p1*pow(rc*coordin(i,0)+1,-1):0) - dp1[1]
                 -(dv1[2][1]<0 ? mu[1]*dv1[2][1]*(dp1[1]*dv1[2][1]+2*f[0][i][j][k]*dv2[2][1]) : 0)
 					//-dw/r_1[i] -2*w*f[1][i][j][k]                   //forces of inertion
 		     + (dn1[0]-f[1][i][j][k])*dv1[2][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[2][1]
 		     + (dn1[2]-f[3][i][j][k])*dv1[2][2]
-		+nut[i][j][k]/3*(dv1[1][1]*r_1[i]+dA11[1][0][1]+dv2[2][1]+dA11[3][1][2])
+//		+nut[i][j][k]/3*(dv1[1][1]*r_1[i]+dA11[1][0][1]+dv2[2][1]+dA11[3][1][2])
 /*                     - dvv(f[1],f[2],1,i,j,k,(approx-1)/2,approx)
                      - dvv(f[2],f[2],2,i,j,k,(approx-1)/2,approx)
                      - dvv(f[3],f[2],3,i,j,k,(approx-1)/2,approx)*/
@@ -91,30 +93,32 @@ void pde(double t, double ****f, double ****df)
 		     + (dn1[1]-f[1][i][j][k])*r_1[i]*f[2][i][j][k]
 		     ;
       df[3][i][j][k]=nut[i][j][k]*(dv2[3][0]+dv2[3][1]+dv2[3][2]+r_1[i]*dv1[3][0])
-		     -dp1[2]/Gamma/f[0][i][j][k]
+		     -dp1[2]
                 -(dv1[3][2]<0 ? mu[2]*dv1[3][2]*(dp1[2]*dv1[3][2]+2*f[0][i][j][k]*dv2[3][2]) : 0)
-              -(j+n[1]<=ghost+2 || N2/2<=j+n[1]<=N2/2+2 ? (coordin(i,0)-rc)*f[2][i][j][k] :0)            //helical force
+//              -(1 || j+n[1]<=ghost+2 && t_cur>-1 ? tan(chimax*M_PI/180)*(coordin(i,0)-rc)*f[2][i][j][k] :0)            //helical force
+//              -(N2/2<=j+n[1]<=N2/2+2 && t_cur>-1 ? tan(chimax*M_PI/180)*(coordin(i,0)-rc)*f[2][i][j][k] :0)            //helical force
 		     + (dn1[0]-f[1][i][j][k])*dv1[3][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[3][1]
 		     + (dn1[2]-f[3][i][j][k])*dv1[3][2]
-      		+nut[i][j][k]/3*(dv1[1][2]*r_1[i]+dA11[1][0][2]+dA11[2][1][2]+dv2[3][2])
+//      		+nut[i][j][k]/3*(dv1[1][2]*r_1[i]+dA11[1][0][2]+dA11[2][1][2]+dv2[3][2])
 /*                     - dvv(f[1],f[2],1,i,j,k,(approx-1)/2,approx)
                      - dvv(f[2],f[2],2,i,j,k,(approx-1)/2,approx)
                      - dvv(f[3],f[2],3,i,j,k,(approx-1)/2,approx)*/
                      - f[1][i][j][k]*f[3][i][j][k]*r_1[i]
                      ;
-//      df[0][i][j][k]= -f[0][i][j][k]*(dv1[1][0]+dv1[2][1]+dv1[3][2]+f[1][i][j][k]*r_1[i])/Gamma;
-      df[0][i][j][k]= -(dvv(f[0],f[1],1,i,j,k,(approx-1)/2,approx)
+      df[0][i][j][k]= -f[0][i][j][k]*(dv1[1][0]+dv1[2][1]+dv1[3][2]+f[1][i][j][k]*r_1[i])/Gamma;
+/*      df[0][i][j][k]= -(dvv(f[0],f[1],1,i,j,k,(approx-1)/2,approx)
       		       +dvv(f[0],f[2],2,i,j,k,(approx-1)/2,approx)
                        +dvv(f[0],f[3],3,i,j,k,(approx-1)/2,approx)
-                       +f[0][i][j][k]*f[1][i][j][k]*r_1[i]);
+                       +f[0][i][j][k]*f[1][i][j][k]*r_1[i]);*/
 /*      df[1][i][j][k] += Gamma*df[0][i][j][k]*f[1][i][j][k];
       df[2][i][j][k] += Gamma*df[0][i][j][k]*f[2][i][j][k];
       df[3][i][j][k] += Gamma*df[0][i][j][k]*f[3][i][j][k];*/
 //      df[0][i][j][k] = df[1][i][j][k] = df[2][i][j][k] = df[3][i][j][k] = 0;
       }   else df[0][i][j][k] = df[1][i][j][k] = df[2][i][j][k] = df[3][i][j][k] = 0;
-
+//return;
 calculate_curl(&f[4],B,NodeMagn);
+calculate_curl(B,J,NodeFluid);
 
    for(i=0;i<m1;i++)
    for(k=0;k<m3;k++)
@@ -148,36 +152,36 @@ calculate_curl(&f[4],B,NodeMagn);
        df[6][i][j][k]=Rm*(f[1][i][j][k]*(dv1[4][2]-dv1[6][0])-f[2][i][j][k]*(dv1[6][1]-dv1[5][2]))
                      +eta[i][j][k]*(dv2[6][0]+dv2[6][1]+dv2[6][2]+r_1[i]*dv1[6][0])
                      +(eta0-eta[i][j][k])*(dv1[4][2]*r_1[i]+dA11[4][0][2]+dA11[5][1][2]+dv2[6][2]);*/
-
+ Ha=(t_cur>10? 1 : 0);
        df[4][i][j][k]=Rm*(f[2][i][j][k]*B[2][i][j][k]-f[3][i][j][k]*B[1][i][j][k])
-//                      +Rm*f[2][i][j][k]	 // for induced field
+                      +Rm*Ha*f[2][i][j][k]	 // for induced field
                      +eta[i][j][k]*(dv2[4][0]+dv2[4][1]+dv2[4][2]+r_1[i]*dv1[4][0]-f[4][i][j][k]*r_2[i]-2*dv1[5][1]*r_1[i])
                      +(eta0-eta[i][j][k])*(dv2[4][0]+dv1[4][0]*r_1[i]-f[4][i][j][k]*r_2[i]-dv1[5][1]*r_1[i]+dA11[5][0][1]+dA11[6][0][2]);
        df[5][i][j][k]=Rm*(f[3][i][j][k]*B[0][i][j][k]-f[1][i][j][k]*B[2][i][j][k])
-//                     -Rm*f[1][i][j][k]	// for induced field
+                     -Rm*Ha*f[1][i][j][k]	// for induced field
                      +eta[i][j][k]*(dv2[5][0]+dv2[5][1]+dv2[5][2]+r_1[i]*dv1[5][0]-f[5][i][j][k]*r_2[i]+2*dv1[4][1]*r_1[i])
                      +(eta0-eta[i][j][k])*(dv1[4][1]*r_1[i]+dA11[4][0][1]+dv2[5][1]+dA11[6][1][2]);
        df[6][i][j][k]=Rm*(f[1][i][j][k]*B[1][i][j][k]-f[2][i][j][k]*B[0][i][j][k])
                      +eta[i][j][k]*(dv2[6][0]+dv2[6][1]+dv2[6][2]+r_1[i]*dv1[6][0])
                      +(eta0-eta[i][j][k])*(dv1[4][2]*r_1[i]+dA11[4][0][2]+dA11[5][1][2]+dv2[6][2]); 
-
+       
    if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
 	   {
 	   // пондеромоторная сила
-	  df[1][i][j][k]-= Ha*Ha/Re/Rm*(
-		     -(dv2[6][0]+dv2[6][1]+dv2[6][2])*B[1][i][j][k]
-		     +(dv2[5][0]+dv2[5][1]+dv2[5][2])*B[2][i][j][k])
+		df[1][i][j][k]-= 
+		     -J[2][i][j][k]*B[1][i][j][k]
+		     +J[1][i][j][k]*(B[2][i][j][k]+Ha)
 		     ;
-      df[2][i][j][k]-= Ha*Ha/Re/Rm*(
-		     +(dv2[6][0]+dv2[6][1]+dv2[6][2])*B[0][i][j][k]
-		     -(dv2[4][0]+dv2[4][1]+dv2[4][2])*B[2][i][j][k])
+		df[2][i][j][k]-= 
+		     +J[2][i][j][k]*B[0][i][j][k]
+		     -J[0][i][j][k]*(B[2][i][j][k]+Ha)
 		     ;
-      df[3][i][j][k]-= Ha*Ha/Re/Rm*(
-		     -(dv2[5][0]+dv2[5][1]+dv2[5][2])*B[0][i][j][k]
-		     +(dv2[4][0]+dv2[4][1]+dv2[4][2])*B[1][i][j][k])
+		df[3][i][j][k]-= 
+		     -J[1][i][j][k]*B[0][i][j][k]
+		     +J[0][i][j][k]*B[1][i][j][k]
 		     ;
 	   }
-      } else df[4][i][j][k] = df[5][i][j][k] = df[6][i][j][k] = 0;
+      }   else df[4][i][j][k] = df[5][i][j][k] = df[6][i][j][k] = 0;
    return;
 }
 
@@ -227,6 +231,7 @@ FILE *inp;
     for(k=0;k<N3+2*ghost;k++)
        {
        if(fread(&tmpf,sizeof(float),1,inp)<1) nrerror("Error in reading velocity",0.,(k+100*(j+100*(i+l*100))));
+	   if(l==0) continue;
        if(i>=n[0] && i<n[0]+m1 &&
           j>=n[1] && j<n[1]+m2 &&
           k>=n[2] && k<n[2]+m3)
@@ -576,42 +581,19 @@ void  init_conditions()
            pr_neighbour[1]!=-1 && i>=mm1  ||
            pr_neighbour[4]!=-1 && k<ghost ||
            pr_neighbour[5]!=-1 && k>=mm3) setType(&node[i][k],NodeClued);
-       }
+       }			  
+	   Rfl=1;
    for(i=0;i<m1;i++)
    for(k=0;k<m3;k++)
        {
         r1 = coordin(i,0);   z1 = coordin(k,2);
         rho=sqrt(r1*r1 + z1*z1);
      //regions
-        if(rho>Rsh) setType(&node[i][k],NodeVacuum);
-          else if(rho>Rfl) setType(&node[i][k],NodeShell);
-          else             setType(&node[i][k],NodeFluid);
-     //for hydrodynamics
-        if(isType(node[i][k],NodeFluid))
-            { if(isType(node[i][k],NodeGhostFluid)) node[i][k] -= NodeGhostFluid;
-              for(l=-ghost1;l<=ghost1;l++)
-              for(ll=-ghost1;ll<=ghost1;ll++)
-                   if(i+l>=0&&i+l<m1 && k+ll>=0&&k+ll<m3)
-                        if(!isType(node[i+l][k+ll],NodeFluid))
-                          setType(&node[i+l][k+ll],NodeGhostFluid);
-                        else;
-                   else if(!isType(node[i][k],NodeClued)) nmessage("out of boundary",i,k);
-            }
+        refr_f[i][k] = i;
+        refz_f[i][k] = k;
+        if(i+n[0]<ghost)  {setType(&node[i][k],NodeGhostFluid);
+                           refr_f[i][k] = i;}
 
-        refr_f[i][k] = r1*(2*Rfl/rho-1);      //physical coordinates
-        refz_f[i][k] = z1*(2*Rfl/rho-1);
-        refr_f[i][k] = (refr_f[i][k]+R)/dx[0]-0.5-n[0]+ghost;   // simulation indices
-        refz_f[i][k] = (refz_f[i][k]+R)/dx[2]-0.5-n[2]+ghost;
-        if(fabs(refr_f[i][k]-i)<1 && fabs(refz_f[i][k]-k)<1 && !isType(node[i][k],NodeFluid))
-                 { setType(&node[i][k],NodeFluid);
-                   if(isType(node[i][k],NodeGhostFluid)) node[i][k] -= NodeGhostFluid;
-                   for(l=-ghost1;l<=ghost1;l++)
-                     { if(i+l>=0&&i+l<m1) if(!isType(node[i+l][k],NodeFluid))
-                                              setType(&node[i+l][k],NodeGhostFluid);
-                       if(k+l>=0&&k+l<m3) if(!isType(node[i][k+l],NodeFluid))
-                                              setType(&node[i][k+l],NodeGhostFluid);
-                     }
-                  }
      //for magnetism
         refr_m[i][k] = i;
         refz_m[i][k] = k;
@@ -628,6 +610,11 @@ void  init_conditions()
         if(!isType(node[i][k],NodeGhostMagn)) setType(&node[i][k],NodeMagn);
 //                                         else node[i][k] -= NodeGhostMagn;
                                           //deleting fictive cells-for constant outside field
+		if(isType(node[i][k],NodeMagn)) setType(&node[i][k],NodeFluid);
+		else setType(&node[i][k],NodeGhostFluid);
+		refr_f[i][k] = refr_m[i][k];
+		refz_f[i][k] = refz_m[i][k];
+
      //for divertor's blade
 	sinth[i][k]=r1/rho;
     costh[i][k]=z1/rho;
@@ -656,13 +643,13 @@ if(!goon) {
       if(isType(node[i][k],NodeFluid)) {
         f[0][i][j][k]=1;
         f[1][i][j][k]=0*Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
-                       (Rfl*Rfl-pow(coordin(i,0),2) - pow(coordin(k,2),2))/Rfl/Rfl;
+                       (Rfl*Rfl-0*pow(coordin(i,0),2) - pow(coordin(k,2),2))/Rfl/Rfl;
         f[2][i][j][k]=NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl)
 		      + (parabole+0*Noise*((double)rand()-RAND_MAX/2)/RAND_MAX)*
-                       (Rfl*Rfl-pow(coordin(i,0),2) - pow(coordin(k,2),2))/Rfl/Rfl;
+                       (Rfl*Rfl-0*pow(coordin(i,0),2) - pow(coordin(k,2),2))/Rfl/Rfl;
         f[3][i][j][k]=NoiseNorm*sin(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl)
                       + 0*Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
-                       (Rfl*Rfl-pow(coordin(i,0),2) - pow(coordin(k,2),2))/Rfl/Rfl;
+                       (Rfl*Rfl-0*pow(coordin(i,0),2) - pow(coordin(k,2),2))/Rfl/Rfl;
 //        f[1][i][j][k]=f[2][i][j][k]=f[3][i][j][k]=0;
         nut[i][j][k]=(
 //        (0.39+14.8*exp(-2.13*pow(2*coordin(k,2)-l3,2)))*0.1*0
@@ -690,7 +677,7 @@ if(!goon) {
                      }
       }
 //   struct_func(f,2,2,3);
-   fill_velocity(0.3, f);
+//   fill_velocity(0.3, f);
    nmessage("Arrays were filled with initial values - calculation from beginning",-1,-1);
    } else nmessage("Arrays were filled with initial values - calculation is continuing",t_cur,count);
 }
@@ -733,7 +720,7 @@ if(!goon) {                       //reading sizes from file when continuing
   n1 = floor((double)N1/pp[0]);     n[0] = n1*pr[0] + min(pr[0],N1-pp[0]*n1);    if(pr[0]<N1-pp[0]*n1) n1++;              // dimensions of subregion
   n2 = floor((double)N2/pp[1]);     n[1] = n2*pr[1] + min(pr[1],N2-pp[1]*n2);    if(pr[1]<N2-pp[1]*n2) n2++;
   n3 = floor((double)N3/pp[2]);     n[2] = n3*pr[2] + min(pr[2],N3-pp[2]*n3);    if(pr[2]<N3-pp[2]*n3) n3++;
-if(rank==size-1)   {
+   if(rank==size-1) {
    iop=fopen(NameStatFile,"w");
    fprintf(iop,"%d\n",rank);
    fprintf(iop,"%d\t%d\t%d\n",pr[0],pr[1],pr[2]);
@@ -751,7 +738,9 @@ if(rank==size-1)   {
    mm3 = ghost+n3;
 
   pr_neighbour[0] = (pr[0]>0       ? rank-1           :-1);                           // neighbours of subregion
+  if(pr[0]==0)      pr_neighbour[0] = rank+pp[0]-1;            //periodic conditions
   pr_neighbour[1] = (pr[0]<pp[0]-1 ? rank+1           :-1);
+  if(pr[0]==pp[0]-1) pr_neighbour[1] = rank-pp[0]+1;            //periodic conditions
   pr_neighbour[2] = (pr[1]>0       ? rank-pp[0]       :-1);
   if(pr[1]==0)       pr_neighbour[2] = rank+pp[0]*(pp[1]-1);     //periodic conditions
   pr_neighbour[3] = (pr[1]<pp[1]-1 ? rank+pp[0]       :-1);
