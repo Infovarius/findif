@@ -312,7 +312,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
    Master printf("number of runge-kutt calculations=%d\n",enter);
 
  // -------------------- average profile of velocity ---------------------
-         for(i=0;i<N3;i++)    vfi[i]=0;
+/*         for(i=0;i<N3;i++)    vfi[i]=0;
          for(i=0;i<N3;i++) totvfi[i]=0;
          for(i=0;i<m1;i++)
                for(k=0;k<m3;k++)
@@ -324,7 +324,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
                  fprintf(fv,"{%8.8f}\t",t_cur);
                  print_array1d(fv,totvfi,0,N3);
                  fileclose(fv);
-                }
+                }*/
 }
 
 void dump(double ***f1,double **nu,double t_cur,long count)

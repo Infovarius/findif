@@ -36,13 +36,13 @@ void pde(double t, double ***f, double ***df)
      if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
      {
       for(m=0;m<3;m++ for2D(m)) {
-         dp1[m]=dr(f[0],i,k,m+1,0,dx[m],ghost, approx);
-         dn1[m]=dr(nut,i,k,m+1,0,dx[m],ghost, approx);
+         dp1[m]=dr(f[0],i,k,m+1,0,dx[m],(approx-1)/2, approx);
+         dn1[m]=dr(nut,i,k,m+1,0,dx[m],(approx-1)/2, approx);
       }
       for(l=1;l<=3;l++) {
        for(m=0;m<3;m++ for2D(m)) {
-         dv1[l][m]=dr(f[l],i,k,m+1,0,dx[m],ghost, approx);
-         dv2[l][m]=dr(f[l],i,k,m+1,1,dx[m]*dx[m],ghost, approx);
+         dv1[l][m]=dr(f[l],i,k,m+1,0,dx[m],(approx-1)/2, approx);
+         dv2[l][m]=dr(f[l],i,k,m+1,1,dx[m]*dx[m],(approx-1)/2, approx);
          }
       }
 
@@ -246,6 +246,7 @@ void  init_conditions()
 {
    int i,k,l;
    double r, rho, r1, z1;
+   int ghost1=(approx-1)/2;
 //   double k1,k2,k3;
 
 // -------- filling of nodes' types +reflections rel circle + nut ---------------
@@ -269,7 +270,7 @@ void  init_conditions()
      //for hydrodynamics
         if(isType(node[i][k],NodeFluid))
             { if(isType(node[i][k],NodeGhostFluid)) node[i][k] -= NodeGhostFluid;
-              for(l=-ghost;l<=ghost;l++)
+              for(l=-ghost1;l<=ghost1;l++)
                      { if(i+l>=0&&i+l<m1) if(!isType(node[i+l][k],NodeFluid))
                                               setType(&node[i+l][k],NodeGhostFluid);
                        if(k+l>=0&&k+l<m3) if(!isType(node[i][k+l],NodeFluid))
@@ -285,7 +286,7 @@ void  init_conditions()
            isType(node[i][k],NodeGhostFluid))
                  { setType(&node[i][k],NodeFluid);
                    if(isType(node[i][k],NodeGhostFluid)) node[i][k] -= NodeGhostFluid;
-                   for(l=-ghost;l<=ghost;l++)
+              for(l=-ghost1;l<=ghost1;l++)
                      { if(i+l>=0&&i+l<m1) if(!isType(node[i+l][k],NodeFluid))
                                              setType(&node[i+l][k],NodeGhostFluid);
                        if(k+l>=0&&k+l<m3) if(!isType(node[i][k+l],NodeFluid))
