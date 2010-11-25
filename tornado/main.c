@@ -1,6 +1,8 @@
 #define LEVEL
 
 #include "head.h"
+#include "time.h"
+
 
 int main(int argc, char** argv)
 {
@@ -15,6 +17,7 @@ int main(int argc, char** argv)
  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
  MPI_Comm_size(MPI_COMM_WORLD,&size);
 
+  srand(rank);
   NameMessageFile = "message.dat";
   NameErrorFile = "error.err";
   NameNuFile = "nut.dat";
@@ -52,9 +55,9 @@ int main(int argc, char** argv)
        else { init_parallel();  operate_memory(1);}
    fileclose(fd);
 
-   dx[0]=2*R/N1;
+   dx[0]=R/N1;
    dx[1]=lfi/N2;
-   dx[2]=2*R/N3;
+   dx[2]=H/N3;
    init_conditions();
 
 //--------------------------------------
@@ -122,6 +125,9 @@ int main(int argc, char** argv)
 	    }
 	if (SnapStep!=0 && count%SnapStep==0)
 	    snapshot(f1,nut,t_cur,count);
+        if (SnapDelta>5*dtdid && floor(t_cur/SnapDelta)>floor((t_cur-dtdid)/SnapDelta))
+            snapshot(f1,nut,t_cur,count);
+
 	for(l=0;l<nvar;l++)
 	for(i=0;i<m1;i++)
 	for(j=0;j<m2;j++)

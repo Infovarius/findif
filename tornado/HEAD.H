@@ -26,7 +26,7 @@ enum  TypeNodes {NodeUnknown=0,NodeClued=1,
                                /*NodeFluid=8,*/ NodeGhostFluid=16};       // for hydrodynamics
 LEVEL double ***averf;
 LEVEL double *totvfi, *vfi;
-LEVEL double Gamma, lfi, R, rc, Re;
+LEVEL double Gamma, lfi, H, R, Gr, Ta;
 
 LEVEL int    m1, m2, m3, mm1, mm2, mm3, n1, n2, n3, N1, N2, N3, Ns,
              approx, ghost, nvar;
@@ -47,6 +47,7 @@ LEVEL int goon;                       // continue calculation
 LEVEL int CheckStep;  //each CheckStep divergence of program is checking
 LEVEL int OutStep;    //each OutStep result is printing
 LEVEL int SnapStep;   //each SnapStep snapshot is done
+LEVEL double SnapDelta;  //each SnapDelta of simulation time snapshot is done
 LEVEL int VarStep;    //each VarStep step in RungeKutta varies
 LEVEL int num_dump;
 LEVEL long numlog;
@@ -59,7 +60,7 @@ LEVEL long numlog;
 LEVEL int rank, size;
 LEVEL MPI_Request SendRequest[256],RecvRequest[256];
 LEVEL MPI_Status statuses[256];
-LEVEL double *buf_send[6], *buf_recv[6], buf_size[3];    //6=2*(nvar-1)
+LEVEL double *buf_send[6], *buf_recv[6], buf_size[3];    //6=2*3(D)
 LEVEL int pr_neighbour[6],pp[3],n[3];                    //3D
 LEVEL int pr[3];                                         //3D
 //void init_parallel();                       in file pde.c

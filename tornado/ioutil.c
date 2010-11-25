@@ -48,7 +48,7 @@ char str[256],*pstr;
  do fgets(str,256,inp); while(strchr(str,'|')==NULL);
  if(strchr(str,'|')==NULL) return;
  if(sscanf(str,"%lf",param)==0) nrerror("Input of parameter error",-1,-1);
- pstr=strtok(str,"|");
+ strtok(str,"|");
  pstr=strtok((char *)NULL,"|");
  Master printf("%g\t->\t%s",*param,pstr);
 }
@@ -61,41 +61,20 @@ double d;
  if(argc<2 || (iop=fopen(argv[1],"r"))==NULL) //no ini file
     {
      nrerror("Start from no ini file!",-1,-1);
-     Re=10.;
-     lfi=3.;
-     rc=3.;
-     R=1.;
-     parabole=0.;
-     Noise=0.;
-     NoiseNorm=0.;
-     UpLimit=10.;
-     N1=10;
-     N2=10;
-     N3=10;
-     nvar=4;
-     approx=7;                    //width of approximation sample
-     *dtnext=1e-3;
-     Ns=15;
-     maschtab=1e6;
-     lambda = 2.0;
-     max_okr = 3;
-     OutStep = (CheckStep=100)/1;
-     VarStep = 0;
-     SnapStep = 100;
-     Ttot=1.;
-     }
+    }
     else {
-      if(fscanf(iop,"%d",&ver)<1 || ver!=3) nrerror("parameters' file has wrong version",0,0);
-      read_token(iop,&lfi);
-      read_token(iop,&rc);
+      if(fscanf(iop,"%d",&ver)<1 || ver!=1) nrerror("parameters' file has wrong version",0,0);
+      read_token(iop,&lfi);        //geometry
       read_token(iop,&R);
-      read_token(iop,&Re);
+      read_token(iop,&H);
+      read_token(iop,&Gr);         //hydrodynamical
+      read_token(iop,&Ta);
       read_token(iop,&parabole);
       read_token(iop,&Noise);
       read_token(iop,&NoiseNorm);
       read_token(iop,&UpLimit);
       if(ver>=2) read_token(iop,&chimax);
-      read_token(iop,&d);         N1 = (int)d;
+      read_token(iop,&d);         N1 = (int)d;   //scheme
       read_token(iop,&d);         N2 = (int)d;
       read_token(iop,&d);         N3 = (int)d;
       read_token(iop,&d);         nvar = (int)d;
@@ -105,8 +84,9 @@ double d;
       read_token(iop,&maschtab);
       read_token(iop,&lambda);
       read_token(iop,&d);         max_okr = (int)d;
-      read_token(iop,&d);         OutStep = (int)d;
+      read_token(iop,&d);         OutStep = (int)d;    //output
       read_token(iop,&d);         SnapStep = (int)d;
+      read_token(iop,&SnapDelta);
       read_token(iop,&d);         CheckStep = (int)d;
       read_token(iop,&d);         VarStep = (int)d;
       read_token(iop,&Ttot);
@@ -258,7 +238,7 @@ for(l=0;l<=2;l++)
   for(i=0;i<m1;i++)
     for(k=0;k<m3;k++)
        if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
-           TotalEnergy += fabs(1+coordin(i,0)*rc)*pow(averf[l][i][k],2.);
+           TotalEnergy += fabs(coordin(i,0))*pow(averf[l][i][k],2.);
 TotalEnergy += 1.;   //if zero average field
 razlet = (PulsEnergy/TotalEnergy>UpLimit);
 }
@@ -311,8 +291,8 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
 //     Master printf("%d  maxf=%e(loc=%e) \tmaxdf=%e(loc=%e) \tmax(df/f)=%e(loc=%e)\n",
 //                     l,      totmf[0],mf[0],    totmf[1],mf[1],       totmf[2],mf[2]);
        Master printf("%d  maxf=%e \tmaxdf=%e \tmax(df/f)=%e\n",
-                       l,      totmf[0],  totmf[1],      totmf[2]);
-       Master fprintf(fen,"\t %e \t %e",totmf[0],totmf[1]);
+		       l,      totmf[0],  totmf[1],      totmf[2]);
+       Master fprintf(fen,"\t %e \t %e",f1[3][ghost+3][ghost][ghost+N3/2],f1[3][mm1-2][ghost][ghost+N3/2]);
        }
   // --------------- quadratic norma of arrays --------------------------------------
    for(l=0;l<nvar;l++) {
@@ -321,7 +301,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
         for(j=ghost;j<m2;j++)
          for(k=0;k<mm3;k++)
          if(isType(node[i][k],NodeFluid))
-            mf[0] += fabs(1+coordin(i,0)*rc)*pow(f1[l][i][j][k],2);
+            mf[0] += fabs(coordin(i,0))*pow(f1[l][i][j][k],2);
        MPI_Allreduce(&mf, &totmf, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
        Master fprintf(fen,"\t %e",totmf[0]/N1/N2/N3);
        }
@@ -331,7 +311,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
    Master printf("number of runge-kutt calculations=%d\n",enter);
 
  // -------------------- average profile of velocity ---------------------
-         for(i=0;i<N3;i++)    vfi[i]=0;
+/*         for(i=0;i<N3;i++)    vfi[i]=0;
          for(i=0;i<N3;i++) totvfi[i]=0;
          for(i=0;i<m1;i++)
 	    for(j=ghost;j<mm2;j++)
@@ -344,7 +324,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
                  fprintf(fv,"{%8.8f}\t",t_cur);
                  print_array1d(fv,totvfi,0,N3);
                  fileclose(fv);
-                }
+                }*/
 }
 
 void dump(double ****f1,double ***nu,double t_cur,long count)
@@ -363,7 +343,8 @@ int tag=1,v;
  Master fprintf(fd,"Number of points along x = %d\n",N1);
  Master fprintf(fd,"Number of points along y = %d\n",N2);
  Master fprintf(fd,"Number of points along z = %d\n",N3);
- Master fprintf(fd,"Reynolds number = %lf\n",Re);
+ Master fprintf(fd,"Grassgof number = %lf\n",Gr);
+// Master fprintf(fd,"Taylor number = %lf\n",Ta);
 
  for(v=0;v<nvar;v++)
     print_array3d(fd,f1[v],0,m1,0,m2,0,m3);
@@ -395,16 +376,17 @@ FILE *fd;
  Master fprintf(fd,"Number of points along x = %d\n",N1);
  Master fprintf(fd,"Number of points along y = %d\n",N2);
  Master fprintf(fd,"Number of points along z = %d\n",N3);
- Master fprintf(fd,"Reynolds number = %lf\n",Re);
+ Master fprintf(fd,"Grassgof number = %lf\n",Gr);
+// Master fprintf(fd,"Taylor number = %lf\n",Ta);
 
  for(v=0;v<nvar;v++)
     print_array3d(fd,f1[v],0,m1,0,m2,0,m3);
  print_array3d(fd,nu,0,m1,0,m2,0,m3);
  fclose(fd);
-                  
+
  if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
  MPI_Barrier(MPI_COMM_WORLD);
  Master {nmessage("snap is done",t_cur,count);
                    add_control_point(str);}
 }
-												  
+
