@@ -263,7 +263,7 @@ for(i=ghost;i<mm1;i++)
            PulsEnergy+=deviation(f,i,j,k);
            for(l=0;l<=2;l++) averf[l][i][k] += pow(f[l+1][i][j][k],2.);
            }
-for(l=0;l<=2;l++)
+for(l=1;l<=3;l++)
   for(i=0;i<m1;i++)
     for(k=0;k<m3;k++)
        if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
