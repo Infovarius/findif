@@ -118,31 +118,8 @@ void nut_by_flux(double ****f, double ***nut, double dt) //calculating nu_turbul
 {
 int i,j,k,l;
 double koef,r1,z1,rho,tmp;
-/*struct_func(f,2,2,3);
-for(i=0;i<n3;i++)
-    {
-    koef=sqrt(s_func[i][0]/(pow(sha[i][1],2.)+pow(shb[i][1],2.)));
-    sha[i][1] *= koef;
-    shb[i][1] *= koef;
-    koef=sqrt(s_func[i][1]/(pow(sha[i][0],2.)+pow(shb[i][0],2.)));
-    sha[i][0] *= koef;
-    shb[i][0] *= koef;
-    }*/
-/*clrscr();
-for(j=0;j<n3;j++)
-    {
-    printf("%lf  %lf",s_func[j][0],s_func[j][1]);
-    double en;
-    for (i=0,en=0; i<=Ns; i++)
-      en+=sha[j][i]*sha[j][i]+shb[j][i]*shb[j][i];
-    printf("   totEn=%lf\n",en);
-    }  */
-//time_step_shell(dt);
 for(k=0;k<m3;k++)
    {
-/*   double tmp = maschtab*pow(
-           (nl[2]*s_func[k][0] + nl[1]*s_func[k][1] + nl[0]*s_func[k][2])*pow(dx[2],4),
-                         1./3);*/
    for(i=0;i<m1;i++)
      {
      r1 = coordin(i,0);   z1 = coordin(k,2);
@@ -197,7 +174,7 @@ void  boundary_conditions(double ****f, double ***nut)
    z[0]=1; z[1]=z[2]=z[3]=-1; //  влияет на вид гран.условий (-1:жесткие, 1:свободные)
 
   /*============================ divertor =================================*/
-  if(t_cur>-1)                  // divertors are off till t sec
+  if(t_cur<0)                  // divertors are off till t sec
   if(n[1]==0)
   for(i=0;i<m1;i++)
     for(j=ghost;j<=ghost;j++)
@@ -212,7 +189,6 @@ void  boundary_conditions(double ****f, double ***nut)
 	 f[3][i][j][k] = vrho*costh[i][k]-vphi*sinth[i][k]*sin(chi[i][k]);
 	 }
 
-  snapshot(f,nut,0,0);exit(0);
   /*-------------------------------- exchanging of ghosts -------------------------------------*/
 // exchanging in phi-direction - periodical directions first
  if(pr_neighbour[2]>-1)
@@ -297,7 +273,7 @@ void  boundary_conditions(double ****f, double ***nut)
                                putlog(msg_err,numlog++);
                                }    else numlog++;
    req_numS = 0;
-    MPI_Waitall(req_numR,RecvRequest,statuses);
+   MPI_Waitall(req_numR,RecvRequest,statuses);
   if(req_numR && statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
@@ -510,6 +486,39 @@ static double kf7[2][7][7]={{{-49./20.0, 6.0, -15./2.0, 20./3.0, -15./4.0, 6./5.
 							{137./180.0, -49./60.0, -17./12.0, 47./18.0, -19./12.0, 31./60.0, -13./180.0}, {-13./180.0, 19./15.0, -7./3.0, 10./9.0, 1./12.0, -1./15.0, 1./90.0},
                      {1./90.0, -3./20.0, 3./2.0, -49./18.0, 3./2.0, -3./20.0, 1./90.0}, {1./90.0, -1./15.0, 1./12.0, 10./9.0, -7./3.0, 19./15.0, -13./180.0},
                      {-13./180.0, 31./60.0, -19./12.0, 47./18.0, -17./12.0, -49./60.0, 137./180.0}, {137./180.0, -27./5.0, 33./2.0, -254./9.0, 117./4.0, -87./5.0, 203./45.0}}};
+
+double dvv(double ****f, int a, int b, int ii, int jj, int kk, int sh, int sm)
+/* find d(v^a v^b)/dx^a with sum for a */
+{
+double tmp;
+switch (sm) {
+     case 7 :  switch (a) {
+                  case 1 : tmp = kf7[0][sh][6]*(f[a][ii+3][jj][kk]*f[b][ii+3][jj][kk]-f[a][ii-3][jj][kk]*f[b][ii-3][jj][kk])
+                               + kf7[0][sh][5]*(f[a][ii+2][jj][kk]*f[b][ii+2][jj][kk]-f[a][ii-2][jj][kk]*f[b][ii-2][jj][kk])
+                               + kf7[0][sh][4]*(f[a][ii+1][jj][kk]*f[b][ii+1][jj][kk]-f[a][ii-1][jj][kk]*f[b][ii-1][jj][kk]); break;
+                  case 2 : tmp = kf7[0][sh][6]*(f[a][ii][jj+3][kk]*f[b][ii][jj+3][kk]-f[a][ii][jj-3][kk]*f[b][ii][jj-3][kk])
+                               + kf7[0][sh][5]*(f[a][ii][jj+2][kk]*f[b][ii][jj+2][kk]-f[a][ii][jj-2][kk]*f[b][ii][jj-2][kk])
+                               + kf7[0][sh][4]*(f[a][ii][jj+1][kk]*f[b][ii][jj+1][kk]-f[a][ii][jj-1][kk]*f[b][ii][jj-1][kk]); break;
+                  case 3 : tmp = kf7[0][sh][6]*(f[a][ii][jj][kk+3]*f[b][ii][jj][kk+3]-f[a][ii][jj][kk-3]*f[b][ii][jj][kk-3])
+                               + kf7[0][sh][5]*(f[a][ii][jj][kk+2]*f[b][ii][jj][kk+2]-f[a][ii][jj][kk-2]*f[b][ii][jj][kk-2])
+                               + kf7[0][sh][4]*(f[a][ii][jj][kk+1]*f[b][ii][jj][kk+1]-f[a][ii][jj][kk-1]*f[b][ii][jj][kk-1]); break;
+                  }; break;
+     case 3 :  switch (a) {
+                  case 1 : tmp = kf3[0][sh][2]*(f[a][ii+1][jj][kk]*f[b][ii+1][jj][kk]-f[a][ii-1][jj][kk]*f[b][ii-1][jj][kk]); break;
+                  case 2 : tmp = kf3[0][sh][2]*(f[a][ii][jj+1][kk]*f[b][ii][jj+1][kk]-f[a][ii][jj-1][kk]*f[b][ii][jj-1][kk]); break;
+                  case 3 : tmp = kf3[0][sh][2]*(f[a][ii][jj][kk+1]*f[b][ii][jj][kk+1]-f[a][ii][jj][kk-1]*f[b][ii][jj][kk-1]); break;
+                  }; break;
+     case 5 :  switch (a) {
+                  case 1 : tmp = kf5[0][sh][4]*(f[a][ii+2][jj][kk]*f[b][ii+2][jj][kk]-f[a][ii-2][jj][kk]*f[b][ii-2][jj][kk])
+                               + kf5[0][sh][3]*(f[a][ii+1][jj][kk]*f[b][ii+1][jj][kk]-f[a][ii-1][jj][kk]*f[b][ii-1][jj][kk]); break;
+                  case 2 : tmp = kf5[0][sh][4]*(f[a][ii][jj+2][kk]*f[b][ii][jj+2][kk]-f[a][ii][jj-2][kk]*f[b][ii][jj-2][kk])
+                               + kf5[0][sh][3]*(f[a][ii][jj+1][kk]*f[b][ii][jj+1][kk]-f[a][ii][jj-1][kk]*f[b][ii][jj-1][kk]); break;
+                  case 3 : tmp = kf5[0][sh][4]*(f[a][ii][jj][kk+2]*f[b][ii][jj][kk+2]-f[a][ii][jj][kk-2]*f[b][ii][jj][kk-2])
+                               + kf5[0][sh][3]*(f[a][ii][jj][kk+1]*f[b][ii][jj][kk+1]-f[a][ii][jj][kk-1]*f[b][ii][jj][kk-1]); break;
+                  }; break;
+    }
+  return tmp;
+}
 
 double dr(double ***m, int ii, int jj, int kk, int dir, int or, double dx, int sh,  int sm)
 /*        matrix     , point                 , direct, order , differ   , shift , sample */

@@ -47,7 +47,7 @@ int main(int argc, char** argv)
       }
 
    init_param(argc,argv,&dtnext);       // initialization of parameters
-   Gamma=1e-2;
+   Gamma=1e-4;
    ghost=(approx-1)/2;                  //radius of approx sample
    t_cur=0;
    count=0; enter = 0;
@@ -91,6 +91,7 @@ int main(int argc, char** argv)
             }
 //--------------------------------------
 
+
    boundary_conditions(f,nut);
    
 //   if(!goon)  dump(f,nut,t_cur,count);
@@ -109,7 +110,7 @@ int main(int argc, char** argv)
 	dttry=dtnext;
 	timestep(f, df, nut, t_cur, f1, dttry, &dtdid, &dtnext);
 //	nut_by_flux(f1,nut,dtdid);
-     gaussian(f1,f,1);
+//     gaussian(f1,f,0);
 	t_cur+=dtdid;
 	count++;
         if(t_cur >= Ttot) break;
