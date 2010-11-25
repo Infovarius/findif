@@ -79,7 +79,7 @@ int error=0, tmpr;
 int i,j,k,l;
 float tmpf; double tmpd; int tmpi;  char tmpc;
 FILE *inp;
-/*       for(i=0;i<m1;i++)
+       for(i=0;i<m1;i++)
          for(j=0;j<m2;j++)
             for(k=0;k<m3;k++)
             if(isType(node[i][k],NodeFluid))
@@ -95,8 +95,9 @@ FILE *inp;
             f[2][i][j][k] = vphi;
             f[3][i][j][k] = vrho*costh[i][k]-vth*sinth[i][k];
             }    else f[1][i][j][k] = f[2][i][j][k] = f[3][i][j][k] = 0;
-*/
+/*
  inp = fileopen("velocity.snp",-1);
+
  read_tilleq(inp,'=','y');   if(fscanf(inp,"%lf",&tmpd)==0) error=1; //	current time
  read_tilleq(inp,'=','y');   if(fscanf(inp,"%ld",&tmpd)==0) error=1; // current iteration
  read_tilleq(inp,'=','y');   if(fscanf(inp,"%c%d%c%d%c%d%c",&tmpc,&pp[0],&tmpc,&pp[1],&tmpc,&pp[2],&tmpc)<7) error=1; // number of processors along axes
@@ -124,8 +125,9 @@ FILE *inp;
                 }
        }
  }
-  fileclose(inp);            
-}
+ fileclose(inp);
+ */ 
+ }
 
 double deviation(double ****f,int i,int j,int k)
 {
@@ -435,7 +437,7 @@ void  init_conditions()
         costh[i][k]=z1/rho;
        }
 
-   for(i=0;i<m1;i++) { r_1[i] = rc/(rc*(dx[0]*(i-ghost+0.5+n[0])-R)+1); r_2[i] = r_1[i]*r_1[i]; } 
+   for(i=0;i<m1;i++) { r_1[i] = rc/(rc*coordin(i,0)+1); r_2[i] = r_1[i]*r_1[i]; }
    for(i=0;i<m1;i++)
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
@@ -527,17 +529,13 @@ if(!goon) {                       //reading sizes from file when continuing
   n1 = floor((double)N1/pp[0]);     n[0] = n1*pr[0] + min(pr[0],N1-pp[0]*n1);    if(pr[0]<N1-pp[0]*n1) n1++;              // dimensions of subregion
   n2 = floor((double)N2/pp[1]);     n[1] = n2*pr[1] + min(pr[1],N2-pp[1]*n2);    if(pr[1]<N2-pp[1]*n2) n2++;
   n3 = floor((double)N3/pp[2]);     n[2] = n3*pr[2] + min(pr[2],N3-pp[2]*n3);    if(pr[2]<N3-pp[2]*n3) n3++;
-    {
+if(rank==size-1)   {
    iop=fopen(NameStatFile,"w");
    fprintf(iop,"%d\n",rank);
    fprintf(iop,"%d\t%d\t%d\n",pr[0],pr[1],pr[2]);
    fprintf(iop,"%d\t%d\t%d\n",pp[0],pp[1],pp[2]);
    fprintf(iop,"%d\t%d\t%d\n",n[0],n[1],n[2]);
    fprintf(iop,"%d\t%d\t%d\n",n1,n2,n3);
-   for(i=0;i<6;i++)
-     fprintf(iop,"%d ",pr_neighbour[i]);
-   fprintf(iop,"\n");
-   fileclose(iop);
        }
    if(n1<ghost || n2<ghost || n3<ghost) nrerror("Too small mesh or incorrect number of processes",0,0);
 
@@ -566,7 +564,13 @@ if(!goon) {                       //reading sizes from file when continuing
    buf_send[j+2*i] = alloc_mem_1f(buf_size[i]);
    buf_recv[j+2*i] = alloc_mem_1f(buf_size[i]);
   }
+if(rank==size-1) {
+  for(i=0;i<6;i++)
 
+   fprintf(iop,"%d ",pr_neighbour[i]);
+   fprintf(iop,"\n");
+   fileclose(iop);
+   }
 }
 
 static double kf3[2][3][3]={{{-3./2.0, 2.0, -1./2.0}, {-1./2.0, 0.0, 1./2.0}, {1./2.0, -2.0, 3./2.0}},

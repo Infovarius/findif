@@ -7,6 +7,7 @@
 int main(int argc, char** argv)
 {
    double dttry, dtdid, dtnext, tmp,tmpT, time_old;
+   char str[200];
    int i,j,k,l,tmpC;
    int outed;
    FILE *fd, *ferror;
@@ -34,7 +35,7 @@ int main(int argc, char** argv)
   sprintf(NameDumpFile ,"%s.dmp",fname); NameDumpFile[strl+4] = 0;
   NameStatFile =(char *)calloc(strl+9,sizeof(char));
   sprintf(NameStatFile,"%s_%d.sta",fname,rank); NameStatFile[strl+8] = 0;
-
+nextrc: ;
    Master nmessage("--------------------------------------------------------------------------",-1,-1);
 
 /* ---------------------- reading files and arrays --------------------- */
@@ -99,7 +100,7 @@ int main(int argc, char** argv)
    Master ferror = fileopen(NameErrorFile,abs(goon));
 
    if(CheckStep!=0) check(f);
-   if (OutStep!=0) printing(f,0,t_cur,count,PulsEnergy);
+   if (OutStep!=0) printing(f,0,t_cur,count,TotalEnergy);
 
 /*------------------------ MAIN ITERATIONS -------------------------*/
 
@@ -127,7 +128,7 @@ int main(int argc, char** argv)
                 }
               else boundary_conditions(f1);
             time1=MPI_Wtime();
-            printing(f1,dtdid,t_cur,count,PulsEnergy);
+            printing(f1,dtdid,t_cur,count,TotalEnergy);
             time0=MPI_Wtime();
             timeE1=0;
             }
@@ -150,7 +151,7 @@ int main(int argc, char** argv)
 		//Rm = floor(t_cur/ChangeParamTime+0.5)*DeltaParam-190;
 		if(!outed) { snapshot(f,eta,t_cur,count); outed = 1;}
 //                MPI_Barrier(MPI_COMM_WORLD);
-		tmp = (Rm += DeltaParam);
+		tmp = (Rm /= (1+max(-0.9,DeltaParam*log(TotalEnergy/TotalEnergyOld))));
                 tmpC = count;  tmpT = t_cur;
 			init_param(argc,argv,&dtnext,1);       // initialization of parameters
 
@@ -179,10 +180,13 @@ int main(int argc, char** argv)
 	if(tmpC) dump(f,nut,t_cur,count);
    } // end while
 
-   printing(f,dtdid,t_cur,count,PulsEnergy);
+   printing(f,dtdid,t_cur,count,TotalEnergy);
    if(!outed) snapshot(f,eta,t_cur,count);
    if(rank==0) add_control_point("END");
 
+sprintf(str,"energy(0.%d).dat",100*rc);
+rename("energy.dat",str);
+if((rc += 0.05) < 0.6) {Master nmessage("rc was changed to",rc,count); goto nextrc;}
    Master fileclose(ferror);
 
 	MPI_Barrier(MPI_COMM_WORLD);

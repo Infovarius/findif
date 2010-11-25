@@ -46,7 +46,7 @@ LEVEL double time0, time1, timeE0, timeE1, timeT;
 
 LEVEL long enter;
 LEVEL char razlet;
-LEVEL double TotalEnergy, PulsEnergy;
+LEVEL double TotalEnergy, TotalEnergyOld;
 
 LEVEL int goon;                       // continue calculation
 LEVEL int CheckStep;  //each CheckStep divergence of program is checking
