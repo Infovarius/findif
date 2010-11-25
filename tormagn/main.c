@@ -61,7 +61,7 @@ int main(int argc, char** argv)
 
 //--------------------------------------
   Master {
-      fd=fileopen("coord",rank);
+      fd=fileopen("coord",0);
       for(i=0;i<N1+2*ghost;i++) fprintf(fd,"%e ",coordin(i,0));
       fprintf(fd,"\n");
       for(i=0;i<N2+2*ghost;i++) fprintf(fd,"%e ",coordin(i,1));
@@ -71,7 +71,7 @@ int main(int argc, char** argv)
      }
 //--------------------------------------
  if(!goon) {
-    if(rank!=0) MPI_Recv("",0,MPI_CHAR,rank-1,1,MPI_COMM_WORLD,statuses);
+    if(rank!=0) MPI_Recv(fname,0,MPI_CHAR,rank-1,1,MPI_COMM_WORLD,statuses);
 
  fd=fileopen("node",rank);
 
@@ -84,20 +84,15 @@ int main(int argc, char** argv)
  print_array2d(fd,refz_m,0,m1,0,m3);
  fileclose(fd);
 
- if(rank!=size-1) MPI_Send("",0,MPI_CHAR,rank+1,1,MPI_COMM_WORLD);
+ if(rank!=size-1) MPI_Send(fname,0,MPI_CHAR,rank+1,1,MPI_COMM_WORLD);
              else nmessage("nodes has been dumped",t_cur,count);
             }
 //--------------------------------------
-
-   putlog("before",1);
+   MPI_Barrier(MPI_COMM_WORLD);
    fill_velocity(0.3, f);    // time=0.3 for amplitude~1
-   putlog("velocity1",1);
    fill_velocity(0.3, f1);   // additional array
-   putlog("velocity2",2);
    boundary_conditions(f);
-   putlog("bc",3);
    if(!goon)  dump(f,eta,t_cur,count);
-   exit(0);
    time_begin = MPI_Wtime();
    if(!goon) Master nmessage("work has begun",0,0);
        else Master nmessage("work continued",t_cur,count);
@@ -115,6 +110,7 @@ int main(int argc, char** argv)
         timestep(f, df, t_cur, f1, dttry, &dtdid, &dtnext);
   //      nut_by_flux(f,dtdid);
         t_cur+=dtdid;
+		time_old = time_now;
         count++;
         if(Ttot!=0 && t_cur >= Ttot) break;
         if (CheckStep!=0 && count%CheckStep==0)

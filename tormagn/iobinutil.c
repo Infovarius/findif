@@ -12,12 +12,14 @@ FILE *fileopen(const char *x, int mode)  //opening of file to ff
 {
 FILE *ff;
 char* s_mode;
+char msg[100];
 if(mode>0) s_mode="ab";
 if(mode<0) s_mode="rb";
 if(mode==0) s_mode="wb";
 if ((ff = fopen(x,s_mode))==NULL)
 	 {
-		nrerror ("Can't open file !\n",t_cur,count);
+	    sprintf(msg,"Can't open file '%s'!\n",x);
+		nrerror (msg,t_cur,count);
 		exit(-1);
 	 }
 return(ff);
@@ -50,7 +52,7 @@ char str[256],*pstr;
  if(sscanf(str,"%lf",param)==0) nrerror("Input of parameter error",-1,-1);
  pstr=strtok(str,"|");
  pstr=strtok((char *)NULL,"|");
- if(count==0) Master printf("%g\t->\t%s",*param,pstr);
+ if(!count) printf("%g\t->\t%s",*param,pstr);
 }
 
 void init_param(int argc, char** argv,double *dtnext,int flag)
@@ -87,6 +89,8 @@ double d;
       read_token(iop,&d);         OutStep = (int)d;    //output
       read_token(iop,&d);         SnapStep = (int)d;
       read_token(iop,&SnapDelta);
+      read_token(iop,&DumpInterval);
+      read_token(iop,&d);         DumpKeep = (int)d;
       read_token(iop,&d);         CheckStep = (int)d;
       read_token(iop,&d);         VarStep = (int)d;
       read_token(iop,&Ttot);
@@ -336,8 +340,8 @@ Master printf("time per iteration per node: %g  includes time for exchanging: %g
    for(l=0;l<nvar;l++) {
        mf[0]=mf[1]=mf[2]=0;
        for(i=0;i<m1;i++)
-        for(j=ghost;j<m2;j++)
-         for(k=0;k<mm3;k++)
+        for(j=ghost;j<mm2;j++)
+         for(k=0;k<m3;k++)
          if((l<=3 && isType(node[i][k],NodeFluid) || l>=4&& isType(node[i][k],NodeMagn))
             && !isType(node[i][k],NodeClued))
           {
