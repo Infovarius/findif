@@ -103,6 +103,11 @@ double d;
   else Master nmessage("Parameters were extracted from file",0,0);
       fileclose(iop);
       }
+ 	Gamma=1e-4;
+	ghost=(approx-1)/2+3;                  //radius of approx sample
+	dx[0]=2*R/N1;
+	dx[2]=2*R/N3;
+	p1 = 4/Re;
 }
 
 void read_tilleq(FILE *ffff,char lim, char echo)
@@ -117,7 +122,7 @@ int init_data(void)                 //returns code of error
  int i,j,k,l,tmpr;
  float tmpd;
  char tmpc;	 
- double Re1;		  // prioritet for parameter in snap-file
+ double Re1;		  // priority for parameter in snap-file
 
 	 FILE *inp = fileopen(NameInitFile,-1);
  read_tilleq(inp,'=','n');   if(fscanf(inp,"%lf",&t_cur)==0) error=1;
@@ -259,6 +264,7 @@ FILE *fv,*fnu,*fen,*fkv;
 time_now = MPI_Wtime();
 Master printf("program is working %0.2f seconds\n",time_now-time_begin);
 
+divv = 0;
 for(i=0;i<m1;i++)
       for(k=0;k<m3;k++)
         if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))

@@ -318,12 +318,12 @@ if(!goon) {
 		      + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
 		       (R*R-pow(coordin(i,0),2) - pow(coordin(k,2),2))/R/R;
 	}
-   for(i=0;i<m1;i++)
-   for(k=0;k<m3;k++)
-	nut[i][k]=1./Re;
 //   struct_func(f,2,2,3);
    nmessage("Arrays were filled with initial values - calculation from beginning",-1,-1);
    } else nmessage("Arrays were filled with initial values - calculation is continuing",t_cur,count);
+   for(i=0;i<m1;i++)
+   for(k=0;k<m3;k++)
+	nut[i][k]=1./Re;
 }
 
 void init_parallel()
@@ -380,18 +380,20 @@ if(!goon) {                       //reading sizes from file when continuing
    buf_recv[j+2*i] = alloc_mem_1f(buf_size[i]);
   }
 
-   iop=fopen(NameStatFile,"w");
-   fprintf(iop,"%d\n",rank);
-   fprintf(iop,"%d\t%d\n",pr[0],pr[2]);
-   fprintf(iop,"%d\t%d\n",pp[0],pp[2]);
-   fprintf(iop,"%d\t%d\n",n[0],n[2]);
-   fprintf(iop,"%d\t%d\n",n1,n3);
-   for(i=0;i<6;i++)
-     if(i!=2 && i!=3)
-     fprintf(iop,"%d ",pr_neighbour[i]);
-   fprintf(iop,"\n");
-   fileclose(iop);
-
+  Master
+	  {
+	iop=fopen(NameStatFile,"w");
+	fprintf(iop,"%d\n",rank);
+	fprintf(iop,"%d\t%d\n",pr[0],pr[2]);
+	fprintf(iop,"%d\t%d\n",pp[0],pp[2]);
+	fprintf(iop,"%d\t%d\n",n[0],n[2]);
+	fprintf(iop,"%d\t%d\n",n1,n3);
+	for(i=0;i<6;i++)
+		if(i!=2 && i!=3)
+			fprintf(iop,"%d ",pr_neighbour[i]);
+	fprintf(iop,"\n");
+	fileclose(iop);
+	  }
 }
 
 static double kf3[2][3][3]={{{-3./2.0, 2.0, -1./2.0}, {-1./2.0, 0.0, 1./2.0}, {1./2.0, -2.0, 3./2.0}},
