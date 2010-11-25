@@ -47,7 +47,7 @@ int main(int argc, char** argv)
         goon = strcmp(NameInitFile,"END");
       }
 
-   init_param(argc,argv,&dtnext);       // initialization of parameters
+   init_param(argc,argv,&dtnext,0);       // initialization of parameters
    t_cur=0;
    count=0; enter = 0;
 
@@ -77,10 +77,11 @@ int main(int argc, char** argv)
  print_array2d(fd,refr,0,m1,0,m3);
  print_array2d(fd,refz,0,m1,0,m3);
  fileclose(fd);
-
+         
  if(rank!=size-1) {MPI_Send(&rank,1,MPI_INT,rank+1,rank,MPI_COMM_WORLD); }
              else nmessage("nodes has been dumped",t_cur,count);
             }
+
 //--------------------------------------
 
    boundary_conditions(f,nut);
@@ -124,42 +125,37 @@ int main(int argc, char** argv)
 	     { snapshot(f1,nut,t_cur,count); outed=1; }
 	if (SnapDelta>5*dtdid && floor((t_cur-dtdid)/SnapDelta)<floor(t_cur/SnapDelta))
    	     { snapshot(f1,nut,t_cur,count); outed=1; }
-        ft = f;  f = f1;  f1 = ft;
-        if (count%100==0) {
-//          MPI_Barrier(MPI_COMM_WORLD);
-			tmp=rc;
-          init_param(argc,argv,&dttry);
-			rc=tmp;
-//          MPI_Barrier(MPI_COMM_WORLD);
-        }
-
-        if (ChangeParamTime!=0 && floor((t_cur-dtdid)/ChangeParamTime)<floor(t_cur/ChangeParamTime))
-            {
-		//Rm = floor(t_cur/ChangeParamTime+0.5)*DeltaParam-190;
-		if(!outed) { snapshot(f,nut,t_cur,count); outed = 1;}
-//                MPI_Barrier(MPI_COMM_WORLD);
-			tmp = (rc += DeltaParam);
-                tmpC = count;  tmpT = t_cur;
-		goon = ((fd=fopen(NameCPFile,"r+"))>0);
-		if(goon)
-				{
-				do fscanf(fd,"%s\n",NameInitFile); while (!feof(fd));
-//                        putlog(NameInitFile,ftell(fd));
-			goon = strcmp(NameInitFile,"END");
+	ft = f;  f = f1;  f1 = ft;
+	if (count%100==0) {
+//			MPI_Barrier(MPI_COMM_WORLD);
+			tmp=Re;
+			init_param(argc,argv,&dttry,0);
+			Re=tmp;
+			p1 = 4/Re;
+//			MPI_Barrier(MPI_COMM_WORLD);
 			}
-		init_param(argc,argv,&dtnext);       // initialization of parameters
 
-		if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
-		fileclose(fd);
+	if (ChangeParamTime!=0 && floor((t_cur-dtdid)/ChangeParamTime)<floor(t_cur/ChangeParamTime))
+            {
+			//Rm = floor(t_cur/ChangeParamTime+0.5)*DeltaParam-190;
+			if(!outed) { snapshot(f,nut,t_cur,count); outed = 1;}
+//                MPI_Barrier(MPI_COMM_WORLD);
+
+			tmp = (Re += DeltaParam);
+				tmpC = count;  tmpT = t_cur;
+			init_param(argc,argv,&dtnext,1);       // initialization of parameters
+
+			if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
+			if(strcmp(NameInitFile,"-1")==0) goon = 1;
 
 			count = tmpC;  t_cur = tmpT;  Re = tmp;
-//			p1 = 4/Re;
-		init_conditions();
-		goon = 1;
-            Master nmessage("parameter was changed to",rc,count);
+			init_conditions();
+			p1 = 4/Re;
+			goon = 1;
+            Master nmessage("parameter was changed to",Re,count);
             }
-/*        if(kbhit())
-	     {
+/*	if(kbhit())
+		{
 		switch (getch()) {
 			case 'd' : dump(f,t_cur,count);  break;
 			case 'q' : { dump(f,t_cur,count);
@@ -168,19 +164,19 @@ int main(int argc, char** argv)
                                     }
                         }
               }*/
-   } // end while
+	} // end while
 
-   printing(f1,dtdid,t_cur,count,PulsEnergy);
-   if(!outed) snapshot(f,nut,t_cur,count);
-   if(rank==0) add_control_point("END");
+	printing(f1,dtdid,t_cur,count,PulsEnergy);
+	if(!outed) snapshot(f,nut,t_cur,count);
+	if(rank==0) add_control_point("END");
 
-   Master fileclose(ferror);
+	Master fileclose(ferror);
 
-   if(t_cur>=Ttot&&!razlet) nmessage("work is succesfully done",t_cur,count);
-       else nrerror("this is break of scheme",t_cur,count);
-   MPI_Barrier(MPI_COMM_WORLD);
-   operate_memory(-1);
-   MPI_Finalize();
-   nmessage("mpi_finalize is done",t_cur,count);
+	MPI_Barrier(MPI_COMM_WORLD);
+	operate_memory(-1);
+	if(t_cur>=Ttot&&!razlet) nmessage("work is succesfully done",t_cur,count);
+		else nrerror("this is break of scheme",t_cur,count);
+	MPI_Finalize();
+	nmessage("mpi_finalize is done",t_cur,count);
 return 0;
 }

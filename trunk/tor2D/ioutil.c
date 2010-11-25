@@ -55,17 +55,15 @@ char str[256],*pstr;
  if(!count) printf("%g\t->\t%s",*param,pstr);
 }
 
-void init_param(int argc, char** argv,double *dtnext)
+void init_param(int argc, char** argv,double *dtnext,int flag)
 {
 int ver;
 FILE *iop;
 double d;
  if(argc<2 || (iop=fopen(argv[1],"r"))==NULL) //no ini file
-    {
      nrerror("Start from no ini file!",-1,-1);
-     }
-    else {
-      if(fscanf(iop,"%d",&ver)<1 || ver!=1) nrerror("parameters' file has wrong version",0,0);
+
+ if(fscanf(iop,"%d",&ver)<1 || ver!=1) nrerror("parameters' file has wrong version",0,0);
       read_token(iop,&rc);
       read_token(iop,&R);
       read_token(iop,&Re);
@@ -89,20 +87,25 @@ double d;
       read_token(iop,&ChangeParamTime);
       read_token(iop,&DeltaParam);
       read_token(iop,&d);
-  if(count)
+  if(flag)
      {
       if(d==0)	{
-      		goon = 0;
+      		    goon = 0;
                 strcpy(NameInitFile,"END");
                 }
       else if(d>0)  {
-         	goon = 1;
-                sprintf(NameInitFile,"%s_*_%05d.snp",NameSnapFile,(int)d);
+         	    goon = 1;
+                sprintf(NameInitFile,"%s_%d_%05d.snp",NameSnapFile,size,(int)d);
                 }
+	  else {// without reading (d<0)
+		    goon=0;
+			strcpy(NameInitFile,"-1");
+	  }
      }
-  else Master nmessage("Parameters were extracted from file",0,0);
-      fileclose(iop);
-      }
+  
+  Master if(!count) nmessage("Parameters were extracted from file",0,0);
+  fileclose(iop);
+   
  	Gamma=1e-4;
 	ghost=(approx-1)/2+3;                  //radius of approx sample
 	dx[0]=2*R/N1;
