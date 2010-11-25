@@ -60,39 +60,63 @@ double          dc1=c1-2825.0/27648.0,dc3=c3-18575.0/48384.0,
 enter++;
    /*2rd step*/
    for(l=0;l<nvar;l++)
-   for(i=0;i<m1;i++)
-   for(j=0;j<m2;j++)
-   for(k=0;k<m3;k++)
+   for(i=ghost;i<mm1;i++)
+   for(j=ghost;j<mm2;j++)
+   for(k=ghost;k<mm3;k++)
      if(isType(node[i][k],NodeFluid))
       fout[l][i][j][k] = f[l][i][j][k]+dt*b21*df1[l][i][j][k];
    pde(t+a2*dt,fout, df2);
 
+   err=0;for(l=0;l<nvar;l++)for(i=0;i<m1;i++)for(j=0;j<m2;j++)for(k=0;k<m3;k++)
+     if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
+   {
+      sca = fabs(f[l][i][j][k])+fabs(dt*df1[l][i][j][k])+MinScale;
+      err1 = fabs(dt*df1[l][i][j][k])/sca;
+      err = max(err, err1);
+   }
+
    /*3rd step*/
    for(l=0;l<nvar;l++)
-   for(i=0;i<m1;i++)
-   for(j=0;j<m2;j++)
-   for(k=0;k<m3;k++)
+   for(i=ghost;i<mm1;i++)
+   for(j=ghost;j<mm2;j++)
+   for(k=ghost;k<mm3;k++)
      if(isType(node[i][k],NodeFluid))
       fout[l][i][j][k] = f[l][i][j][k]+dt*(b31*df1[l][i][j][k]+
                                            b32*df2[l][i][j][k]);
    pde(t+a3*dt,fout, df3);
 
+   err=0;for(l=0;l<nvar;l++)for(i=0;i<m1;i++)for(j=0;j<m2;j++)for(k=0;k<m3;k++)
+     if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
+   {
+      sca = fabs(f[l][i][j][k])+fabs(dt*df1[l][i][j][k])+MinScale;
+      err1 = fabs(dt*df1[l][i][j][k])/sca;
+      err = max(err, err1);
+   }
+
    /*4th step*/
    for(l=0;l<nvar;l++)
-   for(i=0;i<m1;i++)
-   for(j=0;j<m2;j++)
-   for(k=0;k<m3;k++)
+   for(i=ghost;i<mm1;i++)
+   for(j=ghost;j<mm2;j++)
+   for(k=ghost;k<mm3;k++)
      if(isType(node[i][k],NodeFluid))
       fout[l][i][j][k] = f[l][i][j][k]+dt*(b41*df1[l][i][j][k]+
                                            b42*df2[l][i][j][k]+
                                            b43*df3[l][i][j][k]);
    pde(t+a4*dt,fout, df4);
 
+   err=0;for(l=0;l<nvar;l++)for(i=0;i<m1;i++)for(j=0;j<m2;j++)for(k=0;k<m3;k++)
+     if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
+   {
+      sca = fabs(f[l][i][j][k])+fabs(dt*df1[l][i][j][k])+MinScale;
+      err1 = fabs(dt*df1[l][i][j][k])/sca;
+      err = max(err, err1);
+   }
+
    /*5th step*/
    for(l=0;l<nvar;l++)
-   for(i=0;i<m1;i++)
-   for(j=0;j<m2;j++)
-   for(k=0;k<m3;k++)
+   for(i=ghost;i<mm1;i++)
+   for(j=ghost;j<mm2;j++)
+   for(k=ghost;k<mm3;k++)
      if(isType(node[i][k],NodeFluid))
       fout[l][i][j][k] = f[l][i][j][k]+dt*(b51*df1[l][i][j][k]+
                                            b52*df2[l][i][j][k]+
@@ -100,11 +124,19 @@ enter++;
                                            b54*df4[l][i][j][k]);
    pde(t+a5*dt,fout, df5);
 
+   err=0;for(l=0;l<nvar;l++)for(i=0;i<m1;i++)for(j=0;j<m2;j++)for(k=0;k<m3;k++)
+     if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
+   {
+      sca = fabs(f[l][i][j][k])+fabs(dt*df1[l][i][j][k])+MinScale;
+      err1 = fabs(dt*df1[l][i][j][k])/sca;
+      err = max(err, err1);
+   }
+
    /*6th step*/
    for(l=0;l<nvar;l++)
-   for(i=0;i<m1;i++)
-   for(j=0;j<m2;j++)
-   for(k=0;k<m3;k++)
+   for(i=ghost;i<mm1;i++)
+   for(j=ghost;j<mm2;j++)
+   for(k=ghost;k<mm3;k++)
      if(isType(node[i][k],NodeFluid))
       fout[l][i][j][k] = f[l][i][j][k]+dt*(b61*df1[l][i][j][k]+
                                            b62*df2[l][i][j][k]+
@@ -116,9 +148,9 @@ enter++;
  /*calculating output matrix and error value*/
    err = 0.0;
    for(l=0;l<nvar;l++)
-   for(i=0;i<m1;i++)
-   for(j=0;j<m2;j++)
-   for(k=0;k<m3;k++)
+   for(i=ghost;i<mm1;i++)
+   for(j=ghost;j<mm2;j++)
+   for(k=ghost;k<mm3;k++)
      if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
    {
       fout[l][i][j][k] = f[l][i][j][k]+dt*(c1*df1[l][i][j][k]+
