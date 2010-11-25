@@ -16,13 +16,14 @@ int main(int argc, char** argv)
  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
  MPI_Comm_size(MPI_COMM_WORLD,&size);
 
+// MPI_Barrier(MPI_COMM_WORLD);
+
   srand(rank);
   NameMessageFile = "message.dat";
   NameErrorFile = "error.err";
-  NameNuFile = "nut.dat";
   NameVFile  = "vv.dat";
   NameEnergyFile = "energy.dat";
-  KaskadVarFile = "kaskvar.dat";
+  MainFlowFile = "torstab.main";
   fname = (argc>1)? argv[1] : argv[0];
   NameSnapFile = fname;
   strl=strlen(fname);
@@ -37,10 +38,12 @@ int main(int argc, char** argv)
    init_param(argc,argv,&dtnext);       // initialization of parameters
    Gamma=1e-4;
    ghost=(approx-1)/2;                  //radius of approx sample
-   t_cur=0;
-   count=0; enter = 0;
 
 /* ---------------------- initialization of arrays --------------------- */
+
+   init_parallel();
+   operate_memory(1);                     // creating arrays
+
    goon = ((fd=fopen(NameCPFile,"r+"))>0);
    if(fd==NULL) { //putlog("File of cp were not opened",goon);
                   Master if((fd=fopen(NameCPFile,"w+"))!=NULL) ;//putlog("File cp was successfully created",1);
@@ -50,14 +53,16 @@ int main(int argc, char** argv)
       { do fscanf(fd,"%s\n",NameInitFile); while (!feof(fd));
         goon = strcmp(NameInitFile,"END");
       }
-   if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
-       else { init_parallel();  operate_memory(1);}
+   if(init_data(MainFlowFile,flow)) nrerror("error of reading main flow",-1,-1);
+   t_cur=0;
+   count=0; enter = 0;
+   precalc();
+   if(goon) {if(init_data(NameInitFile,f)) nrerror("error of reading initial arrays",-1,-1);}
    fileclose(fd);
 
    dx[0]=2*R/N1;
    dx[1]=lfi/N2;
    dx[2]=2*R/N3;
-   p1 = 4/Re*rc;
 
    init_conditions();
 
@@ -89,7 +94,7 @@ int main(int argc, char** argv)
             }
 //--------------------------------------
 
-   boundary_conditions(f,nut);
+//   boundary_conditions(f,nut);
    
    if(!goon)  dump(f,nut,t_cur,count);
 

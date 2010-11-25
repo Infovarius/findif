@@ -61,7 +61,7 @@ double d;
  if(argc<2 || (iop=fopen(argv[1],"r"))==NULL) //no ini file
     {     }
     else {
-      if(fscanf(iop,"%d",&ver)<1 || ver!=3) nrerror("parameters' file has wrong version",0,0);
+      if(fscanf(iop,"%d",&ver)<1 || ver!=1) nrerror("parameters' file has wrong version",0,0);
       read_token(iop,&lfi);
       read_token(iop,&rc);
       read_token(iop,&R);
@@ -69,17 +69,13 @@ double d;
       read_token(iop,&parabole);
       read_token(iop,&Noise);
       read_token(iop,&NoiseNorm);
-      read_token(iop,&UpLimit);
-      if(ver>=2) read_token(iop,&chimax);
+      read_token(iop,&chimax);
       read_token(iop,&d);         N1 = (int)d;
       read_token(iop,&d);         N2 = (int)d;
       read_token(iop,&d);         N3 = (int)d;
       read_token(iop,&d);         nvar = (int)d;
       read_token(iop,&d);         approx = (int)d;
       read_token(iop,dtnext);
-      read_token(iop,&d);         Ns = (int)d;   //shell
-      read_token(iop,&maschtab);
-      read_token(iop,&lambda);
       read_token(iop,&d);         max_okr = (int)d;
       read_token(iop,&d);         OutStep = (int)d;
       read_token(iop,&d);         SnapStep = (int)d;
@@ -98,15 +94,15 @@ void read_tilleq(FILE *ffff,char echo)
          else    while ((ch=(char)fgetc(ffff))!='=') printf("%c",ch);
 }
 
-int init_data(void)                 //returns code of error
+int init_data(char *fname, double ****f)                 //returns code of error
 {
  int error=0;
  int i,j,k,l,tmpr;
  float tmpd;
  char tmpc;	 
- double Re1;		  // prioritet in parameter for runtest.dat
+ double Re1;		  // prioritet for parameter from special file
 
- FILE *inp = fileopen(NameInitFile,-1);
+ FILE *inp = fileopen(fname,-1);
  read_tilleq(inp,'n');   if(fscanf(inp,"%lf",&t_cur)==0) error=1;
  read_tilleq(inp,'n');   if(fscanf(inp,"%ld",&count)==0) error=1;
  read_tilleq(inp,'n');   if(fscanf(inp,"%c%d%c%d%c%d%c",&tmpc,&pp[0],&tmpc,&pp[1],&tmpc,&pp[2],&tmpc)<7) error=1;
@@ -116,9 +112,6 @@ int init_data(void)                 //returns code of error
  read_tilleq(inp,'n');   if(fscanf(inp,"%d",&N2)==0) error=1;
  read_tilleq(inp,'n');   if(fscanf(inp,"%d",&N3)==0) error=1;
  read_tilleq(inp,'n');   if(fscanf(inp,"%lf",&Re1)==0) error=1;
-
- init_parallel();
- operate_memory(1);                     // creating arrays
 
  for(tmpr=0;tmpr<=rank;tmpr++)           //reading until arrays of this process
  {
@@ -245,15 +238,16 @@ for(i=0;i<m1;i++)
           if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
            {
            PulsEnergy+=deviation(f,i,j,k);
-           for(l=0;l<=2;l++) averf[l][i][k] += f[l+1][i][j][k];
+//           for(l=0;l<=2;l++) averf[l][i][k] += f[l+1][i][j][k];
            }
-for(l=0;l<=2;l++)
+PulsEnergy /= N2;
+for(l=1;l<=3;l++)
   for(i=0;i<m1;i++)
     for(k=0;k<m3;k++)
        if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
-           TotalEnergy += fabs(1+coordin(i,0)*rc)*pow(averf[l][i][k],2.);
+           TotalEnergy += fabs(1+coordin(i,0)*rc)*pow(flow[l][i][ghost][k],2.);
 TotalEnergy += 1.;   //if zero average field
-razlet = (PulsEnergy/TotalEnergy>UpLimit);
+razlet = (PulsEnergy>10*TotalEnergy);
 }
 
 void printing(double ****f1,double dtdid,double t_cur,long count,double en)
