@@ -12,12 +12,14 @@ FILE *fileopen(const char *x, int mode)  //opening of file to ff
 {
 FILE *ff;
 char* s_mode;
+char msg[100];
 if(mode>0) s_mode="ab";
 if(mode<0) s_mode="rb";
 if(mode==0) s_mode="wb";
 if ((ff = fopen(x,s_mode))==NULL)
 	 {
-		nrerror ("Can't open file !\n",t_cur,count);
+	    sprintf(msg,"Can't open file '%s'!\n",x);
+		nrerror (msg,t_cur,count);
 		exit(-1);
 	 }
 return(ff);
@@ -111,7 +113,7 @@ double d;
   Master if(!count) nmessage("Parameters were extracted from file",0,0);
       fileclose(iop);
    
- 	Gamma=1e-4;
+ 	Gamma=1e-2;
 	ghost=(approx-1)/2;                  //radius of approx sample
 	dx[0]=2*R/N1;		
 	dx[1]=lfi/N2;
@@ -331,7 +333,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
             if(f1[l][i][j][k]!=0) temp/=f1[l][i][j][k];
             if (temp>mf[2]) mf[2]=temp;
           }
-       MPI_Allreduce(&mf, &totmf, 3, MPI_DOUBLE , MPI_MAX, MPI_COMM_WORLD);
+       MPI_Allreduce(mf, totmf, 3, MPI_DOUBLE , MPI_MAX, MPI_COMM_WORLD);
 //     Master printf("%d  maxf=%e(loc=%e) \tmaxdf=%e(loc=%e) \tmax(df/f)=%e(loc=%e)\n",
 //                     l,      totmf[0],mf[0],    totmf[1],mf[1],       totmf[2],mf[2]);
        Master printf("%d  maxf=%e \tmaxdf=%e \tmax(df/f)=%e\n",
