@@ -50,7 +50,7 @@ char str[256],*pstr;
  if(sscanf(str,"%lf",param)==0) nrerror("Input of parameter error",-1,-1);
  pstr=strtok(str,"|");
  pstr=strtok((char *)NULL,"|");
- Master printf("%g\t->\t%s",*param,pstr);
+ if(!count) printf("%g\t->\t%s",*param,pstr);
 }
 
 void init_param(int argc, char** argv,double *dtnext)
@@ -92,6 +92,8 @@ double d;
       read_token(iop,&ChangeParamTime);
       read_token(iop,&DeltaParam);
       read_token(iop,&d);
+  if(count)
+     {
       if(d==0)	{
       		goon = 0;
                 strcpy(NameInitFile,"END");
@@ -100,8 +102,9 @@ double d;
          	goon = 1;
                 sprintf(NameInitFile,"%s_*_%05d.snp",NameSnapFile,(int)d);
                 }
-      fileclose(iop);
       Master nmessage("Parameters were extracted from file",0,0);
+     }
+      fileclose(iop);
       }
 }
 
@@ -344,7 +347,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
                for(k=0;k<m3;k++)
                 if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
                    vfi[k-ghost+n[2]] += f[2][i][j][k];
-         MPI_Allreduce(vfi, totvfi, N2, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
+         MPI_Allreduce(vfi, totvfi, N3, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
          Master {for(i=0;i<N3;i++) totvfi[i] /= N1*N3;
                  fv = fileopen(NameVFile,count);
                  fprintf(fv,"{%8.8f}\t",t_cur);
