@@ -91,7 +91,6 @@ int main(int argc, char** argv)
             }
 //--------------------------------------
 
-
    boundary_conditions(f,nut);
    
 //   if(!goon)  dump(f,nut,t_cur,count);
@@ -113,7 +112,6 @@ int main(int argc, char** argv)
 //     gaussian(f1,f,0);
 	t_cur+=dtdid;
 	count++;
-        if(t_cur >= Ttot) break;
 	if (CheckStep!=0 && count%CheckStep==0)
 	    {
 	    boundary_conditions(f1,nut);
@@ -132,7 +130,7 @@ int main(int argc, char** argv)
         outed = 0;
 	if (SnapStep!=0 && count%SnapStep==0)
 	     { snapshot(f1,nut,t_cur,count); outed=1; }
-	if (SnapDelta>5*dtdid && floor((t_cur-dtdid)/SnapDelta)<floor(t_cur/SnapDelta))
+	if (SnapDelta>5*dtdid && floor((t_cur-dtdid)/SnapDelta)<floor(t_cur/SnapDelta) && !outed)
    	     { snapshot(f1,nut,t_cur,count); outed=1; }
         ft = f;  f = f1;  f1 = ft;
         if (count%100==0) {
@@ -166,7 +164,7 @@ int main(int argc, char** argv)
 		fileclose(fd);
 
                 count = tmpC;  t_cur = tmpT;  Re = tmp;
-                p1 = 4/Re*rc;
+                p1 = 4/Re;
 		init_conditions();
 		goon = 1;
             Master nmessage("Re was changed to",Re,count);

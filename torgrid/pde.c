@@ -26,51 +26,71 @@ if(t<t_begin) *w=omega0;
 void pde(double t, double ****f, double ****df)
 {
    int i,j,k,l,m;
+   double M;
    double dv1[4][3],dv2[4][3],dp1[3],dn1[3],w,dw;
 
    boundary_conditions(f,nut);
 
-   omega(t,&w,&dw);
+//   omega(t,&w,&dw);
    for(i=0;i<m1;i++)
    for(j=ghost;j<mm2;j++)
    for(k=0;k<m3;k++)
      if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
      {
+      M = 1./(rc*coordin(i,0)+1);
       for(m=0;m<3;m++) {
          dp1[m]=dr(f[0],i,j,k,m+1,0,dx[m],ghost, approx);
          dn1[m]=dr(nut,i,j,k,m+1,0,dx[m],ghost, approx);
       }
+      dp1[1] *= M; dn1[1] *= M;
       for(l=1;l<=3;l++) {
        for(m=0;m<3;m++) {
          dv1[l][m]=dr(f[l],i,j,k,m+1,0,dx[m],ghost, approx);
          dv2[l][m]=dr(f[l],i,j,k,m+1,1,dx[m]*dx[m],ghost, approx);
          }
+         dv1[l][1] *= M;     dv2[l][1]  *= M*M;
       }
 
       df[1][i][j][k]=nut[i][j][k]*(dv2[1][0]+dv2[1][1]+dv2[1][2]+r_1[i]*dv1[1][0]
 				   -f[1][i][j][k]*r_2[i]-2*dv1[2][1]*r_1[i])
 		     -dp1[0]//+w*w/r_1[i]       +2*w*f[2][i][j][k]                   //forces of inertion
 //                     +(j+n[2]<=ghost+2 ? coordin(k,2)*f[2][i][j][k] : 0)                //helical force
-		     + (dn1[0]-f[1][i][j][k])*dv1[1][0]
+/*		     + (dn1[0]-f[1][i][j][k])*dv1[1][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[1][1]
-		     + (dn1[2]-f[3][i][j][k])*dv1[1][2]
+		     + (dn1[2]-f[3][i][j][k])*dv1[1][2]*/
+                     - dvv(f,1,1,i,j,k,ghost,approx)
+                     - dvv(f,2,1,i,j,k,ghost,approx)
+                     - dvv(f,3,1,i,j,k,ghost,approx)
+                     - f[1][i][j][k]*f[1][i][j][k]*r_1[i]
 		     - (dn1[1]-f[2][i][j][k])*r_1[i]*f[2][i][j][k]
 		     ;
       df[2][i][j][k]=nut[i][j][k]*(dv2[2][0]+dv2[2][1]+dv2[2][2]+r_1[i]*dv1[2][0]
 				   -f[2][i][j][k]*r_2[i]+2*dv1[1][1]*r_1[i])
 		     + p1*(rc*coordin(i,0)+1)-dp1[1]//-dw/r_1[i] -2*w*f[1][i][j][k]                   //forces of inertion
 //                     -(j+n[2]<=ghost+2 ? (coordin(i,0)-rc)*f[2][i][j][k] :0)            //helical force
-		     + (dn1[0]-f[1][i][j][k])*dv1[2][0]
+/*		     + (dn1[0]-f[1][i][j][k])*dv1[2][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[2][1]
-		     + (dn1[2]-f[3][i][j][k])*dv1[2][2]
+		     + (dn1[2]-f[3][i][j][k])*dv1[2][2]*/
+                     - dvv(f,1,2,i,j,k,ghost,approx)
+                     - dvv(f,2,2,i,j,k,ghost,approx)
+                     - dvv(f,3,2,i,j,k,ghost,approx)
+                     - f[1][i][j][k]*f[2][i][j][k]*r_1[i]
 		     + (dn1[1]-f[1][i][j][k])*r_1[i]*f[2][i][j][k]
 		     ;
       df[3][i][j][k]=nut[i][j][k]*(dv2[3][0]+dv2[3][1]+dv2[3][2]+r_1[i]*dv1[3][0])
 		     -dp1[2]
-		     + (dn1[0]-f[1][i][j][k])*dv1[3][0]
+/*		     + (dn1[0]-f[1][i][j][k])*dv1[3][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[3][1]
-		     + (dn1[2]-f[3][i][j][k])*dv1[3][2];
+		     + (dn1[2]-f[3][i][j][k])*dv1[3][2]*/
+                     - dvv(f,1,2,i,j,k,ghost,approx)
+                     - dvv(f,2,2,i,j,k,ghost,approx)
+                     - dvv(f,3,2,i,j,k,ghost,approx)
+                     - f[1][i][j][k]*f[3][i][j][k]*r_1[i]
+                     ;
       df[0][i][j][k]= -(dv1[1][0]+dv1[2][1]+dv1[3][2]+f[1][i][j][k]*r_1[i])/Gamma;
+/*      df[1][i][j][k] += Gamma*df[0][i][j][k]*f[1][i][j][k];
+      df[2][i][j][k] += Gamma*df[0][i][j][k]*f[2][i][j][k];
+      df[3][i][j][k] += Gamma*df[0][i][j][k]*f[3][i][j][k];*/
 //        df[0][i][j][k] = 0;
 //      df[0][i][j][k] = df[1][i][j][k] = df[2][i][j][k] = df[3][i][j][k] = 0;
 
@@ -80,7 +100,7 @@ void pde(double t, double ****f, double ****df)
 
 double deviation(double ****f,int i,int j,int k)
 {
-const int size_okr=max(max_okr,ghost);
+const int size_okr=min(max_okr,ghost);
 double flux = 0;
 int kol=0,l;
    for(l=1;l<=size_okr;l++)
@@ -174,7 +194,7 @@ void  boundary_conditions(double ****f, double ***nut)
    z[0]=1; z[1]=z[2]=z[3]=-1; //  влияет на вид гран.условий (-1:жесткие, 1:свободные)
 
   /*============================ divertor =================================*/
-  if(t_cur<0)                  // divertors are off till t sec
+  if(t_cur>1)                  // divertors are off till t sec
   if(n[1]==0)
   for(i=0;i<m1;i++)
     for(j=ghost;j<=ghost;j++)
@@ -211,13 +231,13 @@ void  boundary_conditions(double ****f, double ***nut)
                                putlog(msg_err,numlog++);
                                }    else numlog++;
    req_numS = 0;
-    MPI_Waitall(req_numR,RecvRequest,statuses);
+   MPI_Waitall(req_numR,RecvRequest,statuses);
    if(req_numR && statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
                                }    else numlog++;
-    req_numR = 0;
+   req_numR = 0;
   if(pr_neighbour[2]>-1) CopyBufferToGrid(f,nut,buf_recv[2],0,0,0,m1-1,ghost-1,m3-1);
   if(pr_neighbour[3]>-1) CopyBufferToGrid(f,nut,buf_recv[3],0,mm2,0,m1-1,m2-1,m3-1);
 
@@ -241,9 +261,9 @@ void  boundary_conditions(double ****f, double ***nut)
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
                                }    else numlog++;
-    req_numS = 0;
-    MPI_Waitall(req_numR,RecvRequest,statuses);
-  if(req_numR && statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
+   req_numS = 0;
+   MPI_Waitall(req_numR,RecvRequest,statuses);
+   if(req_numR && statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
@@ -261,12 +281,12 @@ void  boundary_conditions(double ****f, double ***nut)
 		}
  if(pr_neighbour[5]>-1)
   if(pr_neighbour[5]==rank) CopyGridToBuffer(f,nut,buf_recv[5],0,0,ghost,m1-1,m2-1,2*ghost-1);
-        else { CopyGridToBuffer(f,nut,buf_send[5],0,0,n3,m1-1,m2-1,mm3-1);
-	       MPI_Isend(buf_send[5],buf_size[2],MPI_DOUBLE,pr_neighbour[5],tag+5,MPI_COMM_WORLD,&SendRequest[req_numS++]);
-	       MPI_Irecv(buf_recv[5],buf_size[2],MPI_DOUBLE,pr_neighbour[5],tag+4,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
-	       }
+         else { CopyGridToBuffer(f,nut,buf_send[5],0,0,n3,m1-1,m2-1,mm3-1);
+  	        MPI_Isend(buf_send[5],buf_size[2],MPI_DOUBLE,pr_neighbour[5],tag+5,MPI_COMM_WORLD,&SendRequest[req_numS++]);
+   	        MPI_Irecv(buf_recv[5],buf_size[2],MPI_DOUBLE,pr_neighbour[5],tag+4,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
+	        }
 
-    MPI_Waitall(req_numS,SendRequest,statuses);
+   MPI_Waitall(req_numS,SendRequest,statuses);
    if(req_numS && statuses[0].MPI_ERROR) {putlog("bc:error during send=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
@@ -274,12 +294,12 @@ void  boundary_conditions(double ****f, double ***nut)
                                }    else numlog++;
    req_numS = 0;
    MPI_Waitall(req_numR,RecvRequest,statuses);
-  if(req_numR && statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
+   if(req_numR && statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
                                }    else numlog++;
-  req_numR = 0;
+   req_numR = 0;
   if(pr_neighbour[4]>-1) CopyBufferToGrid(f,nut,buf_recv[4],0,0,0,m1-1,m2-1,ghost-1);
   if(pr_neighbour[5]>-1) CopyBufferToGrid(f,nut,buf_recv[5],0,0,mm3,m1-1,m2-1,m3-1);
 
