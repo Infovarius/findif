@@ -97,7 +97,7 @@ int main(int argc, char** argv)
    if(!goon) if (OutStep!=0) printing(f,0,t_cur,count,PulsEnergy);
 
 /*------------------------ MAIN ITERATIONS -------------------------*/
-   while ((t_cur < Ttot || Ttot==0) && !razlet) {
+   while ((Ttot==0 || t_cur < Ttot) && !razlet) {
 	pde(t_cur, f, df);
 	dttry=dtnext;
 	timestep(f, df, nut, t_cur, f1, dttry, &dtdid, &dtnext);
