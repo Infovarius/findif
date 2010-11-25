@@ -37,7 +37,7 @@ void pde(double t, double ****f, double ****df)
    for(i=0;i<m1;i++)
    for(j=ghost;j<mm2;j++)
    for(k=0;k<m3;k++)
-     if(0 && isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
+     if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
      {
       if(j<=ghost && n[1]==0) continue;
       M = 1./(rc*coordin(i,0)+1);
@@ -566,8 +566,8 @@ void  init_conditions()
                                           //deleting fictive cells-for constant outside field
      //for divertor's blade
 	sinth[i][k]=r1/rho;
-        costh[i][k]=z1/rho;
-        chi[i][k]  = chimax*M_PI/180.*rho/R;
+    costh[i][k]=z1/rho;
+    chi[i][k]  = chimax*M_PI/180.*rho/Rfl;
        }
 
    for(i=0;i<m1;i++) { r_1[i] = rc/(rc*coordin(i,0)+1); r_2[i] = r_1[i]*r_1[i]; }
@@ -592,13 +592,13 @@ if(!goon) {
       if(isType(node[i][k],NodeFluid)) {
         f[0][i][j][k]=1;
         f[1][i][j][k]=0*Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
-                       (Rfl*Rfl-pow(coordin(i,0),2) - pow(coordin(k,2),2))*4/Rfl/Rfl;
+                       (Rfl*Rfl-pow(coordin(i,0),2) - pow(coordin(k,2),2))/Rfl/Rfl;
         f[2][i][j][k]=NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl)
 		      + (parabole+0*Noise*((double)rand()-RAND_MAX/2)/RAND_MAX)*
-                       (Rfl*Rfl-pow(coordin(i,0),2) - pow(coordin(k,2),2))*4/Rfl/Rfl;
+                       (Rfl*Rfl-pow(coordin(i,0),2) - pow(coordin(k,2),2))/Rfl/Rfl;
         f[3][i][j][k]=NoiseNorm*sin(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl)
                       + 0*Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
-                       (Rfl*Rfl-pow(coordin(i,0),2) - pow(coordin(k,2),2))*4/Rfl/Rfl;
+                       (Rfl*Rfl-pow(coordin(i,0),2) - pow(coordin(k,2),2))/Rfl/Rfl;
 //        f[1][i][j][k]=f[2][i][j][k]=f[3][i][j][k]=0;
         nut[i][j][k]=(
 //        (0.39+14.8*exp(-2.13*pow(2*coordin(k,2)-l3,2)))*0.1*0
@@ -626,7 +626,7 @@ if(!goon) {
                      }
       }
 //   struct_func(f,2,2,3);
-   fill_velocity(0.3, f);
+//   fill_velocity(0.3, f);
    nmessage("Arrays were filled with initial values - calculation from beginning",-1,-1);
    } else nmessage("Arrays were filled with initial values - calculation is continuing",t_cur,count);
 }
