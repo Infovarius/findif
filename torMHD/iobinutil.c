@@ -487,7 +487,7 @@ FILE *fd;
  fprintf(fd,"Number of points along z = %d\n",N3);
  fprintf(fd,"Reynolds number = %lf\n",Rm);
 		}
- for(v=1;v<nvar;v++)
+ for(v=4;v<nvar;v++)
     printbin_array3d(fd,f1[v],0,m1,0,m2,0,m3);
 // printbin_array3d(fd,nu,0,m1,0,m2,0,m3);
  fileclose(fd);
