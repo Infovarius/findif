@@ -430,7 +430,8 @@ if(!goon) {
         nut[i][j][k]=(
 //        (0.39+14.8*exp(-2.13*pow(2*coordin(k,2)-l3,2)))*0.1*0
                     +1.)/Re;
-                                        }   else f[0][i][j][k]=f[1][i][j][k]=f[2][i][j][k]=f[3][i][j][k] = 0;
+                                        }
+            else f[0][i][j][k]=f[1][i][j][k]=f[2][i][j][k]=f[3][i][j][k] = 0;
       if(isType(node[i][k],NodeFluid)/*||isType(node[i][k],NodeShell)*/ )
                  {   }
                  f[4][i][j][k]=f[5][i][j][k]=f[6][i][j][k]=0;
@@ -440,12 +441,12 @@ if(!goon) {
 //                 if(!isType(node[i][k],NodeMagn))
                   if(isType(node[i][k],NodeFluid))
                      {
-                     f[4][i][j][k]+=Noise*((double)rand()-RAND_MAX/2)/RAND_MAX;
-                     f[5][i][j][k]+=Noise*((double)rand()-RAND_MAX/2)/RAND_MAX;
-                     f[6][i][j][k]+=Noise*((double)rand()-RAND_MAX/2)/RAND_MAX;
+                     f[4][i][j][k]+=Noise*((double)rand()-RAND_MAX/2)/RAND_MAX + NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl);
+                     f[5][i][j][k]+=Noise*((double)rand()-RAND_MAX/2)/RAND_MAX + NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl);
+                     f[6][i][j][k]+=Noise*((double)rand()-RAND_MAX/2)/RAND_MAX + NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl);
                      }
       }
-   Master f[4][2*ghost][2*ghost][2*ghost] = 100;   
+//   Master f[4][2*ghost][2*ghost][2*ghost] = 100;   
 //   struct_func(f,2,2,3);
    nmessage("Arrays were filled with initial values - calculation from beginning",-1,-1);
    } else nmessage("Arrays were filled with initial values - calculation is continuing",t_cur,count);

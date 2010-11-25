@@ -63,7 +63,7 @@ double d;
      nrerror("Start from no ini file!",-1,-1);
      }
     else {
-      if(fscanf(iop,"%d",&ver)<1 || ver!=6) nrerror("parameters' file has wrong version",-1,-1);
+      if(fscanf(iop,"%d",&ver)<1 || ver!=7) nrerror("parameters' file has wrong version",-1,-1);
       read_token(iop,&lfi);        //geometry
       read_token(iop,&rc);
       read_token(iop,&Rfl);
@@ -72,6 +72,7 @@ double d;
       read_token(iop,&Re);         //hydrodynamical
       read_token(iop,&Hksi);
       read_token(iop,&Noise);
+      read_token(iop,&NoiseNorm);
       read_token(iop,&d);         TDV = (int)d;
       if(ver>=2) read_token(iop,&chi);
       read_token(iop,&maschtab);
@@ -93,8 +94,17 @@ double d;
       read_token(iop,&Ttot);
       read_token(iop,&ChangeParamTime);
       read_token(iop,&DeltaParam);
+      read_token(iop,&d);
+      if(d==0)	{
+      		goon = 0;
+                strcpy(NameInitFile,"END");
+                }
+      else if(d>0)  {
+         	goon = 1;
+                sprintf(NameInitFile,"%s_*_%05d.snp",NameSnapFile,(int)d);
+                }
       fileclose(iop);
-//      nmessage("Parameters were extracted from file",-1,-1);
+//      nmessage("Parameters were extracted from file",t_cur,count);
       }
 }
 
@@ -116,7 +126,6 @@ int init_data(void)                 //returns code of error
  pos = strcspn(NameInitFile,"*");
  NameInitFile[pos]=0;
  sprintf(fstr,"%s%d%s",NameInitFile,rank,NameInitFile+pos+1);
-// putlog(fstr,pos);
 
  inp = fileopen(fstr,-1);
  read_tilleq(inp,'=','n');   if(fscanf(inp,"%lf",&t_cur)==0) error=1;
@@ -160,7 +169,7 @@ int init_data(void)                 //returns code of error
 fileclose(inp);
 
 if(error) nrerror("Data couldn't have been read from file!!!",-1,error);
-     else Master nmessage("Data has been read from file",t_cur,count);
+//     else nmessage("Data has been read from file",t_cur,count);
 return(error);
 }
 
@@ -452,10 +461,10 @@ FILE *fd;
  fileclose(fd);
 
 // if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
- MPI_Barrier(MPI_COMM_WORLD);
  Master {nmessage("snap is done",t_cur,count);
          sprintf(str,"%s_*_%05d.snp",NameSnapFile,count);
          add_control_point(str);}
+ MPI_Barrier(MPI_COMM_WORLD);
 }
 
 
