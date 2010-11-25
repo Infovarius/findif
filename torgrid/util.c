@@ -200,7 +200,6 @@ int j, k;
 	free(aa[j]);
 	}
 
-
    if(!aa) {putlog("error at releasing",(long)aa);return;}
    free(aa);
 

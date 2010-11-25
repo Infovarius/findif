@@ -4,6 +4,7 @@
 #include <string.h>
 //#include <conio.h>
 #include "mpi.h"
+#define M_PI 3.141592653579893L
 
 LEVEL char *NameMessageFile;
 LEVEL char *NameErrorFile;

@@ -41,7 +41,7 @@ void pde(double t, double ****f, double ****df)
      {
 //      if(j<=ghost && n[1]==0) continue;
       M = 1./(rc*coordin(i,0)+1);
-      memset(dp1,0,3*sizeof(double));      memset(dn1,0,3*sizeof(double));
+      memset(dp1,0,3*sizeof(double));   memset(dn1,0,3*sizeof(double));
       memset(dv1,0,12*sizeof(double));  memset(dv2,0,12*sizeof(double));
       memset(dA11,0,36*sizeof(double));
       for(m=0;m<3;m++) {
@@ -102,15 +102,14 @@ void pde(double t, double ****f, double ****df)
                      - dvv(f[3],f[2],3,i,j,k,(approx-1)/2,approx)*/
                      - f[1][i][j][k]*f[3][i][j][k]*r_1[i]
                      ;
+//      df[0][i][j][k]= -f[0][i][j][k]*(dv1[1][0]+dv1[2][1]+dv1[3][2]+f[1][i][j][k]*r_1[i])/Gamma;
       df[0][i][j][k]= -(dvv(f[0],f[1],1,i,j,k,(approx-1)/2,approx)
       		       +dvv(f[0],f[2],2,i,j,k,(approx-1)/2,approx)
                        +dvv(f[0],f[3],3,i,j,k,(approx-1)/2,approx)
                        +f[0][i][j][k]*f[1][i][j][k]*r_1[i]);
-//      df[0][i][j][k]= -f[0][i][j][k]*(dv1[1][0]+dv1[2][1]+dv1[3][2]+f[1][i][j][k]*r_1[i])/Gamma;
 /*      df[1][i][j][k] += Gamma*df[0][i][j][k]*f[1][i][j][k];
       df[2][i][j][k] += Gamma*df[0][i][j][k]*f[2][i][j][k];
       df[3][i][j][k] += Gamma*df[0][i][j][k]*f[3][i][j][k];*/
-//        df[0][i][j][k] = 0;
 //      df[0][i][j][k] = df[1][i][j][k] = df[2][i][j][k] = df[3][i][j][k] = 0;
 
   } //global for
@@ -225,36 +224,75 @@ for(l=0;l<nvar;l++)
          		+ (eps2*eps2-4*eps2)*(f[l][i][j][k-2]+f[l][i][j][k+2])/1152;
 }
 
-void  boundary_conditions(double ****f, double ***nut)
+void ghost_filling(double ****f, double ***nut)
 {
-   int i, j, k, l, req_numS=0, req_numR=0;
+   int i,j,k,l;
    int r1,r2,z1,z2;
    double ftemp[4];
-   int /*flag,cnt,*/z[4],znorm,ztau,tag=10;
-   double vrho,vphi,vth,vn;
-   char msg_err[100];       //for putlog+mpi_error
-   int reslen;
-
+   int /*flag,cnt,*/z[4],znorm,ztau;
+   double vn;
    z[1]=z[2]=z[3]=-1; z[0]=1;  //  влияет на вид гран.условий (-1:жесткие, 1:свободные)
    znorm = -1; ztau = -1;
 
-  /*============================ divertor =================================*/
-  if(t_cur>0.1)                  // divertors are off till t sec
-  if(n[1]==0)
+/*----------------------- filling of ghost nodes ------------------------------*/
+
   for(i=0;i<m1;i++)
-    for(j=ghost;j<=ghost;j++)
-      for(k=0;k<m3;k++)
-      if(isType(node[i][k],NodeFluid))
-         {
-         vrho = f[3][i][j][k]*costh[i][k]+f[1][i][j][k]*sinth[i][k];
-         vth  = -f[3][i][j][k]*sinth[i][k]+f[1][i][j][k]*costh[i][k];
-         vphi = sqrt(pow(f[2][i][j][k],2)+vth*vth);           //sqrt(vfi*vfi+vth*vth)
-         f[1][i][j][k] = vrho*sinth[i][k]+vphi*costh[i][k]*sin(chi[i][k]);
-	 f[2][i][j][k] = vphi*cos(chi[i][k]);
-	 f[3][i][j][k] = vrho*costh[i][k]-vphi*sinth[i][k]*sin(chi[i][k]);
-/*         f[1][i][j][k] = f[3][i][j][k] = 0;
-         f[2][i][j][k] = (R*R-pow(coordin(i,0),2) - pow(coordin(k,2),2))/R/R;*/
-	 }
+     for(j=0;j<m2;j++)
+        for(k=0;k<m3;k++)
+          if(isType(node[i][k],NodeGhostFluid) && !isType(node[i][k],NodeClued)) {
+                r2=(r1=floor(refr[i][k]))+1;
+                z2=(z1=floor(refz[i][k]))+1;
+        if(r1<0 || r2>m1-1) printf("refr doesn't fit: (%d,%d)",i,k);
+        if(z1<0 || z2>m3-1) printf("refz doesn't fit: (%d,%d)",i,k);
+        if(r1<0 || r2>m1-1) nrerror("refr doesn't fit",t_cur,1000*i+k);
+        if(z1<0 || z2>m3-1) nrerror("refz doesn't fit",t_cur,1000*i+k);
+                for(l=0;l<nvar;l++)
+		 {
+		 f[l][i][j][k] = 0;
+                   ftemp[l] = (refr[i][k]-r2)*(f[l][r1][j][z1]*(refz[i][k]-z2)-f[l][r1][j][z2]*(refz[i][k]-z1))
+                                   + (refr[i][k]-r1)*(f[l][r2][j][z2]*(refz[i][k]-z1)-f[l][r2][j][z1]*(refz[i][k]-z2))
+                                    ;
+/*                 if(i==r1 && k==z1) f[l][i][j][k] /= (1-(refr[i][k]-r2)*(refz[i][k]-z2)*z[l]);
+                 if(i==r1 && k==z2) f[l][i][j][k] /= (1+(refr[i][k]-r2)*(refz[i][k]-z1)*z[l]);
+                 if(i==r2 && k==z1) f[l][i][j][k] /= (1-(refr[i][k]-r1)*(refz[i][k]-z1)*z[l]);
+                 if(i==r2 && k==z2) f[l][i][j][k] /= (1+(refr[i][k]-r1)*(refz[i][k]-z2)*z[l]);
+     если есть внутренние фиктивные, то этот отрывок не должен влиять
+     */            }
+
+//                   nut[i][j][k] = (refr[i][k]-r2)*(nut[r1][j][z1]*(refz[i][k]-z2)-nut[r1][j][z2]*(refz[i][k]-z1))
+//                                + (refr[i][k]-r1)*(nut[r2][j][z2]*(refz[i][k]-z1)-nut[r2][j][z1]*(refz[i][k]-z2));
+                vn = ( ftemp[1]*(refr[i][k]-i)+ftemp[3]*(refz[i][k]-k) )/
+                     ( (refr[i][k]-i)*(refr[i][k]-i) + (refz[i][k]-k)*(refz[i][k]-k) );
+/*                for(l=0;l<nvar;l++)
+                   f[l][i][j][k] = z[l]*ftemp[l];*/
+//                rfict_1 = r_1[i]; rrel = 2*R*rfict_1 - 1;
+                f[0][i][j][k] = z[0]*ftemp[0];
+                f[1][i][j][k] = ztau*ftemp[1] + (znorm-ztau)*vn*(refr[i][k]-i);
+                f[2][i][j][k] = ztau*ftemp[2]
+//                             * (rrel+1-rfict_1*(i-i1)*dx[0]) / (rrel+1+rfict_1*(i-i1)*dx[0])
+                              ;
+                f[3][i][j][k] = ztau*ftemp[3] + (znorm-ztau)*vn*(refz[i][k]-k);
+                   nut[i][j][k] = 1./Re;
+                }
+/*     if(pr[1]==0)
+     for(j=0;j<ghost;j++)
+        for(i=0;i<m1;i++)
+        for(k=0;k<m3;k++)
+        for(l=0;l<nvar;l++)
+            f[l][i][j][k] = f[l][i][2*ghost-1-j][k];
+     if(pr[1]==pp[1]-1)
+     for(j=mm2;j<m2;j++)
+        for(i=0;i<m1;i++)
+        for(k=0;k<m3;k++)
+        for(l=0;l<nvar;l++)
+            f[l][i][j][k] = f[l][i][2*mm2-1-j][k];*/
+}
+
+void interprocessor_communication(double ****f, double***nut)
+{
+   int req_numS=0, req_numR=0,tag=10;
+   int reslen;
+   char msg_err[100];       //for putlog+mpi_error
 
   /*-------------------------------- exchanging of ghosts -------------------------------------*/
 // exchanging in phi-direction - periodical directions first
@@ -357,44 +395,34 @@ void  boundary_conditions(double ****f, double ***nut)
 //    MPI_Testall(req_numR,RecvRequest,&flag,statuses);
 //    MPI_Get_count(statuses,MPI_DOUBLE,&cnt);
 //    MPI_Waitall(req_numR,RecvRequest,statuses);
+}
 
-/*----------------------- filling of ghost nodes ------------------------------*/
+void  boundary_conditions(double ****f, double ***nut)
+{
+   int i, j, k, l;
+   double vrho,vphi,vth;
 
+  /*============================ divertor =================================*/
+  if(t_cur>1)                  // divertors are off till t sec
+  if(n[1]==0)
   for(i=0;i<m1;i++)
-     for(j=0;j<m2;j++)
-        for(k=0;k<m3;k++)
-          if(isType(node[i][k],NodeGhostFluid) && !isType(node[i][k],NodeClued)) {
-                r2=(r1=floor(refr[i][k]))+1;
-                z2=(z1=floor(refz[i][k]))+1;
-                for(l=0;l<nvar;l++)
-		 {
-		 f[l][i][j][k] = 0;
-                   ftemp[l] = (refr[i][k]-r2)*(f[l][r1][j][z1]*(refz[i][k]-z2)-f[l][r1][j][z2]*(refz[i][k]-z1))
-                                   + (refr[i][k]-r1)*(f[l][r2][j][z2]*(refz[i][k]-z1)-f[l][r2][j][z1]*(refz[i][k]-z2))
-                                    ;
-/*                 if(i==r1 && k==z1) f[l][i][j][k] /= (1-(refr[i][k]-r2)*(refz[i][k]-z2)*z[l]);
-                 if(i==r1 && k==z2) f[l][i][j][k] /= (1+(refr[i][k]-r2)*(refz[i][k]-z1)*z[l]);
-                 if(i==r2 && k==z1) f[l][i][j][k] /= (1-(refr[i][k]-r1)*(refz[i][k]-z1)*z[l]);
-                 if(i==r2 && k==z2) f[l][i][j][k] /= (1+(refr[i][k]-r1)*(refz[i][k]-z2)*z[l]);
-     если есть внутренние фиктивные, то этот отрывок не должен влиять
-     */            }
-     
-//                   nut[i][j][k] = (refr[i][k]-r2)*(nut[r1][j][z1]*(refz[i][k]-z2)-nut[r1][j][z2]*(refz[i][k]-z1))
-//                                + (refr[i][k]-r1)*(nut[r2][j][z2]*(refz[i][k]-z1)-nut[r2][j][z1]*(refz[i][k]-z2));
-                vn = ( ftemp[1]*(refr[i][k]-i)+ftemp[3]*(refz[i][k]-k) )/
-                     ( (refr[i][k]-i)*(refr[i][k]-i) + (refz[i][k]-k)*(refz[i][k]-k) );
-/*                for(l=0;l<nvar;l++)
-                   f[l][i][j][k] = z[l]*ftemp[l];*/
-//                rfict_1 = r_1[i]; rrel = 2*R*rfict_1 - 1;
-                f[0][i][j][k] = z[0]*ftemp[0];
-                f[1][i][j][k] = ztau*ftemp[1] + (znorm-ztau)*vn*(refr[i][k]-i);
-                f[2][i][j][k] = ztau*ftemp[2]
-//                             * (rrel+1-rfict_1*(i-i1)*dx[0]) / (rrel+1+rfict_1*(i-i1)*dx[0])
-                              ;
-                f[3][i][j][k] = ztau*ftemp[3] + (znorm-ztau)*vn*(refz[i][k]-k);
-                   nut[i][j][k] = 1./Re;
-                }
+    for(j=ghost;j<=ghost;j++)
+      for(k=0;k<m3;k++)
+      if(isType(node[i][k],NodeFluid))
+         {
+         vrho = f[3][i][j][k]*costh[i][k]+f[1][i][j][k]*sinth[i][k];
+         vth  = -f[3][i][j][k]*sinth[i][k]+f[1][i][j][k]*costh[i][k];
+         vphi = sqrt(pow(f[2][i][j][k],2)+vth*vth);           //sqrt(vfi*vfi+vth*vth)
+         f[1][i][j][k] = vrho*sinth[i][k]+vphi*costh[i][k]*sin(chi[i][k]);
+	 f[2][i][j][k] = vphi*cos(chi[i][k]);
+	 f[3][i][j][k] = vrho*costh[i][k]-vphi*sinth[i][k]*sin(chi[i][k]);
+/*         f[1][i][j][k] = f[3][i][j][k] = 0;
+         f[2][i][j][k] = (R*R-pow(coordin(i,0),2) - pow(coordin(k,2),2))/R/R;*/
+	 }
 
+   interprocessor_communication(f,nut);
+   ghost_filling(f,nut);
+   if(pp[0]>1 || pp[2]>1) interprocessor_communication(f,nut);
   return;
 }
 
@@ -452,9 +480,9 @@ void  init_conditions()
                       else if(!isType(node[i][k],NodeClued)) nmessage("out of boundary",i,k);
                   }
      //for divertor's blade
-        sinth[i][k]=r1/rho;
-        costh[i][k]=   z1/rho;
-        chi[i][k]  = chimax*M_PI/180.*rho/R;
+        sinth[i][k] = r1/rho;
+        costh[i][k] = z1/rho;
+        chi[i][k] = chimax*M_PI/180*rho/R;
        }
 
    for(i=0;i<m1;i++) { r_1[i] = rc/(rc*coordin(i,0)+1); r_2[i] = r_1[i]*r_1[i]; }
@@ -479,11 +507,12 @@ if(!goon) {
 		       (R*R-pow(coordin(i,0),2) - pow(coordin(k,2),2))/R/R;
 	f[0][i][j][k]=(coordin(j,1)<lfi/2)? 1:1;
 	}
-        else
+/*        else
       if(!isType(node[i][k],NodeGhostFluid))
         { f[0][i][j][k]=0;
-          f[1][i][j][k]=f[2][i][j][k]=f[3][i][j][k]= 1e5;
-        }  
+          f[1][i][j][k]=f[2][i][j][k]=f[3][i][j][k]= 1e8;
+        }
+       else f[0][i][j][k] = 1; */
       }
    for(i=0;i<m1;i++)
    for(j=0;j<m2;j++)
@@ -522,7 +551,7 @@ void init_parallel()
          }
 if(!goon) {                       //reading sizes from file when continuing
   pp[0]=divisors[nd1]; pp[1]=divisors[nd2]; pp[2]=size/pp[0]/pp[1];                 // number of procs along axes
-  pp[1]=pp[2]=1; pp[0]=size;
+//  pp[1]=pp[2]=1; pp[0]=size;
           }
   pr[0] = rank%pp[0]; pr[1] = (rank/pp[0])%pp[1]; pr[2] = (rank/pp[0]/pp[1])%pp[2];  // coordinates of current subregion
 
@@ -530,6 +559,12 @@ if(!goon) {                       //reading sizes from file when continuing
   n1 = floor((double)N1/pp[0]);     n[0] = n1*pr[0] + min(pr[0],N1-pp[0]*n1);    if(pr[0]<N1-pp[0]*n1) n1++;              // dimensions of subregion
   n2 = floor((double)N2/pp[1]);     n[1] = n2*pr[1] + min(pr[1],N2-pp[1]*n2);    if(pr[1]<N2-pp[1]*n2) n2++;
   n3 = floor((double)N3/pp[2]);     n[2] = n3*pr[2] + min(pr[2],N3-pp[2]*n3);    if(pr[2]<N3-pp[2]*n3) n3++;
+   iop=fopen(NameStatFile,"w");
+   fprintf(iop,"%d\n",rank);
+   fprintf(iop,"%d\t%d\t%d\n",pr[0],pr[1],pr[2]);
+   fprintf(iop,"%d\t%d\t%d\n",pp[0],pp[1],pp[2]);
+   fprintf(iop,"%d\t%d\t%d\n",n[0],n[1],n[2]);
+   fprintf(iop,"%d\t%d\t%d\n",n1,n2,n3);
    if(n1<ghost || n2<ghost || n3<ghost) nrerror("Too small mesh or incorrect number of processes",0,0);
 
    m1 = n1+2*ghost;
@@ -557,19 +592,11 @@ if(!goon) {                       //reading sizes from file when continuing
    buf_send[j+2*i] = alloc_mem_1f(buf_size[i]);
    buf_recv[j+2*i] = alloc_mem_1f(buf_size[i]);
   }
-
-  {
-   iop=fopen(NameStatFile,"w");
-   fprintf(iop,"%d\n",rank);
-   fprintf(iop,"%d\t%d\t%d\n",pr[0],pr[1],pr[2]);
-   fprintf(iop,"%d\t%d\t%d\n",pp[0],pp[1],pp[2]);
-   fprintf(iop,"%d\t%d\t%d\n",n[0],n[1],n[2]);
-   fprintf(iop,"%d\t%d\t%d\n",n1,n2,n3);
    for(i=0;i<6;i++)
      fprintf(iop,"%d ",pr_neighbour[i]);
    fprintf(iop,"\n");
    fileclose(iop);
-       }
+
 }
 
 static double kf3[2][3][3]={{{-3./2.0, 2.0, -1./2.0}, {-1./2.0, 0.0, 1./2.0}, {1./2.0, -2.0, 3./2.0}},
@@ -626,6 +653,7 @@ double dr(double ***m, int ii, int jj, int kk, int dir, int or, double dx, int s
 {
 double tmp=0.0;
 int i;
+
 if(or==0)
 switch (sm) {
      case 7 :  switch (dir) {
