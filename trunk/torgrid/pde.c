@@ -147,8 +147,8 @@ for(k=0;k<m3;k++)
      r1 = coordin(i,0);   z1 = coordin(k,2);
      rho = 1 - sqrt(r1*r1 + z1*z1)/R;
      if(rho<0) tmp = 0;
-//	  else tmp = sqrt(2*Re)*(0.32*rho*(1-rho)+0.013*(2*rho-1)*(2*rho-1)*rho);   // Шлихтинг
-          else tmp = sqrt(2*Re)*0.276467*rho*(2.08 - 2.8*rho + rho*rho)*(0.64 - 1.2*rho + rho*rho);   // Рейнольдс
+	  else tmp = sqrt(2*Re)*(0.32*rho*(1-rho)+0.013*(2*rho-1)*(2*rho-1)*rho);   // Шлихтинг
+//          else tmp = sqrt(2*Re)*0.276467*rho*(2.08 - 2.8*rho + rho*rho)*(0.64 - 1.2*rho + rho*rho);   // Рейнольдс
        for(j=ghost;j<mm2;j++)
 	if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
 	  nut[i][j][k] = (1. + maschtab*tmp)/Re;
@@ -339,14 +339,14 @@ void  init_conditions()
         refz[i][k] = (refz[i][k]+R)/dx[2]-0.5-n[2]+ghost;
         if(fabs(refr[i][k]-i)<1 && fabs(refr[i][k]-(int)refr[i][k])>EPS &&
            fabs(refz[i][k]-k)<1 && fabs(refz[i][k]-(int)refz[i][k])>EPS &&
-           isType(node[i][k],NodeGhostFluid))
+           !isType(node[i][k],NodeFluid))
                  { setType(&node[i][k],NodeFluid);
                    if(isType(node[i][k],NodeGhostFluid)) node[i][k] -= NodeGhostFluid;
                    for(l=-ghost;l<=ghost;l++)
                      { if(i+l>=0&&i+l<m1) if(!isType(node[i+l][k],NodeFluid))
-                                             setType(&node[i+l][k],NodeGhostFluid);
+                                              setType(&node[i+l][k],NodeGhostFluid);
                        if(k+l>=0&&k+l<m3) if(!isType(node[i][k+l],NodeFluid))
-                                             setType(&node[i][k+l],NodeGhostFluid);
+                                              setType(&node[i][k+l],NodeGhostFluid);
                      }
                   }
      //for divertor's blade
@@ -355,7 +355,7 @@ void  init_conditions()
         chi[i][k]  = chimax*M_PI/180.*rho/R;
        }
 
-   for(i=0;i<m1;i++) { r_1[i] = rc/(rc*(dx[0]*(i-ghost+0.5+n[0])-R)+1); r_2[i] = r_1[i]*r_1[i]; }
+   for(i=0;i<m1;i++) { r_1[i] = rc/(rc*(dx[0]*(i-ghost+0.5+n[0])-R)+1); r_2[i] = r_1[i]*r_1[i]; } 
 
 // --------------- initial conditions -----------------------------------------
 //   k1=2*M_PI/lfi;  k3=M_PI/l3;
