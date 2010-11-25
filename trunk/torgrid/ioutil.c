@@ -120,7 +120,7 @@ int init_data(void)                 //returns code of error
  int i,j,k,l,tmpr;
  float tmpd;
  char tmpc;	 
- double Re1;		  // prioritet for parameter in snap-file
+ double Re1;		  // priority for parameter in snap-file
 
  FILE *inp = fileopen(NameInitFile,-1);
  read_tilleq(inp,'=','n');   if(fscanf(inp,"%lf",&t_cur)==0) error=1;
