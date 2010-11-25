@@ -48,18 +48,12 @@ int main(int argc, char** argv)
       }
 
    init_param(argc,argv,&dtnext);       // initialization of parameters
-   Gamma=1e-4;
-   ghost=(approx-1)/2+3;                  //radius of approx sample
    t_cur=0;
    count=0; enter = 0;
 
    if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
        else { init_parallel();  operate_memory(1);}
    fileclose(fd);
-
-   dx[0]=2*R/N1;
-   dx[2]=2*R/N3;
-   p1 = 4/Re;
 
    init_conditions();
 
@@ -84,7 +78,7 @@ int main(int argc, char** argv)
  print_array2d(fd,refz,0,m1,0,m3);
  fileclose(fd);
 
- if(rank!=size-1) {putlog("me node done",numlog++); MPI_Send(&rank,1,MPI_INT,rank+1,rank,MPI_COMM_WORLD); }
+ if(rank!=size-1) {MPI_Send(&rank,1,MPI_INT,rank+1,rank,MPI_COMM_WORLD); }
              else nmessage("nodes has been dumped",t_cur,count);
             }
 //--------------------------------------
@@ -102,14 +96,14 @@ int main(int argc, char** argv)
    if(!goon) if (OutStep!=0) printing(f,0,t_cur,count,PulsEnergy);
 
 /*------------------------ MAIN ITERATIONS -------------------------*/
-   while (t_cur < Ttot && !razlet) {
+   while ((t_cur < Ttot || Ttot==0) && !razlet) {
 	pde(t_cur, f, df);
 	dttry=dtnext;
 	timestep(f, df, nut, t_cur, f1, dttry, &dtdid, &dtnext);
 //	nut_by_flux(f,nut,dtdid);
 	t_cur+=dtdid;
 	count++;
-        if(t_cur >= Ttot) break;
+        if(t_cur >= Ttot && Ttot>0) break;
 	if (CheckStep!=0 && count%CheckStep==0)
 	    {
 	    boundary_conditions(f1,nut);
@@ -133,9 +127,9 @@ int main(int argc, char** argv)
         ft = f;  f = f1;  f1 = ft;
         if (count%100==0) {
 //          MPI_Barrier(MPI_COMM_WORLD);
-          tmp=Re;
+			tmp=rc;
           init_param(argc,argv,&dttry);
-          Re=tmp;
+			rc=tmp;
 //          MPI_Barrier(MPI_COMM_WORLD);
         }
 
@@ -144,24 +138,22 @@ int main(int argc, char** argv)
 		//Rm = floor(t_cur/ChangeParamTime+0.5)*DeltaParam-190;
 		if(!outed) { snapshot(f,nut,t_cur,count); outed = 1;}
 //                MPI_Barrier(MPI_COMM_WORLD);
-		tmp = (rc += DeltaParam);
+			tmp = (rc += DeltaParam);
                 tmpC = count;  tmpT = t_cur;
 		goon = ((fd=fopen(NameCPFile,"r+"))>0);
 		if(goon)
-			{ do fscanf(fd,"%s\n",NameInitFile); while (!feof(fd));
+				{
+				do fscanf(fd,"%s\n",NameInitFile); while (!feof(fd));
 //                        putlog(NameInitFile,ftell(fd));
 			goon = strcmp(NameInitFile,"END");
 			}
 		init_param(argc,argv,&dtnext);       // initialization of parameters
-		ghost=(approx-1)/2+3;                  //radius of approx sample
-		dx[0]=2*R/N1;
-		dx[2]=2*R/N3;
 
 		if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
 		fileclose(fd);
 
-                count = tmpC;  t_cur = tmpT;  rc = tmp;
-                p1 = 4/Re;
+			count = tmpC;  t_cur = tmpT;  Re = tmp;
+//			p1 = 4/Re;
 		init_conditions();
 		goon = 1;
             Master nmessage("parameter was changed to",rc,count);
