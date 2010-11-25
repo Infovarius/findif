@@ -218,6 +218,22 @@ for(i=beg1;i<beg1+n1;i++)
     }
 }
 
+void print_array2i(FILE *ff,int **a,int beg1,int n1,int beg2,int n2)
+{
+int i,j;
+fprintf(ff,"{");
+for(i=beg1;i<beg1+n1;i++)
+    {
+    fprintf(ff,"{");
+    for(j=beg2;j<beg2+n2;j++)
+        {
+        fprintf(ff,"%d",a[i][j]);
+        fprintf(ff,j<beg2+n2-1 ? "," : "}");
+        }
+    fprintf(ff,i<beg1+n1-1 ? "," : "}\n");
+    }
+}
+
 void print_array3d(FILE *ff,double ***a,
         int beg1,int n1,int beg2,int n2,int beg3,int n3)
 {
@@ -297,9 +313,9 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
    for(l=0;l<nvar;l++) {
        mf[0]=mf[1]=mf[2]=0;
        for(i=0;i<m1;i++)
-        for(j=ghost;j<m2;j++)
-         for(k=0;k<mm3;k++)
-         if(isType(node[i][k],NodeFluid))
+        for(j=ghost;j<mm2;j++)
+         for(k=0;k<m3;k++)
+         if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
           {
             if (fabs(f1[l][i][j][k])>mf[0]) mf[0]=fabs(f1[l][i][j][k]);
             temp=fabs(f[l][i][j][k]-f1[l][i][j][k]);
@@ -318,9 +334,9 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
    for(l=0;l<nvar;l++) {
        mf[0]=mf[1]=0;
        for(i=0;i<m1;i++)
-        for(j=ghost;j<m2;j++)
-         for(k=0;k<mm3;k++)
-         if(isType(node[i][k],NodeFluid))
+        for(j=ghost;j<mm2;j++)
+         for(k=0;k<m3;k++)
+         if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
             mf[0] += fabs(1+coordin(i,0)*rc)*pow(f1[l][i][j][k],2);
        MPI_Allreduce(&mf, &totmf, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
        Master fprintf(fen,"\t %10.10g",totmf[0]/N1/N2/N3);
@@ -333,7 +349,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
  // -------------------- average profile of velocity ---------------------
          for(i=0;i<N3;i++)    vfi[i]=0;
          for(i=0;i<N3;i++) totvfi[i]=0;
-         for(i=0;i<m1;i++)
+        for(i=0;i<m1;i++)
 	    for(j=ghost;j<mm2;j++)
                for(k=0;k<m3;k++)
                 if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
@@ -400,11 +416,12 @@ FILE *fd;
  for(v=0;v<nvar;v++)
     print_array3d(fd,f1[v],0,m1,0,m2,0,m3);
  print_array3d(fd,nu,0,m1,0,m2,0,m3);
- fclose(fd);
+ fileclose(fd);
                   
  if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
  MPI_Barrier(MPI_COMM_WORLD);
  Master {nmessage("snap is done",t_cur,count);
                    add_control_point(str);}
 }
+
 												  

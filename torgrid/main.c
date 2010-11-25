@@ -79,7 +79,7 @@ int main(int argc, char** argv)
 
  Master nmessage("nodes outputting has been started",t_cur,count);
 
- print_array2d(fd,node,0,m1,0,m3);
+ print_array2i(fd,node,0,m1,0,m3);
  print_array2d(fd,refr,0,m1,0,m3);
  print_array2d(fd,refz,0,m1,0,m3);
  fileclose(fd);
@@ -126,18 +126,19 @@ int main(int argc, char** argv)
 	    }
 	if (SnapStep!=0 && count%SnapStep==0)
 	    snapshot(f1,nut,t_cur,count);
+        if (SnapDelta>5*dtdid && floor(t_cur/SnapDelta)<floor((t_cur+dtdid)/SnapDelta))
+            snapshot(f1,nut,t_cur,count);
+/*        if (floor(t_cur/ChangeParamTime)<floor((t_cur+dtdid)/ChangeParamTime))
+            {
+            Re = floor(t_cur/ChangeParamTime+0.5)*DeltaParam-190;
+         //Re -= DeltaParam;
+            Master nmessage("Rm was changed to",Rm,count);
+            }*/
 	for(l=0;l<nvar;l++)
 	for(i=0;i<m1;i++)
 	for(j=0;j<m2;j++)
 	for(k=0;k<m3;k++)
 	   f[l][i][j][k]=f1[l][i][j][k];
-        if (SnapDelta>5*dtdid && floor(t_cur/SnapDelta)<floor((t_cur+dtdid)/SnapDelta))
-            snapshot(f1,eta,t_cur,count);
-/*        if (floor(t_cur/ChangeParamTime)<floor((t_cur+dtdid)/ChangeParamTime))
-            Rm = floor(t_cur/ChangeParamTime+0.5)*DeltaParam-190;
-//Rm -= DeltaParam;
-            Master nmessage("Rm was changed to",Rm,count);
-            }*/
 /*        if(kbhit())
 	     {
 		switch (getch()) {

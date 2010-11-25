@@ -228,14 +228,13 @@ void operate_memory(int dir)
        df5=alloc_mem_4f(nvar, m1, m2, m3);
        r_1=alloc_mem_1f(m1);                  // r^(-1)
        r_2=alloc_mem_1f(m1);                  // r^(-2)
+       node=alloc_mem_2i(m1, m3);         // kind of nodes
        refr=alloc_mem_2f(m1, m3);         // reflection of nodes relative circle
        refz=alloc_mem_2f(m1, m3);
-       node=alloc_mem_2i(m1, m3);         // kind of nodes
        sinth=alloc_mem_2f(m1, m3);
        costh=alloc_mem_2f(m1, m3);
        chi=alloc_mem_2f(m1, m3);          // angle of blade tilt
-       nut = alloc_mem_3f(m1, m2, m3);
-       eta = alloc_mem_3f(m1, m2, m3);
+       nut=alloc_mem_3f(m1, m2, m3);
        averf = alloc_mem_3f(nvar,m1,m3);
        vfi = alloc_mem_1f(N3);
        totvfi = alloc_mem_1f(N3);

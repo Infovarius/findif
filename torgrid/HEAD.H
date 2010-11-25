@@ -19,7 +19,8 @@ LEVEL char *NameStatFile;
 LEVEL char *fname;
 
 LEVEL double ****f, ****f1, ***nut, ****df, ****df2, ****df3, ****df4, ****df5, **s_func,
-             dx[3], *r_1, *r_2, **node, **refr, **refz, **sinth, **costh, **chi;
+             dx[3], *r_1, *r_2, **refr, **refz, **sinth, **costh, **chi;
+LEVEL int **node;
 
 enum  TypeNodes {NodeUnknown=0,NodeClued=1,
                                NodeFluid=8, NodeShell=2, NodeVacuum=4,   // regions
@@ -47,6 +48,7 @@ LEVEL int goon;                       // continue calculation
 LEVEL int CheckStep;  //each CheckStep divergence of program is checking
 LEVEL int OutStep;    //each OutStep result is printing
 LEVEL int SnapStep;   //each SnapStep snapshot is done
+LEVEL double SnapDelta;  //each SnapDelta of simulation time snapshot is done
 LEVEL int VarStep;    //each VarStep step in RungeKutta varies
 LEVEL int num_dump;
 LEVEL long numlog;
@@ -59,7 +61,7 @@ LEVEL long numlog;
 LEVEL int rank, size;
 LEVEL MPI_Request SendRequest[256],RecvRequest[256];
 LEVEL MPI_Status statuses[256];
-LEVEL double *buf_send[6], *buf_recv[6], buf_size[3];    //6=2*(nvar-1)
+LEVEL double *buf_send[6], *buf_recv[6], buf_size[3];    //6=2*3(D)
 LEVEL int pr_neighbour[6],pp[3],n[3];                    //3D
 LEVEL int pr[3];                                         //3D
 //void init_parallel();                       in file pde.c
@@ -92,9 +94,13 @@ double **alloc_mem_2f(int, int);
 void   free_mem_2f(double **, int, int);
 double *alloc_mem_1f(int);
 void   free_mem_1f(double *, int);
+int **alloc_mem_2i(int, int);
+void   free_mem_2i(int **, int, int);
+int *alloc_mem_1i(int);
+void   free_mem_1i(int *, int);
 void operate_memory(int dir);
-int isType(double nod, enum TypeNodes tip);
-void setType(double *nod, enum TypeNodes tip);
+int isType(int nod, enum TypeNodes tip);
+void setType(int *nod, enum TypeNodes tip);
 void CopyBufferToGrid(double ****,double ***,double *,int,int,int,int,int,int);
 void CopyGridToBuffer(double ****,double ***,double *,int,int,int,int,int,int);
 /*------- rkad.c  -----------*/
