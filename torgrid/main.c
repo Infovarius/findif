@@ -4,7 +4,7 @@
 
 int main(int argc, char** argv)
 {
-   double dttry, dtdid, dtnext, tmp,tmpT;
+   double dttry, dtdid, dtnext, tmp,tmpT, time_old;
    int i,j,k,l,tmpC;
    int outed;
    FILE *fd, *ferror;
@@ -33,17 +33,18 @@ int main(int argc, char** argv)
   NameStatFile =(char *)calloc(strl+9,sizeof(char));
   sprintf(NameStatFile,"%s_%d.sta",fname,rank); NameStatFile[strl+8] = 0;
 
+   numlog = 1;
    Master nmessage("--------------------------------------------------------------------------",0,0);
 
 /* ---------------------- reading files and arrays --------------------- */
-   goon = ((fd=fopen(NameCPFile,"r"))>0);
-   Master if(fd==NULL) { putlog("File of cp were not opened",2);
-                  if((fd=fopen(NameCPFile,"w"))!=NULL) ; putlog("File cp was successfully created",3);
+   goon = ((fd=fopen(NameCPFile,"r+"))>0);
+   if(fd==NULL) { //putlog("File of cp were not opened",goon);
+                  Master if((fd=fopen(NameCPFile,"w+"))!=NULL) ;//putlog("File cp was successfully created",1);
                 }
            else putlog("File of control points opened=",(long)fd);
    if(goon)
       { do fscanf(fd,"%s\n",NameInitFile); while (!feof(fd));
-        goon = strcmp(NameInitFile,"END");
+        goon = strcmp(NameInitFile,"END") || strlen(NameInitFile)==0;
       }
 
    init_param(argc,argv,&dtnext,0);       // initialization of parameters
@@ -67,7 +68,7 @@ int main(int argc, char** argv)
       fileclose(fd);
      }
 //--------------------------------------
- {
+{
     if(rank!=0) MPI_Recv(&tmpC,1,MPI_INT,rank-1,9,MPI_COMM_WORLD,statuses);
 
  fd=fileopen("node",rank);
@@ -87,7 +88,7 @@ int main(int argc, char** argv)
 
    boundary_conditions(f,nut);
 
-//   dump(f,nut,t_cur,count);
+   if(!goon)  dump(f,nut,t_cur,count);
 
    time_begin = MPI_Wtime();
    if(!goon) Master nmessage("work has begun",0,0);
@@ -95,7 +96,7 @@ int main(int argc, char** argv)
    Master ferror = fileopen(NameErrorFile,abs(goon));
 
    if(CheckStep!=0) check(f);
-   if (OutStep!=0) printing(f,0,t_cur,count,PulsEnergy);
+   if(!goon) if (OutStep!=0) printing(f,0,t_cur,count,PulsEnergy);
 
 /*------------------------ MAIN ITERATIONS -------------------------*/
    while ((Ttot==0 || t_cur < Ttot) && !razlet) {
@@ -105,8 +106,9 @@ int main(int argc, char** argv)
 //	nut_by_flux(f1,nut,dtdid);
 //     gaussian(f1,f,0);
 	t_cur+=dtdid;
+	time_old = time_now;
 	count++;
-        if(t_cur >= Ttot && Ttot>0) break;
+    if(t_cur >= Ttot && Ttot>0) break;
 	if (CheckStep!=0 && count%CheckStep==0)
 	    {
 	    boundary_conditions(f1,nut);
@@ -140,19 +142,19 @@ int main(int argc, char** argv)
         if (ChangeParamTime!=0 && floor((t_cur-dtdid)/ChangeParamTime)<floor(t_cur/ChangeParamTime))
             {
 		//Rm = floor(t_cur/ChangeParamTime+0.5)*DeltaParam-190;
-		if(!outed) { snapshot(f,nut,t_cur,count); outed = 1;}
+			if(!outed) { snapshot(f,nut,t_cur,count); outed = 1;}
 //                MPI_Barrier(MPI_COMM_WORLD);
-		tmp = (Re += DeltaParam);
-                tmpC = count;  tmpT = t_cur;
+			tmp = (Re += DeltaParam);
+			tmpC = count;  tmpT = t_cur;
 			init_param(argc,argv,&dtnext,1);       // initialization of parameters
 
-		if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
+			if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
 			if(strcmp(NameInitFile,"-1")==0) goon = 1;
 
-                count = tmpC;  t_cur = tmpT;  Re = tmp;
+            count = tmpC;  t_cur = tmpT;  Re = tmp;
 			init_conditions();
-                p1 = 4/Re;
-		goon = 1;
+            p1 = 4/Re;
+			goon = 1;
             Master nmessage("parameter was changed to",Re,count);
             }
 /*        if(kbhit())
@@ -165,6 +167,10 @@ int main(int argc, char** argv)
                                     }
                         }
               }*/
+	if (OutStep==0 || count%OutStep!=0) time_now=MPI_Wtime();
+	Master tmpC = DumpInterval>0 && floor((time_now-time_begin)/60/DumpInterval)>floor((time_old-time_begin)/60/DumpInterval);
+	MPI_Bcast(&tmpC,1,MPI_INT,0,MPI_COMM_WORLD);
+	if(tmpC) dump(f,nut,t_cur,count);
    } // end while
 
    printing(f1,dtdid,t_cur,count,PulsEnergy);

@@ -27,11 +27,11 @@
 2		| maximal size of averaging vicinity (max_okr)
 
 ---------  Output parameters  -------------------------------
-20		| steps to statistics output (OutStep)
+1		| steps to statistics output (OutStep)
 0		| steps to snaps (SnapStep)
-0.		| simulation time delta to snap (SnapDelta)
-0.5		| minutes between dumps (DumpInterval)
-1		| keep dumps (DumpKeep)
+0.1		| simulation time delta to snap (SnapDelta)
+5		| minutes between dumps (DumpInterval)
+0		| keep dumps (DumpKeep)
 10		| steps of checking divergence (CheckStep)
 2		| test of time step (VarStep)
 10		| Total time

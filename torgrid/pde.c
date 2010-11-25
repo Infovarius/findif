@@ -41,7 +41,7 @@ void pde(double t, double ****f, double ****df)
      {
 //      if(j<=ghost && n[1]==0) continue;
       M = 1./(rc*coordin(i,0)+1);
-      memset(dp1,0,3*sizeof(double));   memset(dn1,0,3*sizeof(double));
+      memset(dp1,0,3*sizeof(double));      memset(dn1,0,3*sizeof(double));
       memset(dv1,0,12*sizeof(double));  memset(dv2,0,12*sizeof(double));
       memset(dA11,0,36*sizeof(double));
       for(m=0;m<3;m++) {
@@ -63,7 +63,7 @@ void pde(double t, double ****f, double ****df)
       df[1][i][j][k]=nut[i][j][k]*(dv2[1][0]+dv2[1][1]+dv2[1][2]+r_1[i]*dv1[1][0]
 				   -f[1][i][j][k]*r_2[i]-2*dv1[2][1]*r_1[i])
 		     -dp1[0]/Gamma/f[0][i][j][k]//+w*w/r_1[i]       +2*w*f[2][i][j][k]                   //forces of inertion
-                -(dv1[1][0]<0 ? mu[0]*dv1[1][0]*(dp1[0]*dv1[1][0]+2*f[0][i][j][k]*dv2[1][0]) : 0)
+             -(dv1[1][0]<0 ? mu[0]*dv1[1][0]*(dp1[0]*dv1[1][0]+2*f[0][i][j][k]*dv2[1][0]) : 0)
                      +(j+n[1]<=ghost+4 ? coordin(k,2)*f[2][i][j][k] : 0)                //helical force
 		     + (dn1[0]-f[1][i][j][k])*dv1[1][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[1][1]
@@ -77,8 +77,9 @@ void pde(double t, double ****f, double ****df)
 		     ;
       df[2][i][j][k]=nut[i][j][k]*(dv2[2][0]+dv2[2][1]+dv2[2][2]+r_1[i]*dv1[2][0]
 				   -f[2][i][j][k]*r_2[i]+2*dv1[1][1]*r_1[i])
-		     + p1*pow(rc*coordin(i,0)+1,-1)-dp1[1]/Gamma/f[0][i][j][k]//-dw/r_1[i] -2*w*f[1][i][j][k]                   //forces of inertion
-                -(dv1[2][1]<0 ? mu[1]*dv1[2][1]*(dp1[1]*dv1[2][1]+2*f[0][i][j][k]*dv2[2][1]) : 0)
+			 + (t_cur>-1 ? p1*pow(rc*coordin(i,0)+1,-1):0) - dp1[1]/Gamma/f[0][i][j][k]
+             -(dv1[2][1]<0 ? mu[1]*dv1[2][1]*(dp1[1]*dv1[2][1]+2*f[0][i][j][k]*dv2[2][1]) : 0)
+					//-dw/r_1[i] -2*w*f[1][i][j][k]                   //forces of inertion
 		     + (dn1[0]-f[1][i][j][k])*dv1[2][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[2][1]
 		     + (dn1[2]-f[3][i][j][k])*dv1[2][2]
@@ -91,7 +92,7 @@ void pde(double t, double ****f, double ****df)
 		     ;
       df[3][i][j][k]=nut[i][j][k]*(dv2[3][0]+dv2[3][1]+dv2[3][2]+r_1[i]*dv1[3][0])
 		     -dp1[2]/Gamma/f[0][i][j][k]
-                -(dv1[3][2]<0 ? mu[2]*dv1[3][2]*(dp1[2]*dv1[3][2]+2*f[0][i][j][k]*dv2[3][2]) : 0)
+             -(dv1[3][2]<0 ? mu[2]*dv1[3][2]*(dp1[2]*dv1[3][2]+2*f[0][i][j][k]*dv2[3][2]) : 0)
                      -(j+n[1]<=ghost+4 ? (coordin(i,0)-rc)*f[2][i][j][k] :0)            //helical force
 		     + (dn1[0]-f[1][i][j][k])*dv1[3][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[3][1]
@@ -104,7 +105,7 @@ void pde(double t, double ****f, double ****df)
                      ;
 //      df[0][i][j][k]= -f[0][i][j][k]*(dv1[1][0]+dv1[2][1]+dv1[3][2]+f[1][i][j][k]*r_1[i])/Gamma;
       df[0][i][j][k]= -(dvv(f[0],f[1],1,i,j,k,(approx-1)/2,approx)
-      		       +dvv(f[0],f[2],2,i,j,k,(approx-1)/2,approx)
+      		           +dvv(f[0],f[2],2,i,j,k,(approx-1)/2,approx)
                        +dvv(f[0],f[3],3,i,j,k,(approx-1)/2,approx)
                        +f[0][i][j][k]*f[1][i][j][k]*r_1[i]);
 /*      df[1][i][j][k] += Gamma*df[0][i][j][k]*f[1][i][j][k];
@@ -293,6 +294,7 @@ void interprocessor_communication(double ****f, double***nut)
    int req_numS=0, req_numR=0,tag=10;
    int reslen;
    char msg_err[100];       //for putlog+mpi_error
+
   /*-------------------------------- exchanging of ghosts -------------------------------------*/
 // exchanging in phi-direction - periodical directions first
  if(pr_neighbour[2]>-1)
@@ -518,8 +520,8 @@ if(!goon) {
    for(k=0;k<m3;k++)
 	nut[i][j][k]=1./Re;
 //   fill_velocity(0,f);
-   nmessage("Arrays were filled with initial values - calculation from beginning",-1,-1);
-   } else nmessage("Arrays were filled with initial values - calculation is continuing",t_cur,count);
+   Master nmessage("Arrays were filled with initial values - calculation from beginning",-1,-1);
+   } else Master nmessage("Arrays were filled with saved values - calculation is continuing",t_cur,count);
 }
 
 void init_parallel()
@@ -550,7 +552,7 @@ void init_parallel()
          }
 if(!goon) {                       //reading sizes from file when continuing
   pp[0]=divisors[nd1]; pp[1]=divisors[nd2]; pp[2]=size/pp[0]/pp[1];                 // number of procs along axes
-//  pp[1]=pp[2]=1; pp[0]=size;
+  pp[0]=pp[2]=2; pp[1]=size/4;
           }
   pr[0] = rank%pp[0]; pr[1] = (rank/pp[0])%pp[1]; pr[2] = (rank/pp[0]/pp[1])%pp[2];  // coordinates of current subregion
 
@@ -558,12 +560,14 @@ if(!goon) {                       //reading sizes from file when continuing
   n1 = floor((double)N1/pp[0]);     n[0] = n1*pr[0] + min(pr[0],N1-pp[0]*n1);    if(pr[0]<N1-pp[0]*n1) n1++;              // dimensions of subregion
   n2 = floor((double)N2/pp[1]);     n[1] = n2*pr[1] + min(pr[1],N2-pp[1]*n2);    if(pr[1]<N2-pp[1]*n2) n2++;
   n3 = floor((double)N3/pp[2]);     n[2] = n3*pr[2] + min(pr[2],N3-pp[2]*n3);    if(pr[2]<N3-pp[2]*n3) n3++;
+if(rank==size-1)   {
    iop=fopen(NameStatFile,"w");
    fprintf(iop,"%d\n",rank);
    fprintf(iop,"%d\t%d\t%d\n",pr[0],pr[1],pr[2]);
    fprintf(iop,"%d\t%d\t%d\n",pp[0],pp[1],pp[2]);
    fprintf(iop,"%d\t%d\t%d\n",n[0],n[1],n[2]);
    fprintf(iop,"%d\t%d\t%d\n",n1,n2,n3);
+   }
    if(n1<ghost || n2<ghost || n3<ghost) nrerror("Too small mesh or incorrect number of processes",0,0);
 
    m1 = n1+2*ghost;
@@ -591,11 +595,13 @@ if(!goon) {                       //reading sizes from file when continuing
    buf_send[j+2*i] = alloc_mem_1f(buf_size[i]);
    buf_recv[j+2*i] = alloc_mem_1f(buf_size[i]);
   }
-   for(i=0;i<6;i++)
-     fprintf(iop,"%d ",pr_neighbour[i]);
+if(rank==size-1) {
+  for(i=0;i<6;i++)
+   
+   fprintf(iop,"%d ",pr_neighbour[i]);
    fprintf(iop,"\n");
    fileclose(iop);
-
+   }
 }
 
 static double kf3[2][3][3]={{{-3./2.0, 2.0, -1./2.0}, {-1./2.0, 0.0, 1./2.0}, {1./2.0, -2.0, 3./2.0}},
