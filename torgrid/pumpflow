@@ -13,9 +13,9 @@
 45		| maximal angle of blade tilt (degrees)
 
 ---------  Scheme (aproximation) parameters ------------------
-20		| mesh point in R
-20		| mesh point in PHI
-20		| mesh point in Z
+64		| mesh point in R
+10		| mesh point in PHI
+64		| mesh point in Z
 4		| variables number
 7		| aproxx order
 0.01		| initial timestep
@@ -29,7 +29,7 @@
 ---------  Output parameters  -------------------------------
 5		| steps to statistics output (OutStep)
 1000		| steps to snaps (SnapStep)
-0		| simulation time delta to snap (SnapDelta)
+0.01		| simulation time delta to snap (SnapDelta)
 10		| steps of checking divergence (CheckStep)
 2		| test of time step (VarStep)
 100		| Total time
