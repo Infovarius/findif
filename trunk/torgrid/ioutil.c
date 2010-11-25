@@ -59,31 +59,7 @@ int ver;
 FILE *iop;
 double d;
  if(argc<2 || (iop=fopen(argv[1],"r"))==NULL) //no ini file
-    {
-     nrerror("Start from no ini file!",-1,-1);
-     Re=10.;
-     lfi=3.;
-     rc=3.;
-     R=1.;
-     parabole=0.;
-     Noise=0.;
-     NoiseNorm=0.;
-     UpLimit=10.;
-     N1=10;
-     N2=10;
-     N3=10;
-     nvar=4;
-     approx=7;                    //width of approximation sample
-     *dtnext=1e-3;
-     Ns=15;
-     maschtab=1e6;
-     lambda = 2.0;
-     max_okr = 3;
-     OutStep = (CheckStep=100)/1;
-     VarStep = 0;
-     SnapStep = 100;
-     Ttot=1.;
-     }
+    {     }
     else {
       if(fscanf(iop,"%d",&ver)<1 || ver!=3) nrerror("parameters' file has wrong version",0,0);
       read_token(iop,&lfi);
@@ -107,6 +83,7 @@ double d;
       read_token(iop,&d);         max_okr = (int)d;
       read_token(iop,&d);         OutStep = (int)d;
       read_token(iop,&d);         SnapStep = (int)d;
+      read_token(iop,&SnapDelta);
       read_token(iop,&d);         CheckStep = (int)d;
       read_token(iop,&d);         VarStep = (int)d;
       read_token(iop,&Ttot);
@@ -307,7 +284,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
    MPI_Allreduce(&en, &toten, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
    Master printf("Energy of pulsations=%g (local=%g)\n",toten,en);
    Master fen = fileopen(NameEnergyFile,count);
-   Master fprintf(fen,"%8.8g  \t%e",t_cur,toten);
+   Master fprintf(fen,"%0.10g  \t%0.20g",t_cur,toten);
 
   // -------------------Maxima of array components and their changes---------------------------
    for(l=0;l<nvar;l++) {
@@ -349,7 +326,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
  // -------------------- average profile of velocity ---------------------
          for(i=0;i<N3;i++)    vfi[i]=0;
          for(i=0;i<N3;i++) totvfi[i]=0;
-        for(i=0;i<m1;i++)
+         for(i=0;i<m1;i++)
 	    for(j=ghost;j<mm2;j++)
                for(k=0;k<m3;k++)
                 if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))

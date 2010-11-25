@@ -1,12 +1,12 @@
 3
 ---------  Geometry paramereters ------------------------------
 1		| streamwise length (not angle)
-0.25		| inverse distance from centre to axis of torus
+0.15		| inverse distance from centre to axis of torus
 1		| radius of torus
 
 ---------  Physical paramereters ------------------------------
-100		| Reynolds number
-0		| init profile: 0 - zero, 1 - parabole
+1		| Reynolds number
+1		| init profile: 0 - zero, 1 - parabole
 0.001		| amplitude of initial random noise
 0.01		| amplitude of initial normal noise
 10		| maximal level of fluctuation after which nut is on
@@ -28,7 +28,8 @@
 
 ---------  Output parameters  -------------------------------
 10		| steps to statistics output (OutStep)
-1000		| steps to snaps (SnapStep)
+0		| steps to snaps (SnapStep)
+0.2		| simulation time delta to snap (SnapDelta)
 10		| steps of checking divergence (CheckStep)
 1		| test of time step (VarStep)
 200		| Total time
