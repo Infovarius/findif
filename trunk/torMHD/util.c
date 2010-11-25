@@ -8,7 +8,7 @@ void nrerror(char error_text[],double t_cur,long count)
     nmessage(error_text,t_cur,count);
     err=fileopen(NameErrorFile,0);
 
-    fprintf(err,"Run-time error of proc#%d at t=%-6.4lf:\n",rank,t_cur);
+	fprintf(err,"Run-time error of proc#%d at t=%-6.4lf (numerics= %ld ):\n",rank,t_cur,count);
     fprintf(err,"%s\n",error_text);
     fprintf(err,"...now exiting to system...\n");
     fileclose(err);
@@ -176,7 +176,7 @@ return(aa);
 
 void free_mem_2f(double **aa, int n1, int n2)
 {
-int j, k;
+int j;
 
    for(j = 0; j < n1; j++)
     {
@@ -192,7 +192,7 @@ int j, k;
 
 void free_mem_2i(int **aa, int n1, int n2)
 {
-int j, k;
+int j;
 
    for(j = 0; j < n1; j++)
     {
@@ -228,7 +228,6 @@ return(a);
 
 void free_mem_1f(double *a, int n)
 {
-int k;
    if(!a) {putlog("error at releasing",(long)a);return;}
    free(a);
    return;
@@ -236,7 +235,6 @@ int k;
 
 void free_mem_1i(int *a, int n)
 {
-int k;
    if(!a) {putlog("error at releasing",(long)a);return;}
    free(a);
    return;
