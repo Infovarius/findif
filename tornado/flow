@@ -1,0 +1,28 @@
+1
+---------  Geometry paramereters ------------------------------
+1		| height of box
+1		| side of square
+
+---------  Physical paramereters ------------------------------
+10		| Reynolds number
+0.001		| amplitude of initial random noise
+0.01		| amplitude of initial normal noise
+1		| amplitude of force
+0.1		| radius of force
+
+---------  Scheme (aproximation) parameters ------------------
+32		| mesh point in X
+32		| mesh point in Y
+32		| mesh point in Z
+4		| variables number
+7		| aproxx order
+0.001		| initial timestep
+
+3		| maximal size of averaging vicinity (max_okr)
+
+---------  Output parameters  -------------------------------
+10		| steps to statistics output (OutStep)
+1000		| steps to snaps (SnapStep)
+10		| steps of checking divergence (CheckStep)
+1		| test of time step (VarStep)
+100		| Total time

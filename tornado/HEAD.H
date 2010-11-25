@@ -18,15 +18,15 @@ LEVEL char *NameCPFile;
 LEVEL char *NameStatFile;
 LEVEL char *fname;
 
-LEVEL double ****f, ****f1, ***nut, ****df, ****df2, ****df3, ****df4, ****df5, **s_func,
-             dx[3], *r_1, *r_2, **node, **refr, **refz, **sinth, **costh, **chi;
+LEVEL double ****f, ****f1, ***nut, ****df, ****df2, ****df3, ****df4, ****df5,
+             dx[3], **sinth, **costh;
 
 enum  TypeNodes {NodeUnknown=0,NodeClued=1,
                                NodeFluid=8, NodeShell=2, NodeVacuum=4,   // regions
                                /*NodeFluid=8,*/ NodeGhostFluid=16};       // for hydrodynamics
 LEVEL double ***averf;
 LEVEL double *totvfi, *vfi;
-LEVEL double Gamma, lfi, H, R, Gr, Ta;
+LEVEL double Gamma, H, R, Re, aF, rF, W;
 
 LEVEL int    m1, m2, m3, mm1, mm2, mm3, n1, n2, n3, N1, N2, N3, Ns,
              approx, ghost, nvar;
@@ -74,13 +74,8 @@ LEVEL double *nl,**sha,**shb;
 LEVEL double *f0;                           //flux of energy from grid to shell
 LEVEL double *en_flux;                      //summary of energy in cascade model
 
-/*-------- goy.c  -----------*/
-void init_shell(void);
-void sima(double *zza, double *zzb, double *xx, double *yy);
-void time_step_shell(double tm);
-void erase_shell(void);
 /*------- struct_func.c ----*/
-void struct_func(double ****f,int q,double lambda,int size_okr);
+//void struct_func(double ****f,int q,double lambda,int size_okr);
 /*------- util.c  -----------*/
 void nrerror(char *mess,double t_cur,long count);
 void nmessage(char *mess,double t_cur,long count);
@@ -93,9 +88,13 @@ double **alloc_mem_2f(int, int);
 void   free_mem_2f(double **, int, int);
 double *alloc_mem_1f(int);
 void   free_mem_1f(double *, int);
+int **alloc_mem_2i(int, int);
+void   free_mem_2i(int **, int, int);
+int *alloc_mem_1i(int);
+void   free_mem_1i(int *, int);
 void operate_memory(int dir);
-int isType(double nod, enum TypeNodes tip);
-void setType(double *nod, enum TypeNodes tip);
+int isType(int nod, enum TypeNodes tip);
+void setType(int *nod, enum TypeNodes tip);
 void CopyBufferToGrid(double ****,double ***,double *,int,int,int,int,int,int);
 void CopyGridToBuffer(double ****,double ***,double *,int,int,int,int,int,int);
 /*------- rkad.c  -----------*/
@@ -120,6 +119,7 @@ void init_param(int argc, char** argv,double *dtnext);
 int init_data(void);
 void print_array1d(FILE *ff,double *a,int beg1,int n1);
 void print_array2d(FILE *ff,double **a,int beg1,int n1,int beg2,int n2);
+void print_array2i(FILE *ff,int **a,int beg1,int n1,int beg2,int n2);
 void print_array3d(FILE *ff,double ***a,int beg1,int n1,int beg2,int n2,int beg3,int n3);
 void check(double ****f);
 void printing(double ****f1,double dtdid,double t_cur,long count,double en);
