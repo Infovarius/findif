@@ -253,7 +253,7 @@ for(l=0;l<=2;l++)
   for(i=0;i<m1;i++)
     for(k=0;k<m3;k++)
        if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
-           TotalEnergy += fabs(1+coordin(i,0)*rc)*pow(averf[l][i][k],2.);
+           TotalEnergy += pow(averf[l][i][k],2.);
 TotalEnergy += 1.;   //if zero average field
 razlet = (PulsEnergy/TotalEnergy>UpLimit);
 }
