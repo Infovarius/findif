@@ -42,7 +42,7 @@ void pde(double t, double ****f, double ****df)
       if(j<=ghost && n[1]==0) continue;
       M = 1./(rc*coordin(i,0)+1);
       memset(dp1,0,3*sizeof(double));      memset(dn1,0,3*sizeof(double));
-      memset(dv1,0,21*sizeof(double));  memset(dv2,0,21*sizeof(double));
+      memset(dv1,0,21*sizeof(double));     memset(dv2,0,21*sizeof(double));
       memset(dA11,0,63*sizeof(double));
       for(m=0;m<3;m++) {
          dp1[m]=dr(f[0],i,j,k,m+1,0,dx[m],(approx-1)/2, approx);
@@ -115,7 +115,7 @@ void pde(double t, double ****f, double ****df)
    for(i=0;i<m1;i++)
    for(k=0;k<m3;k++)
       if(isType(node[i][k],NodeGhostFluid))
-      for(j=ghost;j<mm2;j++)
+      for(j=0;j<m2;j++)
         for(l=1;l<=3;l++)
                 f[l][i][j][k] = 0;
    for(i=0;i<m1;i++)
@@ -151,6 +151,29 @@ void pde(double t, double ****f, double ****df)
        df[6][i][j][k]=0;*/
       }   else df[4][i][j][k] = df[5][i][j][k] = df[6][i][j][k] = 0;
    return;
+}
+
+void fill_velocity(double t, double ****f)
+{
+double r1, phi1, z1, rho, vrho, vth, vphi;
+int i,j,k;
+       for(i=0;i<m1;i++)
+         for(j=0;j<m2;j++)
+            for(k=0;k<m3;k++)
+            if(isType(node[i][k],NodeFluid))
+            {
+            r1 = coordin(i,0);  phi1 = coordin(j,1);  z1 = coordin(k,2);
+            rho=sqrt(r1*r1 + z1*z1);
+            vrho = 0;
+            vth  = vtheta_given(0,rho,R,phi1)/(1+r1*rc);
+/*            vphi = vfi_given(t_cur*Tunit,rho,Rfl);      // nonstationary time=t_cur*Tunit, max magnitude=0.0990906
+            vth = 0;                        */
+            vphi = vfi_given(0,rho,R);
+//            vth = rho*vphi/R;
+            f[1][i][j][k] = vrho*sinth[i][k]+vth*costh[i][k];
+            f[2][i][j][k] = vphi;
+            f[3][i][j][k] = vrho*costh[i][k]-vth*sinth[i][k];
+            }    else f[1][i][j][k] = f[2][i][j][k] = f[3][i][j][k] = 0;
 }
 
 double deviation(double ****f,int i,int j,int k)
@@ -443,7 +466,7 @@ void  boundary_conditions(double ****f, double ***nut)
    double vrho,vphi,vth;
 
   /*============================ divertor =================================*/
-  if(t_cur>0.1)                  // divertors are off till t sec
+  if(t_cur>-0.1)                  // divertors are off till t sec
   if(n[1]==0)
   for(i=0;i<m1;i++)
     for(j=ghost;j<=ghost;j++)
@@ -505,7 +528,7 @@ void  init_conditions()
             }
 
         refr_f[i][k] = r1*(2*Rfl/rho-1);      //physical coordinates
-	    refz_f[i][k] = z1*(2*Rfl/rho-1);
+        refz_f[i][k] = z1*(2*Rfl/rho-1);
         refr_f[i][k] = (refr_f[i][k]+R)/dx[0]-0.5-n[0]+ghost;   // simulation indices
         refz_f[i][k] = (refz_f[i][k]+R)/dx[2]-0.5-n[2]+ghost;
         if(fabs(refr_f[i][k]-i)<1 && fabs(refz_f[i][k]-k)<1 && !isType(node[i][k],NodeFluid))
@@ -590,6 +613,7 @@ if(!goon) {
                      }
       }
 //   struct_func(f,2,2,3);
+//  fill_velocity(0.3, f);
    nmessage("Arrays were filled with initial values - calculation from beginning",-1,-1);
    } else nmessage("Arrays were filled with initial values - calculation is continuing",t_cur,count);
 }
@@ -622,7 +646,9 @@ void init_parallel()
          }
 if(!goon) {                       //reading sizes from file when continuing
   pp[0]=divisors[nd1]; pp[1]=divisors[nd2]; pp[2]=size/pp[0]/pp[1];                 // number of procs along axes
-  pp[0]=pp[2]=1; pp[1]=size;
+  if(pp[0]>2) pp[0]=2;
+  if(pp[2]>2) pp[2]=2;
+  pp[1]=size/pp[0]/pp[2];
           }
   pr[0] = rank%pp[0]; pr[1] = (rank/pp[0])%pp[1]; pr[2] = (rank/pp[0]/pp[1])%pp[2];  // coordinates of current subregion
 
