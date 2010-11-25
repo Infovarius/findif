@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#define _USE_MATH_DEFINES
 #include <math.h>
 #include <string.h>
 //#include <conio.h>
 #include "mpi.h"
-#define M_PI 3.141592653579893L
+// #define M_PI 3.141592653579893L
 
 LEVEL char *NameMessageFile;
 LEVEL char *NameErrorFile;

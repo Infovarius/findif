@@ -6,7 +6,7 @@
 
 int main(int argc, char** argv)
 {
-   double dttry, dtdid, dtnext, tmp,tmpT, time_old;
+   double dttry, dtdid, dtnext, Rm_tmp, rc_tmp, tmpT, time_old;
    char str[200];
    int i,j,k,l,tmpC;
    int outed;
@@ -35,7 +35,6 @@ int main(int argc, char** argv)
   sprintf(NameDumpFile ,"%s.dmp",fname); NameDumpFile[strl+4] = 0;
   NameStatFile =(char *)calloc(strl+9,sizeof(char));
   sprintf(NameStatFile,"%s_%d.sta",fname,rank); NameStatFile[strl+8] = 0;
-nextrc: ;
    Master nmessage("--------------------------------------------------------------------------",-1,-1);
 
 /* ---------------------- reading files and arrays --------------------- */
@@ -49,14 +48,14 @@ nextrc: ;
         goon = strcmp(NameInitFile,"END");
       }
 
+   fileclose(fd);
    init_param(argc,argv,&dtnext,0);       // initialization of parameters
+nextrc: 
    t_cur=0;
    count=0; enter = 0;
    timeE1=0;
-
    if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
        else { init_parallel();  operate_memory(1);}
-   fileclose(fd);
 
    init_conditions();
 
@@ -140,25 +139,28 @@ nextrc: ;
         ft = f;  f = f1;  f1 = ft;
         if (count%100==0) {
 //          MPI_Barrier(MPI_COMM_WORLD);
-          tmp=Rm;
+          Rm_tmp=Rm;
+          rc_tmp = rc;
 			init_param(argc,argv,&dttry,0);
-          Rm=tmp;
+          Rm=Rm_tmp;
+          rc = rc_tmp;
 //          MPI_Barrier(MPI_COMM_WORLD);
         }
 
         if (ChangeParamTime!=0 && floor((t_cur-dtdid)/ChangeParamTime)<floor(t_cur/ChangeParamTime))
 		{
 		//Rm = floor(t_cur/ChangeParamTime+0.5)*DeltaParam-190;
-		if(!outed) { snapshot(f,eta,t_cur,count); outed = 1;}
+//		if(!outed) { snapshot(f,eta,t_cur,count); outed = 1;}
 //                MPI_Barrier(MPI_COMM_WORLD);
-		tmp = (Rm /= (1+max(-0.9,DeltaParam*log(TotalEnergy/TotalEnergyOld))));
+		Rm_tmp = (Rm /= (1+max(-0.9,DeltaParam*log(TotalEnergy/TotalEnergyOld))));
+              rc_tmp = rc;
                 tmpC = count;  tmpT = t_cur;
 			init_param(argc,argv,&dtnext,1);       // initialization of parameters
 
 		if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
 			if(strcmp(NameInitFile,"-1")==0) goon = 1;
 
-                count = tmpC;  t_cur = tmpT;  Rm = tmp;
+                count = tmpC;  t_cur = tmpT;  Rm = Rm_tmp; rc = rc_tmp;
 		init_conditions();
 		fill_velocity(0.3, f);   fill_velocity(0.3, f1);
 		goon = 1;
@@ -184,13 +186,20 @@ nextrc: ;
    if(!outed) snapshot(f,eta,t_cur,count);
    if(rank==0) add_control_point("END");
 
-sprintf(str,"energy(0.%d).dat",100*rc);
-rename("energy.dat",str);
-if((rc += 0.05) < 0.6) {Master nmessage("rc was changed to",rc,count); goto nextrc;}
+sprintf(str,"energy(%0.2f).dat",rc);
+Master rename("energy.dat",str);
+MPI_Barrier(MPI_COMM_WORLD);
+	operate_memory(-1);
+if((rc += 0.05) <1) 
+    {
+   Master nmessage("--------------------------------------------------------------------------",-1,-1);
+	Master nmessage("rc was changed to",rc,count);
+	goon=0;
+	goto nextrc;
+}
    Master fileclose(ferror);
 
 	MPI_Barrier(MPI_COMM_WORLD);
-	operate_memory(-1);
    if(t_cur>=Ttot&&!razlet) nmessage("work is succesfully done",t_cur,count);
        else nrerror("this is break of scheme",t_cur,count);
    MPI_Finalize();
