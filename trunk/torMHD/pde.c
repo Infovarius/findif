@@ -114,6 +114,8 @@ void pde(double t, double ****f, double ****df)
 //      df[0][i][j][k] = df[1][i][j][k] = df[2][i][j][k] = df[3][i][j][k] = 0;
       }   else df[0][i][j][k] = df[1][i][j][k] = df[2][i][j][k] = df[3][i][j][k] = 0;
 
+calculate_curl(&f[4],B,NodeMagn);
+
    for(i=0;i<m1;i++)
    for(k=0;k<m3;k++)
       if(isType(node[i][k],NodeGhostFluid))
@@ -135,7 +137,7 @@ void pde(double t, double ****f, double ****df)
         dA11[l][1][2] = dA11[l][2][1] = d2cross(f[l],i,j,k,3,2,(approx-1)/2,approx);
         }
 
-       df[4][i][j][k]=Rm*(f[2][i][j][k]*(dv1[5][0]-dv1[4][1]+f[5][i][j][k]*r_1[i])-f[3][i][j][k]*(dv1[4][2]-dv1[6][0]))
+       /*df[4][i][j][k]=Rm*(f[2][i][j][k]*(dv1[5][0]-dv1[4][1]+f[5][i][j][k]*r_1[i])-f[3][i][j][k]*(dv1[4][2]-dv1[6][0]))
 //                      +Rm*f[2][i][j][k]	 // for induced field
                      +eta[i][j][k]*(dv2[4][0]+dv2[4][1]+dv2[4][2]+r_1[i]*dv1[4][0]-f[4][i][j][k]*r_2[i]-2*dv1[5][1]*r_1[i])
                      +(eta0-eta[i][j][k])*(dv2[4][0]+dv1[4][0]*r_1[i]-f[4][i][j][k]*r_2[i]-dv1[5][1]*r_1[i]+dA11[5][0][1]+dA11[6][0][2]);
@@ -145,12 +147,36 @@ void pde(double t, double ****f, double ****df)
                      +(eta0-eta[i][j][k])*(dv1[4][1]*r_1[i]+dA11[4][0][1]+dv2[5][1]+dA11[6][1][2]);
        df[6][i][j][k]=Rm*(f[1][i][j][k]*(dv1[4][2]-dv1[6][0])-f[2][i][j][k]*(dv1[6][1]-dv1[5][2]))
                      +eta[i][j][k]*(dv2[6][0]+dv2[6][1]+dv2[6][2]+r_1[i]*dv1[6][0])
-                     +(eta0-eta[i][j][k])*(dv1[4][2]*r_1[i]+dA11[4][0][2]+dA11[5][1][2]+dv2[6][2]);
-/*       df[4][i][j][k]=eta[i][j][k]*(dv2[4][0]+dv2[4][1]+dv2[4][2]+r_1[i]*dv1[4][0]-f[4][i][j][k]*r_2[i]-2*dv1[5][1]*r_1[i]);
-       df[5][i][j][k]=f[3][i][j][k]*(dv1[6][1]-dv1[5][2])-f[1][i][j][k]*(dv1[5][0]-dv1[4][1]+f[5][i][j][k]*r_1[i])
+                     +(eta0-eta[i][j][k])*(dv1[4][2]*r_1[i]+dA11[4][0][2]+dA11[5][1][2]+dv2[6][2]);*/
+
+       df[4][i][j][k]=Rm*(f[2][i][j][k]*B[2][i][j][k]-f[3][i][j][k]*B[1][i][j][k])
+//                      +Rm*f[2][i][j][k]	 // for induced field
+                     +eta[i][j][k]*(dv2[4][0]+dv2[4][1]+dv2[4][2]+r_1[i]*dv1[4][0]-f[4][i][j][k]*r_2[i]-2*dv1[5][1]*r_1[i])
+                     +(eta0-eta[i][j][k])*(dv2[4][0]+dv1[4][0]*r_1[i]-f[4][i][j][k]*r_2[i]-dv1[5][1]*r_1[i]+dA11[5][0][1]+dA11[6][0][2]);
+       df[5][i][j][k]=Rm*(f[3][i][j][k]*B[0][i][j][k]-f[1][i][j][k]*B[2][i][j][k])
+//                     -Rm*f[1][i][j][k]	// for induced field
                      +eta[i][j][k]*(dv2[5][0]+dv2[5][1]+dv2[5][2]+r_1[i]*dv1[5][0]-f[5][i][j][k]*r_2[i]+2*dv1[4][1]*r_1[i])
-                     +(1./Rm-eta[i][j][k])*(dv1[4][1]*r_1[i]+dA11[4][0][1]+dv2[5][1]+dA11[6][1][2]);
-       df[6][i][j][k]=0;*/
+                     +(eta0-eta[i][j][k])*(dv1[4][1]*r_1[i]+dA11[4][0][1]+dv2[5][1]+dA11[6][1][2]);
+       df[6][i][j][k]=Rm*(f[1][i][j][k]*B[1][i][j][k]-f[2][i][j][k]*B[0][i][j][k])
+                     +eta[i][j][k]*(dv2[6][0]+dv2[6][1]+dv2[6][2]+r_1[i]*dv1[6][0])
+                     +(eta0-eta[i][j][k])*(dv1[4][2]*r_1[i]+dA11[4][0][2]+dA11[5][1][2]+dv2[6][2]); 
+
+   if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
+	   {
+	   // пондеромоторная сила
+	  df[1][i][j][k]-= Ha*Ha/Re/Rm*(
+		     -(dv2[6][0]+dv2[6][1]+dv2[6][2])*B[1][i][j][k]
+		     +(dv2[5][0]+dv2[5][1]+dv2[5][2])*B[2][i][j][k])
+		     ;
+      df[2][i][j][k]-= Ha*Ha/Re/Rm*(
+		     +(dv2[6][0]+dv2[6][1]+dv2[6][2])*B[0][i][j][k]
+		     -(dv2[4][0]+dv2[4][1]+dv2[4][2])*B[2][i][j][k])
+		     ;
+      df[3][i][j][k]-= Ha*Ha/Re/Rm*(
+		     -(dv2[5][0]+dv2[5][1]+dv2[5][2])*B[0][i][j][k]
+		     +(dv2[4][0]+dv2[4][1]+dv2[4][2])*B[1][i][j][k])
+		     ;
+	   }
       }   else df[4][i][j][k] = df[5][i][j][k] = df[6][i][j][k] = 0;
    return;
 }
