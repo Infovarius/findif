@@ -6,7 +6,7 @@
 #define Pgrow        (double)-0.2
 #define Pshrink      (double)-0.25
 #define ErrCon       (double)1.89e-4
-#define ErrScale     (double)1e4
+#define ErrScale     (double)1e3
 #define MinScale     (double)1e-12
 
 
@@ -29,8 +29,7 @@ void timestep(double ****f, double ****df, double ***nut, double t, double ****f
       err=errs;
 
       err *=ErrScale;
-      if (err<=1.0)
-	 break;
+      if (err<=1.0) break;
       dt = max(Safety * dt * pow(err, Pshrink), dt*(double)0.1);
       if (t+dt == t)
 	    {

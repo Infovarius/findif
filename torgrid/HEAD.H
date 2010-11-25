@@ -120,6 +120,7 @@ void   pde(double t, double ****f, double ****df);
 double norma(double a,double b,double c,int q);
 double deviation(double ****f,int,int,int);
 void nut_by_flux(double ****f, double ***nu, double Re);
+void gaussian(double ****f, double ****f1, double eps);
 void   boundary_conditions(double ****f, double ***nu);
 void  init_conditions(void);
 void init_parallel(void);

@@ -102,8 +102,8 @@ double d;
          	goon = 1;
                 sprintf(NameInitFile,"%s_*_%05d.snp",NameSnapFile,(int)d);
                 }
-      Master nmessage("Parameters were extracted from file",0,0);
      }
+  else Master nmessage("Parameters were extracted from file",0,0);
       fileclose(iop);
       }
 }
@@ -261,13 +261,13 @@ for(i=0;i<m1;i++)
           if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
            {
            PulsEnergy+=deviation(f,i,j,k);
-           for(l=0;l<=2;l++) averf[l][i][k] += f[l+1][i][j][k];
+           for(l=0;l<=2;l++) averf[l][i][k] += pow(f[l+1][i][j][k],2.);
            }
 for(l=0;l<=2;l++)
   for(i=0;i<m1;i++)
     for(k=0;k<m3;k++)
        if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
-           TotalEnergy += fabs(1+coordin(i,0)*rc)*pow(averf[l][i][k],2.);
+           TotalEnergy += fabs(1+coordin(i,0)*rc)*averf[l][i][k];
 TotalEnergy += 1.;   //if zero average field
 razlet = (PulsEnergy/TotalEnergy>UpLimit);
 }
@@ -393,7 +393,7 @@ long tag=count,v;
 FILE *fd;
 
  sprintf(str,"%s_%d_%d.snp",NameSnapFile,size,count);
- boundary_conditions(f1,nut);
+// boundary_conditions(f1,nut);
 
  if(rank!=0) MPI_Recv(message,0,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);
 
