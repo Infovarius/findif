@@ -6,7 +6,7 @@
 
 int main(int argc, char** argv)
 {
-   double dttry, dtdid, dtnext, tmp,tmpT;
+   double dttry, dtdid, dtnext, tmp,tmpT, time_old;
    int i,j,k,l,tmpC;
    int outed;
    FILE *fd, *ferror;
@@ -48,9 +48,7 @@ int main(int argc, char** argv)
         goon = strcmp(NameInitFile,"END");
       }
 
-   init_param(argc,argv,&dtnext);       // initialization of parameters
-   Gamma=1e-4;
-   ghost=(approx-1)/2;                  //radius of approx sample
+   init_param(argc,argv,&dtnext,0);       // initialization of parameters
    t_cur=0;
    count=0; enter = 0;
    timeE1=0;
@@ -58,10 +56,6 @@ int main(int argc, char** argv)
    if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
        else { init_parallel();  operate_memory(1);}
    fileclose(fd);
-
-   dx[0]=2*R/N1;
-   dx[1]=lfi/N2;
-   dx[2]=2*R/N3;
 
    init_conditions();
 
@@ -95,11 +89,15 @@ int main(int argc, char** argv)
             }
 //--------------------------------------
 
+   putlog("before",1);
    fill_velocity(0.3, f);    // time=0.3 for amplitude~1
+   putlog("velocity1",1);
    fill_velocity(0.3, f1);   // additional array
+   putlog("velocity2",2);
    boundary_conditions(f);
-
+   putlog("bc",3);
    if(!goon)  dump(f,eta,t_cur,count);
+   exit(0);
    time_begin = MPI_Wtime();
    if(!goon) Master nmessage("work has begun",0,0);
        else Master nmessage("work continued",t_cur,count);
@@ -146,7 +144,7 @@ int main(int argc, char** argv)
         if (count%100==0) {
 //          MPI_Barrier(MPI_COMM_WORLD);
           tmp=Rm;
-          init_param(argc,argv,&dttry);
+			init_param(argc,argv,&dttry,0);
           Rm=tmp;
 //          MPI_Barrier(MPI_COMM_WORLD);
         }
@@ -158,19 +156,10 @@ int main(int argc, char** argv)
 //                MPI_Barrier(MPI_COMM_WORLD);
 		tmp = (Rm += DeltaParam);
                 tmpC = count;  tmpT = t_cur;
-		goon = ((fd=fopen(NameCPFile,"r+"))>0);
-		if(goon)
-			{ do fscanf(fd,"%s\n",NameInitFile); while (!feof(fd));
-			goon = strcmp(NameInitFile,"END");
-			}
-		init_param(argc,argv,&dtnext);       // initialization of parameters
-		ghost=(approx-1)/2;                  //radius of approx sample
-		dx[0]=2*R/N1;
-		dx[1]=lfi/N2;
-		dx[2]=2*R/N3;
+			init_param(argc,argv,&dtnext,1);       // initialization of parameters
 
-		fileclose(fd);
 		if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
+			if(strcmp(NameInitFile,"-1")==0) goon = 1;
 
                 count = tmpC;  t_cur = tmpT;  Rm = tmp;
 		init_conditions();
@@ -184,10 +173,14 @@ int main(int argc, char** argv)
                         case 'd' : dump(f,t_cur,count);  break;
                         case 'q' : { dump(f,t_cur,count);
                                      MPI_Finalize();
-                                     nrerror("You asked to exit. Here you are...",t_cur);
+                                     nrerror("You asked to exit. Here you are...",t_cur,count);
                                     }
                         }
               }*/
+	if (OutStep==0 || count%OutStep!=0) time_now=MPI_Wtime();
+	Master tmpC = DumpInterval>0 && floor((time_now-time_begin)/60/DumpInterval)>floor((time_old-time_begin)/60/DumpInterval);
+	MPI_Bcast(&tmpC,1,MPI_INT,0,MPI_COMM_WORLD);
+	if(tmpC) dump(f,nut,t_cur,count);
    } // end while
 
    printing(f,dtdid,t_cur,count,PulsEnergy);
@@ -196,10 +189,10 @@ int main(int argc, char** argv)
 
    Master fileclose(ferror);
 
+	MPI_Barrier(MPI_COMM_WORLD);
+	operate_memory(-1);
    if(t_cur>=Ttot&&!razlet) nmessage("work is succesfully done",t_cur,count);
        else nrerror("this is break of scheme",t_cur,count);
-   MPI_Barrier(MPI_COMM_WORLD);
-   operate_memory(-1);
    MPI_Finalize();
    nmessage("mpi_finalize is done",t_cur,count);
 return 0;

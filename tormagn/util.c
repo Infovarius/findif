@@ -176,7 +176,7 @@ return(aa);
 
 void free_mem_2f(double **aa, int n1, int n2)
 {
-int j, k;
+int j;
 
    for(j = 0; j < n1; j++)
     {
@@ -192,7 +192,7 @@ int j, k;
 
 void free_mem_2i(int **aa, int n1, int n2)
 {
-int j, k;
+int j;
 
    for(j = 0; j < n1; j++)
     {
@@ -228,7 +228,6 @@ return(a);
 
 void free_mem_1f(double *a, int n)
 {
-int k;
    if(!a) {putlog("error at releasing",(long)a);return;}
    free(a);
    return;
@@ -236,7 +235,6 @@ int k;
 
 void free_mem_1i(int *a, int n)
 {
-int k;
    if(!a) {putlog("error at releasing",(long)a);return;}
    free(a);
    return;
