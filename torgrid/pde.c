@@ -164,7 +164,7 @@ void  boundary_conditions(double ****f, double ***nut)
    char msg_err[100];       //for putlog+mpi_error
    int reslen;
 
-   z[1]=z[2]=z[3]=-1; z[0]=1;  //  влияет на вид гран.условий (-1:жесткие, 1:свободные)
+   z[0]=1; z[1]=z[2]=z[3]=-1; //  влияет на вид гран.условий (-1:жесткие, 1:свободные)
 
   /*============================ divertor =================================*/
   if(t_cur<00)                  // divertors are off till t sec
@@ -242,13 +242,13 @@ void  boundary_conditions(double ****f, double ***nut)
 
 // exchanging in z-direction
  if(pr_neighbour[4]>-1)
-  if(pr_neighbour[4]==rank) CopyGridToBuffer(f,nut,buf_recv[4],0,0,mm3,m1-1,m2-1,m3-1);
+  if(pr_neighbour[4]==rank) CopyGridToBuffer(f,nut,buf_recv[4],0,0,n3,m1-1,m2-1,mm3-1);
          else { CopyGridToBuffer(f,nut,buf_send[4],0,0,ghost,m1-1,m2-1,2*ghost-1);
 		MPI_Isend(buf_send[4],buf_size[2],MPI_DOUBLE,pr_neighbour[4],tag+4,MPI_COMM_WORLD,&SendRequest[req_numS++]);
 		MPI_Irecv(buf_recv[4],buf_size[2],MPI_DOUBLE,pr_neighbour[4],tag+5,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
 		}
  if(pr_neighbour[5]>-1)
-  if(pr_neighbour[5]==rank) CopyGridToBuffer(f,nut,buf_recv[5],0,0,0,m1-1,m2-1,ghost-1);
+  if(pr_neighbour[5]==rank) CopyGridToBuffer(f,nut,buf_recv[5],0,0,ghost,m1-1,m2-1,2*ghost-1);
         else { CopyGridToBuffer(f,nut,buf_send[5],0,0,n3,m1-1,m2-1,mm3-1);
 	       MPI_Isend(buf_send[5],buf_size[2],MPI_DOUBLE,pr_neighbour[5],tag+5,MPI_COMM_WORLD,&SendRequest[req_numS++]);
 	       MPI_Irecv(buf_recv[5],buf_size[2],MPI_DOUBLE,pr_neighbour[5],tag+4,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
@@ -404,6 +404,7 @@ void init_parallel()
                  k2*((kp1-1)*N2*N3+N1*(kp2-1)*N3+N1*N2*(kp3-1))+
                  k3*((kp1-1)*kp2*kp3+kp1*(kp2-1)*kp3+kp1*kp2*(kp3-1));
          if(mintime<0 || vtime<mintime) { mintime=vtime; nd1=i; nd2=j; }
+//         if((mintime<0 || vtime<mintime) && ceil((double)N1/kp1)==floor((double)N1/kp1) && ceil((double)N2/kp2)==floor((double)N2/kp2) && ceil((double)N3/kp3)==floor((double)N3/kp3)) { mintime=vtime; nd1=i; nd2=j; }
          }
 if(!goon) {                       //reading sizes from file when continuing
   pp[0]=divisors[nd1]; pp[1]=divisors[nd2]; pp[2]=size/pp[0]/pp[1];                 // number of procs along axes

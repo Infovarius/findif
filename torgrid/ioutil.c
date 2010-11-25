@@ -59,9 +59,11 @@ int ver;
 FILE *iop;
 double d;
  if(argc<2 || (iop=fopen(argv[1],"r"))==NULL) //no ini file
-    {     }
+    {
+     nrerror("Start from no ini file!",-1,-1);
+     }
     else {
-      if(fscanf(iop,"%d",&ver)<1 || ver!=3) nrerror("parameters' file has wrong version",0,0);
+      if(fscanf(iop,"%d",&ver)<1 || ver!=4) nrerror("parameters' file has wrong version",0,0);
       read_token(iop,&lfi);
       read_token(iop,&rc);
       read_token(iop,&R);
@@ -87,15 +89,26 @@ double d;
       read_token(iop,&d);         CheckStep = (int)d;
       read_token(iop,&d);         VarStep = (int)d;
       read_token(iop,&Ttot);
+      read_token(iop,&ChangeParamTime);
+      read_token(iop,&DeltaParam);
+      read_token(iop,&d);
+      if(d==0)	{
+      		goon = 0;
+                strcpy(NameInitFile,"END");
+                }
+      else if(d>0)  {
+         	goon = 1;
+                sprintf(NameInitFile,"%s_*_%05d.snp",NameSnapFile,(int)d);
+                }
       fileclose(iop);
       Master nmessage("Parameters were extracted from file",0,0);
       }
 }
 
-void read_tilleq(FILE *ffff,char echo)
+void read_tilleq(FILE *ffff,char lim, char echo)
 {char ch;
-  if (echo=='n') while ((ch=(char)fgetc(ffff))!='=');
-         else    while ((ch=(char)fgetc(ffff))!='=') printf("%c",ch);
+  if (echo=='n') while ((ch=(char)fgetc(ffff))!=lim);
+         else    while ((ch=(char)fgetc(ffff))!=lim) printf("%c",ch);
 }
 
 int init_data(void)                 //returns code of error
@@ -104,18 +117,18 @@ int init_data(void)                 //returns code of error
  int i,j,k,l,tmpr;
  float tmpd;
  char tmpc;	 
- double Re1;		  // prioritet in parameter for runtest.dat
+ double Re1;		  // prioritet for parameter in snap-file
 
  FILE *inp = fileopen(NameInitFile,-1);
- read_tilleq(inp,'n');   if(fscanf(inp,"%lf",&t_cur)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%ld",&count)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%c%d%c%d%c%d%c",&tmpc,&pp[0],&tmpc,&pp[1],&tmpc,&pp[2],&tmpc)<7) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%lf",&t_cur)==0) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%ld",&count)==0) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%c%d%c%d%c%d%c",&tmpc,&pp[0],&tmpc,&pp[1],&tmpc,&pp[2],&tmpc)<7) error=1;
                          //no need unless process distribution is written
  if(pp[0]*pp[1]*pp[2]!=size) nrerror("Wrong number of processors in data file. Can't read data.",-1,-1);
- read_tilleq(inp,'n');   if(fscanf(inp,"%d",&N1)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%d",&N2)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%d",&N3)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%lf",&Re1)==0) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%d",&N1)==0) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%d",&N2)==0) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%d",&N3)==0) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%lf",&Re1)==0) error=1;
 
  init_parallel();
  operate_memory(1);                     // creating arrays

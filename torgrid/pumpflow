@@ -1,4 +1,4 @@
-3
+4
 ---------  Geometry paramereters ------------------------------
 1		| streamwise length (not angle)
 0.15		| inverse distance from centre to axis of torus
@@ -33,3 +33,7 @@
 10		| steps of checking divergence (CheckStep)
 1		| test of time step (VarStep)
 200		| Total time
+---------  Regulators ----------------------------------------
+3		| simulation time delta between parameter changing (ChangeParamTime)
+-1		| delta of parameter changing (DeltaParam)
+-1		| name of initial file
