@@ -34,7 +34,7 @@ void pde(double t, double ****f, double ****df)
 
       df[1][i][j][k]=nut[i][j][k]*(dv2[1][0]+dv2[1][1]+dv2[1][2]+r_1[i]*dv1[1][0]
 				   -f[1][i][j][k]*r_2[i]-2*dv1[2][1]*r_1[i])
-		     -dp1[0]+Ta*Ta/r_1[i]       +2*Ta*f[2][i][j][k]                   //forces of inertion
+		     -dp1[0]+Ta*Ta/r_1[i]*0       +2*Ta*f[2][i][j][k]                   //forces of inertion
 //                     +(j+n[2]<=ghost+2 ? coordin(k,2)*f[2][i][j][k] : 0)                //helical force
 		     + (dn1[0]-f[1][i][j][k])*dv1[1][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[1][1]
@@ -51,7 +51,7 @@ void pde(double t, double ****f, double ****df)
 		     + (dn1[1]-f[1][i][j][k])*r_1[i]*f[2][i][j][k]
 		     ;
       df[3][i][j][k]=nut[i][j][k]*(dv2[3][0]+dv2[3][1]+dv2[3][2]+r_1[i]*dv1[3][0])
-		     +(i==ghost? Gr : 0)
+		     +(i<=(ghost+N1/5-1)  ? Gr : 0)
 		     -dp1[2]
 		     + (dn1[0]-f[1][i][j][k])*dv1[3][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[3][1]
