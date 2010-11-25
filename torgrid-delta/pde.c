@@ -2,6 +2,8 @@
 #define LEVEL extern
 #include "head.h"
 
+#define EPS 1e-10
+
 double norma(double a,double b,double c,int order)
 {
 if(order==2) return ((a)*(a)+(b)*(b)+(c)*(c));
@@ -24,6 +26,7 @@ if(t<t_begin) *w=omega0;
 void pde(double t, double ****f, double ****df)
 {
    int i,j,k,l,m;
+   double M;
    double dv1[4][3],dv2[4][3],dp1[3],w,dw;
 
    boundary_conditions(f,nut);
@@ -34,37 +37,40 @@ void pde(double t, double ****f, double ****df)
    for(k=0;k<m3;k++)
      if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
      {
+//      if(j<=ghost && n[1]==0) continue;
+      M = 1./(rc*coordin(i,0)+1);
       for(m=0;m<3;m++) {
-         dp1[m]=dr(f[0],i,j,k,m+1,0,dx[m],ghost, approx);
-//         dn1[m]=dr(nut,i,j,k,m+1,0,dx[m],ghost, approx);
+         dp1[m]=dr(f[0],i,j,k,m+1,0,dx[m],(approx-1)/2, approx);
       }
+      dp1[1] *= M;
       for(l=1;l<=3;l++) {
        for(m=0;m<3;m++) {
-         dv1[l][m]=dr(f[l],i,j,k,m+1,0,dx[m],ghost, approx);
-         dv2[l][m]=dr(f[l],i,j,k,m+1,1,dx[m]*dx[m],ghost, approx);
+         dv1[l][m]=dr(f[l],i,j,k,m+1,0,dx[m],(approx-1)/2, approx);
+         dv2[l][m]=dr(f[l],i,j,k,m+1,1,dx[m]*dx[m],(approx-1)/2, approx);
          }
+         dv1[l][1] *= M;     dv2[l][1]  *= M*M;
       }
 
       df[1][i][j][k]=nut[i][j][k]*(dv2[1][0]+dv2[1][1]+dv2[1][2]+r_1[i]*dv1[1][0]
 				   -f[1][i][j][k]*r_2[i]-2*dv1[2][1]*r_1[i])
-		     -dflow[0][0][i][k]-dp1[0]//+w*w/r_1[i]       +2*w*f[2][i][j][k]                   //forces of inertion
+		     -0*dflow[0][0][i][k]-dp1[0]//+w*w/r_1[i]       +2*w*f[2][i][j][k]                   //forces of inertion
 //                     +(j+n[2]<=ghost+2 ? coordin(k,2)*f[2][i][j][k] : 0)                //helical force
 		     - flow[1][i][j][k]*dv1[1][0] - f[1][i][j][k]*dflow[1][0][i][k]
 		     - flow[2][i][j][k]*dv1[1][1]
 		     - flow[3][i][j][k]*dv1[1][2] - f[3][i][j][k]*dflow[1][2][i][k]
-		     + r_1[i]*f[2][i][j][k]*f[2][i][j][k]
+		     + 2*r_1[i]*f[2][i][j][k]*flow[2][i][j][k]
 		     ;
       df[2][i][j][k]=nut[i][j][k]*(dv2[2][0]+dv2[2][1]+dv2[2][2]+r_1[i]*dv1[2][0]
 				   -f[2][i][j][k]*r_2[i]+2*dv1[1][1]*r_1[i])
-		     -dflow[0][1][i][k]-dp1[1]//-dw/r_1[i] -2*w*f[1][i][j][k]                   //forces of inertion
+		     -0*dflow[0][1][i][k]-dp1[1]//-dw/r_1[i] -2*w*f[1][i][j][k]                   //forces of inertion
 //                     -(j+n[2]<=ghost+2 ? (coordin(i,0)-rc)*f[2][i][j][k] :0)            //helical force
 		     - flow[1][i][j][k]*dv1[2][0] - f[1][i][j][k]*dflow[2][0][i][k]
 		     - flow[2][i][j][k]*dv1[2][1]
 		     - flow[3][i][j][k]*dv1[2][2] - f[3][i][j][k]*dflow[2][2][i][k]
-                     - r_1[i]*f[1][i][j][k]*f[2][i][j][k]
+                     - r_1[i]*(flow[1][i][j][k]*f[2][i][j][k]+f[1][i][j][k]*flow[2][i][j][k])
 		     ;
       df[3][i][j][k]=nut[i][j][k]*(dv2[3][0]+dv2[3][1]+dv2[3][2]+r_1[i]*dv1[3][0])
-		     -dflow[0][2][i][k]-dp1[2]
+		     -0*dflow[0][2][i][k]-dp1[2]
 		     - flow[1][i][j][k]*dv1[3][0] - f[1][i][j][k]*dflow[3][0][i][k]
 		     - flow[2][i][j][k]*dv1[3][1]
                      - flow[3][i][j][k]*dv1[3][2] - f[3][i][j][k]*dflow[3][2][i][k];
@@ -72,6 +78,7 @@ void pde(double t, double ****f, double ****df)
 //      df[0][i][j][k] = df[1][i][j][k] = df[2][i][j][k] = df[3][i][j][k] = 0;
 
   } //global for
+  else df[0][i][j][k] = df[1][i][j][k] = df[2][i][j][k] = df[3][i][j][k] = 0;
    return;
 }
 
@@ -132,31 +139,54 @@ for(k=0;k<m3;k++)
    }
 }
 
-void  boundary_conditions(double ****f, double ***nut)
+void ghost_filling(double ****f, double ***nut)
 {
-   int i, j, k, l, req_numS=0, req_numR=0;
+   int i,j,k,l;
    int r1,r2,z1,z2;
-   int /*flag,cnt,*/z[4],tag=10;
-   double vrho,vphi,vth;
-   char msg_err[100];       //for putlog+mpi_error
-   int reslen;
-
+   double ftemp[4];
+   int /*flag,cnt,*/z[4];
+   double vn;
    z[1]=z[2]=z[3]=-1; z[0]=1;  //  влияет на вид гран.условий (-1:жесткие, 1:свободные)
 
-  /*============================ divertor =================================*/
-  if(t_cur<00)                  // divertors are off till t sec
-  if(n[2]==0)
+/*----------------------- filling of ghost nodes ------------------------------*/
+
   for(i=0;i<m1;i++)
-    for(j=ghost;j<=ghost;j++)
-      for(k=0;k<m3;k++)
-         {
-         vrho = f[3][i][j][k]*costh[i][k]+f[1][i][j][k]*sinth[i][k];
-         vth  = -f[3][i][j][k]*sinth[i][k]+f[1][i][j][k]*costh[i][k];
-         vphi = sqrt(pow(f[2][i][j][k],2)+vth*vth);           //sqrt(vfi*vfi+vth*vth)
-         f[1][i][j][k] = vrho*sinth[i][k]+vphi*costh[i][k]*sin(chi[i][k]);
-	 f[2][i][j][k] = vphi*cos(chi[i][k]);
-	 f[3][i][j][k] = vrho*costh[i][k]-vphi*sinth[i][k]*sin(chi[i][k]);
-	 }
+     for(j=0;j<m2;j++)
+        for(k=0;k<m3;k++)
+          if(isType(node[i][k],NodeGhostFluid) && !isType(node[i][k],NodeClued)) {
+                r2=(r1=floor(refr[i][k]))+1;
+                z2=(z1=floor(refz[i][k]))+1;
+        if(r1<0 || r2>m1-1) printf("refr doesn't fit: (%d,%d)",i,k);
+        if(z1<0 || z2>m3-1) printf("refz doesn't fit: (%d,%d)",i,k);
+        if(r1<0 || r2>m1-1) nrerror("refr doesn't fit",t_cur,1000*i+k);
+        if(z1<0 || z2>m3-1) nrerror("refz doesn't fit",t_cur,1000*i+k);
+                for(l=0;l<nvar;l++)
+                   f[l][i][j][k] = ( (refr[i][k]-r2)*(f[l][r1][j][z1]*(refz[i][k]-z2)-f[l][r1][j][z2]*(refz[i][k]-z1))
+                                   + (refr[i][k]-r1)*(f[l][r2][j][z2]*(refz[i][k]-z1)-f[l][r2][j][z1]*(refz[i][k]-z2))
+                                    ) * z[l];
+//                   nut[i][j][k] = (refr[i][k]-r2)*(nut[r1][j][z1]*(refz[i][k]-z2)-nut[r1][j][z2]*(refz[i][k]-z1))
+//                                + (refr[i][k]-r1)*(nut[r2][j][z2]*(refz[i][k]-z1)-nut[r2][j][z1]*(refz[i][k]-z2));
+                   nut[i][j][k] = 1./Re;
+                }
+/*     if(pr[1]==0)
+     for(j=0;j<ghost;j++)
+        for(i=0;i<m1;i++)
+        for(k=0;k<m3;k++)
+        for(l=0;l<nvar;l++)
+            f[l][i][j][k] = f[l][i][2*ghost-1-j][k];
+     if(pr[1]==pp[1]-1)
+     for(j=mm2;j<m2;j++)
+        for(i=0;i<m1;i++)
+        for(k=0;k<m3;k++)
+        for(l=0;l<nvar;l++)
+            f[l][i][j][k] = f[l][i][2*mm2-1-j][k];*/
+}
+
+void interprocessor_communication(double ****f, double***nut)
+{
+   int req_numS=0, req_numR=0,tag=10;
+   int reslen;
+   char msg_err[100];       //for putlog+mpi_error
 
   /*-------------------------------- exchanging of ghosts -------------------------------------*/
 // exchanging in phi-direction - periodical directions first
@@ -174,17 +204,19 @@ void  boundary_conditions(double ****f, double ***nut)
 		}
 
    MPI_Waitall(req_numS,SendRequest,statuses);
-   if(statuses[0].MPI_ERROR) {putlog("bc:error during send=",numlog++);
+   if(req_numS && statuses[0].MPI_ERROR) {putlog("bc:error during send=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
                                }    else numlog++;
+   req_numS = 0;
     MPI_Waitall(req_numR,RecvRequest,statuses);
-   if(statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
+   if(req_numR && statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
                                }    else numlog++;
+   req_numR = 0;
   if(pr_neighbour[2]>-1) CopyBufferToGrid(f,nut,buf_recv[2],0,0,0,m1-1,ghost-1,m3-1);
   if(pr_neighbour[3]>-1) CopyBufferToGrid(f,nut,buf_recv[3],0,mm2,0,m1-1,m2-1,m3-1);
 
@@ -203,46 +235,50 @@ void  boundary_conditions(double ****f, double ***nut)
 		}
 
    MPI_Waitall(req_numS,SendRequest,statuses);
-   if(statuses[0].MPI_ERROR) {putlog("bc:error during send=",numlog++);
+   if(req_numS && statuses[0].MPI_ERROR) {putlog("bc:error during send=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
                                }    else numlog++;
+   req_numS = 0;
     MPI_Waitall(req_numR,RecvRequest,statuses);
-  if(statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
+   if(req_numR && statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
                                }    else numlog++;
+   req_numR = 0;
   if(pr_neighbour[0]>-1) CopyBufferToGrid(f,nut,buf_recv[0],0,0,0,ghost-1,m2-1,m3-1);
   if(pr_neighbour[1]>-1) CopyBufferToGrid(f,nut,buf_recv[1],mm1,0,0,m1-1,m2-1,m3-1);
 
 // exchanging in z-direction
  if(pr_neighbour[4]>-1)
-  if(pr_neighbour[4]==rank) CopyGridToBuffer(f,nut,buf_recv[4],0,0,mm3,m1-1,m2-1,m3-1);
+  if(pr_neighbour[4]==rank) CopyGridToBuffer(f,nut,buf_recv[4],0,0,n3,m1-1,m2-1,mm3-1);
          else { CopyGridToBuffer(f,nut,buf_send[4],0,0,ghost,m1-1,m2-1,2*ghost-1);
 		MPI_Isend(buf_send[4],buf_size[2],MPI_DOUBLE,pr_neighbour[4],tag+4,MPI_COMM_WORLD,&SendRequest[req_numS++]);
 		MPI_Irecv(buf_recv[4],buf_size[2],MPI_DOUBLE,pr_neighbour[4],tag+5,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
 		}
  if(pr_neighbour[5]>-1)
-  if(pr_neighbour[5]==rank) CopyGridToBuffer(f,nut,buf_recv[5],0,0,0,m1-1,m2-1,ghost-1);
+  if(pr_neighbour[5]==rank) CopyGridToBuffer(f,nut,buf_recv[5],0,0,ghost,m1-1,m2-1,2*ghost-1);
         else { CopyGridToBuffer(f,nut,buf_send[5],0,0,n3,m1-1,m2-1,mm3-1);
 	       MPI_Isend(buf_send[5],buf_size[2],MPI_DOUBLE,pr_neighbour[5],tag+5,MPI_COMM_WORLD,&SendRequest[req_numS++]);
 	       MPI_Irecv(buf_recv[5],buf_size[2],MPI_DOUBLE,pr_neighbour[5],tag+4,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
 	       }
 
    MPI_Waitall(req_numS,SendRequest,statuses);
-   if(statuses[0].MPI_ERROR) {putlog("bc:error during send=",numlog++);
+   if(req_numS && statuses[0].MPI_ERROR) {putlog("bc:error during send=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
                                }    else numlog++;
+   req_numS = 0;
     MPI_Waitall(req_numR,RecvRequest,statuses);
-  if(statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
+   if(req_numR && statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
                                }    else numlog++;
+   req_numR = 0;
   if(pr_neighbour[4]>-1) CopyBufferToGrid(f,nut,buf_recv[4],0,0,0,m1-1,m2-1,ghost-1);
   if(pr_neighbour[5]>-1) CopyBufferToGrid(f,nut,buf_recv[5],0,0,mm3,m1-1,m2-1,m3-1);
 
@@ -253,31 +289,42 @@ void  boundary_conditions(double ****f, double ***nut)
 //    MPI_Testall(req_numR,RecvRequest,&flag,statuses);
 //    MPI_Get_count(statuses,MPI_DOUBLE,&cnt);
 //    MPI_Waitall(req_numR,RecvRequest,statuses);
+}
+							   
+void  boundary_conditions(double ****f, double ***nut)
+{
+   int i, j, k, l;
+   double vrho,vphi,vth;
 
-/*----------------------- filling of ghost nodes ------------------------------*/
-
+  /*============================ divertor =================================*/
+  if(t_cur<00)                  // divertors are off till t sec
+  if(n[1]==0)
   for(i=0;i<m1;i++)
-     for(j=0;j<m2;j++)
-        for(k=0;k<m3;k++)
-          if(isType(node[i][k],NodeGhostFluid) && !isType(node[i][k],NodeClued)) {
-                r2=(r1=floor(refr[i][k]))+1;
-                z2=(z1=floor(refz[i][k]))+1;
-                for(l=0;l<nvar;l++)
-                   f[l][i][j][k] = ( (refr[i][k]-r2)*(f[l][r1][j][z1]*(refz[i][k]-z2)-f[l][r1][j][z2]*(refz[i][k]-z1))
-                                   + (refr[i][k]-r1)*(f[l][r2][j][z2]*(refz[i][k]-z1)-f[l][r2][j][z1]*(refz[i][k]-z2))
-                                    ) * z[l];
-//                   nut[i][j][k] = (refr[i][k]-r2)*(nut[r1][j][z1]*(refz[i][k]-z2)-nut[r1][j][z2]*(refz[i][k]-z1))
-//                                + (refr[i][k]-r1)*(nut[r2][j][z2]*(refz[i][k]-z1)-nut[r2][j][z1]*(refz[i][k]-z2));
-                   nut[i][j][k] = 1./Re;
-                }
+    for(j=ghost;j<=ghost;j++)
+      for(k=0;k<m3;k++)
+      if(isType(node[i][k],NodeFluid))
+         {
+         vrho = f[3][i][j][k]*costh[i][k]+f[1][i][j][k]*sinth[i][k];
+         vth  = -f[3][i][j][k]*sinth[i][k]+f[1][i][j][k]*costh[i][k];
+         vphi = sqrt(pow(f[2][i][j][k],2)+vth*vth);           //sqrt(vfi*vfi+vth*vth)
+         f[1][i][j][k] = vrho*sinth[i][k]+vphi*costh[i][k]*sin(chi[i][k]);
+	 f[2][i][j][k] = vphi*cos(chi[i][k]);
+	 f[3][i][j][k] = vrho*costh[i][k]-vphi*sinth[i][k]*sin(chi[i][k]);
+/*         f[1][i][j][k] = f[3][i][j][k] = 0;
+         f[2][i][j][k] = (R*R-pow(coordin(i,0),2) - pow(coordin(k,2),2))/R/R;*/
+	 }
 
+   interprocessor_communication(f,nut);
+   ghost_filling(f,nut);
+   if(pp[0]>1 || pp[2]>1) interprocessor_communication(f,nut);
   return;
 }
 
 void  init_conditions()
 {
-   int i,j,k,l;
+   int i,j,k,l,ll;
    double r, rho, r1, z1;
+   int ghost1=(approx-1)/2;
 //   double k1,k2,k3;
 
 // -------- filling of nodes' types +reflections rel circle + nut ---------------
@@ -301,34 +348,38 @@ void  init_conditions()
      //for hydrodynamics
         if(isType(node[i][k],NodeFluid))
             { if(isType(node[i][k],NodeGhostFluid)) node[i][k] -= NodeGhostFluid;
-              for(l=-ghost;l<=ghost;l++)
-                     { if(i+l>=0&&i+l<m1) if(!isType(node[i+l][k],NodeFluid))
-                                              setType(&node[i+l][k],NodeGhostFluid);
-                       if(k+l>=0&&k+l<m3) if(!isType(node[i][k+l],NodeFluid))
-                                              setType(&node[i][k+l],NodeGhostFluid);
-                     }
+              for(l=-ghost1;l<=ghost1;l++)
+              for(ll=-ghost1;ll<=ghost1;ll++)
+                   if(i+l>=0&&i+l<m1 && k+ll>=0&&k+ll<m3)
+                        if(!isType(node[i+l][k+ll],NodeFluid))
+                          setType(&node[i+l][k+ll],NodeGhostFluid);
+                        else;
+                   else if(!isType(node[i][k],NodeClued)) nmessage("out of boundary",i,k);
             }
         refr[i][k] = r1*(2*R/rho-1);      //physical coordinates
         refz[i][k] = z1*(2*R/rho-1);
         refr[i][k] = (refr[i][k]+R)/dx[0]-0.5-n[0]+ghost;   // simulation indices
         refz[i][k] = (refz[i][k]+R)/dx[2]-0.5-n[2]+ghost;
-        if(fabs(refr[i][k]-i)<1 && fabs(refz[i][k]-k)<1 && !isType(node[i][k],NodeFluid))
+        if(fabs(refr[i][k]-i)<1 && fabs(refr[i][k]-(int)refr[i][k])>EPS &&
+           fabs(refz[i][k]-k)<1 && fabs(refz[i][k]-(int)refz[i][k])>EPS &&
+           !isType(node[i][k],NodeFluid))
                  { setType(&node[i][k],NodeFluid);
                    if(isType(node[i][k],NodeGhostFluid)) node[i][k] -= NodeGhostFluid;
-                   for(l=-ghost;l<=ghost;l++)
-                     { if(i+l>=0&&i+l<m1) if(!isType(node[i+l][k],NodeFluid))
-                                              setType(&node[i+l][k],NodeGhostFluid);
-                       if(k+l>=0&&k+l<m3) if(!isType(node[i][k+l],NodeFluid))
-                                              setType(&node[i][k+l],NodeGhostFluid);
-                     }
+              for(l=-ghost1;l<=ghost1;l++)
+                   for(ll=-ghost1;ll<=ghost1;ll++)
+                      if(i+l>=0&&i+l<m1 && k+ll>=0&&k+ll<m3)
+                         if(!isType(node[i+l][k+ll],NodeFluid))
+                           setType(&node[i+l][k+ll],NodeGhostFluid);
+                        else;
+                      else if(!isType(node[i][k],NodeClued)) nmessage("out of boundary",i,k);
                   }
      //for divertor's blade
         sinth[i][k]=r1/rho;
         costh[i][k]=   z1/rho;
-        chi[i][k]  = chimax*M_PI/180.*rho/R;
+        chi[i][k] = chimax*M_PI/180*rho/R;
        }
 
-   for(i=0;i<m1;i++) { r_1[i] = rc/(rc*(dx[0]*(i-ghost+0.5+n[0])-R)+1); r_2[i] = r_1[i]*r_1[i]; } 
+   for(i=0;i<m1;i++) { r_1[i] = rc/(rc*coordin(i,0)+1); r_2[i] = r_1[i]*r_1[i]; }
 
 // --------------- initial conditions -----------------------------------------
 //   k1=2*M_PI/lfi;  k3=M_PI/l3;
@@ -352,7 +403,6 @@ if(!goon) {
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
 	nut[i][j][k]=1./Re;
-//   struct_func(f,2,2,3);
    nmessage("Arrays were filled with initial values - calculation from beginning",-1,-1);
    } else nmessage("Arrays were filled with initial values - calculation is continuing",t_cur,count);
 }
@@ -381,6 +431,7 @@ void init_parallel()
                  k2*((kp1-1)*N2*N3+N1*(kp2-1)*N3+N1*N2*(kp3-1))+
                  k3*((kp1-1)*kp2*kp3+kp1*(kp2-1)*kp3+kp1*kp2*(kp3-1));
          if(mintime<0 || vtime<mintime) { mintime=vtime; nd1=i; nd2=j; }
+//         if((mintime<0 || vtime<mintime) && ceil((double)N1/kp1)==floor((double)N1/kp1) && ceil((double)N2/kp2)==floor((double)N2/kp2) && ceil((double)N3/kp3)==floor((double)N3/kp3)) { mintime=vtime; nd1=i; nd2=j; }
          }
 if(!goon) {                       //reading sizes from file when continuing
   pp[0]=divisors[nd1]; pp[1]=divisors[nd2]; pp[2]=size/pp[0]/pp[1];                 // number of procs along axes
@@ -391,6 +442,12 @@ if(!goon) {                       //reading sizes from file when continuing
   n1 = floor((double)N1/pp[0]);     n[0] = n1*pr[0] + min(pr[0],N1-pp[0]*n1);    if(pr[0]<N1-pp[0]*n1) n1++;              // dimensions of subregion
   n2 = floor((double)N2/pp[1]);     n[1] = n2*pr[1] + min(pr[1],N2-pp[1]*n2);    if(pr[1]<N2-pp[1]*n2) n2++;
   n3 = floor((double)N3/pp[2]);     n[2] = n3*pr[2] + min(pr[2],N3-pp[2]*n3);    if(pr[2]<N3-pp[2]*n3) n3++;
+   iop=fopen(NameStatFile,"w");
+   fprintf(iop,"%d\n",rank);
+   fprintf(iop,"%d\t%d\t%d\n",pr[0],pr[1],pr[2]);
+   fprintf(iop,"%d\t%d\t%d\n",pp[0],pp[1],pp[2]);
+   fprintf(iop,"%d\t%d\t%d\n",n[0],n[1],n[2]);
+   fprintf(iop,"%d\t%d\t%d\n",n1,n2,n3);
    if(n1<ghost || n2<ghost || n3<ghost) nrerror("Too small mesh or incorrect number of processes",0,0);
 
    m1 = n1+2*ghost;
@@ -418,13 +475,6 @@ if(!goon) {                       //reading sizes from file when continuing
    buf_send[j+2*i] = alloc_mem_1f(buf_size[i]);
    buf_recv[j+2*i] = alloc_mem_1f(buf_size[i]);
   }
-
-   iop=fopen(NameStatFile,"w");
-   fprintf(iop,"%d\n",rank);
-   fprintf(iop,"%d\t%d\t%d\n",pr[0],pr[1],pr[2]);
-   fprintf(iop,"%d\t%d\t%d\n",pp[0],pp[1],pp[2]);
-   fprintf(iop,"%d\t%d\t%d\n",n[0],n[1],n[2]);
-   fprintf(iop,"%d\t%d\t%d\n",n1,n2,n3);
    for(i=0;i<6;i++)
      fprintf(iop,"%d ",pr_neighbour[i]);
    fprintf(iop,"\n");
@@ -492,7 +542,7 @@ int i,j,k,l,m;
       for(l=0;l<=3;l++)
        for(m=0;m<3;m++)
          if(l==0 || m!=1)       // for velocity there's no need in phi-derivative
-         dflow[l][m][i][k] = dr(f[l],i,j,k,m+1,0,dx[m],ghost, approx);
+         dflow[l][m][i][k] = dr(f[l],i,j,k,m+1,0,dx[m],(approx-1)/2, approx);
       }
    boundary_conditions(flow,nut);
    snapshot(flow,nut,0,0);

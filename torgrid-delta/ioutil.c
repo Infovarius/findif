@@ -50,7 +50,7 @@ char str[256],*pstr;
  if(sscanf(str,"%lf",param)==0) nrerror("Input of parameter error",-1,-1);
  pstr=strtok(str,"|");
  pstr=strtok((char *)NULL,"|");
- Master printf("%g\t->\t%s",*param,pstr);
+ if(!count) printf("%g\t->\t%s",*param,pstr);
 }
 
 void init_param(int argc, char** argv,double *dtnext)
@@ -59,9 +59,11 @@ int ver;
 FILE *iop;
 double d;
  if(argc<2 || (iop=fopen(argv[1],"r"))==NULL) //no ini file
-    {     }
+    {
+     nrerror("Start from no ini file!",-1,-1);
+     }
     else {
-      if(fscanf(iop,"%d",&ver)<1 || ver!=1) nrerror("parameters' file has wrong version",0,0);
+      if(fscanf(iop,"%d",&ver)<1 || ver!=2) nrerror("parameters' file has wrong version",0,0);
       read_token(iop,&lfi);
       read_token(iop,&rc);
       read_token(iop,&R);
@@ -69,6 +71,7 @@ double d;
       read_token(iop,&parabole);
       read_token(iop,&Noise);
       read_token(iop,&NoiseNorm);
+      if(ver>=2) read_token(iop,&UpLimit);
       read_token(iop,&chimax);
       read_token(iop,&d);         N1 = (int)d;
       read_token(iop,&d);         N2 = (int)d;
@@ -83,15 +86,29 @@ double d;
       read_token(iop,&d);         CheckStep = (int)d;
       read_token(iop,&d);         VarStep = (int)d;
       read_token(iop,&Ttot);
+      if(ver>=2) read_token(iop,&ChangeParamTime);
+      if(ver>=2) read_token(iop,&DeltaParam);
+      if(ver>=2) read_token(iop,&d);
+  if(count)
+     {
+      if(d==0)	{
+      		goon = 0;
+                strcpy(NameInitFile,"END");
+                }
+      else if(d>0)  {
+         	goon = 1;
+                sprintf(NameInitFile,"%s_*_%05d.snp",NameSnapFile,(int)d);
+                }
+     }
+  else Master nmessage("Parameters were extracted from file",0,0);
       fileclose(iop);
-      Master nmessage("Parameters were extracted from file",0,0);
       }
 }
 
-void read_tilleq(FILE *ffff,char echo)
+void read_tilleq(FILE *ffff,char lim, char echo)
 {char ch;
-  if (echo=='n') while ((ch=(char)fgetc(ffff))!='=');
-         else    while ((ch=(char)fgetc(ffff))!='=') printf("%c",ch);
+  if (echo=='n') while ((ch=(char)fgetc(ffff))!=lim);
+         else    while ((ch=(char)fgetc(ffff))!=lim) printf("%c",ch);
 }
 
 int init_data(char *fname, double ****f)                 //returns code of error
@@ -100,18 +117,18 @@ int init_data(char *fname, double ****f)                 //returns code of error
  int i,j,k,l,tmpr;
  float tmpd;
  char tmpc;	 
- double Re1;		  // prioritet for parameter from special file
+ double Re1;		  // priority for parameter in snap-file
 
  FILE *inp = fileopen(fname,-1);
- read_tilleq(inp,'n');   if(fscanf(inp,"%lf",&t_cur)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%ld",&count)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%c%d%c%d%c%d%c",&tmpc,&pp[0],&tmpc,&pp[1],&tmpc,&pp[2],&tmpc)<7) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%lf",&t_cur)==0) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%ld",&count)==0) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%c%d%c%d%c%d%c",&tmpc,&pp[0],&tmpc,&pp[1],&tmpc,&pp[2],&tmpc)<7) error=1;
                          //no need unless process distribution is written
  if(pp[0]*pp[1]*pp[2]!=size) nrerror("Wrong number of processors in data file. Can't read data.",-1,-1);
- read_tilleq(inp,'n');   if(fscanf(inp,"%d",&N1)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%d",&N2)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%d",&N3)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%lf",&Re1)==0) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%d",&N1)==0) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%d",&N2)==0) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%d",&N3)==0) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%lf",&Re1)==0) error=1;
 
  for(tmpr=0;tmpr<=rank;tmpr++)           //reading until arrays of this process
  {
@@ -232,22 +249,22 @@ for(l=0;l<=2;l++)
    for(i=0;i<m1;i++)
       for(k=0;k<m3;k++)
         averf[l][i][k] = 0;
-for(i=0;i<m1;i++)
+for(i=ghost;i<mm1;i++)
      for(j=ghost;j<mm2;j++)
-        for(k=0;k<m3;k++)
+        for(k=ghost;k<mm3;k++)
           if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
            {
            PulsEnergy+=deviation(f,i,j,k);
-//           for(l=0;l<=2;l++) averf[l][i][k] += f[l+1][i][j][k];
+           for(l=0;l<=2;l++) averf[l][i][k] += pow(f[l+1][i][j][k],2.);
            }
 PulsEnergy /= N2;
 for(l=1;l<=3;l++)
   for(i=0;i<m1;i++)
     for(k=0;k<m3;k++)
        if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
-           TotalEnergy += fabs(1+coordin(i,0)*rc)*pow(flow[l][i][ghost][k],2.);
+           TotalEnergy += fabs(1+coordin(i,0)*rc)*averf[l][i][k];
 TotalEnergy += 1.;   //if zero average field
-razlet = (PulsEnergy>10*TotalEnergy);
+razlet = (PulsEnergy/TotalEnergy>UpLimit);
 }
 
 void printing(double ****f1,double dtdid,double t_cur,long count,double en)
@@ -258,6 +275,7 @@ double mf[3], totmf[3], toten;     //mf[0]=max(f), mf[1]=max(df), mf[2]=max(df/f
 FILE *fv,*fnu,*fen,*fkv;
 
 //clrscr();
+divv = totdivv = 0;
 time_now = MPI_Wtime();
 Master printf("program is working %0.2f seconds\n",time_now-time_begin);
 
@@ -278,7 +296,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
    MPI_Allreduce(&en, &toten, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
    Master printf("Energy of pulsations=%g (local=%g)\n",toten,en);
    Master fen = fileopen(NameEnergyFile,count);
-   Master fprintf(fen,"%0.10g  \t%0.20g",t_cur,toten);
+   Master fprintf(fen,"%0.10g  \t%0.20g",t_cur,totdivv);
 
   // -------------------Maxima of array components and their changes---------------------------
    for(l=0;l<nvar;l++) {
@@ -309,7 +327,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
          for(k=0;k<m3;k++)
          if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
             mf[0] += fabs(1+coordin(i,0)*rc)*pow(f1[l][i][j][k],2);
-       MPI_Allreduce(&mf, &totmf, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
+       MPI_Allreduce(mf, totmf, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
        Master fprintf(fen,"\t %10.10g",totmf[0]/N1/N2/N3);
        }
 
@@ -318,20 +336,20 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
    Master printf("number of runge-kutt calculations=%d\n",enter);
 
  // -------------------- average profile of velocity ---------------------
-         for(i=0;i<N3;i++)    vfi[i]=0;
+/*         for(i=0;i<N3;i++)    vfi[i]=0;
          for(i=0;i<N3;i++) totvfi[i]=0;
          for(i=0;i<m1;i++)
 	    for(j=ghost;j<mm2;j++)
                for(k=0;k<m3;k++)
                 if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
                    vfi[k-ghost+n[2]] += f[2][i][j][k];
-         MPI_Allreduce(vfi, totvfi, N2, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
+         MPI_Allreduce(vfi, totvfi, N3, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
          Master {for(i=0;i<N3;i++) totvfi[i] /= N1*N3;
                  fv = fileopen(NameVFile,count);
                  fprintf(fv,"{%8.8f}\t",t_cur);
                  print_array1d(fv,totvfi,0,N3);
                  fileclose(fv);
-                }
+                }*/
 }
 
 void dump(double ****f1,double ***nu,double t_cur,long count)
@@ -360,7 +378,8 @@ int tag=1,v;
  if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
  MPI_Barrier(MPI_COMM_WORLD);
  Master {nmessage("dump is done",t_cur,count);
-                   add_control_point(NameDumpFile);}
+                   //add_control_point(NameDumpFile);
+                   }
 }
 
 void snapshot(double ****f1,double ***nu,double t_cur,long count)
@@ -371,7 +390,7 @@ long tag=count,v;
 FILE *fd;
 
  sprintf(str,"%s_%d_%d.snp",NameSnapFile,size,count);
- boundary_conditions(f1,nut);
+// boundary_conditions(f1,nut);
 
  if(rank!=0) MPI_Recv(message,0,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);
 
