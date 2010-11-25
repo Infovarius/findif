@@ -50,7 +50,7 @@ char str[256],*pstr;
  if(sscanf(str,"%lf",param)==0) nrerror("Input of parameter error",-1,-1);
  pstr=strtok(str,"|");
  pstr=strtok((char *)NULL,"|");
- Master printf("%g\t->\t%s",*param,pstr);
+ if(count==0) Master printf("%g\t->\t%s",*param,pstr);
 }
 
 void init_param(int argc, char** argv,double *dtnext)
@@ -303,6 +303,7 @@ MPI_Allreduce(&divv, &totdivv, 1, MPI_DOUBLE , MPI_MAX, MPI_COMM_WORLD);
 MPI_Allreduce(&divB, &totdivB, 1, MPI_DOUBLE , MPI_MAX, MPI_COMM_WORLD);
 Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g) maxdivB=%g(local=%g)\n",
                t_cur, dtdid, count,   totdivv,   divv,     totdivB,   divB);
+Master printf("time per iteration per node: %g  includes time for exchanging: %g\n",(time1-time0)/(N1*N2*N3*OutStep),(timeE1)/(N1*N2*N3*OutStep));
 
    MPI_Allreduce(&en, &toten, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
    Master printf("Energy of pulsations=%g (local=%g)\n",toten,en);
@@ -370,7 +371,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g) maxdivB=%g(local=%g)\
 
    Master fprintf(fen,"\n");
    Master fileclose(fen);
-//   Master printf("number of runge-kutt calculations=%d\n",enter);
+   Master printf("number of runge-kutt calculations=%d\n",enter);
 
  // -------------------- average profile of velocity ---------------------
 /*         for(i=0;i<N3;i++)    vfi[i]=0;
@@ -434,7 +435,7 @@ FILE *fd;
 
 // if(rank!=0) MPI_Recv(message,0,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);
 
- fd=fileopen(str,rank);
+ fd=fileopen(str,1);
  nmessage("snap has been started",t_cur,count);
  fprintf(fd,"current time = %0.10f \ncurrent iteration = %ld\n",t_cur,count);
  fprintf(fd,"number of processors along axes={%d,%d,%d}\n",pp[0],pp[1],pp[2]);

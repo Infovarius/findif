@@ -41,6 +41,7 @@ LEVEL double maschtab;
 LEVEL double t_cur,Ttot;
 LEVEL long count;
 LEVEL double time_begin,time_now;
+LEVEL double time0, time1, timeE0, timeE1, timeT;
 
 LEVEL long enter;
 LEVEL char razlet;
