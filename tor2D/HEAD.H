@@ -117,7 +117,7 @@ double interpolation(double,double, double,double,double,double);
 /*------- ioutil.c  ------*/
 FILE *fileopen(const char *, int mode);
 void fileclose(FILE *fd);
-void init_param(int argc, char** argv,double *dtnext);
+void init_param(int argc, char** argv,double *dtnext,int flag);
 int init_data(void);
 void print_array1d(FILE *ff,double *a,int beg1,int n1);
 void print_array2d(FILE *ff,double **a,int beg1,int n1,int beg2,int n2);
