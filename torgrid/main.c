@@ -4,7 +4,7 @@
 
 int main(int argc, char** argv)
 {
-   double dttry, dtdid, dtnext, tmp,tmpT;
+   double dttry, dtdid, dtnext, tmp,tmpT, time_old;
    int i,j,k,l,tmpC;
    int outed;
    FILE *fd, *ferror;
@@ -33,12 +33,13 @@ int main(int argc, char** argv)
   NameStatFile =(char *)calloc(strl+9,sizeof(char));
   sprintf(NameStatFile,"%s_%d.sta",fname,rank); NameStatFile[strl+8] = 0;
 
+   numlog = 1;
    Master nmessage("--------------------------------------------------------------------------",0,0);
 
 /* ---------------------- reading files and arrays --------------------- */
-   goon = ((fd=fopen(NameCPFile,"r"))>0);
-   Master if(fd==NULL) { putlog("File of cp were not opened",2);
-                  if((fd=fopen(NameCPFile,"w"))!=NULL) ; putlog("File cp was successfully created",3);
+   goon = ((fd=fopen(NameCPFile,"r+"))>0);
+   if(fd==NULL) { //putlog("File of cp were not opened",goon);
+                  Master if((fd=fopen(NameCPFile,"w+"))!=NULL) ;//putlog("File cp was successfully created",1);
                 }
            else putlog("File of control points opened=",(long)fd);
    if(goon)
@@ -46,20 +47,13 @@ int main(int argc, char** argv)
         goon = strcmp(NameInitFile,"END");
       }
 
-   init_param(argc,argv,&dtnext);       // initialization of parameters
-   Gamma=1e-4;
-   ghost=(approx-1)/2+1;                  //ghost=width of fictive layer; approx=diameter of approx sample
+   init_param(argc,argv,&dtnext,0);       // initialization of parameters
    t_cur=0;
    count=0; enter = 0;
 
    if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
        else { init_parallel();  operate_memory(1);}
    fileclose(fd);
-
-   dx[0]=2*R/N1;
-   dx[1]=lfi/N2;
-   dx[2]=2*R/N3;
-   p1 = 4/Re;
 
    init_conditions();
 
@@ -74,8 +68,8 @@ int main(int argc, char** argv)
       fileclose(fd);
      }
 //--------------------------------------
- {
-    if(rank!=0) MPI_Recv(fname,0,MPI_CHAR,rank-1,1,MPI_COMM_WORLD,statuses);
+if(0) {
+    if(rank!=0) MPI_Recv(&tmpC,1,MPI_INT,rank-1,rank-1,MPI_COMM_WORLD,statuses);
 
  fd=fileopen("node",rank);
 
@@ -86,15 +80,15 @@ int main(int argc, char** argv)
  print_array2d(fd,refz,0,m1,0,m3);
  fileclose(fd);
 
- if(rank!=size-1) MPI_Send(fname,0,MPI_CHAR,rank+1,1,MPI_COMM_WORLD);
+ if(rank!=size-1) {MPI_Send(&rank,1,MPI_INT,rank+1,rank,MPI_COMM_WORLD); }
              else nmessage("nodes has been dumped",t_cur,count);
             }
+
 //--------------------------------------
 
-   MPI_Barrier(MPI_COMM_WORLD);
    boundary_conditions(f,nut);
 
-//   dump(f,nut,t_cur,count);
+//   if(!goon)  dump(f,nut,t_cur,count);
 
    time_begin = MPI_Wtime();
    if(!goon) Master nmessage("work has begun",0,0);
@@ -102,7 +96,7 @@ int main(int argc, char** argv)
    Master ferror = fileopen(NameErrorFile,abs(goon));
 
    if(CheckStep!=0) check(f);
-   if (OutStep!=0) printing(f,0,t_cur,count,PulsEnergy);
+   if(!goon) if (OutStep!=0) printing(f,0,t_cur,count,PulsEnergy);
 
 /*------------------------ MAIN ITERATIONS -------------------------*/
    while ((Ttot==0 || t_cur < Ttot) && !razlet) {
@@ -112,8 +106,9 @@ int main(int argc, char** argv)
 //	nut_by_flux(f1,nut,dtdid);
 //     gaussian(f1,f,0);
 	t_cur+=dtdid;
+	time_old = time_now;
 	count++;
-        if(Ttot!=0 && t_cur >= Ttot) break;
+    if(t_cur >= Ttot && Ttot>0) break;
 	if (CheckStep!=0 && count%CheckStep==0)
 	    {
 	    boundary_conditions(f1,nut);
@@ -132,14 +127,15 @@ int main(int argc, char** argv)
         outed = 0;
 	if (SnapStep!=0 && count%SnapStep==0)
 	     { snapshot(f1,nut,t_cur,count); outed=1; }
-	if (SnapDelta>2*dtdid && floor((t_cur-dtdid)/SnapDelta)<floor(t_cur/SnapDelta) && !outed)
+	if (SnapDelta>5*dtdid && floor((t_cur-dtdid)/SnapDelta)<floor(t_cur/SnapDelta))
    	     { snapshot(f1,nut,t_cur,count); outed=1; }
         ft = f;  f = f1;  f1 = ft;
         if (count%100==0) {
 //          MPI_Barrier(MPI_COMM_WORLD);
           tmp=Re;
-          init_param(argc,argv,&dttry);
+			init_param(argc,argv,&dttry,0);
           Re=tmp;
+			p1 = 4/Re;
 //          MPI_Barrier(MPI_COMM_WORLD);
         }
 
@@ -150,24 +146,14 @@ int main(int argc, char** argv)
 //                MPI_Barrier(MPI_COMM_WORLD);
 		tmp = (Re += DeltaParam);
                 tmpC = count;  tmpT = t_cur;
-		goon = ((fd=fopen(NameCPFile,"r+"))>0);
-		if(goon)
-			{ do fscanf(fd,"%s\n",NameInitFile); while (!feof(fd));
-//                        putlog(NameInitFile,ftell(fd));
-			goon = strcmp(NameInitFile,"END");
-			}
-		init_param(argc,argv,&dtnext);       // initialization of parameters
-		ghost=(approx-1)/2+1;                  //radius of approx sample
-		dx[0]=2*R/N1;
-		dx[1]=lfi/N2;
-		dx[2]=2*R/N3;
+			init_param(argc,argv,&dtnext,1);       // initialization of parameters
 
 		if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
-		fileclose(fd);
+			if(strcmp(NameInitFile,"-1")==0) goon = 1;
 
                 count = tmpC;  t_cur = tmpT;  Re = tmp;
+			init_conditions();
                 p1 = 4/Re;
-		init_conditions();
 		goon = 1;
             Master nmessage("Re was changed to",Re,count);
             }
@@ -181,6 +167,9 @@ int main(int argc, char** argv)
                                     }
                         }
               }*/
+	if (OutStep==0 || count%OutStep!=0) time_now=MPI_Wtime();
+	if (DumpInterval>0 && floor((time_now-time_begin)/60/DumpInterval)>floor((time_old-time_begin)/60/DumpInterval))
+		dump(f,nut,t_cur,count);
    } // end while
 
    printing(f1,dtdid,t_cur,count,PulsEnergy);
@@ -189,10 +178,10 @@ int main(int argc, char** argv)
 
    Master fileclose(ferror);
 
+	MPI_Barrier(MPI_COMM_WORLD);
+	operate_memory(-1);
    if(t_cur>=Ttot&&!razlet) nmessage("work is succesfully done",t_cur,count);
        else nrerror("this is break of scheme",t_cur,count);
-   MPI_Barrier(MPI_COMM_WORLD);
-   operate_memory(-1);
    MPI_Finalize();
    nmessage("mpi_finalize is done",t_cur,count);
 return 0;
