@@ -10,7 +10,7 @@ int main(int argc, char** argv)
    int i,j,k,l;
    FILE *fd, *ferror;
    int strl;
-   double ChangeParamTime = 3, DeltaParam = -2.5;  // for iteration on parameters
+   double ChangeParamTime = 1, DeltaParam = -2.5;  // for iteration on parameters
    double ****ft;
 
  /* Initialize MPI */
@@ -115,7 +115,7 @@ int main(int argc, char** argv)
   //      nut_by_flux(f,dtdid);
         t_cur+=dtdid;
         count++;
-//        if(t_cur >= Ttot) break;
+        if(t_cur >= Ttot) break;
         if (CheckStep!=0 && count%CheckStep==0)
             {
             boundary_conditions(f1);
