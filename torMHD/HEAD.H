@@ -8,7 +8,6 @@
 LEVEL char *NameMessageFile;
 LEVEL char *NameErrorFile;
 LEVEL char NameInitFile[200];
-LEVEL char *NameNuFile;
 LEVEL char *NameVFile;
 LEVEL char *NameDumpFile;
 LEVEL char *NameSnapFile;
@@ -19,8 +18,9 @@ LEVEL char *NameStatFile;
 LEVEL char *fname;
 
 LEVEL double ****f, ****f1, ***nut, ****df, ****df2, ****df3, ****df4, ****df5, ****B, ****J,
-             **s_func,dx[3], *r_1, *r_2, **node, **refr_f, **refz_f, **refr_m, **refz_m,
+             **s_func,dx[3], *r_1, *r_2, **refr_f, **refz_f, **refr_m, **refz_m,
              **sinth, **costh, **chi, ***eta;
+LEVEL int **node;
 
 enum  TypeNodes {NodeUnknown=0,NodeClued=1,
                                NodeFluid=8, NodeShell=2, NodeVacuum=4,   // regions
@@ -28,7 +28,7 @@ enum  TypeNodes {NodeUnknown=0,NodeClued=1,
                                NodeMagn=32, NodeGhostMagn=64};           // for magnetic effects
 LEVEL double ***averf;
 LEVEL double *totvfi, *vfi;
-LEVEL double Gamma, lfi, R, Rfl, Rsh, rc, Re, Rm, etash, etavac;
+LEVEL double Gamma, lfi, R, Rfl, Rsh, rc, Re, Rm, etash, etavac, p1;
 
 LEVEL int    m1, m2, m3, mm1, mm2, mm3, n1, n2, n3, N1, N2, N3, Ns,
              approx, ghost, nvar;
@@ -40,6 +40,7 @@ LEVEL double maschtab;
 LEVEL double t_cur,Ttot;
 LEVEL long count;
 LEVEL double time_begin,time_now;
+LEVEL double time0, time1, timeE0, timeE1, timeT;
 
 LEVEL long enter;
 LEVEL char razlet;
@@ -49,7 +50,9 @@ LEVEL int goon;                       // continue calculation
 LEVEL int CheckStep;  //each CheckStep divergence of program is checking
 LEVEL int OutStep;    //each OutStep result is printing
 LEVEL int SnapStep;   //each SnapStep snapshot is done
+LEVEL double SnapDelta;  //each SnapDelta of simulation time snapshot is done
 LEVEL int VarStep;    //each VarStep step in RungeKutta varies
+LEVEL double ChangeParamTime, DeltaParam;  // for iteration on parameters
 LEVEL int num_dump;
 LEVEL long numlog;
 
@@ -102,9 +105,13 @@ double **alloc_mem_2f(int, int);
 void   free_mem_2f(double **, int, int);
 double *alloc_mem_1f(int);
 void   free_mem_1f(double *, int);
+int **alloc_mem_2i(int, int);
+void   free_mem_2i(int **, int, int);
+int *alloc_mem_1i(int);
+void   free_mem_1i(int *, int);
 void operate_memory(int dir);
-int isType(double nod, enum TypeNodes tip);
-void setType(double *nod, enum TypeNodes tip);
+int isType(int nod, enum TypeNodes tip);
+void setType(int *nod, enum TypeNodes tip);
 void CopyBufferToGrid(double ****,double ***,double *,int,int,int,int,int,int);
 void CopyGridToBuffer(double ****,double ***,double *,int,int,int,int,int,int);
 /*------- rkad.c  -----------*/
@@ -116,9 +123,10 @@ void   pde(double t, double ****f, double ****df);
 double norma(double a,double b,double c,int q);
 double deviation(double ****f,int,int,int);
 void nut_by_flux(double ****f,double Re);
-void   boundary_conditions(double ****f);
+void   boundary_conditions(double ****f,double ***nut);
 void  init_conditions(void);
 void init_parallel(void);
+double dvv(double ***f1, double ***f2, int dir, int ii, int jj, int kk, int sh, int sm);
 double dr(double ***m,int ii,int jj,int kk,int dir,int or,double dx,int sh,int sm);
 double d2cross(double ***m,int ii,int jj,int kk,int dir1,int dir2,int sh,int sm);
 double coordin(int, int);
@@ -127,10 +135,12 @@ void calculate_curl(double ****mas,double ****out,enum TypeNodes tip);
 /*------- ioutil.c  ------*/
 FILE *fileopen(const char *, int mode);
 void fileclose(FILE *fd);
+//void read_tilleq(FILE *ffff,char lim, char echo);
 void init_param(int argc, char** argv,double *dtnext);
 int init_data(void);
 void print_array1d(FILE *ff,double *a,int beg1,int n1);
 void print_array2d(FILE *ff,double **a,int beg1,int n1,int beg2,int n2);
+void print_array2i(FILE *ff,int **a,int beg1,int n1,int beg2,int n2);
 void print_array3d(FILE *ff,double ***a,int beg1,int n1,int beg2,int n2,int beg3,int n3);
 void printbin_array3d(FILE *ff,double ***a,int beg1,int n1,int beg2,int n2,int beg3,int n3);
 void check(double ****f);
@@ -142,7 +152,8 @@ void putlog(char msg_text[],long num);
 double vfi_given(double t,double rho,double rho0);
 double vtheta_given(double t,double rho,double rho0,double phi);
 /*------------ testspeed.c ------*/
-void start_tick(int num_stage,char *inname);
-void finish_tick(int nomer);
+//void init_tick(int num_stage,char *inname);
+void start_tick(int num_stage);
+void finish_tick(int num_stage);
 void init_timers();
 void print_CPU_usage();
