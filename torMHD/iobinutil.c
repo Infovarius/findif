@@ -33,7 +33,7 @@ if(fd==NULL) putlog("It was endeavor to close unopened file",1);
 
 void putlog(char msg_text[],long num)
 {
-   FILE *log;
+/*   FILE *log;
    char name[20];
    sprintf(name,"mess%d.log",rank);
    log=fileopen(name,num);
@@ -41,7 +41,7 @@ void putlog(char msg_text[],long num)
    fprintf(log,"message at t=%-7.4lf Niter=%-6d time of work=%g sec\n",
                     t_cur,count,time_now-time_begin);
    fprintf(log,"%s %d\n",msg_text,num);
-   fileclose(log);
+   fileclose(log);*/
 }
 
 void read_token(FILE *inp,double *param)
@@ -124,6 +124,7 @@ double d;
 	dx[1]=lfi/N2;
 	dx[2]=2*R/N3;
 	p1 = 4/Re;
+	Ha = 1;
 }
 
 void read_tilleq(FILE *ffff,char lim, char echo)
@@ -308,7 +309,7 @@ FILE *fen;
 //clrscr();
 time_now = MPI_Wtime();
 Master printf("program is working %0.2f seconds\n",time_now-time_begin);
-calculate_curl(&f1[4],B,NodeMagn);
+//calculate_curl(&f1[4],B,NodeMagn);
 
 divv = divB = 0;
 for(i=0;i<m1;i++)
@@ -487,7 +488,7 @@ FILE *fd;
  fprintf(fd,"Number of points along z = %d\n",N3);
  fprintf(fd,"Reynolds number = %lf\n",Rm);
 		}
- for(v=4;v<nvar;v++)
+ for(v=1;v<nvar;v++)
     printbin_array3d(fd,f1[v],0,m1,0,m2,0,m3);
 // printbin_array3d(fd,nu,0,m1,0,m2,0,m3);
  fileclose(fd);
