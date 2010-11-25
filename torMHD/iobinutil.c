@@ -464,10 +464,11 @@ FILE *fd;
 
 // if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
 // MPI_Barrier(MPI_COMM_WORLD);
- nmessage("snap is done",t_cur,count);
+
  Master {
          sprintf(str,"%s_*_%05d.snp",NameSnapFile,count);
          add_control_point(str);
+         nmessage("snap is done",t_cur,count);
          }
 }
 
