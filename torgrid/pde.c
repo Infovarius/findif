@@ -41,6 +41,9 @@ void pde(double t, double ****f, double ****df)
      {
 //      if(j<=ghost && n[1]==0) continue;
       M = 1./(rc*coordin(i,0)+1);
+      memset(dp1,0,3*sizeof(double));      memset(dn1,0,3*sizeof(double));
+      memset(dv1,0,12*sizeof(double));  memset(dv2,0,12*sizeof(double));
+      memset(dA11,0,36*sizeof(double));
       for(m=0;m<3;m++) {
          dp1[m]=dr(f[0],i,j,k,m+1,0,dx[m],(approx-1)/2, approx);
          dn1[m]=dr(nut,i,j,k,m+1,0,dx[m], (approx-1)/2, approx);
@@ -60,12 +63,12 @@ void pde(double t, double ****f, double ****df)
       df[1][i][j][k]=nut[i][j][k]*(dv2[1][0]+dv2[1][1]+dv2[1][2]+r_1[i]*dv1[1][0]
 				   -f[1][i][j][k]*r_2[i]-2*dv1[2][1]*r_1[i])
 		     -dp1[0]/Gamma/f[0][i][j][k]//+w*w/r_1[i]       +2*w*f[2][i][j][k]                   //forces of inertion
-                -(dv1[1][0]<0 ? mu[0]*dv1[1][0]*(dp1[0]*dv1[1][0]+2*f[0][i][j][k]*dv2[1][0]) : 0)
+//                -(dv1[1][0]<0 ? mu[0]*dv1[1][0]*(dp1[0]*dv1[1][0]+2*f[0][i][j][k]*dv2[1][0]) : 0)
 //                     +(j+n[2]<=ghost+2 ? coordin(k,2)*f[2][i][j][k] : 0)                //helical force
 		     + (dn1[0]-f[1][i][j][k])*dv1[1][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[1][1]
 		     + (dn1[2]-f[3][i][j][k])*dv1[1][2]
-		+nut[i][j][k]*(dv2[1][0]+dv1[1][0]*r_1[i]-f[1][i][j][k]*r_2[i]-dv1[2][1]*r_1[i]+dA11[2][0][1]+dA11[3][0][2])
+		+nut[i][j][k]/3*(dv2[1][0]+dv1[1][0]*r_1[i]-f[1][i][j][k]*r_2[i]-dv1[2][1]*r_1[i]+dA11[2][0][1]+dA11[3][0][2])
 /*                     - dvv(f[1],f[1],1,i,j,k,(approx-1)/2,approx)
                      - dvv(f[2],f[1],2,i,j,k,(approx-1)/2,approx)
                      - dvv(f[3],f[1],3,i,j,k,(approx-1)/2,approx)*/
@@ -74,13 +77,13 @@ void pde(double t, double ****f, double ****df)
 		     ;
       df[2][i][j][k]=nut[i][j][k]*(dv2[2][0]+dv2[2][1]+dv2[2][2]+r_1[i]*dv1[2][0]
 				   -f[2][i][j][k]*r_2[i]+2*dv1[1][1]*r_1[i])
-		     + p1*pow(rc*coordin(i,0)+1,-1)-dp1[1]/Gamma/f[0][i][j][k]//-dw/r_1[i] -2*w*f[1][i][j][k]                   //forces of inertion
-                -(dv1[2][1]<0 ? mu[1]*dv1[2][1]*(dp1[1]*dv1[2][1]+2*f[0][i][j][k]*dv2[2][1]) : 0)
+		     + 0*p1*pow(rc*coordin(i,0)+1,-1)-dp1[1]/Gamma/f[0][i][j][k]//-dw/r_1[i] -2*w*f[1][i][j][k]                   //forces of inertion
+//                -(dv1[2][1]<0 ? mu[1]*dv1[2][1]*(dp1[1]*dv1[2][1]+2*f[0][i][j][k]*dv2[2][1]) : 0)
 //                     -(j+n[2]<=ghost+2 ? (coordin(i,0)-rc)*f[2][i][j][k] :0)            //helical force
 		     + (dn1[0]-f[1][i][j][k])*dv1[2][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[2][1]
 		     + (dn1[2]-f[3][i][j][k])*dv1[2][2]
-		+nut[i][j][k]*(dv1[1][1]*r_1[i]+dA11[1][0][1]+dv2[2][1]+dA11[3][1][2])
+		+nut[i][j][k]/3*(dv1[1][1]*r_1[i]+dA11[1][0][1]+dv2[2][1]+dA11[3][1][2])
 /*                     - dvv(f[1],f[2],1,i,j,k,(approx-1)/2,approx)
                      - dvv(f[2],f[2],2,i,j,k,(approx-1)/2,approx)
                      - dvv(f[3],f[2],3,i,j,k,(approx-1)/2,approx)*/
@@ -89,11 +92,11 @@ void pde(double t, double ****f, double ****df)
 		     ;
       df[3][i][j][k]=nut[i][j][k]*(dv2[3][0]+dv2[3][1]+dv2[3][2]+r_1[i]*dv1[3][0])
 		     -dp1[2]/Gamma/f[0][i][j][k]
-                -(dv1[3][2]<0 ? mu[2]*dv1[3][2]*(dp1[2]*dv1[3][2]+2*f[0][i][j][k]*dv2[3][2]) : 0)
+//                -(dv1[3][2]<0 ? mu[2]*dv1[3][2]*(dp1[2]*dv1[3][2]+2*f[0][i][j][k]*dv2[3][2]) : 0)
 		     + (dn1[0]-f[1][i][j][k])*dv1[3][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[3][1]
 		     + (dn1[2]-f[3][i][j][k])*dv1[3][2]
-      		+nut[i][j][k]*(dv1[1][2]*r_1[i]+dA11[1][0][2]+dA11[2][1][2]+dv2[3][2])
+      		+nut[i][j][k]/3*(dv1[1][2]*r_1[i]+dA11[1][0][2]+dA11[2][1][2]+dv2[3][2])
 /*                     - dvv(f[1],f[2],1,i,j,k,(approx-1)/2,approx)
                      - dvv(f[2],f[2],2,i,j,k,(approx-1)/2,approx)
                      - dvv(f[3],f[2],3,i,j,k,(approx-1)/2,approx)*/
@@ -247,8 +250,8 @@ void  boundary_conditions(double ****f, double ***nut)
          f[1][i][j][k] = vrho*sinth[i][k]+vphi*costh[i][k]*sin(chi[i][k]);
 	 f[2][i][j][k] = vphi*cos(chi[i][k]);
 	 f[3][i][j][k] = vrho*costh[i][k]-vphi*sinth[i][k]*sin(chi[i][k]);*/
-         f[1][i][j][k] = f[3][i][j][k] = 0;
-         f[2][i][j][k] = (R*R-pow(coordin(i,0),2) - pow(coordin(k,2),2))/R/R;
+/*         f[1][i][j][k] = f[3][i][j][k] = 0;
+         f[2][i][j][k] = (R*R-pow(coordin(i,0),2) - pow(coordin(k,2),2))/R/R;*/
 	 }
 
   /*-------------------------------- exchanging of ghosts -------------------------------------*/
@@ -390,8 +393,8 @@ void  init_conditions()
 
 // -------- filling of nodes' types +reflections rel circle + nut ---------------
    for(i=0;i<m1;i++)
-   for(k=0;k<m3;k++)                                                                   {
-
+   for(k=0;k<m3;k++)
+       {
        node[i][k] = NodeUnknown;
        if(pr_neighbour[0]!=-1 && i<ghost ||
            pr_neighbour[1]!=-1 && i>=mm1  ||
@@ -457,10 +460,11 @@ if(!goon) {
 //             f[1][i][j][k]=1-sqrt(pow(coordin(i,0),2) + pow(coordin(k,2),2))/R;
 	f[2][i][j][k]=(parabole+Noise*((double)rand()-RAND_MAX/2)/RAND_MAX)*
 		       (R*R-pow(coordin(i,0),2) - pow(coordin(k,2),2))/R/R;
+	f[2][i][j][k]=sin(2*M_PI*coordin(j,1)/lfi);
 	f[3][i][j][k]=NoiseNorm*sin(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/R)
 		      + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX*
 		       (R*R-pow(coordin(i,0),2) - pow(coordin(k,2),2))/R/R;
-	f[0][i][j][k]=(coordin(j,1)<lfi/2)? 1.5:1;
+	f[0][i][j][k]=(coordin(j,1)<lfi/2)? 1:1;
 	}
         else
       if(!isType(node[i][k],NodeGhostFluid))

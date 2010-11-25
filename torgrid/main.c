@@ -94,7 +94,7 @@ int main(int argc, char** argv)
    MPI_Barrier(MPI_COMM_WORLD);
    boundary_conditions(f,nut);
 
-   dump(f,nut,t_cur,count);
+   dump(f,nut,t_cur,count); 
 
    time_begin = MPI_Wtime();
    if(!goon) Master nmessage("work has begun",0,0);
