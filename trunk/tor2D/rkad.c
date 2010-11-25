@@ -10,7 +10,7 @@
 #define MinScale     (double)1e-12
 
 
-void timestep(double ****f, double ****df, double ***nut, double t, double ****fout,
+void timestep(double ***f, double ***df, double **nut, double t, double ***fout,
               double dttry, double *dtdid, double *dtnext)
 {
    double dt, err, errs;
@@ -45,7 +45,7 @@ void timestep(double ****f, double ****df, double ***nut, double t, double ****f
       *dtnext = dt * (double)5.0;
 }
 
-double rkck(double ****f, double ****df1, double ***nut, double t, double dt, double ****fout)
+double rkck(double ***f, double ***df1, double **nut, double t, double dt, double ***fout)
 {
 static double   a2=0.2,a3=0.3,a4=0.6,a5=1.0,a6=0.875,b21=0.2,
 		b31=3.0/40.0,b32=9.0/40.0,b41=0.3,b42 = -0.9,b43=1.2,
@@ -57,81 +57,75 @@ static double   a2=0.2,a3=0.3,a4=0.6,a5=1.0,a6=0.875,b21=0.2,
 double          dc1=c1-2825.0/27648.0,dc3=c3-18575.0/48384.0,
 		dc4=c4-13525.0/55296.0,dc6=c6-0.25;
 
-   int i,j,k,l;
+   int i,k,l;
    double err, sca, err1;
    /*2rd step*/
    for(l=0;l<nvar;l++)
    for(i=0;i<m1;i++)
-   for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
      if(isType(node[i][k],NodeFluid))
-      fout[l][i][j][k] = f[l][i][j][k]+dt*b21*df1[l][i][j][k];
+      fout[l][i][k] = f[l][i][k]+dt*b21*df1[l][i][k];
    pde(t+a2*dt,fout, df2);
 
    /*3rd step*/
    for(l=0;l<nvar;l++)
    for(i=0;i<m1;i++)
-   for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
      if(isType(node[i][k],NodeFluid))
-      fout[l][i][j][k] = f[l][i][j][k]+dt*(b31*df1[l][i][j][k]+
-                                           b32*df2[l][i][j][k]);
+      fout[l][i][k] = f[l][i][k]+dt*(b31*df1[l][i][k]+
+                                           b32*df2[l][i][k]);
    pde(t+a3*dt,fout, df3);
 
    /*4th step*/
    for(l=0;l<nvar;l++)
    for(i=0;i<m1;i++)
-   for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
      if(isType(node[i][k],NodeFluid))
-      fout[l][i][j][k] = f[l][i][j][k]+dt*(b41*df1[l][i][j][k]+
-                                           b42*df2[l][i][j][k]+
-                                           b43*df3[l][i][j][k]);
+      fout[l][i][k] = f[l][i][k]+dt*(b41*df1[l][i][k]+
+                                           b42*df2[l][i][k]+
+                                           b43*df3[l][i][k]);
    pde(t+a4*dt,fout, df4);
 
    /*5th step*/
    for(l=0;l<nvar;l++)
    for(i=0;i<m1;i++)
-   for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
      if(isType(node[i][k],NodeFluid))
-      fout[l][i][j][k] = f[l][i][j][k]+dt*(b51*df1[l][i][j][k]+
-                                           b52*df2[l][i][j][k]+
-                                           b53*df3[l][i][j][k]+
-                                           b54*df4[l][i][j][k]);
+      fout[l][i][k] = f[l][i][k]+dt*(b51*df1[l][i][k]+
+                                           b52*df2[l][i][k]+
+                                           b53*df3[l][i][k]+
+                                           b54*df4[l][i][k]);
    pde(t+a5*dt,fout, df5);
 
    /*6th step*/
    for(l=0;l<nvar;l++)
    for(i=0;i<m1;i++)
-   for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
      if(isType(node[i][k],NodeFluid))
-      fout[l][i][j][k] = f[l][i][j][k]+dt*(b61*df1[l][i][j][k]+
-                                           b62*df2[l][i][j][k]+
-                                           b63*df3[l][i][j][k]+
-                                           b64*df4[l][i][j][k]+
-                                           b65*df5[l][i][j][k]);
+      fout[l][i][k] = f[l][i][k]+dt*(b61*df1[l][i][k]+
+                                           b62*df2[l][i][k]+
+                                           b63*df3[l][i][k]+
+                                           b64*df4[l][i][k]+
+                                           b65*df5[l][i][k]);
    pde(t+a6*dt,fout, df2);
 
  /*calculating output matrix and error value*/
    err = 0.0;
    for(l=0;l<nvar;l++)
    for(i=0;i<m1;i++)
-   for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
      if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
    {
-      fout[l][i][j][k] = f[l][i][j][k]+dt*(c1*df1[l][i][j][k]+
-					   c3*df3[l][i][j][k]+
-					   c4*df4[l][i][j][k]+
-					   c6*df2[l][i][j][k]);
-      sca = fabs(f[l][i][j][k])+fabs(dt*df1[l][i][j][k])+MinScale;
-      err1 = fabs(dt*(    dc1*df1[l][i][j][k]+
-			  dc3*df3[l][i][j][k]+
-			  dc4*df4[l][i][j][k]+
-			  dc5*df5[l][i][j][k]+
-			  dc6*df2[l][i][j][k]))/sca;
+      fout[l][i][k] = f[l][i][k]+dt*(c1*df1[l][i][k]+
+					   c3*df3[l][i][k]+
+					   c4*df4[l][i][k]+
+					   c6*df2[l][i][k]);
+      sca = fabs(f[l][i][k])+fabs(dt*df1[l][i][k])+MinScale;
+      err1 = fabs(dt*(    dc1*df1[l][i][k]+
+			  dc3*df3[l][i][k]+
+			  dc4*df4[l][i][k]+
+			  dc5*df5[l][i][k]+
+			  dc6*df2[l][i][k]))/sca;
       err = max(err, err1);
    }
    return err;

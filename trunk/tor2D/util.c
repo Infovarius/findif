@@ -246,14 +246,14 @@ int k;
 void operate_memory(int dir)
 {
  if(dir>0)
-   {   s_func = alloc_mem_2f(n3+2,kol_masht);
-       f  =alloc_mem_4f(nvar, m1, m2, m3);   //f[0]-pressure,f[1..3]-v(vector)
-       f1 =alloc_mem_4f(nvar, m1, m2, m3);
-       df =alloc_mem_4f(nvar, m1, m2, m3);
-       df2=alloc_mem_4f(nvar, m1, m2, m3);
-       df3=alloc_mem_4f(nvar, m1, m2, m3);
-       df4=alloc_mem_4f(nvar, m1, m2, m3);
-       df5=alloc_mem_4f(nvar, m1, m2, m3);
+   {
+        f  =alloc_mem_3f(nvar, m1, m3);   //f[0]-pressure,f[1..3]-v(vector)
+       f1 =alloc_mem_3f(nvar, m1, m3);
+       df =alloc_mem_3f(nvar, m1, m3);
+       df2=alloc_mem_3f(nvar, m1, m3);
+       df3=alloc_mem_3f(nvar, m1, m3);
+       df4=alloc_mem_3f(nvar, m1, m3);
+       df5=alloc_mem_3f(nvar, m1, m3);
        r_1=alloc_mem_1f(m1);                  // r^(-1)
        r_2=alloc_mem_1f(m1);                  // r^(-2)
        node=alloc_mem_2i(m1, m3);         // kind of nodes
@@ -262,34 +262,29 @@ void operate_memory(int dir)
        sinth=alloc_mem_2f(m1, m3);
        costh=alloc_mem_2f(m1, m3);
        chi=alloc_mem_2f(m1, m3);          // angle of blade tilt
-       nut=alloc_mem_3f(m1, m2, m3);
-       averf = alloc_mem_3f(nvar,m1,m3);
+       nut=alloc_mem_2f(m1, m3);
        vfi = alloc_mem_1f(N3);
        totvfi = alloc_mem_1f(N3);
-       init_shell();
     } else
    {
-//   free_mem_2f(s_func,n3+2,kol_masht);
-       free_mem_4f(f  ,nvar, m1, m2, m3);
-       free_mem_4f(f1 ,nvar, m1, m2, m3);
-       free_mem_4f(df ,nvar, m1, m2, m3);
-       free_mem_4f(df2,nvar, m1, m2, m3);
-       free_mem_4f(df3,nvar, m1, m2, m3);
-       free_mem_4f(df4,nvar, m1, m2, m3);
-       free_mem_4f(df5,nvar, m1, m2, m3);
-       free_mem_3f(nut, m1, m2, m3);
+       free_mem_3f(f  ,nvar, m1, m3);
+       free_mem_3f(f1 ,nvar, m1, m3);
+       free_mem_3f(df ,nvar, m1, m3);
+       free_mem_3f(df2,nvar, m1, m3);
+       free_mem_3f(df3,nvar, m1, m3);
+       free_mem_3f(df4,nvar, m1, m3);
+       free_mem_3f(df5,nvar, m1, m3);
+       free_mem_2f(nut, m1, m3);
        free_mem_2f(refr,m1, m3);
        free_mem_2f(refz,m1, m3);
        free_mem_2f(sinth,m1, m3);
        free_mem_2f(costh,m1, m3);
        free_mem_2f(chi,  m1, m3);
        free_mem_2i(node,m1, m3);
-       free_mem_3f(averf,nvar,m1,m3);
        free_mem_1f(vfi,N3);
        free_mem_1f(totvfi,N3);
        free_mem_1f(r_1,m1);
        free_mem_1f(r_2,m1);
-       erase_shell();
     }
 }
 
@@ -304,31 +299,27 @@ void setType(int *nod, enum TypeNodes tip)
   return;
 }
 
- void CopyBufferToGrid(double ****m,double ***nut,double *buffer,int x1,int y1,int z1,int x2,int y2,int z2)
+ void CopyBufferToGrid(double ***m,double **nut,double *buffer,int x1,int z1,int x2,int z2)
  {
-   int i,j,k,l,n=0;
+   int i,k,l,n=0;
    for(l=0;l<nvar;l++)
     for(i=x1;i<=x2;i++)
-     for(j=y1;j<=y2;j++)
       for(k=z1;k<=z2;k++)
-      m[l][i][j][k]=buffer[n++];
+      m[l][i][k]=buffer[n++];
    for(i=x1;i<=x2;i++)
-    for(j=y1;j<=y2;j++)
      for(k=z1;k<=z2;k++)
-     nut[i][j][k]=buffer[n++];
+     nut[i][k]=buffer[n++];
  }
 
- void CopyGridToBuffer(double ****m,double ***nut,double *buffer,int x1,int y1,int z1,int x2,int y2,int z2)
+ void CopyGridToBuffer(double ***m,double **nut,double *buffer,int x1,int z1,int x2,int z2)
  {
-   int i,j,k,l,n=0;
+   int i,k,l,n=0;
    for(l=0;l<nvar;l++)
     for(i=x1;i<=x2;i++)
-     for(j=y1;j<=y2;j++)
       for(k=z1;k<=z2;k++)
-      buffer[n++]=m[l][i][j][k];
+      buffer[n++]=m[l][i][k];
    for(i=x1;i<=x2;i++)
-    for(j=y1;j<=y2;j++)
      for(k=z1;k<=z2;k++)
-     buffer[n++]=nut[i][j][k];
+     buffer[n++]=nut[i][k];
  }
 
