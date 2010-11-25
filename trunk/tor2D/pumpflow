@@ -1,19 +1,19 @@
 1
 ---------  Geometry paramereters ------------------------------
-0.1		| inverse distance from centre to axis of torus
+0.25		| inverse distance from centre to axis of torus
 1		| radius of torus
 
 ---------  Physical paramereters ------------------------------
 1		| Reynolds number
 0		| init profile: 0 - zero, 1 - parabole
-0.001		| amplitude of initial random noise
-0.01		| amplitude of initial normal noise
+0.01		| amplitude of initial random noise
+0.00		| amplitude of initial normal noise
 10		| maximal level of fluctuation after which nut is on
 45		| maximal angle of blade tilt (degrees)
 
 ---------  Scheme (aproximation) parameters ------------------
-101		| mesh point in R
-101		| mesh point in Z
+9		| mesh point in R
+9		| mesh point in Z
 4		| variables number
 7		| aproxx order
 0.001		| initial timestep
@@ -22,11 +22,11 @@
 ---------  Output parameters  -------------------------------
 10		| steps to statistics output (OutStep)
 0		| steps to snaps (SnapStep)
-0.2		| simulation time delta to snap (SnapDelta)
+0		| simulation time delta to snap (SnapDelta)
 10		| steps of checking divergence (CheckStep)
-1		| test of time step (VarStep)
-5		| Total time
+2		| test of time step (VarStep)
+200		| Total time
 ---------  Regulators ----------------------------------------
-0		| simulation time delta between parameter changing (ChangeParamTime)
-0		| delta of parameter changing (DeltaParam)
+10		| simulation time delta between parameter changing (ChangeParamTime)
+1		| delta of parameter changing (DeltaParam)
 0		| name of initial file

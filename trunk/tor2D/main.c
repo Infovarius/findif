@@ -33,6 +33,7 @@ int main(int argc, char** argv)
   NameStatFile =(char *)calloc(strl+9,sizeof(char));
   sprintf(NameStatFile,"%s_%d.sta",fname,rank); NameStatFile[strl+8] = 0;
 
+   numlog = 1;
    Master nmessage("--------------------------------------------------------------------------",-1,-1);
 
 /* ---------------------- reading files and arrays --------------------- */
@@ -72,7 +73,7 @@ int main(int argc, char** argv)
      }
 //--------------------------------------
  if(!goon) {
-    if(rank!=0) MPI_Recv("",0,MPI_CHAR,rank-1,1,MPI_COMM_WORLD,statuses);
+    if(rank!=0) MPI_Recv(&tmpC,1,MPI_INT,rank-1,rank-1,MPI_COMM_WORLD,statuses);
 
  fd=fileopen("node",rank);
 
@@ -83,7 +84,7 @@ int main(int argc, char** argv)
  print_array2d(fd,refz,0,m1,0,m3);
  fileclose(fd);
 
- if(rank!=size-1) MPI_Send("",0,MPI_CHAR,rank+1,1,MPI_COMM_WORLD);
+ if(rank!=size-1) {putlog("me node done",numlog++); MPI_Send(&rank,1,MPI_INT,rank+1,rank,MPI_COMM_WORLD); }
              else nmessage("nodes has been dumped",t_cur,count);
             }
 //--------------------------------------

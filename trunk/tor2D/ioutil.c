@@ -39,7 +39,9 @@ void putlog(char msg_text[],long num)
    fprintf(log,"message at t=%-7.4lf Niter=%-6d time of work=%g sec\n",
                     t_cur,count,time_now-time_begin);
    fprintf(log,"%s %d\n",msg_text,num);
+   printf("%s %d...",msg_text,num);
    fileclose(log);
+   printf("OK\n");
 }
 
 void read_token(FILE *inp,double *param)
@@ -120,7 +122,7 @@ int init_data(void)                 //returns code of error
 	 FILE *inp = fileopen(NameInitFile,-1);
  read_tilleq(inp,'=','n');   if(fscanf(inp,"%lf",&t_cur)==0) error=1;
  read_tilleq(inp,'=','n');   if(fscanf(inp,"%ld",&count)==0) error=1;
- read_tilleq(inp,'=','n');   if(fscanf(inp,"%c%d%c%d%c%d%c",&tmpc,&pp[0],&tmpc,&pp[2],&tmpc)<5) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%c%d%c%d%c",&tmpc,&pp[0],&tmpc,&pp[2],&tmpc)<5) error=1;
                          //no need unless process distribution is written
  if(pp[0]*pp[2]!=size) nrerror("Wrong number of processors in data file. Can't read data.",-1,-1);
  read_tilleq(inp,'=','n');   if(fscanf(inp,"%d",&N1)==0) error=1;
