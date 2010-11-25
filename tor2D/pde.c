@@ -155,20 +155,6 @@ void  boundary_conditions(double ***f, double **nut)
 
    z[0]=1; z[1]=z[2]=z[3]=-1; //  влияет на вид гран.условий (-1:жесткие, 1:свободные)
 
-  /*============================ divertor =================================*/
-  if(t_cur<00)                  // divertors are off till t sec
-  if(n[2]==0)
-  for(i=0;i<m1;i++)
-      for(k=0;k<m3;k++)
-         {
-         vrho = f[3][i][k]*costh[i][k]+f[1][i][k]*sinth[i][k];
-         vth  = -f[3][i][k]*sinth[i][k]+f[1][i][k]*costh[i][k];
-         vphi = sqrt(pow(f[2][i][k],2)+vth*vth);           //sqrt(vfi*vfi+vth*vth)
-         f[1][i][k] = vrho*sinth[i][k]+vphi*costh[i][k]*sin(chi[i][k]);
-	 f[2][i][k] = vphi*cos(chi[i][k]);
-	 f[3][i][k] = vrho*costh[i][k]-vphi*sinth[i][k]*sin(chi[i][k]);
-	 }
-
   /*-------------------------------- exchanging of ghosts -------------------------------------*/
 
 // exchanging in r-direction
@@ -186,13 +172,13 @@ void  boundary_conditions(double ***f, double **nut)
 		}
 
    MPI_Waitall(req_numS,SendRequest,statuses);
-   if(statuses[0].MPI_ERROR) {putlog("bc:error during send=",numlog++);
+   if(statuses[0].MPI_ERROR) {putlog("bc:error during r-send=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
                                }    else numlog++;
     MPI_Waitall(req_numR,RecvRequest,statuses);
-  if(statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
+  if(statuses[0].MPI_ERROR) {putlog("bc:error during r-receive=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
@@ -215,13 +201,13 @@ void  boundary_conditions(double ***f, double **nut)
 	       }
 
    MPI_Waitall(req_numS,SendRequest,statuses);
-   if(statuses[0].MPI_ERROR) {putlog("bc:error during send=",numlog++);
+   if(statuses[0].MPI_ERROR) {putlog("bc:error during z-send=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
                                }    else numlog++;
     MPI_Waitall(req_numR,RecvRequest,statuses);
-  if(statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
+  if(statuses[0].MPI_ERROR) {putlog("bc:error during z-receive=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
@@ -379,15 +365,15 @@ if(!goon) {                       //reading sizes from file when continuing
    mm1 = ghost+n1;
    mm3 = ghost+n3;
 
-  pr_neighbour[0] = (pr[0]>0       ? rank-1           :-1);                           // neighbours of subregion
-  pr_neighbour[1] = (pr[0]<pp[0]-1 ? rank+1           :-1);
-  pr_neighbour[4] = (pr[2]>0       ? rank-pp[0]*pp[1] :-1);
-  pr_neighbour[5] = (pr[2]<pp[2]-1 ? rank+pp[0]*pp[1] :-1);
+  pr_neighbour[0] = (pr[0]>0       ? rank-1     :-1);                           // neighbours of subregion
+  pr_neighbour[1] = (pr[0]<pp[0]-1 ? rank+1     :-1);
+  pr_neighbour[4] = (pr[2]>0       ? rank-pp[0] :-1);
+  pr_neighbour[5] = (pr[2]<pp[2]-1 ? rank+pp[0] :-1);
 
  buf_size[0]=m3*(nvar+1)*ghost;
  buf_size[2]=m1*(nvar+1)*ghost;
 
- for(i=0;i<3 for2D(i);i++)           //3-D
+ for(i=0;i<3;i++ for2D(i))           //3-D
   for(j=0;j<=1;j++) {
    buf_send[j+2*i] = alloc_mem_1f(buf_size[i]);
    buf_recv[j+2*i] = alloc_mem_1f(buf_size[i]);
