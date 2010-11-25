@@ -52,12 +52,13 @@ LEVEL int CheckStep;  //each CheckStep divergence of program is checking
 LEVEL int OutStep;    //each OutStep result is printing
 LEVEL int SnapStep;   //each SnapStep snapshot is done
 LEVEL double SnapDelta;  //each SnapDelta of simulation time snapshot is done
+LEVEL double DumpInterval;  // each DumpInterval all essential data is saved
+LEVEL int DumpKeep;   // if to keep all Dumps (0 - only 2 last)
 LEVEL int VarStep;    //each VarStep step in RungeKutta varies
 LEVEL double ChangeParamTime, DeltaParam;  // for iteration on parameters
-LEVEL int num_dump;
 LEVEL long numlog;
 
-#if !defined(max)
+#ifndef max
 #define max(a, b)  (((a) > (b)) ? (a) : (b))
 #define min(a, b)  (((a) < (b)) ? (a) : (b))
 #endif
@@ -122,6 +123,7 @@ double rkck(double ****f, double ****df, double t, double dt, double ****fout);
 /*------- pde.c  -----------*/
 void   pde(double t, double ****f, double ****df);
 double norma(double a,double b,double c,int q);
+void fill_velocity(double t, double ****f);
 double deviation(double ****f,int,int,int);
 void nut_by_flux(double ****f,double Re);
 void   boundary_conditions(double ****f,double ***nut);
@@ -136,8 +138,8 @@ void calculate_curl(double ****mas,double ****out,enum TypeNodes tip);
 /*------- ioutil.c  ------*/
 FILE *fileopen(const char *, int mode);
 void fileclose(FILE *fd);
-//void read_tilleq(FILE *ffff,char lim, char echo);
-void init_param(int argc, char** argv,double *dtnext);
+void read_tilleq(FILE *ffff,char lim, char echo);
+void init_param(int argc, char** argv,double *dtnext,int flag);
 int init_data(void);
 void print_array1d(FILE *ff,double *a,int beg1,int n1);
 void print_array2d(FILE *ff,double **a,int beg1,int n1,int beg2,int n2);

@@ -12,16 +12,15 @@ FILE *fileopen(const char *x, int mode)  //opening of file to ff
 {
 FILE *ff;
 char* s_mode;
+char msg[100];
 if(mode>0) s_mode="ab";
 if(mode<0) s_mode="rb";
 if(mode==0) s_mode="wb";
 if ((ff = fopen(x,s_mode))==NULL)
 	 {
-		s_mode = (char *)malloc(100);
-		sprintf(s_mode,"Can't open file: '%s' \n",x);
-		nmessage (s_mode,t_cur,count);
-		free(s_mode);
-		//exit(-1);
+	    sprintf(msg,"Can't open file '%s'!\n",x);
+		nrerror (msg,t_cur,count);
+		exit(-1);
 	 }
 return(ff);
 }
@@ -56,17 +55,15 @@ char str[256],*pstr;
  if(!count) printf("%g\t->\t%s",*param,pstr);
 }
 
-void init_param(int argc, char** argv,double *dtnext)
+void init_param(int argc, char** argv,double *dtnext,int flag)
 {
 int ver;
 FILE *iop;
 double d;
  if(argc<2 || (iop=fopen(argv[1],"r"))==NULL) //no ini file
-    {
      nrerror("Start from no ini file!",-1,-1);
-     }
-    else {
-      if(fscanf(iop,"%d",&ver)<1 || ver!=5) nrerror("parameters' file has wrong version",t_cur,count);
+
+      if(fscanf(iop,"%d",&ver)<1 || ver!=6) nrerror("parameters' file has wrong version",-1,-1);
       read_token(iop,&lfi);        //geometry
       read_token(iop,&rc);
       read_token(iop,&Rfl);
@@ -94,13 +91,15 @@ double d;
       read_token(iop,&d);         OutStep = (int)d;    //output
       read_token(iop,&d);         SnapStep = (int)d;
       read_token(iop,&SnapDelta);
+      read_token(iop,&DumpInterval);
+      read_token(iop,&d);         DumpKeep = (int)d;
       read_token(iop,&d);         CheckStep = (int)d;
       read_token(iop,&d);         VarStep = (int)d;
       read_token(iop,&Ttot);
       read_token(iop,&ChangeParamTime);
       read_token(iop,&DeltaParam);
       read_token(iop,&d);
-  if(count)
+  if(flag)
      {
       if(d==0)	{
       		goon = 0;
@@ -108,13 +107,23 @@ double d;
                 }
       else if(d>0)  {
          	goon = 1;
-                sprintf(NameInitFile,"%s_*_%05d.snp",NameSnapFile,(int)d);
+                sprintf(NameInitFile,"%s_%d_%05d.snp",NameSnapFile,size,(int)d);
                 }
+	  else {// without reading (d<0)
+		    goon=0;
+			strcpy(NameInitFile,"-1");
+			}
      }
-  else Master nmessage("Parameters were extracted from file",0,0);
+  
+	Master if(!count) nmessage("Parameters were extracted from file",0,0);
       fileclose(iop);
-//      nmessage("Parameters were extracted from file",t_cur,count);
-      }
+   
+ 	Gamma=1e-4;
+	ghost=(approx-1)/2;                  //radius of approx sample
+	dx[0]=2*R/N1;
+	dx[1]=lfi/N2;
+	dx[2]=2*R/N3;
+	p1 = 4/Re;
 }
 
 void read_tilleq(FILE *ffff,char lim, char echo)
@@ -130,6 +139,8 @@ int init_data(void)                 //returns code of error
  char fstr[256], pos;
  float tmpf;
  char tmpc;
+ double Re1;		  // priority for parameter in snap-file
+
  FILE *inp;
 
  pos = strcspn(NameInitFile,"*");
@@ -145,7 +156,7 @@ int init_data(void)                 //returns code of error
  read_tilleq(inp,'=','n');   if(fscanf(inp,"%d",&N1)==0) error=1;
  read_tilleq(inp,'=','n');   if(fscanf(inp,"%d",&N2)==0) error=1;
  read_tilleq(inp,'=','n');   if(fscanf(inp,"%d",&N3)==0) error=1;
- read_tilleq(inp,'=','n');   if(fscanf(inp,"%lf",&Re)==0) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%lf",&Re1)==0) error=1;
 // fgetc(inp);  fgetc(inp);
  read_tilleq(inp,0x0A,'n');
 
@@ -176,6 +187,7 @@ int init_data(void)                 //returns code of error
        }*/
 // }
 fileclose(inp);
+
 if(error) nrerror("Data couldn't have been read from file!!!",-1,error);
      else Master nmessage("Data has been read from file",t_cur,count);
 return(error);
@@ -276,7 +288,7 @@ for(i=ghost;i<mm1;i++)
            PulsEnergy+=deviation(f,i,j,k);
            for(l=0;l<=2;l++) averf[l][i][k] += pow(f[l+1][i][j][k],2.);
            }
-for(l=0;l<=2;l++)
+for(l=1;l<=3;l++)
   for(i=0;i<m1;i++)
     for(k=0;k<m3;k++)
        if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
@@ -410,31 +422,44 @@ Master printf("time per iteration per node: %g  includes time for exchanging: %g
 
 void dump(double ****f1,double ***nu,double t_cur,long count)
 {
+char str[256],str1[256];
 FILE *fd;
-char message[5]="dump";
+char message[10]="dump";
 int tag=1,v;
 
- if(rank!=0) MPI_Recv(message,0,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);
+if(DumpKeep)  sprintf(str,"%s_%d_%d.dmp",NameSnapFile,rank,count);
+	else {
+		sprintf(str,"%s%d.dmp",NameSnapFile,rank);
+		sprintf(str1,"%s%d.bak",NameSnapFile,rank);
+		remove(str1);
+		rename(str,str1);
+		}
+// if(rank!=0) MPI_Recv(message,0,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);
 
- fd=fileopen(NameDumpFile,rank);
+ fd=fileopen(str,rank);
 
  Master nmessage("dump has been started",t_cur,count);
- Master fprintf(fd,"current time = %0.10f \ncurrent iteration = %ld\n",t_cur,count);
- Master fprintf(fd,"number of processors along axes={%d,%d,%d}\n",pp[0],pp[1],pp[2]);
- Master fprintf(fd,"Number of points along x = %d\n",N1);
- Master fprintf(fd,"Number of points along y = %d\n",N2);
- Master fprintf(fd,"Number of points along z = %d\n",N3);
- Master fprintf(fd,"Reynolds number = %lf\n",Re);
+// Master {
+  fprintf(fd,"current time = %0.10f \ncurrent iteration = %ld\n",t_cur,count);
+  fprintf(fd,"number of processors along axes={%d,%d,%d}\n",pp[0],pp[1],pp[2]);
+  fprintf(fd,"Number of points along x = %d\n",N1);
+  fprintf(fd,"Number of points along y = %d\n",N2);
+  fprintf(fd,"Number of points along z = %d\n",N3);
+  fprintf(fd,"Reynolds number = %lf\n",Re);
+ //}
 
  for(v=0;v<nvar;v++)
     printbin_array3d(fd,f1[v],0,m1,0,m2,0,m3);
  printbin_array3d(fd,nu,0,m1,0,m2,0,m3);
  fileclose(fd);
 
- if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
+// if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
  MPI_Barrier(MPI_COMM_WORLD);
- Master {nmessage("dump is done",t_cur,count);
-                   //add_control_point(NameDumpFile);
+ Master 
+ {    nmessage("dump is done",t_cur,count);
+	  if(DumpKeep)  sprintf(str,"%s_*_%d.dmp",NameSnapFile,count);
+			else 	sprintf(str,"%s*.dmp",NameSnapFile);
+	  add_control_point(str);
                    }
 }
 
@@ -445,14 +470,15 @@ char message[10]="message";
 long tag=count,v;
 FILE *fd;
 
- sprintf(str,"%s_%d_%05d.snp",NameSnapFile,rank,count);
+ sprintf(str,"%s_%d_%d.snp",NameSnapFile,size,count);
 // boundary_conditions(f1);
 // calculate_curl(&f1[4],B,NodeMagn);
 // calculate_curl(B,J,NodeMagn);
 
-// if(rank!=0) MPI_Recv(message,0,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);
+ if(rank!=0) MPI_Recv(message,0,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);
 
- fd=fileopen(str,0);
+ fd=fileopen(str,rank);
+ Master {
  nmessage("snap has been started",t_cur,count);
  fprintf(fd,"current time = %0.10f \ncurrent iteration = %ld\n",t_cur,count);
  fprintf(fd,"number of processors along axes={%d,%d,%d}\n",pp[0],pp[1],pp[2]);
@@ -460,19 +486,18 @@ FILE *fd;
  fprintf(fd,"Number of points along y = %d\n",N2);
  fprintf(fd,"Number of points along z = %d\n",N3);
  fprintf(fd,"Reynolds number = %lf\n",Rm);
-
- for(v=0;v<nvar;v++)
+		}
+ for(v=1;v<nvar;v++)
     printbin_array3d(fd,f1[v],0,m1,0,m2,0,m3);
 // printbin_array3d(fd,nu,0,m1,0,m2,0,m3);
  fileclose(fd);
 
-// if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
-// MPI_Barrier(MPI_COMM_WORLD);
-
+ if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
+ MPI_Barrier(MPI_COMM_WORLD);
  Master {
-         sprintf(str,"%s_*_%05d.snp",NameSnapFile,count);
-         add_control_point(str);
          nmessage("snap is done",t_cur,count);
+//         sprintf(str,"%s_*_%05d.snp",NameSnapFile,count);
+//         add_control_point(str);
          }
 }
 
