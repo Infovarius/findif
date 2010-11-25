@@ -124,7 +124,7 @@ double d;
 	dx[1]=lfi/N2;
 	dx[2]=2*R/N3;
 	p1 = 4/Re;
-	Ha = 1;
+	Ha = 100;
 }
 
 void read_tilleq(FILE *ffff,char lim, char echo)
@@ -371,6 +371,7 @@ Master printf("time per iteration per node: %g  includes time for exchanging: %g
          if(isType(node[i][k],NodeMagn) && !isType(node[i][k],NodeClued))
           {
             if (fabs(B[l][i][j][k])>mf[0]) mf[0]=fabs(B[l][i][j][k]);
+                     f[l+4][i][j][k]=0.00001*((double)rand()-RAND_MAX/2)/RAND_MAX;
           }
        MPI_Allreduce(mf, totmf, 1, MPI_DOUBLE , MPI_MAX, MPI_COMM_WORLD);
        Master printf("%d  maxB=%e(loc=%e)\n",l,totmf[0],mf[0]);
