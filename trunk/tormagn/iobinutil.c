@@ -63,7 +63,7 @@ double d;
      nrerror("Start from no ini file!",-1,-1);
      }
     else {
-      if(fscanf(iop,"%d",&ver)<1 || ver!=5) nrerror("parameters' file has wrong version",-1,-1);
+      if(fscanf(iop,"%d",&ver)<1 || ver!=6) nrerror("parameters' file has wrong version",-1,-1);
       read_token(iop,&lfi);        //geometry
       read_token(iop,&rc);
       read_token(iop,&Rfl);
@@ -91,6 +91,8 @@ double d;
       read_token(iop,&d);         CheckStep = (int)d;
       read_token(iop,&d);         VarStep = (int)d;
       read_token(iop,&Ttot);
+      read_token(iop,&ChangeParamTime);
+      read_token(iop,&DeltaParam);
       fileclose(iop);
 //      nmessage("Parameters were extracted from file",-1,-1);
       }

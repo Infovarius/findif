@@ -53,6 +53,7 @@ LEVEL int OutStep;    //each OutStep result is printing
 LEVEL int SnapStep;   //each SnapStep snapshot is done
 LEVEL double SnapDelta;  //each SnapDelta of simulation time snapshot is done
 LEVEL int VarStep;    //each VarStep step in RungeKutta varies
+LEVEL double ChangeParamTime, DeltaParam;  // for iteration on parameters
 LEVEL int num_dump;
 LEVEL long numlog;
 
