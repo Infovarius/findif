@@ -126,6 +126,7 @@ int init_data(void);
 void print_array1d(FILE *ff,double *a,int beg1,int n1);
 void print_array2d(FILE *ff,double **a,int beg1,int n1,int beg2,int n2);
 void print_array3d(FILE *ff,double ***a,int beg1,int n1,int beg2,int n2,int beg3,int n3);
+void print_array2i(FILE *ff,int **a,int beg1,int n1,int beg2,int n2);
 void check(double ****f);
 void printing(double ****f1,double dtdid,double t_cur,long count,double en);
 void dump(double ****f1,double ***nu,double t_cur,long count);

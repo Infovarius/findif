@@ -90,7 +90,7 @@ int main(int argc, char** argv)
 //--------------------------------------
 
    boundary_conditions(f,nut);
-
+   
    if(!goon)  dump(f,nut,t_cur,count);
 
    time_begin = MPI_Wtime();
@@ -126,7 +126,7 @@ int main(int argc, char** argv)
 	    }
 	if (SnapStep!=0 && count%SnapStep==0)
 	    snapshot(f1,nut,t_cur,count);
-        if (SnapDelta>5*dtdid && floor(t_cur/SnapDelta)<floor((t_cur+dtdid)/SnapDelta))
+        if (SnapDelta>5*dtdid && floor((t_cur-dtdid)/SnapDelta)<floor(t_cur/SnapDelta))
             snapshot(f1,nut,t_cur,count);
 /*        if (floor(t_cur/ChangeParamTime)<floor((t_cur+dtdid)/ChangeParamTime))
             {
