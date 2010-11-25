@@ -5,11 +5,11 @@
 int main(int argc, char** argv)
 {
    double dttry, dtdid, dtnext, tmp,tmpT;
-   int i,j,k,l,tmpC;
+   int i,k,l,tmpC;
    int outed;
    FILE *fd, *ferror;
    int strl;
-   double ****ft;
+   double ***ft;
 
  /* Initialize MPI */
  MPI_Init(&argc,&argv);
@@ -57,9 +57,8 @@ int main(int argc, char** argv)
    fileclose(fd);
 
    dx[0]=2*R/N1;
-   dx[1]=lfi/N2;
    dx[2]=2*R/N3;
-   p1 = 4/Re*rc;
+   p1 = 4/Re;
 
    init_conditions();
 
@@ -67,8 +66,6 @@ int main(int argc, char** argv)
   Master {
       fd=fileopen("coord",rank);
       for(i=0;i<N1+2*ghost;i++) fprintf(fd,"%e ",coordin(i,0));
-      fprintf(fd,"\n");
-      for(i=0;i<N2+2*ghost;i++) fprintf(fd,"%e ",coordin(i,1));
       fprintf(fd,"\n");
       for(i=0;i<N3+2*ghost;i++) fprintf(fd,"%e ",coordin(i,2));
       fileclose(fd);
@@ -92,8 +89,8 @@ int main(int argc, char** argv)
 //--------------------------------------
 
    boundary_conditions(f,nut);
-   
-   if(!goon)  dump(f,nut,t_cur,count);
+
+//   if(!goon)  dump(f,nut,t_cur,count);
 
    time_begin = MPI_Wtime();
    if(!goon) Master nmessage("work has begun",0,0);
@@ -108,7 +105,7 @@ int main(int argc, char** argv)
 	pde(t_cur, f, df);
 	dttry=dtnext;
 	timestep(f, df, nut, t_cur, f1, dttry, &dtdid, &dtnext);
-	nut_by_flux(f,nut,dtdid);
+//	nut_by_flux(f,nut,dtdid);
 	t_cur+=dtdid;
 	count++;
         if(t_cur >= Ttot) break;
@@ -129,22 +126,22 @@ int main(int argc, char** argv)
 	    }
         outed = 0;
 	if (SnapStep!=0 && count%SnapStep==0)
-	     ( snapshot(f1,nut,t_cur,count); outed=1; }
-    if (SnapDelta>5*dtdid && floor((t_cur-dtdid)/SnapDelta)<floor(t_cur/SnapDelta))
-         ( snapshot(f1,nut,t_cur,count); outed=1; }
+	     { snapshot(f1,nut,t_cur,count); outed=1; }
+	if (SnapDelta>5*dtdid && floor((t_cur-dtdid)/SnapDelta)<floor(t_cur/SnapDelta))
+   	     { snapshot(f1,nut,t_cur,count); outed=1; }
         ft = f;  f = f1;  f1 = ft;
         if (count%100==0) {
 //          MPI_Barrier(MPI_COMM_WORLD);
-          tmp=Rm;
+          tmp=Re;
           init_param(argc,argv,&dttry);
-          Rm=tmp;
+          Re=tmp;
 //          MPI_Barrier(MPI_COMM_WORLD);
         }
 
         if (ChangeParamTime!=0 && floor((t_cur-dtdid)/ChangeParamTime)<floor(t_cur/ChangeParamTime))
             {
 		//Rm = floor(t_cur/ChangeParamTime+0.5)*DeltaParam-190;
-		if(!outed) { snapshot(f,eta,t_cur,count); outed = 1;}
+		if(!outed) { snapshot(f,nut,t_cur,count); outed = 1;}
 //                MPI_Barrier(MPI_COMM_WORLD);
 		tmp = (Re += DeltaParam);
                 tmpC = count;  tmpT = t_cur;
@@ -157,17 +154,17 @@ int main(int argc, char** argv)
 		init_param(argc,argv,&dtnext);       // initialization of parameters
 		ghost=(approx-1)/2;                  //radius of approx sample
 		dx[0]=2*R/N1;
-		dx[1]=lfi/N2;
 		dx[2]=2*R/N3;
 
 		if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
 		fileclose(fd);
 
                 count = tmpC;  t_cur = tmpT;  Re = tmp;
+                p1 = 4/Re;
 		init_conditions();
 		goon = 1;
             Master nmessage("Re was changed to",Re,count);
-            }*/
+            }
 /*        if(kbhit())
 	     {
 		switch (getch()) {
