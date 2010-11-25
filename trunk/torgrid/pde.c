@@ -359,6 +359,10 @@ void  boundary_conditions(double ****f, double ***nut)
                    f[l][i][j][k] = ( (refr[i][k]-r2)*(f[l][r1][j][z1]*(refz[i][k]-z2)-f[l][r1][j][z2]*(refz[i][k]-z1))
                                    + (refr[i][k]-r1)*(f[l][r2][j][z2]*(refz[i][k]-z1)-f[l][r2][j][z1]*(refz[i][k]-z2))
                                     ) * z[l];
+                 if(i==r1 && k==z1) f[l][i][j][k] /= (1-(refr[i][k]-r2)*(refz[i][k]-z2)*z[l]);
+                 if(i==r1 && k==z2) f[l][i][j][k] /= (1+(refr[i][k]-r2)*(refz[i][k]-z1)*z[l]);
+                 if(i==r2 && k==z1) f[l][i][j][k] /= (1-(refr[i][k]-r1)*(refz[i][k]-z1)*z[l]);
+                 if(i==r2 && k==z2) f[l][i][j][k] /= (1+(refr[i][k]-r1)*(refz[i][k]-z2)*z[l]);
                  }
 //                   nut[i][j][k] = (refr[i][k]-r2)*(nut[r1][j][z1]*(refz[i][k]-z2)-nut[r1][j][z2]*(refz[i][k]-z1))
 //                                + (refr[i][k]-r1)*(nut[r2][j][z2]*(refz[i][k]-z1)-nut[r2][j][z1]*(refz[i][k]-z2));
@@ -407,7 +411,7 @@ void  init_conditions()
         refz[i][k] = z1*(2*R/rho-1);
         refr[i][k] = (refr[i][k]+R)/dx[0]-0.5-n[0]+ghost;   // simulation indices
         refz[i][k] = (refz[i][k]+R)/dx[2]-0.5-n[2]+ghost;
-        if(fabs(refr[i][k]-i)<1 && fabs(refr[i][k]-(int)refr[i][k])>EPS &&
+/*        if(fabs(refr[i][k]-i)<1 && fabs(refr[i][k]-(int)refr[i][k])>EPS &&
            fabs(refz[i][k]-k)<1 && fabs(refz[i][k]-(int)refz[i][k])>EPS &&
            !isType(node[i][k],NodeFluid))
                  { setType(&node[i][k],NodeFluid);
@@ -419,7 +423,7 @@ void  init_conditions()
                            setType(&node[i+l][k+ll],NodeGhostFluid);
                         else;
                       else if(!isType(node[i][k],NodeClued)) nmessage("out of boundary",i,k);
-                  }
+                  }*/
      //for divertor's blade
         sinth[i][k]=r1/rho;
         costh[i][k]=   z1/rho;
