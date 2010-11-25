@@ -151,7 +151,7 @@ int init_data(void)                 //returns code of error
 
 // for(tmpr=0;tmpr<=rank;tmpr++)           //reading until arrays of this process
 // {
- for(l=1;l<nvar;l++)                    // reading f
+ for(l=0;l<nvar;l++)                    // reading f
         for(i=0;i<m1;i++)
         for(j=0;j<m2;j++)
         for(k=0;k<m3;k++)

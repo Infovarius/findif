@@ -98,7 +98,7 @@ int main(int argc, char** argv)
 
    boundary_conditions(f,nut);
 
-   if(!goon) dump(f,eta,t_cur,count);
+//   if(!goon) dump(f,eta,t_cur,count);
    time_begin = MPI_Wtime();
    if(!goon) Master nmessage("work has begun",0,0);
        else Master nmessage("work continued",t_cur,count);
@@ -127,8 +127,8 @@ int main(int argc, char** argv)
                 {
                 boundary_conditions(f1,nut);
                 check(f1);
-                }
-              else boundary_conditions(f1,nut);
+                };
+//              else boundary_conditions(f1,nut);
             time1=MPI_Wtime();
             printing(f1,dtdid,t_cur,count,PulsEnergy);
             time0=MPI_Wtime();
