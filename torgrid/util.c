@@ -245,8 +245,9 @@ int k;
 
 void operate_memory(int dir)
 {
+int i,k;
  if(dir>0)
-   {   s_func = alloc_mem_2f(n3+2,kol_masht);
+   {
        f  =alloc_mem_4f(nvar, m1, m2, m3);   //f[0]-pressure,f[1..3]-v(vector)
        f1 =alloc_mem_4f(nvar, m1, m2, m3);
        df =alloc_mem_4f(nvar, m1, m2, m3);
@@ -266,10 +267,11 @@ void operate_memory(int dir)
        averf = alloc_mem_3f(nvar,m1,m3);
        vfi = alloc_mem_1f(N3);
        totvfi = alloc_mem_1f(N3);
-       init_shell();
-    } else
+/*       for(i=0;i<3;i++)
+        for(k=0;k<3;k++)
+          tau[i][k] = alloc_mem_3f(m1,m2,m3);
+*/    } else
    {
-//   free_mem_2f(s_func,n3+2,kol_masht);
        free_mem_4f(f  ,nvar, m1, m2, m3);
        free_mem_4f(f1 ,nvar, m1, m2, m3);
        free_mem_4f(df ,nvar, m1, m2, m3);
@@ -289,8 +291,10 @@ void operate_memory(int dir)
        free_mem_1f(totvfi,N3);
        free_mem_1f(r_1,m1);
        free_mem_1f(r_2,m1);
-       erase_shell();
-    }
+/*       for(i=0;i<3;i++)
+        for(k=0;k<3;k++)
+          free_mem_3f(tau[i][k],m1,m2,m3);
+*/    }
 }
 
 int isType(int nod, enum TypeNodes tip)

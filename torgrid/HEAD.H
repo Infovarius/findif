@@ -17,8 +17,9 @@ LEVEL char *NameCPFile;
 LEVEL char *NameStatFile;
 LEVEL char *fname;
 
-LEVEL double ****f, ****f1, ***nut, ****df, ****df2, ****df3, ****df4, ****df5, **s_func,
+LEVEL double ****f, ****f1, ***nut, ****df, ****df2, ****df3, ****df4, ****df5,
              dx[3], *r_1, *r_2, **refr, **refz, **sinth, **costh, **chi;
+LEVEL double ***tau[3][3];
 LEVEL int **node;
 
 enum  TypeNodes {NodeUnknown=0,NodeClued=1,
@@ -124,6 +125,7 @@ void gaussian(double ****f, double ****f1, double eps);
 void   boundary_conditions(double ****f, double ***nu);
 void  init_conditions(void);
 void init_parallel(void);
+double dvv(double ****f, int a, int b, int ii, int jj, int kk, int sh, int sm);
 double dr(double ***m,int ii,int jj,int kk,int dir,int or,double dx,int sh,int sm);
 double coordin(int, int);
 double interpolation(double,double, double,double,double,double);
