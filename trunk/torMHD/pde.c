@@ -39,7 +39,7 @@ void pde(double t, double ****f, double ****df)
    for(k=0;k<m3;k++)
      if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
      {
-      if(j<=ghost && n[1]==0) continue;
+//      if(j<=ghost && n[1]==0) continue;
       M = 1./(rc*coordin(i,0)+1);
       memset(dp1,0,3*sizeof(double));      memset(dn1,0,3*sizeof(double));
       memset(dv1,0,21*sizeof(double));     memset(dv2,0,21*sizeof(double));
@@ -64,7 +64,7 @@ void pde(double t, double ****f, double ****df)
 				   -f[1][i][j][k]*r_2[i]-2*dv1[2][1]*r_1[i])
 		     -dp1[0]/Gamma/f[0][i][j][k]//+w*w/r_1[i]       +2*w*f[2][i][j][k]                   //forces of inertion
                 -(dv1[1][0]<0 ? mu[0]*dv1[1][0]*(dp1[0]*dv1[1][0]+2*f[0][i][j][k]*dv2[1][0]) : 0)
-//                     +(j+n[2]<=ghost+2 ? coordin(k,2)*f[2][i][j][k] : 0)                //helical force
+              +(j+n[1]<=ghost+2 && t_cur>-1 ? coordin(k,2)*f[2][i][j][k] : 0)                //helical force
 		     + (dn1[0]-f[1][i][j][k])*dv1[1][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[1][1]
 		     + (dn1[2]-f[3][i][j][k])*dv1[1][2]
@@ -77,9 +77,9 @@ void pde(double t, double ****f, double ****df)
 		     ;
       df[2][i][j][k]=nut[i][j][k]*(dv2[2][0]+dv2[2][1]+dv2[2][2]+r_1[i]*dv1[2][0]
                                    -f[2][i][j][k]*r_2[i]+2*dv1[1][1]*r_1[i])
-		     + p1*pow(rc*coordin(i,0)+1,-1)-dp1[1]/Gamma/f[0][i][j][k]//-dw/r_1[i] -2*w*f[1][i][j][k]                   //forces of inertion
+			 + (t_cur>-1 ? p1*pow(rc*coordin(i,0)+1,-1):0) - dp1[1]/Gamma/f[0][i][j][k]
                 -(dv1[2][1]<0 ? mu[1]*dv1[2][1]*(dp1[1]*dv1[2][1]+2*f[0][i][j][k]*dv2[2][1]) : 0)
-//                     -(j+n[2]<=ghost+2 ? (coordin(i,0)-rc)*f[2][i][j][k] :0)            //helical force
+					//-dw/r_1[i] -2*w*f[1][i][j][k]                   //forces of inertion
 		     + (dn1[0]-f[1][i][j][k])*dv1[2][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[2][1]
 		     + (dn1[2]-f[3][i][j][k])*dv1[2][2]
@@ -93,6 +93,7 @@ void pde(double t, double ****f, double ****df)
       df[3][i][j][k]=nut[i][j][k]*(dv2[3][0]+dv2[3][1]+dv2[3][2]+r_1[i]*dv1[3][0])
 		     -dp1[2]/Gamma/f[0][i][j][k]
                 -(dv1[3][2]<0 ? mu[2]*dv1[3][2]*(dp1[2]*dv1[3][2]+2*f[0][i][j][k]*dv2[3][2]) : 0)
+              -(j+n[1]<=ghost+2 && t_cur>-1 ? (coordin(i,0)-rc)*f[2][i][j][k] :0)            //helical force
 		     + (dn1[0]-f[1][i][j][k])*dv1[3][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[3][1]
 		     + (dn1[2]-f[3][i][j][k])*dv1[3][2]
@@ -112,6 +113,7 @@ void pde(double t, double ****f, double ****df)
       df[3][i][j][k] += Gamma*df[0][i][j][k]*f[3][i][j][k];*/
 //      df[0][i][j][k] = df[1][i][j][k] = df[2][i][j][k] = df[3][i][j][k] = 0;
       }   else df[0][i][j][k] = df[1][i][j][k] = df[2][i][j][k] = df[3][i][j][k] = 0;
+
    for(i=0;i<m1;i++)
    for(k=0;k<m3;k++)
       if(isType(node[i][k],NodeGhostFluid))
@@ -156,8 +158,12 @@ void pde(double t, double ****f, double ****df)
 void fill_velocity(double t, double ****f)
 {
 double r1, phi1, z1, rho, vrho, vth, vphi;
-int i,j,k;
-       for(i=0;i<m1;i++)
+int pp[3];
+int error=0, tmpr;
+int i,j,k,l;
+float tmpf; double tmpd; long tmpi;  char tmpc;
+FILE *inp;
+/*       for(i=0;i<m1;i++)
          for(j=0;j<m2;j++)
             for(k=0;k<m3;k++)
             if(isType(node[i][k],NodeFluid))
@@ -167,13 +173,44 @@ int i,j,k;
             vrho = 0;
             vth  = vtheta_given(0,rho,Rfl,phi1)/(1+r1*rc);
 /*            vphi = vfi_given(t_cur*Tunit,rho,Rfl);      // nonstationary time=t_cur*Tunit, max magnitude=0.0990906
-            vth = 0;                        */
+            vth = 0;                        *
             vphi = vfi_given(0,rho,Rfl);
 //            vth = rho*vphi/Rfl;
             f[1][i][j][k] = vrho*sinth[i][k]+vth*costh[i][k];
             f[2][i][j][k] = vphi;
             f[3][i][j][k] = vrho*costh[i][k]-vth*sinth[i][k];
             }    else f[1][i][j][k] = f[2][i][j][k] = f[3][i][j][k] = 0;
+*/
+ inp = fileopen("velocity.snp",-1);
+
+ read_tilleq(inp,'=','y');   if(fscanf(inp,"%lf",&tmpd)==0) error=1; //	current time
+ read_tilleq(inp,'=','y');   if(fscanf(inp,"%ld",&tmpi)==0) error=1; // current iteration
+ read_tilleq(inp,'=','y');   if(fscanf(inp,"%c%d%c%d%c%d%c",&tmpc,&pp[0],&tmpc,&pp[1],&tmpc,&pp[2],&tmpc)<7) error=1; // number of processors along axes
+ if(pp[0]*pp[1]*pp[2]!=1) nrerror("Can't read velocity data from many processors.",-1,-1);
+ read_tilleq(inp,'=','y');   if(fscanf(inp,"%ld",&tmpi)==0) error=1; // Number of points along x
+ read_tilleq(inp,'=','y');   if(fscanf(inp,"%ld",&tmpi)==0) error=1; // Number of points along y
+ read_tilleq(inp,'=','y');   if(fscanf(inp,"%ld",&tmpi)==0) error=1; // Number of points along z
+ read_tilleq(inp,'=','y');   if(fscanf(inp,"%lf",&tmpd)==0) error=1; //Reynolds number 
+ read_tilleq(inp,0x0A,'y');
+    if(error) nrerror("Error in reading velocity",t_cur,tmpi);
+ for(tmpr=0;tmpr<=0*rank;tmpr++)           //reading until arrays of this process (if rank=0, one processor snap)
+ {
+ for(l=1;l<=3;l++)                    // reading f
+    for(i=0;i<N1+2*ghost;i++)
+    for(j=0;j<N2+2*ghost;j++)
+    for(k=0;k<N3+2*ghost;k++)
+       {
+       if(fread(&tmpf,sizeof(float),1,inp)<1) nrerror("Error in reading velocity",0.,(k+100*(j+100*(i+l*100))));
+       if(i>=n[0] && i<n[0]+m1 &&
+          j>=n[1] && j<n[1]+m2 &&
+          k>=n[2] && k<n[2]+m3)
+                {
+                if(isType(node[i-n[0]][k-n[2]],NodeFluid)) f[l][i-n[0]][j-n[1]][k-n[2]] = tmpf;
+                        else f[l][i-n[0]][j-n[1]][k-n[2]] = 0;
+                }
+       }
+ }
+ fileclose(inp);    
 }
 
 double deviation(double ****f,int i,int j,int k)
@@ -356,6 +393,7 @@ void interprocessor_communication(double ****f, double***nut)
    int req_numS=0, req_numR=0,tag=10;
    int reslen;
    char msg_err[100];       //for putlog+mpi_error
+
   /*-------------------------------- exchanging of ghosts -------------------------------------*/
 // exchanging in phi-direction - periodical directions first
  if(pr_neighbour[2]>-1)
@@ -465,7 +503,7 @@ void  boundary_conditions(double ****f, double ***nut)
    double vrho,vphi,vth;
 
   /*============================ divertor =================================*/
-  if(t_cur>-0.1)                  // divertors are off till t sec
+  if(t_cur<-0.1)                  // divertors are off till t sec
   if(n[1]==0)
   for(i=0;i<m1;i++)
     for(j=ghost;j<=ghost;j++)
@@ -481,7 +519,7 @@ void  boundary_conditions(double ****f, double ***nut)
 /*         f[1][i][j][k] = f[3][i][j][k] = 0;
          f[2][i][j][k] = (R*R-pow(coordin(i,0),2) - pow(coordin(k,2),2))/R/R;*/
          }
-   MPI_Barrier(MPI_COMM_WORLD);
+
    timeE0 = MPI_Wtime();
    interprocessor_communication(f,nut);
    timeE1+=(MPI_Wtime()-timeE0);
@@ -611,30 +649,24 @@ if(!goon) {
                  /*f[4][i][j][k]=coordin(i,0)*cos(coordin(j,1))*sin(coordin(j,1))*/;
                  /*f[5][i][j][k]=coordin(i,0)*cos(coordin(j,1))*cos(coordin(j,1))*/;
 //                 f[6][i][j][k]=0;
-      }
-//   struct_func(f,2,2,3);
-//   fill_velocity(0.3, f);
-   nmessage("Arrays were filled with initial values - calculation from beginning",-1,-1);
-   } else nmessage("Arrays were filled with initial values - calculation is continuing",t_cur,count);
-
-   for(i=0;i<m1;i++)
-   for(j=0;j<m2;j++)
-   for(k=0;k<m3;k++)
-     {
-		if(isType(node[i][k],NodeMagn))
+                  if(isType(node[i][k],NodeMagn))
 //                  if(isType(node[i][k],NodeFluid))
                      {
-                     f[4][i][j][k]=coordin(j,1)+Noise*((double)rand()-RAND_MAX/2)/RAND_MAX + NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl);
+                     f[4][i][j][k]=0*coordin(j,1)+Noise*((double)rand()-RAND_MAX/2)/RAND_MAX + NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl);
                      f[5][i][j][k]=Noise*((double)rand()-RAND_MAX/2)/RAND_MAX + NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl);
                      f[6][i][j][k]=Noise*((double)rand()-RAND_MAX/2)/RAND_MAX + NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl);
                      }
                    else
                      {
-                     f1[4][i][j][k]=f[4][i][j][k]=coordin(j,1);
+                     f1[4][i][j][k]=f[4][i][j][k]=0*coordin(j,1);
                      f1[5][i][j][k]=f[5][i][j][k]=0;
                      f1[6][i][j][k]=f[6][i][j][k]=0;
                      }
-	   }
+      }
+//   struct_func(f,2,2,3);
+   fill_velocity(0.3, f);
+   nmessage("Arrays were filled with initial values - calculation from beginning",-1,-1);
+   } else nmessage("Arrays were filled with initial values - calculation is continuing",t_cur,count);
 }
 
 void init_parallel()
@@ -675,17 +707,13 @@ if(!goon) {                       //reading sizes from file when continuing
   n1 = floor((double)N1/pp[0]);     n[0] = n1*pr[0] + min(pr[0],N1-pp[0]*n1);    if(pr[0]<N1-pp[0]*n1) n1++;              // dimensions of subregion
   n2 = floor((double)N2/pp[1]);     n[1] = n2*pr[1] + min(pr[1],N2-pp[1]*n2);    if(pr[1]<N2-pp[1]*n2) n2++;
   n3 = floor((double)N3/pp[2]);     n[2] = n3*pr[2] + min(pr[2],N3-pp[2]*n3);    if(pr[2]<N3-pp[2]*n3) n3++;
-    {
+if(rank==size-1)   {
    iop=fopen(NameStatFile,"w");
    fprintf(iop,"%d\n",rank);
    fprintf(iop,"%d\t%d\t%d\n",pr[0],pr[1],pr[2]);
    fprintf(iop,"%d\t%d\t%d\n",pp[0],pp[1],pp[2]);
    fprintf(iop,"%d\t%d\t%d\n",n[0],n[1],n[2]);
    fprintf(iop,"%d\t%d\t%d\n",n1,n2,n3);
-   for(i=0;i<6;i++)
-     fprintf(iop,"%d ",pr_neighbour[i]);
-   fprintf(iop,"\n");
-   fileclose(iop);
        }
    if(n1<ghost || n2<ghost || n3<ghost) nrerror("Too small mesh or incorrect number of processes",0,0);
 
@@ -714,7 +742,13 @@ if(!goon) {                       //reading sizes from file when continuing
    buf_send[j+2*i] = alloc_mem_1f(buf_size[i]);
    buf_recv[j+2*i] = alloc_mem_1f(buf_size[i]);
   }
+if(rank==size-1) {
+  for(i=0;i<6;i++)
 
+   fprintf(iop,"%d ",pr_neighbour[i]);
+   fprintf(iop,"\n");
+   fileclose(iop);
+   }
 }
 
 static double kf3[2][3][3]={{{-3./2.0, 2.0, -1./2.0}, {-1./2.0, 0.0, 1./2.0}, {1./2.0, -2.0, 3./2.0}},
@@ -770,7 +804,6 @@ double dr(double ***m, int ii, int jj, int kk, int dir, int or, double dx, int s
 /*                                           , 1,2,3 ,  0,1    dx,dx^2  , 0-left , 3,5,7 */
 {
 double tmp=0.0;
-int i;
 
 if(or==0)
 switch (sm) {
@@ -903,7 +936,7 @@ double coordin(int i, int dir)
 
 void calculate_curl(double ****f,double ****b,enum TypeNodes tip)
 {
-   int i,j,k,l,m,n;
+   int i,j,k,l,m;
    double dA[7][3];
    for(l=0;l<=2;l++) for(m=0;m<3;m++) dA[l][m] = 0;
    for(i=ghost;i<mm1;i++)
