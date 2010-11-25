@@ -33,21 +33,21 @@ int main(int argc, char** argv)
   NameStatFile =(char *)calloc(strl+9,sizeof(char));
   sprintf(NameStatFile,"%s_%d.sta",fname,rank); NameStatFile[strl+8] = 0;
 
-   Master nmessage("--------------------------------------------------------------------------",-1,-1);
+   Master nmessage("--------------------------------------------------------------------------",0,0);
 
 /* ---------------------- reading files and arrays --------------------- */
-   goon = ((fd=fopen(NameCPFile,"r+"))>0);
-   if(fd==NULL) { //putlog("File of cp were not opened",goon);
-                  Master if((fd=fopen(NameCPFile,"w+"))!=NULL) ;//putlog("File cp was successfully created",1);
+   goon = ((fd=fopen(NameCPFile,"r"))>0);
+   if(fd==NULL) { putlog("File of cp were not opened",2);
+                  Master if((fd=fopen(NameCPFile,"w"))!=NULL) ; putlog("File cp was successfully created",3);
                 }
-           else ;//putlog("File of control points opened=",(long)fd);
+           else putlog("File of control points opened=",(long)fd);
    if(goon)
       { do fscanf(fd,"%s\n",NameInitFile); while (!feof(fd));
         goon = strcmp(NameInitFile,"END");
       }
 
    init_param(argc,argv,&dtnext);       // initialization of parameters
-   Gamma=1e-3;
+   Gamma=1e-1;
    ghost=(approx-1)/2;                  //radius of approx sample
    t_cur=0;
    count=0; enter = 0;
@@ -75,7 +75,7 @@ int main(int argc, char** argv)
      }
 //--------------------------------------
  if(!goon) {
-    if(rank!=0) MPI_Recv("",0,MPI_CHAR,rank-1,1,MPI_COMM_WORLD,statuses);
+    if(rank!=0) MPI_Recv(fname,0,MPI_CHAR,rank-1,1,MPI_COMM_WORLD,statuses);
 
  fd=fileopen("node",rank);
 
@@ -86,13 +86,14 @@ int main(int argc, char** argv)
  print_array2d(fd,refz,0,m1,0,m3);
  fileclose(fd);
 
- if(rank!=size-1) MPI_Send("",0,MPI_CHAR,rank+1,1,MPI_COMM_WORLD);
+ if(rank!=size-1) MPI_Send(fname,0,MPI_CHAR,rank+1,1,MPI_COMM_WORLD);
              else nmessage("nodes has been dumped",t_cur,count);
             }
 //--------------------------------------
 
+   MPI_Barrier(MPI_COMM_WORLD);
    boundary_conditions(f,nut);
-   
+
 //   if(!goon)  dump(f,nut,t_cur,count);
 
    time_begin = MPI_Wtime();
