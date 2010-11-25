@@ -270,18 +270,18 @@ void operate_memory(int dir)
     }
 }
 
-inline int isType(int nod, enum TypeNodes tip)
+int isType(int nod, enum TypeNodes tip)
 {
   return (nod & tip);
 }
 
-inline void setType(int *nod, enum TypeNodes tip)
+void setType(int *nod, enum TypeNodes tip)
 {
   *nod |= tip;
   return;
 }
 
- void CopyBufferToGrid(double ****m,double ***nut,double *buffer,int x1,int y1,int z1,int x2,int y2,int z2)
+void CopyBufferToGrid(double ****m,double ***nut,double *buffer,int x1,int y1,int z1,int x2,int y2,int z2)
  {
    int i,j,k,l,n=0;
    for(l=0;l<nvar;l++)
@@ -295,7 +295,7 @@ inline void setType(int *nod, enum TypeNodes tip)
      nut[i][j][k]=buffer[n++];
  }
 
- void CopyGridToBuffer(double ****m,double ***nut,double *buffer,int x1,int y1,int z1,int x2,int y2,int z2)
+void CopyGridToBuffer(double ****m,double ***nut,double *buffer,int x1,int y1,int z1,int x2,int y2,int z2)
  {
    int i,j,k,l,n=0;
    for(l=0;l<nvar;l++)

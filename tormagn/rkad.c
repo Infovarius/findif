@@ -15,7 +15,6 @@ void timestep(double ****f, double ****df, double t, double ****fout,
 {
    double dt, err, errs;
 
-start_tick(4);
    dt=dttry;
    for (;;)
    {
@@ -35,7 +34,7 @@ start_tick(4);
       dt = max(Safety * dt * pow(err, Pshrink), dt*(double)0.1);
       if (t+dt == t)
 	    {
-	     dump(f,nut,t,count);
+	     dump(f,eta,t,count);
              nrerror("Stepsize underflow in rk\n",t,count);
             }
    }
@@ -44,7 +43,6 @@ start_tick(4);
       *dtnext = Safety * dt * pow(err, Pgrow);
    else
       *dtnext = dt * (double)5.0;
-finish_tick(4);
 }
 
 double rkck(double ****f, double ****df1, double t, double dt, double ****fout)
@@ -63,7 +61,7 @@ double          dc1=c1-2825.0/27648.0,dc3=c3-18575.0/48384.0,
    double err, sca, err1;
 enter++;   
    /*2rd step*/
-   for(l=0;l<nvar;l++)
+   for(l=4;l<nvar;l++)
    for(i=0;i<m1;i++)
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
@@ -72,7 +70,7 @@ enter++;
    pde(t+a2*dt,fout, df2);
 
    /*3rd step*/
-   for(l=0;l<nvar;l++)
+   for(l=4;l<nvar;l++)
    for(i=0;i<m1;i++)
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
@@ -82,7 +80,7 @@ enter++;
    pde(t+a3*dt,fout, df3);
 
    /*4th step*/
-   for(l=0;l<nvar;l++)
+   for(l=4;l<nvar;l++)
    for(i=0;i<m1;i++)
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
@@ -93,7 +91,7 @@ enter++;
    pde(t+a4*dt,fout, df4);
 
    /*5th step*/
-   for(l=0;l<nvar;l++)
+   for(l=4;l<nvar;l++)
    for(i=0;i<m1;i++)
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
@@ -105,7 +103,7 @@ enter++;
    pde(t+a5*dt,fout, df5);
 
    /*6th step*/
-   for(l=0;l<nvar;l++)
+   for(l=4;l<nvar;l++)
    for(i=0;i<m1;i++)
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
@@ -119,7 +117,7 @@ enter++;
 
    /*calculating output matrix and error value*/
    err = 0.0;
-   for(l=0;l<nvar;l++)
+   for(l=4;l<nvar;l++)
    for(i=0;i<m1;i++)
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)

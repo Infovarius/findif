@@ -10,7 +10,7 @@ int main(int argc, char** argv)
    int i,j,k,l;
    FILE *fd, *ferror;
    int strl;
-   double ChangeParamTime = 3, DeltaParam = -2.5;  // for iteration on parameters
+   double ChangeParamTime = 5, DeltaParam = -2.5;  // for iteration on parameters
    double ****ft;
 
  /* Initialize MPI */
@@ -135,12 +135,13 @@ int main(int argc, char** argv)
             snapshot(f1,eta,t_cur,count);
         if (SnapDelta>5*dtdid && floor((t_cur-dtdid)/SnapDelta)<floor(t_cur/SnapDelta))
             snapshot(f1,eta,t_cur,count);
-/*        if (floor((t_cur-dtdid)/ChangeParamTime)<floor(t_cur/ChangeParamTime))
+        if (floor((t_cur-dtdid)/ChangeParamTime)<floor(t_cur/ChangeParamTime))
             {
             //Rm = floor(t_cur/ChangeParamTime+0.5)*DeltaParam-190;
             Rm += DeltaParam;
+            snapshot(f1,eta,t_cur,count);
             Master nmessage("Rm was changed to",Rm,count);
-            }*/
+            }
         ft = f;  f = f1;  f1 = ft;
 /*        if(kbhit())
              {
@@ -156,7 +157,7 @@ int main(int argc, char** argv)
 
    printing(f,dtdid,t_cur,count,PulsEnergy);
    if (SnapDelta>5*dtdid && floor((t_cur-dtdid)/SnapDelta)>=floor(t_cur/SnapDelta))
-       snapshot(f,eta,t_cur,count);
+	   snapshot(f,eta,t_cur,count);
    if(rank==0) add_control_point("END");
 
    Master fileclose(ferror);

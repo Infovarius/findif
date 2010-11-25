@@ -8,7 +8,6 @@
 LEVEL char *NameMessageFile;
 LEVEL char *NameErrorFile;
 LEVEL char NameInitFile[200];
-LEVEL char *NameNuFile;
 LEVEL char *NameVFile;
 LEVEL char *NameDumpFile;
 LEVEL char *NameSnapFile;
@@ -110,6 +109,7 @@ void timestep(double ****f, double ****df, double t, double ****fout,
 double rkck(double ****f, double ****df, double t, double dt, double ****fout);
 /*------- pde.c  -----------*/
 void   pde(double t, double ****f, double ****df);
+void fill_velocity(double t, double ****f);
 double norma(double a,double b,double c,int q);
 double deviation(double ****f,int,int,int);
 void nut_by_flux(double ****f,double Re);
@@ -128,6 +128,7 @@ void init_param(int argc, char** argv,double *dtnext);
 int init_data(void);
 void print_array1d(FILE *ff,double *a,int beg1,int n1);
 void print_array2d(FILE *ff,double **a,int beg1,int n1,int beg2,int n2);
+void print_array2i(FILE *ff,int **a,int beg1,int n1,int beg2,int n2);
 void print_array3d(FILE *ff,double ***a,int beg1,int n1,int beg2,int n2,int beg3,int n3);
 void printbin_array3d(FILE *ff,double ***a,int beg1,int n1,int beg2,int n2,int beg3,int n3);
 void check(double ****f);
