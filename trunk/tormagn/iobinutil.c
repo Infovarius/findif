@@ -269,6 +269,8 @@ if(sum<n1*n2*n3) nrerror("Wrong binary output",t_cur,count);
 void check(double ****f)   //calculate energy of pulsations of all components and know if there's crash
 {
 int i,j,k,l;
+calculate_curl(&f1[4],B,NodeMagn);
+
 /*PulsEnergy=0;
 TotalEnergy=0;
 for(l=0;l<=2;l++)
@@ -303,7 +305,6 @@ FILE *fv,*fen;
 //clrscr();
 time_now = MPI_Wtime();
 Master printf("program is working %0.2f seconds\n",time_now-time_begin);
-calculate_curl(&f1[4],B,NodeMagn);
 
 divv = divB = 0;
 for(i=0;i<m1;i++)
@@ -384,6 +385,8 @@ Master printf("time per iteration per node: %g  includes time for exchanging: %g
        MPI_Allreduce(mf, totmf, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
        Master fprintf(fen,"\t %e",totmf[0]/N1/N2/N3);
        }
+   TotalEnergyOld = TotalEnergy;
+   TotalEnergy = 0;
    for(l=0;l<3;l++) {
        mf[0]=0;
        for(i=0;i<m1;i++)
@@ -392,9 +395,10 @@ Master printf("time per iteration per node: %g  includes time for exchanging: %g
          if(isType(node[i][k],NodeMagn))
 	    mf[0] += fabs(1+coordin(i,0)*rc)*pow(B[l][i][j][k],2);
        MPI_Allreduce(mf, totmf, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
+	   TotalEnergy += totmf[0];
        Master fprintf(fen,"\t %e",totmf[0]/N1/N2/N3);
        }
-
+   
    Master fprintf(fen,"\n");
    Master fileclose(fen);
    Master printf("number of runge-kutt calculations=%d\n",enter);

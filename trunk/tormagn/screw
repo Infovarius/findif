@@ -1,13 +1,13 @@
-7
+8
 ---------  Geometry parameters ------------------------------------
 6.283		| streamwise length in radii units
 0		| inverse distance from centre to axis of torus
 1		| inner radius of torus (with fluid)
 1		| outer radius of torus (with shell)
-3		| radius of region to be modelled
+2		| radius of region to be modelled
 
 ---------  Hydrodynamical parameters ------------------------------
-100		| Reynolds number
+10		| Reynolds number
 
 -1		| HD profile: 0 - parabole, >0 - Hartmann ksi, <0 - solid body
 0.01		| amplitude of initial random noise
@@ -33,12 +33,14 @@
 ---------  Output parameters  -------------------------------
 5		| steps to statistics output (OutStep)
 0		| steps to snaps (SnapStep)
-0.5		| simulation time delta to snap (SnapDelta)
-0		| steps of checking divergence (CheckStep)
+0.1		| simulation time delta to snap (SnapDelta)
+5		| minutes between dumps (DumpInterval)
+0		| keep dumps (DumpKeep)
+10		| steps of checking divergence (CheckStep)
 2		| test of time step (VarStep)
-100		| Total time
+3.5		| Total time
 
 ---------  Regulators ----------------------------------------
-10		| simulation time delta between parameter changing (ChangeParamTime)
--10		| delta of parameter changing (DeltaParam)
-0		| name of initial file
+0.05		| simulation time delta between parameter changing (ChangeParamTime)
+5		| delta of parameter changing (DeltaParam)
+-1		| name of initial file
