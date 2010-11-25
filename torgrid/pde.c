@@ -39,19 +39,19 @@ void pde(double t, double ****f, double ****df)
      {
       M = 1./(rc*coordin(i,0)+1);
       for(m=0;m<3;m++) {
-         dp1[m]=dr(f[0],i,j,k,m+1,0,dx[m],ghost, approx);
-         dn1[m]=dr(nut,i,j,k,m+1,0,dx[m],ghost, approx);
+         dp1[m]=dr(f[0],i,j,k,m+1,0,dx[m],(approx-1)/2, approx);
+         dn1[m]=dr(nut,i,j,k,m+1,0,dx[m], (approx-1)/2, approx);
       }
       dp1[1] *= M; dn1[1] *= M;
       for(l=1;l<=3;l++) {
        for(m=0;m<3;m++) {
-         dv1[l][m]=dr(f[l],i,j,k,m+1,0,dx[m],ghost, approx);
-         dv2[l][m]=dr(f[l],i,j,k,m+1,1,dx[m]*dx[m],ghost, approx);
+         dv1[l][m]=dr(f[l],i,j,k,m+1,0,dx[m],(approx-1)/2, approx);
+         dv2[l][m]=dr(f[l],i,j,k,m+1,1,dx[m]*dx[m],(approx-1)/2, approx);
          }
          dv1[l][1] *= M;     dv2[l][1]  *= M*M;
-        dA11[l][0][1] = dA11[l][1][0] = d2cross(f[l],i,j,k,2,1,ghost,approx);
-        dA11[l][0][2] = dA11[l][2][0] = d2cross(f[l],i,j,k,3,1,ghost,approx);
-        dA11[l][1][2] = dA11[l][2][1] = d2cross(f[l],i,j,k,3,2,ghost,approx);
+        dA11[l][0][1] = dA11[l][1][0] = d2cross(f[l],i,j,k,2,1,(approx-1)/2,approx);
+        dA11[l][0][2] = dA11[l][2][0] = d2cross(f[l],i,j,k,3,1,(approx-1)/2,approx);
+        dA11[l][1][2] = dA11[l][2][1] = d2cross(f[l],i,j,k,3,2,(approx-1)/2,approx);
       }
 
       df[1][i][j][k]=nut[i][j][k]*(dv2[1][0]+dv2[1][1]+dv2[1][2]+r_1[i]*dv1[1][0]
@@ -62,9 +62,9 @@ void pde(double t, double ****f, double ****df)
 		     + (dn1[1]-f[2][i][j][k])*dv1[1][1]
 		     + (dn1[2]-f[3][i][j][k])*dv1[1][2]
 		+nut[i][j][k]*(dv2[1][0]+dv1[1][0]*r_1[i]-f[1][i][j][k]*r_2[i]-dv1[2][1]*r_1[i]+dA11[2][0][1]+dA11[3][0][2])
-/*                     - dvv(f[1],f[1],1,i,j,k,ghost,approx)
-                     - dvv(f[2],f[1],2,i,j,k,ghost,approx)
-                     - dvv(f[3],f[1],3,i,j,k,ghost,approx)*/
+/*                     - dvv(f[1],f[1],1,i,j,k,(approx-1)/2,approx)
+                     - dvv(f[2],f[1],2,i,j,k,(approx-1)/2,approx)
+                     - dvv(f[3],f[1],3,i,j,k,(approx-1)/2,approx)*/
                      - f[1][i][j][k]*f[1][i][j][k]*r_1[i]
 		     - (dn1[1]-f[2][i][j][k])*r_1[i]*f[2][i][j][k]
 		     ;
@@ -76,9 +76,9 @@ void pde(double t, double ****f, double ****df)
 		     + (dn1[1]-f[2][i][j][k])*dv1[2][1]
 		     + (dn1[2]-f[3][i][j][k])*dv1[2][2]
 		+nut[i][j][k]*(dv1[1][1]*r_1[i]+dA11[1][0][1]+dv2[2][1]+dA11[3][1][2])
-/*                     - dvv(f[1],f[2],1,i,j,k,ghost,approx)
-                     - dvv(f[2],f[2],2,i,j,k,ghost,approx)
-                     - dvv(f[3],f[2],3,i,j,k,ghost,approx)*/
+/*                     - dvv(f[1],f[2],1,i,j,k,(approx-1)/2,approx)
+                     - dvv(f[2],f[2],2,i,j,k,(approx-1)/2,approx)
+                     - dvv(f[3],f[2],3,i,j,k,(approx-1)/2,approx)*/
                      - f[1][i][j][k]*f[2][i][j][k]*r_1[i]
 		     + (dn1[1]-f[1][i][j][k])*r_1[i]*f[2][i][j][k]
 		     ;
@@ -88,14 +88,14 @@ void pde(double t, double ****f, double ****df)
 		     + (dn1[1]-f[2][i][j][k])*dv1[3][1]
 		     + (dn1[2]-f[3][i][j][k])*dv1[3][2]
       		+nut[i][j][k]*(dv1[1][2]*r_1[i]+dA11[1][0][2]+dA11[2][1][2]+dv2[3][2])
-/*                     - dvv(f[1],f[2],1,i,j,k,ghost,approx)
-                     - dvv(f[2],f[2],2,i,j,k,ghost,approx)
-                     - dvv(f[3],f[2],3,i,j,k,ghost,approx)*/
+/*                     - dvv(f[1],f[2],1,i,j,k,(approx-1)/2,approx)
+                     - dvv(f[2],f[2],2,i,j,k,(approx-1)/2,approx)
+                     - dvv(f[3],f[2],3,i,j,k,(approx-1)/2,approx)*/
                      - f[1][i][j][k]*f[3][i][j][k]*r_1[i]
                      ;
-      df[0][i][j][k]= -(dvv(f[0],f[1],1,i,j,k,ghost,approx)
-      		       +dvv(f[0],f[2],2,i,j,k,ghost,approx)
-                       +dvv(f[0],f[3],3,i,j,k,ghost,approx)
+      df[0][i][j][k]= -(dvv(f[0],f[1],1,i,j,k,(approx-1)/2,approx)
+      		       +dvv(f[0],f[2],2,i,j,k,(approx-1)/2,approx)
+                       +dvv(f[0],f[3],3,i,j,k,(approx-1)/2,approx)
                        +f[0][i][j][k]*f[1][i][j][k]*r_1[i]);
 //      df[0][i][j][k]= -f[0][i][j][k]*(dv1[1][0]+dv1[2][1]+dv1[3][2]+f[1][i][j][k]*r_1[i])/Gamma;
 /*      df[1][i][j][k] += Gamma*df[0][i][j][k]*f[1][i][j][k];
@@ -359,11 +359,13 @@ void  boundary_conditions(double ****f, double ***nut)
                    f[l][i][j][k] = ( (refr[i][k]-r2)*(f[l][r1][j][z1]*(refz[i][k]-z2)-f[l][r1][j][z2]*(refz[i][k]-z1))
                                    + (refr[i][k]-r1)*(f[l][r2][j][z2]*(refz[i][k]-z1)-f[l][r2][j][z1]*(refz[i][k]-z2))
                                     ) * z[l];
-                 if(i==r1 && k==z1) f[l][i][j][k] /= (1-(refr[i][k]-r2)*(refz[i][k]-z2)*z[l]);
+/*                 if(i==r1 && k==z1) f[l][i][j][k] /= (1-(refr[i][k]-r2)*(refz[i][k]-z2)*z[l]);
                  if(i==r1 && k==z2) f[l][i][j][k] /= (1+(refr[i][k]-r2)*(refz[i][k]-z1)*z[l]);
                  if(i==r2 && k==z1) f[l][i][j][k] /= (1-(refr[i][k]-r1)*(refz[i][k]-z1)*z[l]);
                  if(i==r2 && k==z2) f[l][i][j][k] /= (1+(refr[i][k]-r1)*(refz[i][k]-z2)*z[l]);
-                 }
+     если есть внутренние фиктивные, то этот отрывок не должен влиять
+     */            }
+     
 //                   nut[i][j][k] = (refr[i][k]-r2)*(nut[r1][j][z1]*(refz[i][k]-z2)-nut[r1][j][z2]*(refz[i][k]-z1))
 //                                + (refr[i][k]-r1)*(nut[r2][j][z2]*(refz[i][k]-z1)-nut[r2][j][z1]*(refz[i][k]-z2));
                    nut[i][j][k] = 1./Re;
@@ -411,7 +413,7 @@ void  init_conditions()
         refz[i][k] = z1*(2*R/rho-1);
         refr[i][k] = (refr[i][k]+R)/dx[0]-0.5-n[0]+ghost;   // simulation indices
         refz[i][k] = (refz[i][k]+R)/dx[2]-0.5-n[2]+ghost;
-/*        if(fabs(refr[i][k]-i)<1 && fabs(refr[i][k]-(int)refr[i][k])>EPS &&
+        if(fabs(refr[i][k]-i)<1 && fabs(refr[i][k]-(int)refr[i][k])>EPS &&
            fabs(refz[i][k]-k)<1 && fabs(refz[i][k]-(int)refz[i][k])>EPS &&
            !isType(node[i][k],NodeFluid))
                  { setType(&node[i][k],NodeFluid);
@@ -423,7 +425,7 @@ void  init_conditions()
                            setType(&node[i+l][k+ll],NodeGhostFluid);
                         else;
                       else if(!isType(node[i][k],NodeClued)) nmessage("out of boundary",i,k);
-                  }*/
+                  }
      //for divertor's blade
         sinth[i][k]=r1/rho;
         costh[i][k]=   z1/rho;
@@ -454,7 +456,9 @@ if(!goon) {
 	}
         else
       if(!isType(node[i][k],NodeGhostFluid))
-        f[0][i][j][k]=f[1][i][j][k]=f[2][i][j][k]=f[3][i][j][k]=1;
+        { f[0][i][j][k]=0;
+          f[1][i][j][k]=f[2][i][j][k]=f[3][i][j][k]= 0;
+        }  
       }
    for(i=0;i<m1;i++)
    for(j=0;j<m2;j++)

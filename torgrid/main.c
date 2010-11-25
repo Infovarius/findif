@@ -48,7 +48,7 @@ int main(int argc, char** argv)
 
    init_param(argc,argv,&dtnext);       // initialization of parameters
    Gamma=1e-1;
-   ghost=(approx-1)/2;                  //radius of approx sample
+   ghost=(approx-1)/2+1;                  //radius of approx sample
    t_cur=0;
    count=0; enter = 0;
 
@@ -74,7 +74,7 @@ int main(int argc, char** argv)
       fileclose(fd);
      }
 //--------------------------------------
- if(!goon) {
+ {
     if(rank!=0) MPI_Recv(fname,0,MPI_CHAR,rank-1,1,MPI_COMM_WORLD,statuses);
 
  fd=fileopen("node",rank);
@@ -94,7 +94,7 @@ int main(int argc, char** argv)
    MPI_Barrier(MPI_COMM_WORLD);
    boundary_conditions(f,nut);
 
-//   if(!goon)  dump(f,nut,t_cur,count);
+   dump(f,nut,t_cur,count); 
 
    time_begin = MPI_Wtime();
    if(!goon) Master nmessage("work has begun",0,0);
@@ -156,7 +156,7 @@ int main(int argc, char** argv)
 			goon = strcmp(NameInitFile,"END");
 			}
 		init_param(argc,argv,&dtnext);       // initialization of parameters
-		ghost=(approx-1)/2;                  //radius of approx sample
+		ghost=(approx-1)/2+1;                  //radius of approx sample
 		dx[0]=2*R/N1;
 		dx[1]=lfi/N2;
 		dx[2]=2*R/N3;
