@@ -64,8 +64,8 @@ void pde(double t, double ****f, double ****df)
 				   -f[1][i][j][k]*r_2[i]-2*dv1[2][1]*r_1[i])
 		     -dp1[0]/Gamma/f[0][i][j][k]//+w*w/r_1[i]       +2*w*f[2][i][j][k]                   //forces of inertion
                 -(dv1[1][0]<0 ? mu[0]*dv1[1][0]*(dp1[0]*dv1[1][0]+2*f[0][i][j][k]*dv2[1][0]) : 0)
-              +(1 || j+n[1]<=ghost+2 && t_cur>-1 ? tan(chimax)*coordin(k,2)*f[2][i][j][k] : 0)                //helical force
-//              +(N2/2<=j+n[1]<=N2/2+2 && t_cur>-1 ? tan(chimax)*coordin(k,2)*f[2][i][j][k] : 0)                //helical force
+              +(1 || j+n[1]<=ghost+2 && t_cur>-1 ? tan(chimax*M_PI/180)*coordin(k,2)*f[2][i][j][k] : 0)                //helical force
+//              +(N2/2<=j+n[1]<=N2/2+2 && t_cur>-1 ? tan(chimax*M_PI/180)*coordin(k,2)*f[2][i][j][k] : 0)                //helical force
 		     + (dn1[0]-f[1][i][j][k])*dv1[1][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[1][1]
 		     + (dn1[2]-f[3][i][j][k])*dv1[1][2]
@@ -94,8 +94,8 @@ void pde(double t, double ****f, double ****df)
       df[3][i][j][k]=nut[i][j][k]*(dv2[3][0]+dv2[3][1]+dv2[3][2]+r_1[i]*dv1[3][0])
 		     -dp1[2]/Gamma/f[0][i][j][k]
                 -(dv1[3][2]<0 ? mu[2]*dv1[3][2]*(dp1[2]*dv1[3][2]+2*f[0][i][j][k]*dv2[3][2]) : 0)
-              -(1 || j+n[1]<=ghost+2 && t_cur>-1 ? tan(chimax)*(coordin(i,0)-rc)*f[2][i][j][k] :0)            //helical force
-//              -(N2/2<=j+n[1]<=N2/2+2 && t_cur>-1 ? tan(chimax)*(coordin(i,0)-rc)*f[2][i][j][k] :0)            //helical force
+              -(1 || j+n[1]<=ghost+2 && t_cur>-1 ? tan(chimax*M_PI/180)*(coordin(i,0)-rc)*f[2][i][j][k] :0)            //helical force
+//              -(N2/2<=j+n[1]<=N2/2+2 && t_cur>-1 ? tan(chimax*M_PI/180)*(coordin(i,0)-rc)*f[2][i][j][k] :0)            //helical force
 		     + (dn1[0]-f[1][i][j][k])*dv1[3][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[3][1]
 		     + (dn1[2]-f[3][i][j][k])*dv1[3][2]
