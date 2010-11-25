@@ -53,17 +53,15 @@ char str[256],*pstr;
  if(!count) printf("%g\t->\t%s",*param,pstr);
 }
 
-void init_param(int argc, char** argv,double *dtnext)
+void init_param(int argc, char** argv,double *dtnext,int flag)
 {
 int ver;
 FILE *iop;
 double d;
  if(argc<2 || (iop=fopen(argv[1],"r"))==NULL) //no ini file
-    {
      nrerror("Start from no ini file!",-1,-1);
-     }
-    else {
-      if(fscanf(iop,"%d",&ver)<1 || ver!=4) nrerror("parameters' file has wrong version",0,0);
+
+      if(fscanf(iop,"%d",&ver)<1 || ver!=5) nrerror("parameters' file has wrong version",0,0);
       read_token(iop,&lfi);
       read_token(iop,&rc);
       read_token(iop,&R);
@@ -86,13 +84,15 @@ double d;
       read_token(iop,&d);         OutStep = (int)d;
       read_token(iop,&d);         SnapStep = (int)d;
       read_token(iop,&SnapDelta);
+      read_token(iop,&DumpInterval);
+      read_token(iop,&d);         DumpKeep = (int)d;
       read_token(iop,&d);         CheckStep = (int)d;
       read_token(iop,&d);         VarStep = (int)d;
       read_token(iop,&Ttot);
       read_token(iop,&ChangeParamTime);
       read_token(iop,&DeltaParam);
       read_token(iop,&d);
-  if(count)
+  if(flag)
      {
       if(d==0)	{
       		goon = 0;
@@ -100,12 +100,23 @@ double d;
                 }
       else if(d>0)  {
          	goon = 1;
-                sprintf(NameInitFile,"%s_*_%05d.snp",NameSnapFile,(int)d);
+                sprintf(NameInitFile,"%s_%d_%05d.snp",NameSnapFile,size,(int)d);
                 }
+	  else {// without reading (d<0)
+		    goon=0;
+			strcpy(NameInitFile,"-1");
+	  }
      }
-  else Master nmessage("Parameters were extracted from file",0,0);
+  
+  Master if(!count) nmessage("Parameters were extracted from file",0,0);
       fileclose(iop);
-      }
+   
+ 	Gamma=1e-4;
+	ghost=(approx-1)/2;                  //radius of approx sample
+	dx[0]=2*R/N1;		
+	dx[1]=lfi/N2;
+	dx[2]=2*R/N3;
+	p1 = 4/Re;
 }
 
 void read_tilleq(FILE *ffff,char lim, char echo)
@@ -179,6 +190,7 @@ int init_data(void)                 //returns code of error
  fscanf(inp,"%c",&tmpc);
  }
 fileclose(inp);
+
 if(error) nrerror("Data couldn't have been read from file!!!",-1,error);
      else Master nmessage("Data has been read from file",t_cur,count);
 return(error);
@@ -359,13 +371,23 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
 
 void dump(double ****f1,double ***nu,double t_cur,long count)
 {
+char str[256],str1[256];
 FILE *fd;
-char *message="dump";
+char message[10]="dump";
 int tag=1,v;
 
+// boundary_conditions(f1);
+
+ if(DumpKeep)  sprintf(str,"%s_%d_%d.dmp",NameSnapFile,size,count);
+	else {
+		sprintf(str,NameDumpFile);
+		sprintf(str1,"%s.bak",NameDumpFile);
+		Master remove(str1);
+		Master rename(str,str1);
+		}
  if(rank!=0) MPI_Recv(message,0,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);
 
- fd=fileopen(NameDumpFile,rank);
+ fd=fileopen(str,rank);
 
  Master nmessage("dump has been started",t_cur,count);
  Master fprintf(fd,"current time = %0.10f \ncurrent iteration = %ld\n",t_cur,count);
@@ -383,7 +405,7 @@ int tag=1,v;
  if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
  MPI_Barrier(MPI_COMM_WORLD);
  Master {nmessage("dump is done",t_cur,count);
-                   //add_control_point(NameDumpFile);
+                   add_control_point(str);
                    }
 }
 
@@ -395,28 +417,30 @@ long tag=count,v;
 FILE *fd;
 
  sprintf(str,"%s_%d_%d.snp",NameSnapFile,size,count);
-// boundary_conditions(f1,nut);
+ boundary_conditions(f1,nut);
 
  if(rank!=0) MPI_Recv(message,0,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);
 
  fd=fileopen(str,rank);
- Master nmessage("snap has been started",t_cur,count);
- Master fprintf(fd,"current time = %0.10f \ncurrent iteration = %ld\n",t_cur,count);
- Master fprintf(fd,"number of processors along axes={%d,%d,%d}\n",pp[0],pp[1],pp[2]);
- Master fprintf(fd,"Number of points along x = %d\n",N1);
- Master fprintf(fd,"Number of points along y = %d\n",N2);
- Master fprintf(fd,"Number of points along z = %d\n",N3);
- Master fprintf(fd,"Reynolds number = %lf\n",Re);
-
- for(v=0;v<nvar;v++)
+ Master {
+ nmessage("snap has been started",t_cur,count);
+ fprintf(fd,"current time = %0.10f \ncurrent iteration = %ld\n",t_cur,count);
+ fprintf(fd,"number of processors along axes={%d,%d,%d}\n",pp[0],pp[1],pp[2]);
+ fprintf(fd,"Number of points along x = %d\n",N1);
+ fprintf(fd,"Number of points along y = %d\n",N2);
+ fprintf(fd,"Number of points along z = %d\n",N3);
+ fprintf(fd,"Reynolds number = %lf\n",Re);	 
+ }
+ for(v=1;v<nvar;v++)
     print_array3d(fd,f1[v],0,m1,0,m2,0,m3);
- print_array3d(fd,nu,0,m1,0,m2,0,m3);
+// print_array3d(fd,nu,0,m1,0,m2,0,m3);
  fileclose(fd);
                   
  if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
  MPI_Barrier(MPI_COMM_WORLD);
  Master {nmessage("snap is done",t_cur,count);
-                   add_control_point(str);}
+//                   add_control_point(str);
+	 }
 }
 
 												  
