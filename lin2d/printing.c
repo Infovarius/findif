@@ -9,6 +9,7 @@ LEVEL const char *NameVFile  = "vv.dat";
 LEVEL const char *NameDumpFile = "dump.dat";
 LEVEL const char *NameEnergyFile = "energy.dat";
 
+const double UpLimit=3.;     //after this limit there's dump
 FILE *fileopen(const char *x, int mode)  //opening of file to ff
                          /*   0-rewrite;others-append   */
 {
@@ -85,6 +86,7 @@ for(i=beg1;i<beg1+n1;i++) {
 
 void printing(double ****f1,double dtdid,double t_cur,long count)
 {
+static int net;
 double temp, div=0;
 int i,k,l;
 double mf, mda, mdr, en;
@@ -93,6 +95,9 @@ FILE *fv, *fnu, *fen;
 //fnu = fileopen(NameNuFile,count);
 clrscr();
 boundary_conditions(f1);
+
+(count==0? net = 1 : net);
+
 for(i=ghost;i<mm1;i++)
       for(k=ghost;k<mm3;k++) {
            temp=0;
@@ -104,12 +109,12 @@ for(i=ghost;i<mm1;i++)
            }
 //           fclose(fnu);
 printf("%e %e %d %e\n", t_cur, dtdid, count, div);
-en = 0;
+
         for(l=0;l<nvar;l++ for2D(l)) {
-          mf=mda=mdr=0;
+          mf=mda=mdr=en=0;
           for(i=ghost;i<mm1;i++)
           for(k=ghost;k<mm3;k++) {
-            if (l==0) en+=pow(f1[l][i][0][k]-coordin(k,2)*(l3-coordin(k,2))*4/l3/l3,2);
+            if (l==0) en+=pow(f1[l][i][0][k],2);
                else en+=pow(f1[l][i][0][k],2);
             temp=fabs(f[l][i][0][k]-f1[l][i][0][k]);
             if (temp>mda) mda=temp;
@@ -117,6 +122,7 @@ en = 0;
             if (temp>mdr) mdr=temp;
             if (fabs(f1[l][i][0][k])>mf) mf=fabs(f1[l][i][0][k]);
           }
+          if(l==0&&mf>UpLimit&&net) {dump(f1,t_cur,count); net = 0;};
           printf("%d %e %e %e\n",l, mf, mda, mdr);
           }
 printf("Energy of pulsations=%g\n",en);
@@ -145,7 +151,7 @@ for(k=ghost;k<mm3;k++ for2D(k))
 
 //putting velocities to file
         fv = fileopen(NameVFile,count);
-        print_array1d(fv,avervx,ghost,n3);
+        print_array1d(fv,f1[0][m1/2][0],ghost,n3);
         fclose(fv);
 //putting viscosities to file
 /*        fnu = fileopen(NameNuFile,count);
@@ -153,11 +159,7 @@ for(k=ghost;k<mm3;k++ for2D(k))
         fclose(fnu);*/
 
 //for(k=0;k<m3;k++) printf("%e\n",f1[0][5][0][k]);
-if(kbhit()&&getch()=='q')
-     {
-     dump(f1,t_cur,count);
-     nrerror("You asked to exit. Here you are...");
-     }
+
 }
 
 void dump(double ****f1,double t_cur,long count)

@@ -2,6 +2,7 @@
 #define LEVEL extern
 #include "head.h"
 
+
 void pde(double t, double ****f, double ****df)
 {
    int i,k,l,m;
@@ -23,22 +24,23 @@ void pde(double t, double ****f, double ****df)
 
       for(l=0;l<3;l++ for2D(l))
        df[l][i][0][k]= (dv2[l][0] + dv2[l][2])*nut[i][0][k]
-                     - dp1[l] + (dn1[0]-f[0][i][0][k])*dv1[l][0]
-                              + (dn1[2]-f[2][i][0][k])*dv1[l][2];
+                     - dp1[l] + dn1[0]*dv1[l][0]
+                              + dn1[2]*dv1[l][2]
+                     -coordin(k,2)*(l3-coordin(k,2))*4/l3/l3*dv1[l][0]
+                     -(l==0? 4*(l3-2*coordin(k,2))*4/l3/l3*f[2][i][0][k] : 0);
       df[3][i][0][k]= (-(dv1[0][0] + dv1[2][2]))/Gamma;
    }
 
    return;
 }
 
-void nut_by_flux(int ind) //calculating nu_turbulent by velocity fluctuations
+/*void nut_by_flux(int ind) //calculating nu_turbulent by velocity fluctuations
 {
 double flux, maxflux = 0;
 double maschtab = 10000;
-int i,j,k,kol = 0;
-for(i=0;i<=Nx+1;i++)
-    for(j=0;j<=Ny+1;j++)
-        for(k=0;k<=Nz+1;k++)
+int i,j=0,k,kol = 0;
+for(i=ghost;i<mm1;i++)
+        for(k=ghost;k<mm3;k++)
             {
             flux = 0;
             if(i>0)
@@ -69,7 +71,7 @@ for(i=0;i<=Nx+1;i++)
             if(flux>maxflux) maxflux = flux;
             nut[i][j][k] = (1. + maschtab * flux)/Re;
             }
-}
+} */
 
 void  boundary_conditions(double ****f)
 {
@@ -81,20 +83,10 @@ void  boundary_conditions(double ****f)
    for(g=0;g<ghost;g++)
    {
    //periodic for velocities and gradient-periodic for pressure
-      f[l][g][0][k] = f[l][n1+g][0][k] - ((l==3)?(p2-p1):0);
-      f[l][mm1+g][0][k] = f[l][ghost+g][0][k] + ((l==3)?(p2-p1):0);
+      f[l][g][0][k] = f[l][n1+g][0][k] ;
+      f[l][mm1+g][0][k] = f[l][ghost+g][0][k] ;
    }
 
-/*   // vertical surfaces
-   for(l=0;l<nvar;l++)
-   for(i=ghost;i<mm1;i++)
-   for(k=ghost;k<mm3;k++)
-   for(g=0;g<ghost;g++)
-   {
-   //periodic conditions for velocities and pressure
-      f[l][i][g][k] = f[l][i][n2+g][k];
-      f[l][i][mm2+g][k] = f[l][i][ghost+g][k];
-   }*/
 
    // on horizontal surfaces
 
@@ -113,18 +105,20 @@ void  boundary_conditions(double ****f)
 void  init_conditions(double ****f)
 {
    int i,k,l;
-   double Noise=0.01, Noise1=0.;
+   double Noise=0.0, NoiseNorm=0.01;
    double k1,k2,k3;
 
-   k1=2*M_PI/l1;  k3=M_PI/l3;
+   k1=2*M_PI/l1;  k3=2*M_PI/l3;
+   NoiseNorm /= sqrt(k1*k1+k3*k3);
+
    for(i=0;i<m1;i++)
    for(k=0;k<m3;k++) {
-        f[0][i][0][k]=coordin(k,2)*(l3-coordin(k,2))*4/l3/l3
-          - Noise1*3*k3*pow(sin(k3*coordin(k,2) ),2.)*cos(k3*coordin(k,2))*sin(k1*coordin(i,0))
+        f[0][i][0][k]=0.
+                      + NoiseNorm * k3*sin(k1*coordin(i,0))*sin(k3*coordin(k,2))
                      + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX;
-        f[2][i][0][k]=Noise1* pow(sin(k3*coordin(k,2)),3.) * k1*cos(k1*coordin(i,0))
+        f[2][i][0][k]=NoiseNorm *k1*cos(k1*coordin(i,0))* (cos(k3*coordin(k,2))-1)
                      + Noise*((double)rand()-RAND_MAX/2)/RAND_MAX;
-        f[3][i][0][k]=p1+(i-0.5)*(p2-p1)/n1;
+        f[3][i][0][k]=0.;
         nut[i][0][k]=1./Re;
    }
 

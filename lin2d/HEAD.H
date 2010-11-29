@@ -5,6 +5,7 @@
 //#include <conio.h>
 
 #define for2D(l)  ,l==1?l++:l
+#define modul(a,b,c)  sqrt((a)*(a)+(b)*(b)+(c)*(c))
 
 LEVEL double ****f, ****f1, ****df, ****df2, ****df3, ****df4, ****df5,
              dx[3];
