@@ -1,0 +1,9 @@
+export PATH=$PATH:/common/mpitrace/bin
+dtcc -o tordebug *.c -lm
+dtrun -np 16 tordebug pumpflow
+dtan tordebug
+
+export P4_GLOBMEMSIZE=500000000
+echo $P4_GLOBMEMSIZE
+
+ls -lR >full.ls

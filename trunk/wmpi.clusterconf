@@ -1,0 +1,13 @@
+/Machines
+Amazonka
+shmem Amazonka
+tcp Amazonka
+Meta
+tcp Meta
+shmem Meta
+Acer
+tcp Acer
+shmem Acer
+/Connections
+internal device shmem
+external device tcp
