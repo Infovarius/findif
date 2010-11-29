@@ -1,0 +1,175 @@
+(***********************************************************************
+
+                    Mathematica-Compatible Notebook
+
+This notebook can be used on any computer system with Mathematica 3.0,
+MathReader 3.0, or any compatible application. The data for the notebook 
+starts with the line of stars above.
+
+To get the notebook into a Mathematica-compatible application, do one of 
+the following:
+
+* Save the data starting with the line of stars above into a file
+  with a name ending in .nb, then open the file inside the application;
+
+* Copy the data starting with the line of stars above to the
+  clipboard, then use the Paste menu command inside the application.
+
+Data for notebooks contains only printable 7-bit ASCII and can be
+sent directly in email or through ftp in text mode.  Newlines can be
+CR, LF or CRLF (Unix, Macintosh or MS-DOS style).
+
+NOTE: If you modify the data for this notebook not in a Mathematica-
+compatible application, you must delete the line below containing the 
+word CacheID, otherwise Mathematica-compatible applications may try to 
+use invalid cache data.
+
+For more information on notebooks and Mathematica-compatible 
+applications, contact Wolfram Research:
+  web: http://www.wolfram.com
+  email: info@wolfram.com
+  phone: +1-217-398-0700 (U.S.)
+
+Notebook reader applications are available free of charge from 
+Wolfram Research.
+***********************************************************************)
+
+(*CacheID: 232*)
+
+
+(*NotebookFileLineBreakTest
+NotebookFileLineBreakTest*)
+(*NotebookOptionsPosition[      3325,        114]*)
+(*NotebookOutlinePosition[      3978,        137]*)
+(*  CellTagsIndexPosition[      3934,        133]*)
+(*WindowFrame->Normal*)
+
+
+
+Notebook[{
+Cell[BoxData[
+    \(\(\(\[Psi][x_, z_] := 
+      \[Phi][z] E\^\(\[ImaginaryI] \((\[Omega]\ t - k\_1\ x)\)\); \)\ \)\)], 
+  "Input"],
+
+Cell[BoxData[
+    \(\[Phi][z_] := 1 - Cos[k\_2\ z]; \[Omega] := a + b\ \[ImaginaryI]; \)], 
+  "Input"],
+
+Cell[BoxData[
+    \(Re1[l_] := ComplexExpand[l] /. {Complex[0, x_] -> 0} // Factor; \n
+    Im1[l_] := \(-Re1[\[ImaginaryI]*l]\); \)], "Input"],
+
+Cell[BoxData[
+    \(First\ variant\ of\ valocity\ \(field : \)\)], "Input"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \({vx, 
+        vz} = {\(-Re1[\[PartialD]\_z \[Psi][x, z]]\), 
+          Re1[\[PartialD]\_x \[Psi][x, z]]} /. t -> 0\)], "Input"],
+
+Cell[BoxData[
+    \({\(-Cos[x\ k\_1]\)\ Sin[z\ k\_2]\ k\_2, 
+      \((\(-1\) + Cos[z\ k\_2])\)\ Sin[x\ k\_1]\ k\_1}\)], "Output"]
+}, Open  ]],
+
+Cell[BoxData[
+    \(Second\ \(variant : \)\)], "Input"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \({vx, 
+        vz} = {\(-Im1[\[PartialD]\_z \[Psi][x, z]]\), 
+          Im1[\[PartialD]\_x \[Psi][x, z]]} /. t -> 0\)], "Input"],
+
+Cell[BoxData[
+    \({Sin[x\ k\_1]\ Sin[z\ k\_2]\ k\_2, 
+      Cos[x\ k\_1]\ \((\(-1\) + Cos[z\ k\_2])\)\ k\_1}\)], "Output"]
+}, Open  ]],
+
+Cell[BoxData[
+    \(\(Proving : \)\)], "Input"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(\(\[PartialD]\_x vx + \[PartialD]\_z vz == 0\  (*div*) \)\)], "Input"],
+
+Cell[BoxData[
+    \(True\)], "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(\(k\_2 = 2  \[Pi]; \n (*boundary\ \(conditions : \)*) \n
+    \(Thread[# == 0]&\)/@\(({vx, vz} /. z -> {0, 1})\)\ \)\)], "Input"],
+
+Cell[BoxData[
+    \({{True, True}, {True, True}}\)], "Output"]
+}, Open  ]]
+},
+FrontEndVersion->"Microsoft Windows 3.0",
+ScreenRectangle->{{0, 1024}, {0, 740}},
+WindowSize->{496, 632},
+WindowMargins->{{233, Automatic}, {-34, Automatic}}
+]
+
+
+(***********************************************************************
+Cached data follows.  If you edit this Notebook file directly, not using
+Mathematica, you must remove the line containing CacheID at the top of 
+the file.  The cache data will then be recreated when you save this file 
+from within Mathematica.
+***********************************************************************)
+
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+
+(*NotebookFileOutline
+Notebook[{
+Cell[1709, 49, 131, 3, 31, "Input"],
+Cell[1843, 54, 102, 2, 30, "Input"],
+Cell[1948, 58, 142, 2, 50, "Input"],
+Cell[2093, 62, 75, 1, 30, "Input"],
+
+Cell[CellGroupData[{
+Cell[2193, 67, 147, 3, 30, "Input"],
+Cell[2343, 72, 129, 2, 29, "Output"]
+}, Open  ]],
+Cell[2487, 77, 55, 1, 30, "Input"],
+
+Cell[CellGroupData[{
+Cell[2567, 82, 147, 3, 30, "Input"],
+Cell[2717, 87, 124, 2, 29, "Output"]
+}, Open  ]],
+Cell[2856, 92, 47, 1, 30, "Input"],
+
+Cell[CellGroupData[{
+Cell[2928, 97, 90, 1, 30, "Input"],
+Cell[3021, 100, 38, 1, 29, "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[3096, 106, 148, 2, 70, "Input"],
+Cell[3247, 110, 62, 1, 29, "Output"]
+}, Open  ]]
+}
+]
+*)
+
+
+
+
+(***********************************************************************
+End of Mathematica Notebook file.
+***********************************************************************)
+
