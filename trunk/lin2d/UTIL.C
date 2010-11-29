@@ -16,24 +16,24 @@ int i, j, k;
 double  ****aaa;
 
    aaa = (double ****)calloc(mvar, sizeof(double ***));
-   if(aaa == NULL)  nrerror("\nAlloc_mem: unsuffitient memory!\n\a");
+   if(aaa == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n\a");
 
    for(i = 0; i < mvar; i++) {
       aaa[i] = (double ***)calloc(n1, sizeof(double **));
-      if(aaa[i] == NULL) nrerror("\nAlloc_mem: unsuffitient memory!\n\a");
+      if(aaa[i] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n\a");
    }
 
    for(i = 0; i < mvar; i++)
    for(j = 0; j < n1; j++) {
       aaa[i][j] = (double **)calloc(n2, sizeof(double *));
-      if(aaa[i][j] == NULL) nrerror("\nAlloc_mem: unsuffitient memory!\n\a");
+      if(aaa[i][j] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n\a");
    }
 
 	for(i = 0; i < mvar; i++)
    for(j = 0; j < n1; j++)
    for(k = 0; k < n2; k++) {
 		aaa[i][j][k] = (double *)calloc(n3, sizeof(double));
-		if(aaa[i][j][k] == NULL) nrerror("\nAlloc_mem: unsuffitient memory!\n\a");
+		if(aaa[i][j][k] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n\a");
       }
 
 return(aaa);
@@ -65,17 +65,17 @@ int i, j;
 double  ***aaa;
 
    aaa = (double ***)calloc(mvar, sizeof(double **));
-   if(aaa == NULL)  nrerror("\nAlloc_mem: unsuffitient memory!\n\a");
+   if(aaa == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n\a");
 
    for(i = 0; i < mvar; i++) {
       aaa[i] = (double **)calloc(n1, sizeof(double *));
-      if(aaa[i] == NULL) nrerror("\nAlloc_mem: unsuffitient memory!\n\a");
+      if(aaa[i] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n\a");
    }
 
    for(i = 0; i < mvar; i++)
    for(j = 0; j < n1; j++) {
       aaa[i][j] = (double *)calloc(n2, sizeof(double));
-      if(aaa[i][j] == NULL) nrerror("\nAlloc_mem: unsuffitient memory!\n\a");
+      if(aaa[i][j] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n\a");
    }
 
 return(aaa);

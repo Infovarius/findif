@@ -9,16 +9,16 @@ int main(int argc, char** argv)
    double t_cur, Ttot, dttry, dtdid, dtnext;
    int i,k,l;
 
-   Re=10000;
+   Re=75;
    Gamma=1e-3;
-   l1=3;
+   l1=2;
    l2=1;
    l3=1;
 
    nvar=4;
-   n1=10;
+   n1=100;
    n2=1;
-   n3=10;
+   n3=100;
    approx=7;                      //derivatives approximation order
    ghost=(approx-1)/2;            //radius of approx sample
    dx[0]=l1/n1;
@@ -49,7 +49,7 @@ int main(int argc, char** argv)
    init_conditions(f);
    printing(f,dtdid,t_cur,count);
 
-   dtnext=1e-3;
+   dtnext=1e-2;
    dump(f,t_cur,count);
    while (t_cur < Ttot) {            /*----- MAIN ITERATIONS ----*/
         pde(t_cur, f, df);
@@ -62,7 +62,15 @@ int main(int argc, char** argv)
         for(i=ghost;i<mm1;i++)
         for(k=ghost;k<mm3;k++)
            f[l][i][0][k]=f1[l][i][0][k];
-
+        if(kbhit())
+             {
+                switch (getch()) {
+                        case 'd' : dump(f1,t_cur,count); break;
+                        case 'q' : { dump(f1,t_cur,count);
+                                     nrerror("You asked to exit. Here you are...");
+                                    }
+                        }
+              }
         count++;
    }
 

@@ -1,0 +1,9 @@
+USEUNIT("main.c");
+USEUNIT("pde.c");
+USEUNIT("rkad.c");
+USEUNIT("util.c");
+USEUNIT("printing.c");
+//---------------------------------------------------------------------------
+This file is used by the project manager only and should be treated like the project file
+
+main
