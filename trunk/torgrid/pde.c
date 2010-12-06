@@ -62,13 +62,13 @@ void pde(double t, double ****f, double ****df)
 
       df[1][i][j][k]=nut[i][j][k]*(dv2[1][0]+dv2[1][1]+dv2[1][2]+r_1[i]*dv1[1][0]
 				   -f[1][i][j][k]*r_2[i]-2*dv1[2][1]*r_1[i])
-		     -dp1[0]//+w*w/r_1[i]       +2*w*f[2][i][j][k]                   //forces of inertion
+		     -dp1[0]/Gamma/f[0][i][j][k]//+w*w/r_1[i]       +2*w*f[2][i][j][k]                   //forces of inertion
                 -(dv1[1][0]<0 ? mu[0]*dv1[1][0]*(dp1[0]*dv1[1][0]+2*f[0][i][j][k]*dv2[1][0]) : 0)
-                     +(j+n[1]<=ghost+2 && t_cur>-1 ? coordin(k,2)*f[2][i][j][k] : 0)                //helical force
+                     +(j+n[1]<=ghost+2 && t_cur>1 ? coordin(k,2)*f[2][i][j][k] : 0)                //helical force
 		     + (dn1[0]-f[1][i][j][k])*dv1[1][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[1][1]
 		     + (dn1[2]-f[3][i][j][k])*dv1[1][2]
-//		+nut[i][j][k]/3*(dv2[1][0]+dv1[1][0]*r_1[i]-f[1][i][j][k]*r_2[i]-dv1[2][1]*r_1[i]+dA11[2][0][1]+dA11[3][0][2])
+		+nut[i][j][k]/3*(dv2[1][0]+dv1[1][0]*r_1[i]-f[1][i][j][k]*r_2[i]-dv1[2][1]*r_1[i]+dA11[2][0][1]+dA11[3][0][2])
 /*                     - dvv(f[1],f[1],1,i,j,k,(approx-1)/2,approx)
                      - dvv(f[2],f[1],2,i,j,k,(approx-1)/2,approx)
                      - dvv(f[3],f[1],3,i,j,k,(approx-1)/2,approx)*/
@@ -77,13 +77,13 @@ void pde(double t, double ****f, double ****df)
 		     ;
       df[2][i][j][k]=nut[i][j][k]*(dv2[2][0]+dv2[2][1]+dv2[2][2]+r_1[i]*dv1[2][0]
 				   -f[2][i][j][k]*r_2[i]+2*dv1[1][1]*r_1[i])
-			 + (t_cur>-1 ? p1*pow(rc*coordin(i,0)+1,-1):0) - dp1[1]
+			 + (t_cur>-1 ? p1*pow(rc*coordin(i,0)+1,-1):0) - dp1[1]/Gamma/f[0][i][j][k]
                 -(dv1[2][1]<0 ? mu[1]*dv1[2][1]*(dp1[1]*dv1[2][1]+2*f[0][i][j][k]*dv2[2][1]) : 0)
 					//-dw/r_1[i] -2*w*f[1][i][j][k]                   //forces of inertion
 		     + (dn1[0]-f[1][i][j][k])*dv1[2][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[2][1]
 		     + (dn1[2]-f[3][i][j][k])*dv1[2][2]
-//		+nut[i][j][k]/3*(dv1[1][1]*r_1[i]+dA11[1][0][1]+dv2[2][1]+dA11[3][1][2])
+		+nut[i][j][k]/3*(dv1[1][1]*r_1[i]+dA11[1][0][1]+dv2[2][1]+dA11[3][1][2])
 /*                     - dvv(f[1],f[2],1,i,j,k,(approx-1)/2,approx)
                      - dvv(f[2],f[2],2,i,j,k,(approx-1)/2,approx)
                      - dvv(f[3],f[2],3,i,j,k,(approx-1)/2,approx)*/
@@ -91,23 +91,23 @@ void pde(double t, double ****f, double ****df)
 		     + (dn1[1]-f[1][i][j][k])*r_1[i]*f[2][i][j][k]
 		     ;
       df[3][i][j][k]=nut[i][j][k]*(dv2[3][0]+dv2[3][1]+dv2[3][2]+r_1[i]*dv1[3][0])
-		     -dp1[2]
+		     -dp1[2]/Gamma/f[0][i][j][k]
                 -(dv1[3][2]<0 ? mu[2]*dv1[3][2]*(dp1[2]*dv1[3][2]+2*f[0][i][j][k]*dv2[3][2]) : 0)
                      -(j+n[1]<=ghost+2 && t_cur>1 ? (coordin(i,0)-rc)*f[2][i][j][k] :0)            //helical force
 		     + (dn1[0]-f[1][i][j][k])*dv1[3][0]
 		     + (dn1[1]-f[2][i][j][k])*dv1[3][1]
 		     + (dn1[2]-f[3][i][j][k])*dv1[3][2]
-//      		+nut[i][j][k]/3*(dv1[1][2]*r_1[i]+dA11[1][0][2]+dA11[2][1][2]+dv2[3][2])
+      		+nut[i][j][k]/3*(dv1[1][2]*r_1[i]+dA11[1][0][2]+dA11[2][1][2]+dv2[3][2])
 /*                     - dvv(f[1],f[2],1,i,j,k,(approx-1)/2,approx)
                      - dvv(f[2],f[2],2,i,j,k,(approx-1)/2,approx)
                      - dvv(f[3],f[2],3,i,j,k,(approx-1)/2,approx)*/
                      - f[1][i][j][k]*f[3][i][j][k]*r_1[i]
                      ;
-      df[0][i][j][k]= -f[0][i][j][k]*(dv1[1][0]+dv1[2][1]+dv1[3][2]+f[1][i][j][k]*r_1[i])/Gamma;
-/*      df[0][i][j][k]= -(dvv(f[0],f[1],1,i,j,k,(approx-1)/2,approx)
+//      df[0][i][j][k]= -f[0][i][j][k]*(dv1[1][0]+dv1[2][1]+dv1[3][2]+f[1][i][j][k]*r_1[i])/Gamma;
+      df[0][i][j][k]= -(dvv(f[0],f[1],1,i,j,k,(approx-1)/2,approx)
       		           +dvv(f[0],f[2],2,i,j,k,(approx-1)/2,approx)
                        +dvv(f[0],f[3],3,i,j,k,(approx-1)/2,approx)
-                       +f[0][i][j][k]*f[1][i][j][k]*r_1[i]);*/
+                       +f[0][i][j][k]*f[1][i][j][k]*r_1[i]);
 /*      df[1][i][j][k] += Gamma*df[0][i][j][k]*f[1][i][j][k];
       df[2][i][j][k] += Gamma*df[0][i][j][k]*f[2][i][j][k];
       df[3][i][j][k] += Gamma*df[0][i][j][k]*f[3][i][j][k];*/
@@ -552,7 +552,9 @@ void init_parallel()
          }
 if(!goon) {                       //reading sizes from file when continuing
   pp[0]=divisors[nd1]; pp[1]=divisors[nd2]; pp[2]=size/pp[0]/pp[1];                 // number of procs along axes
-  pp[0]=pp[2]=2; pp[1]=size/4;
+  if(pp[0]>2) pp[0] = 2;
+  if(pp[2]>2) pp[2] = 2;
+  pp[1]=size/pp[0]/pp[2];
           }
   pr[0] = rank%pp[0]; pr[1] = (rank/pp[0])%pp[1]; pr[2] = (rank/pp[0]/pp[1])%pp[2];  // coordinates of current subregion
 
