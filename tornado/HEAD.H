@@ -8,7 +8,6 @@
 LEVEL char *NameMessageFile;
 LEVEL char *NameErrorFile;
 LEVEL char NameInitFile[200];
-LEVEL char *NameNuFile;
 LEVEL char *NameVFile;
 LEVEL char *NameDumpFile;
 LEVEL char *NameSnapFile;
@@ -49,6 +48,7 @@ LEVEL int OutStep;    //each OutStep result is printing
 LEVEL int SnapStep;   //each SnapStep snapshot is done
 LEVEL double SnapDelta;  //each SnapDelta of simulation time snapshot is done
 LEVEL int VarStep;    //each VarStep step in RungeKutta varies
+LEVEL double ChangeParamTime, DeltaParam;  // for iteration on parameters
 LEVEL int num_dump;
 LEVEL long numlog;
 
@@ -109,7 +109,9 @@ void nut_by_flux(double ****f, double ***nu, double Re);
 void   boundary_conditions(double ****f, double ***nu);
 void  init_conditions(void);
 void init_parallel(void);
+double dvv(double ***f1, double ***f2, int dir, int ii, int jj, int kk, int sh, int sm);
 double dr(double ***m,int ii,int jj,int kk,int dir,int or,double dx,int sh,int sm);
+double d2cross(double ***m, int ii, int jj, int kk, int dir1,int dir2,  int sh, int sm);
 double coordin(int, int);
 double interpolation(double,double, double,double,double,double);
 /*------- ioutil.c  ------*/

@@ -6,7 +6,8 @@ int main(int argc, char** argv)
 {
    double dttry, dtdid, dtnext;
    int i,j,k,l,i2,j2,k2;
-   FILE *fd;
+   int outed;
+   FILE *fd, *ferror;
    int strl;
    double ChangeParamTime = 3, DeltaParam = 10;         // for iteration on parameters
 
@@ -19,7 +20,6 @@ int main(int argc, char** argv)
   srand(rank);
   NameMessageFile = "message.dat";
   NameErrorFile = "error.err";
-  NameNuFile = "nut.dat";
   NameVFile  = "vv.dat";
   NameEnergyFile = "energy.dat";
   KaskadVarFile = "kaskvar.dat";
@@ -93,7 +93,7 @@ int main(int argc, char** argv)
    time_begin = MPI_Wtime();
    if(!goon) Master nmessage("work has begun",0,0);
        else Master nmessage("work continued",t_cur,count);
-   Master fileopen(NameErrorFile,abs(goon));
+   Master ferror = fileopen(NameErrorFile,abs(goon));
 
    if(CheckStep!=0) check(f);
    if(!goon) if (OutStep!=0) printing(f,0,t_cur,count,PulsEnergy);
@@ -121,38 +121,65 @@ int main(int argc, char** argv)
 	      else boundary_conditions(f1,nut);
 	    printing(f1,dtdid,t_cur,count,PulsEnergy);
 	    }
+        outed = 0;
 	if (SnapStep!=0 && count%SnapStep==0)
-	    snapshot(f1,nut,t_cur,count);
-        if (SnapDelta>5*dtdid && floor(t_cur/SnapDelta)<floor((t_cur+dtdid)/SnapDelta))
-            snapshot(f1,nut,t_cur,count);
-/*        if (floor(t_cur/ChangeParamTime)<floor((t_cur+dtdid)/ChangeParamTime))
+	     { snapshot(f1,nut,t_cur,count); outed=1; }
+	if (SnapDelta>2*dtdid && floor((t_cur-dtdid)/SnapDelta)<floor(t_cur/SnapDelta) && !outed)
+   	     { snapshot(f1,nut,t_cur,count); outed=1; }
+        ft = f;  f = f1;  f1 = ft;
+        if (count%100==0) {
+//          MPI_Barrier(MPI_COMM_WORLD);
+          tmp=Re;
+          init_param(argc,argv,&dttry);
+          Re=tmp;
+//          MPI_Barrier(MPI_COMM_WORLD);
+        }
+
+        if (ChangeParamTime!=0 && floor((t_cur-dtdid)/ChangeParamTime)<floor(t_cur/ChangeParamTime))
             {
-            Re = floor(t_cur/ChangeParamTime+0.5)*DeltaParam-190;
-         //Re -= DeltaParam;
-            Master nmessage("Rm was changed to",Rm,count);
-            }*/
-	for(l=0;l<nvar;l++)
-	for(i=0;i<m1;i++)
-	for(j=0;j<m2;j++)
-	for(k=0;k<m3;k++)
-	   f[l][i][j][k]=f1[l][i][j][k];
+		//Rm = floor(t_cur/ChangeParamTime+0.5)*DeltaParam-190;
+		if(!outed) { snapshot(f,nut,t_cur,count); outed = 1;}
+//                MPI_Barrier(MPI_COMM_WORLD);
+		tmp = (Re += DeltaParam);
+                tmpC = count;  tmpT = t_cur;
+		goon = ((fd=fopen(NameCPFile,"r+"))>0);
+		if(goon)
+			{ do fscanf(fd,"%s\n",NameInitFile); while (!feof(fd));
+//                        putlog(NameInitFile,ftell(fd));
+			goon = strcmp(NameInitFile,"END");
+			}
+		init_param(argc,argv,&dtnext);       // initialization of parameters
+		ghost=(approx-1)/2+1;                  //radius of approx sample
+		dx[0]=2*R/N1;
+		dx[1]=lfi/N2;
+		dx[2]=2*R/N3;
+
+		if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
+		fileclose(fd);
+
+                count = tmpC;  t_cur = tmpT;  Re = tmp;
+                p1 = 4/Re;
+		init_conditions();
+		goon = 1;
+            Master nmessage("Re was changed to",Re,count);
+            }
 /*        if(kbhit())
 	     {
 		switch (getch()) {
-			case 'd' : dump(f,t_cur,count);  break;
-			case 'q' : { dump(f,t_cur,count);
+			case 'd' : dump(f,nut,t_cur,count);  break;
+			case 'q' : { dump(f,nut,t_cur,count);
 				     MPI_Finalize();
-                                     nrerror("You asked to exit. Here you are...",t_cur);
+                                     nrerror("You asked to exit. Here you are...",t_cur,count);
                                     }
                         }
               }*/
-   }
+   } // end while
 
    printing(f1,dtdid,t_cur,count,PulsEnergy);
-   snapshot(f,nut,t_cur,count);
-   if(rank==size-1) add_control_point("END");
+   if(!outed) snapshot(f,nut,t_cur,count);
+   if(rank==0) add_control_point("END");
 
-//   Master fileclose(NameErrorFile);
+   Master fileclose(ferror);
 
    if(t_cur>=Ttot&&!razlet) nmessage("work is succesfully done",t_cur,count);
        else nrerror("this is break of scheme",t_cur,count);

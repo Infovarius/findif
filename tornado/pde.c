@@ -34,12 +34,12 @@ void pde(double t, double ****f, double ****df)
    for(k=ghost;k<mm3;k++)
      {
       for(m=0;m<3;m++) 
-         dp1[m]=dr(f[0],i,j,k,m+1,0,dx[m],ghost, approx);
+         dp1[m]=dr(f[0],i,j,k,m+1,0,dx[m],(approx-1)/2, approx);
 
       for(l=1;l<=3;l++) {
        for(m=0;m<3;m++) {
-         dv1[l][m]=dr(f[l],i,j,k,m+1,0,dx[m],ghost, approx);
-         dv2[l][m]=dr(f[l],i,j,k,m+1,1,dx[m]*dx[m],ghost, approx);
+         dv1[l][m]=dr(f[l],i,j,k,m+1,0,dx[m],(approx-1)/2, approx);
+         dv2[l][m]=dr(f[l],i,j,k,m+1,1,dx[m]*dx[m],(approx-1)/2, approx);
          }
       }
 
@@ -73,7 +73,7 @@ void pde(double t, double ****f, double ****df)
 
 double deviation(double ****f,int i,int j,int k)
 {
-const int size_okr=max(max_okr,ghost);
+const int size_okr=min(max_okr,ghost);
 double flux = 0;
 int kol=0,l;
    for(l=1;l<=size_okr;l++)
@@ -111,31 +111,8 @@ void nut_by_flux(double ****f, double ***nut, double dt) //calculating nu_turbul
 {
 int i,j,k,l;
 double koef,r1,z1,rho,tmp;
-/*struct_func(f,2,2,3);
-for(i=0;i<n3;i++)
-    {
-    koef=sqrt(s_func[i][0]/(pow(sha[i][1],2.)+pow(shb[i][1],2.)));
-    sha[i][1] *= koef;
-    shb[i][1] *= koef;
-    koef=sqrt(s_func[i][1]/(pow(sha[i][0],2.)+pow(shb[i][0],2.)));
-    sha[i][0] *= koef;
-    shb[i][0] *= koef;
-    }*/
-/*clrscr();
-for(j=0;j<n3;j++)
-    {
-    printf("%lf  %lf",s_func[j][0],s_func[j][1]);
-    double en;
-    for (i=0,en=0; i<=Ns; i++)
-      en+=sha[j][i]*sha[j][i]+shb[j][i]*shb[j][i];
-    printf("   totEn=%lf\n",en);
-    }  */
-//time_step_shell(dt);
-/*for(k=0;k<m3;k++)
+for(k=0;k<m3;k++)
    {
-   double tmp = maschtab*pow(
-           (nl[2]*s_func[k][0] + nl[1]*s_func[k][1] + nl[0]*s_func[k][2])*pow(dx[2],4),
-                         1./3);
    for(i=0;i<m1;i++)
      {
      r1 = coordin(i,0);   z1 = coordin(k,2);
@@ -178,17 +155,19 @@ void  boundary_conditions(double ****f, double ***nut)
 		}
 
    MPI_Waitall(req_numS,SendRequest,statuses);
-   if(statuses[0].MPI_ERROR) {putlog("bc:error during send=",numlog++);
+   if(req_numS && statuses[0].MPI_ERROR) {putlog("bc:error during send=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
                                }    else numlog++;
+   req_numS = 0;
     MPI_Waitall(req_numR,RecvRequest,statuses);
-   if(statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
+   if(req_numR && statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
                                }    else numlog++;
+   req_numR = 0;
   if(pr_neighbour[2]>-1) CopyBufferToGrid(f,nut,buf_recv[2],0,0,0,m1-1,ghost-1,m3-1);
   if(pr_neighbour[3]>-1) CopyBufferToGrid(f,nut,buf_recv[3],0,mm2,0,m1-1,m2-1,m3-1);
 
@@ -207,46 +186,50 @@ void  boundary_conditions(double ****f, double ***nut)
 		}
 
    MPI_Waitall(req_numS,SendRequest,statuses);
-   if(statuses[0].MPI_ERROR) {putlog("bc:error during send=",numlog++);
+   if(req_numS && statuses[0].MPI_ERROR) {putlog("bc:error during send=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
                                }    else numlog++;
+   req_numS = 0;
     MPI_Waitall(req_numR,RecvRequest,statuses);
-  if(statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
+   if(req_numR && statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
                                }    else numlog++;
+   req_numR = 0;
   if(pr_neighbour[0]>-1) CopyBufferToGrid(f,nut,buf_recv[0],0,0,0,ghost-1,m2-1,m3-1);
   if(pr_neighbour[1]>-1) CopyBufferToGrid(f,nut,buf_recv[1],mm1,0,0,m1-1,m2-1,m3-1);
 
 // exchanging in z-direction
  if(pr_neighbour[4]>-1)
-  if(pr_neighbour[4]==rank) CopyGridToBuffer(f,nut,buf_recv[4],0,0,mm3,m1-1,m2-1,m3-1);
+  if(pr_neighbour[4]==rank) CopyGridToBuffer(f,nut,buf_recv[4],0,0,n3,m1-1,m2-1,mm3-1);
          else { CopyGridToBuffer(f,nut,buf_send[4],0,0,ghost,m1-1,m2-1,2*ghost-1);
 		MPI_Isend(buf_send[4],buf_size[2],MPI_DOUBLE,pr_neighbour[4],tag+4,MPI_COMM_WORLD,&SendRequest[req_numS++]);
 		MPI_Irecv(buf_recv[4],buf_size[2],MPI_DOUBLE,pr_neighbour[4],tag+5,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
 		}
  if(pr_neighbour[5]>-1)
-  if(pr_neighbour[5]==rank) CopyGridToBuffer(f,nut,buf_recv[5],0,0,0,m1-1,m2-1,ghost-1);
+  if(pr_neighbour[5]==rank) CopyGridToBuffer(f,nut,buf_recv[5],0,0,ghost,m1-1,m2-1,2*ghost-1);
         else { CopyGridToBuffer(f,nut,buf_send[5],0,0,n3,m1-1,m2-1,mm3-1);
 	       MPI_Isend(buf_send[5],buf_size[2],MPI_DOUBLE,pr_neighbour[5],tag+5,MPI_COMM_WORLD,&SendRequest[req_numS++]);
 	       MPI_Irecv(buf_recv[5],buf_size[2],MPI_DOUBLE,pr_neighbour[5],tag+4,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
 	       }
 
    MPI_Waitall(req_numS,SendRequest,statuses);
-   if(statuses[0].MPI_ERROR) {putlog("bc:error during send=",numlog++);
+   if(req_numS && statuses[0].MPI_ERROR) {putlog("bc:error during send=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
                                }    else numlog++;
+   req_numS = 0;
     MPI_Waitall(req_numR,RecvRequest,statuses);
-  if(statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
+   if(req_numR && statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
                                }    else numlog++;
+   req_numR = 0;
   if(pr_neighbour[4]>-1) CopyBufferToGrid(f,nut,buf_recv[4],0,0,0,m1-1,m2-1,ghost-1);
   if(pr_neighbour[5]>-1) CopyBufferToGrid(f,nut,buf_recv[5],0,0,mm3,m1-1,m2-1,m3-1);
 
@@ -404,7 +387,6 @@ if(!goon) {
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
 	nut[i][j][k]=1./Re;
-//   struct_func(f,2,2,3);
    nmessage("Arrays were filled with initial values - calculation from beginning",-1,-1);
    } else nmessage("Arrays were filled with initial values - calculation is continuing",t_cur,count);
 }
@@ -433,9 +415,11 @@ void init_parallel()
                  k2*((kp1-1)*N2*N3+N1*(kp2-1)*N3+N1*N2*(kp3-1))+
                  k3*((kp1-1)*kp2*kp3+kp1*(kp2-1)*kp3+kp1*kp2*(kp3-1));
          if(mintime<0 || vtime<mintime) { mintime=vtime; nd1=i; nd2=j; }
+//         if((mintime<0 || vtime<mintime) && ceil((double)N1/kp1)==floor((double)N1/kp1) && ceil((double)N2/kp2)==floor((double)N2/kp2) && ceil((double)N3/kp3)==floor((double)N3/kp3)) { mintime=vtime; nd1=i; nd2=j; }
          }
 if(!goon) {                       //reading sizes from file when continuing
   pp[0]=divisors[nd1]; pp[1]=divisors[nd2]; pp[2]=size/pp[0]/pp[1];                 // number of procs along axes
+//  pp[1]=pp[2]=1; pp[0]=size;
           }
   pr[0] = rank%pp[0]; pr[1] = (rank/pp[0])%pp[1]; pr[2] = (rank/pp[0]/pp[1])%pp[2];  // coordinates of current subregion
 
@@ -471,6 +455,7 @@ if(!goon) {                       //reading sizes from file when continuing
    buf_recv[j+2*i] = alloc_mem_1f(buf_size[i]);
   }
 
+  {
    iop=fopen(NameStatFile,"w");
    fprintf(iop,"%d\n",rank);
    fprintf(iop,"%d\t%d\t%d\n",pr[0],pr[1],pr[2]);
@@ -481,7 +466,7 @@ if(!goon) {                       //reading sizes from file when continuing
      fprintf(iop,"%d ",pr_neighbour[i]);
    fprintf(iop,"\n");
    fileclose(iop);
-
+       }
 }
 
 static double kf3[2][3][3]={{{-3./2.0, 2.0, -1./2.0}, {-1./2.0, 0.0, 1./2.0}, {1./2.0, -2.0, 3./2.0}},
@@ -499,13 +484,45 @@ static double kf7[2][7][7]={{{-49./20.0, 6.0, -15./2.0, 20./3.0, -15./4.0, 6./5.
                      {1./90.0, -3./20.0, 3./2.0, -49./18.0, 3./2.0, -3./20.0, 1./90.0}, {1./90.0, -1./15.0, 1./12.0, 10./9.0, -7./3.0, 19./15.0, -13./180.0},
                      {-13./180.0, 31./60.0, -19./12.0, 47./18.0, -17./12.0, -49./60.0, 137./180.0}, {137./180.0, -27./5.0, 33./2.0, -254./9.0, 117./4.0, -87./5.0, 203./45.0}}};
 
+double dvv(double ***f1, double ***f2, int dir, int ii, int jj, int kk, int sh, int sm)
+/* find d(f1 f2)/dx in dir direction*/
+{
+double tmp;
+switch (sm) {
+     case 7 :  switch (dir) {
+                  case 1 : tmp = kf7[0][sh][6]*(f1[ii+3][jj][kk]*f2[ii+3][jj][kk]-f1[ii-3][jj][kk]*f2[ii-3][jj][kk])
+                               + kf7[0][sh][5]*(f1[ii+2][jj][kk]*f2[ii+2][jj][kk]-f1[ii-2][jj][kk]*f2[ii-2][jj][kk])
+                               + kf7[0][sh][4]*(f1[ii+1][jj][kk]*f2[ii+1][jj][kk]-f1[ii-1][jj][kk]*f2[ii-1][jj][kk]); break;
+                  case 2 : tmp = kf7[0][sh][6]*(f1[ii][jj+3][kk]*f2[ii][jj+3][kk]-f1[ii][jj-3][kk]*f2[ii][jj-3][kk])
+                               + kf7[0][sh][5]*(f1[ii][jj+2][kk]*f2[ii][jj+2][kk]-f1[ii][jj-2][kk]*f2[ii][jj-2][kk])
+                               + kf7[0][sh][4]*(f1[ii][jj+1][kk]*f2[ii][jj+1][kk]-f1[ii][jj-1][kk]*f2[ii][jj-1][kk]); break;
+                  case 3 : tmp = kf7[0][sh][6]*(f1[ii][jj][kk+3]*f2[ii][jj][kk+3]-f1[ii][jj][kk-3]*f2[ii][jj][kk-3])
+                               + kf7[0][sh][5]*(f1[ii][jj][kk+2]*f2[ii][jj][kk+2]-f1[ii][jj][kk-2]*f2[ii][jj][kk-2])
+                               + kf7[0][sh][4]*(f1[ii][jj][kk+1]*f2[ii][jj][kk+1]-f1[ii][jj][kk-1]*f2[ii][jj][kk-1]); break;
+                  }; break;
+     case 3 :  switch (dir) {
+                  case 1 : tmp = kf3[0][sh][2]*(f1[ii+1][jj][kk]*f2[ii+1][jj][kk]-f1[ii-1][jj][kk]*f2[ii-1][jj][kk]); break;
+                  case 2 : tmp = kf3[0][sh][2]*(f1[ii][jj+1][kk]*f2[ii][jj+1][kk]-f1[ii][jj-1][kk]*f2[ii][jj-1][kk]); break;
+                  case 3 : tmp = kf3[0][sh][2]*(f1[ii][jj][kk+1]*f2[ii][jj][kk+1]-f1[ii][jj][kk-1]*f2[ii][jj][kk-1]); break;
+                  }; break;
+     case 5 :  switch (dir) {
+                  case 1 : tmp = kf5[0][sh][4]*(f1[ii+2][jj][kk]*f2[ii+2][jj][kk]-f1[ii-2][jj][kk]*f2[ii-2][jj][kk])
+                               + kf5[0][sh][3]*(f1[ii+1][jj][kk]*f2[ii+1][jj][kk]-f1[ii-1][jj][kk]*f2[ii-1][jj][kk]); break;
+                  case 2 : tmp = kf5[0][sh][4]*(f1[ii][jj+2][kk]*f2[ii][jj+2][kk]-f1[ii][jj-2][kk]*f2[ii][jj-2][kk])
+                               + kf5[0][sh][3]*(f1[ii][jj+1][kk]*f2[ii][jj+1][kk]-f1[ii][jj-1][kk]*f2[ii][jj-1][kk]); break;
+                  case 3 : tmp = kf5[0][sh][4]*(f1[ii][jj][kk+2]*f2[ii][jj][kk+2]-f1[ii][jj][kk-2]*f2[ii][jj][kk-2])
+                               + kf5[0][sh][3]*(f1[ii][jj][kk+1]*f2[ii][jj][kk+1]-f1[ii][jj][kk-1]*f2[ii][jj][kk-1]); break;
+                  }; break;
+    }
+  return tmp;
+}
+
 double dr(double ***m, int ii, int jj, int kk, int dir, int or, double dx, int sh,  int sm)
 /*        matrix     , point                 , direct, order , differ   , shift , sample */
 /*                                           , 1,2,3 ,  0,1    dx,dx^2  , 0-left , 3,5,7 */
 {
 double tmp=0.0;
 int i;
-//start_tick(9);
 if(or==0)
 switch (sm) {
      case 7 :  switch (dir) {
@@ -580,6 +597,47 @@ switch (sm) {
     	nrerror("\nNO SUCH SAMPLE for derivative. Bye ...",0,0);
 	} */
 return(tmp/dx);
+}
+
+double d2cross(double ***m, int ii, int jj, int kk, int dir1,int dir2,  int sh, int sm)
+/*             matrix     , point                 , directions of dervs,shift , sample */
+/*                                                , 1, 2, 3           , 0-left, 3,5,7 */
+{         //order ==0 (first),dx=dx[dir1]*dx[dir2]
+double tmp=0.0;
+int i1,i2;
+int dirr=6-dir1-dir2;
+switch (sm*dirr) {
+	case 3 : for(i1=0; i1<sm; i1++)
+		     for(i2=0; i2<sm; i2++)
+		       tmp += m[ii][jj+i1-sh][kk+i2-sh]*kf3[0][sh][i1]*kf3[0][sh][i2]; break;
+	case 6 : for(i1=0; i1<sm; i1++)
+		     for(i2=0; i2<sm; i2++)
+		       tmp += m[ii+i1-sh][jj][kk+i2-sh]*kf3[0][sh][i1]*kf3[0][sh][i2]; break;
+	case 9 : for(i1=0; i1<sm; i1++)
+		     for(i2=0; i2<sm; i2++)
+		       tmp += m[ii+i1-sh][jj+i2-sh][kk]*kf3[0][sh][i1]*kf3[0][sh][i2]; break;
+	case 5 : for(i1=0; i1<sm; i1++)
+		     for(i2=0; i2<sm; i2++)
+		       tmp += m[ii][jj+i1-sh][kk+i2-sh]*kf5[0][sh][i1]*kf5[0][sh][i2]; break;
+	case 10: for(i1=0; i1<sm; i1++)
+		     for(i2=0; i2<sm; i2++)
+		       tmp += m[ii+i1-sh][jj][kk+i2-sh]*kf5[0][sh][i1]*kf5[0][sh][i2]; break;
+	case 15: for(i1=0; i1<sm; i1++)
+		     for(i2=0; i2<sm; i2++)
+		       tmp += m[ii+i1-sh][jj+i2-sh][kk]*kf5[0][sh][i1]*kf5[0][sh][i2]; break;
+	case 7 : for(i1=0; i1<sm; i1++)
+		     for(i2=0; i2<sm; i2++)
+		       tmp += m[ii][jj+i1-sh][kk+i2-sh]*kf7[0][sh][i1]*kf7[0][sh][i2]; break;
+	case 14: for(i1=0; i1<sm; i1++)
+		     for(i2=0; i2<sm; i2++)
+		       tmp += m[ii+i1-sh][jj][kk+i2-sh]*kf7[0][sh][i1]*kf7[0][sh][i2]; break;
+	case 21: for(i1=0; i1<sm; i1++)
+		     for(i2=0; i2<sm; i2++)
+		       tmp += m[ii+i1-sh][jj+i2-sh][kk]*kf7[0][sh][i1]*kf7[0][sh][i2]; break;
+	default :
+	nrerror("\nNO SUCH SAMPLE for derivative. Bye ...",0,0);
+	}
+return(tmp/dx[dir1-1]/dx[dir2-1]);
 }
 
 double coordin(int i, int dir)
