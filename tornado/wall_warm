@@ -1,0 +1,35 @@
+1
+---------  Geometry paramereters ------------------------------
+6.283185307	| angle under consideration
+1		| radius of cylinder
+1		| height of cylinder
+
+---------  Physical paramereters ------------------------------
+10		| Grassgof number
+0		| Taylor number
+0		| init profile: 0 - zero
+0.00		| amplitude of initial random noise
+0.0		| amplitude of initial normal noise
+10		| maximal level of fluctuation after which nut is on
+
+---------  Scheme (aproximation) parameters ------------------
+20		| mesh point in R
+20		| mesh point in PHI
+20		| mesh point in Z
+4		| variables number
+7		| aproxx order
+0.001		| initial timestep
+
+---------  Shell model parameters  --------------------------
+15		| number of shells (Ns)
+0	 	| scaling factor in nu turbulent (maschtab)
+2		| quotient of shell wavenumbers (lambda)
+3		| maximal size of averaging vicinity (max_okr)
+
+---------  Output parameters  -------------------------------
+10		| steps to statistics output (OutStep)
+0		| steps to snaps (SnapStep)
+0.01		| simulation time delta to snap (SnapDelta)
+10		| steps of checking divergence (CheckStep)
+1		| test of time step (VarStep)
+5		| Total time
