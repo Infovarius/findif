@@ -73,15 +73,25 @@ int i, j, k;
    for(i = 0; i < mvar; i++)
    for(j = 0; j < n1; j++)
    for(k = 0; k < n2; k++)
+    { 
+    if(!aaa[i][j][k]) {putlog("error at releasing",(long)aaa[i][j][k]);return;}
 	free(aaa[i][j][k]);
+	}
 
    for(i = 0; i < mvar; i++)
    for(j = 0; j < n1; j++)
+    {
+    if(!aaa[i][j]) {putlog("error at releasing",(long)aaa[i][j]);return;}
 	free(aaa[i][j]);
+	}
 
    for(i = 0; i < mvar; i++)
+    {
+    if(!aaa[i]) {putlog("error at releasing",(long)aaa[i]);return;}
 	free(aaa[i]);
+	}
 
+   if(!aaa) {putlog("error at releasing",(long)aaa);return;}
    free(aaa);
 
    return;
@@ -115,11 +125,18 @@ int j, k;
 
    for(j = 0; j < n1; j++)
    for(k = 0; k < n2; k++)
+    {
+    if(!aaa[j][k]) {putlog("error at releasing",(long)aaa[j][k]);return;}
 	free(aaa[j][k]);
+	}
 
    for(j = 0; j < n1; j++)
+    {
+    if(!aaa[j]) {putlog("error at releasing",(long)aaa[j]);return;}
 	free(aaa[j]);
+	}
 
+    if(!aaa) {putlog("error at releasing",(long)aaa);return;}
    free(aaa);
 
    return;
@@ -162,8 +179,12 @@ void free_mem_2f(double **aa, int n1, int n2)
 int j, k;
 
    for(j = 0; j < n1; j++)
+    {
+    if(!aa[j]) {putlog("error at releasing",(long)aa[j]);return;}
 	free(aa[j]);
+	}
 
+   if(!aa) {putlog("error at releasing",(long)aa);return;}
    free(aa);
 
    return;
@@ -174,8 +195,13 @@ void free_mem_2i(int **aa, int n1, int n2)
 int j, k;
 
    for(j = 0; j < n1; j++)
+    {
+    if(!aa[j]) {putlog("error at releasing",(long)aa[j]);return;}
 	free(aa[j]);
+	}
 
+
+   if(!aa) {putlog("error at releasing",(long)aa);return;}
    free(aa);
 
    return;
@@ -204,6 +230,7 @@ return(a);
 void free_mem_1f(double *a, int n)
 {
 int k;
+   if(!a) {putlog("error at releasing",(long)a);return;}
    free(a);
    return;
 }
@@ -211,14 +238,16 @@ int k;
 void free_mem_1i(int *a, int n)
 {
 int k;
+   if(!a) {putlog("error at releasing",(long)a);return;}
    free(a);
    return;
 }
 
 void operate_memory(int dir)
 {
+int i,k;
  if(dir>0)
-   {   //s_func = alloc_mem_2f(n3+2,kol_masht);
+   {
        f  =alloc_mem_4f(nvar, m1, m2, m3);   //f[0]-pressure,f[1..3]-v(vector)
        f1 =alloc_mem_4f(nvar, m1, m2, m3);
        df =alloc_mem_4f(nvar, m1, m2, m3);
@@ -234,7 +263,6 @@ void operate_memory(int dir)
 //       init_shell();
     } else
    {
-//   free_mem_2f(s_func,n3+2,kol_masht);
        free_mem_4f(f  ,nvar, m1, m2, m3);
        free_mem_4f(f1 ,nvar, m1, m2, m3);
        free_mem_4f(df ,nvar, m1, m2, m3);
