@@ -4,7 +4,7 @@
   <MACROS>
     <VERSION value="BCB.06.00"/>
     <PROJECT value="tor.exe"/>
-    <OBJFILES value="main.obj pde.obj rkad.obj util.obj iobinutil.obj"/>
+    <OBJFILES value="main.obj pde.obj rkad.obj util.obj iobinutil.obj velocity.obj"/>
     <RESFILES value="tor.res"/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>
@@ -60,6 +60,7 @@
       <FILE FILENAME="util.c" FORMNAME="" UNITNAME="util.c" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="wmpi1.lib" FORMNAME="" UNITNAME="wmpi1.lib" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="iobinutil.c" FORMNAME="" UNITNAME="iobinutil" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="velocity.c" FORMNAME="" UNITNAME="velocity" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
   </FILELIST>
   <BUILDTOOLS>
   </BUILDTOOLS>
@@ -96,7 +97,7 @@ Comments=
 DebugSourceDirs=$(BCB)\source\vcl
 
 [Parameters]
-RunParams=pumpflow
+RunParams=screw
 Launcher=
 UseLauncher=0
 DebugCWD=
