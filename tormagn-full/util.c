@@ -97,6 +97,28 @@ int i, j, k;
    return;
 }
 
+int ***alloc_mem_3i(int mvar, int n1, int n2)
+{
+int i, j;
+int  ***aaa;
+
+   aaa = (int ***)calloc(mvar, sizeof(int **));
+   if(aaa == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",-1,-1);
+
+   for(i = 0; i < mvar; i++) {
+         aaa[i] = (int **)calloc(n1, sizeof(int *));
+         if(aaa[i] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",-1,-1);
+   }
+
+   for(i = 0; i < mvar; i++)
+   for(j = 0; j < n1; j++) {
+         aaa[i][j] = (int *)calloc(n2, sizeof(int));
+         if(aaa[i][j] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",-1,-1);
+   }
+
+return(aaa);
+}
+
 double ***alloc_mem_3f(int mvar, int n1, int n2)
 {
 int i, j;
@@ -117,6 +139,29 @@ double  ***aaa;
    }
 
 return(aaa);
+}
+
+void free_mem_3i(int ***aaa, int n1, int n2, int n3)
+{
+int j, k;
+
+   for(j = 0; j < n1; j++)
+   for(k = 0; k < n2; k++)
+    {
+    if(!aaa[j][k]) {putlog("error at releasing",(long)aaa[j][k]);return;}
+	free(aaa[j][k]);
+	}
+
+   for(j = 0; j < n1; j++)
+    {
+    if(!aaa[j]) {putlog("error at releasing",(long)aaa[j]);return;}
+	free(aaa[j]);
+	}
+
+    if(!aaa) {putlog("error at releasing",(long)aaa);return;}
+   free(aaa);
+
+   return;
 }
 
 void free_mem_3f(double ***aaa, int n1, int n2, int n3)
@@ -255,13 +300,14 @@ void operate_memory(int dir)
        J = alloc_mem_4f(3, m1, m2, m3);      // vector of electric current
        r_1=alloc_mem_1f(m1);                  // r^(-1)
        r_2=alloc_mem_1f(m1);                  // r^(-2)
-       node=alloc_mem_2i(m1, m3);         // kind of nodes
-       refr_f=alloc_mem_2f(m1, m3);         // reflection of nodes relative inner surface (for hydro)
-       refz_f=alloc_mem_2f(m1, m3);
-       refr_m=alloc_mem_2f(m1, m3);         // reflection of nodes relative sphere of simulation (for magn)
-       refz_m=alloc_mem_2f(m1, m3);
-       sinth=alloc_mem_2f(m1, m3);
-       costh=alloc_mem_2f(m1, m3);
+       node=alloc_mem_3i(m1, m2, m3);         // kind of nodes
+//       refr_f=alloc_mem_2f(m1, m3);         // reflection of nodes relative inner surface (for hydro)
+//       refz_f=alloc_mem_2f(m1, m3);
+       refx_m=alloc_mem_3f(m1, m2, m3);         // reflection of nodes relative sphere of simulation (for magn)
+       refy_m=alloc_mem_3f(m1, m2, m3);
+       refz_m=alloc_mem_3f(m1, m2, m3);
+       sinth=alloc_mem_3f(m1, m2, m3);
+       costh=alloc_mem_3f(m1, m2, m3);
        nut = alloc_mem_3f(m1, m2, m3);
        eta = alloc_mem_3f(m1, m2, m3);
        averf = alloc_mem_3f(nvar,m1,m3);
@@ -279,13 +325,14 @@ void operate_memory(int dir)
        free_mem_4f(B, 3, m1, m2, m3);
        free_mem_4f(J, 3, m1, m2, m3);
        free_mem_3f(nut, m1, m2, m3);
-       free_mem_2f(refr_f,m1, m3);
-       free_mem_2f(refz_f,m1, m3);
-       free_mem_2f(refr_m,m1, m3);
-       free_mem_2f(refz_m,m1, m3);
-       free_mem_2f(sinth,m1, m3);
-       free_mem_2f(costh,m1, m3);
-       free_mem_2i(node,m1, m3);
+//       free_mem_2f(refr_f,m1, m3);
+//       free_mem_2f(refz_f,m1, m3);
+       free_mem_3f(refx_m,m1, m2,m3);
+       free_mem_3f(refy_m,m1, m2,m3);
+       free_mem_3f(refz_m,m1, m2,m3);
+       free_mem_3f(sinth,m1, m2,m3);
+       free_mem_3f(costh,m1, m2,m3);
+       free_mem_3i(node,m1, m2, m3);
        free_mem_3f(averf,nvar,m1,m3);
        free_mem_1f(vfi,N3);
        free_mem_1f(totvfi,N3);

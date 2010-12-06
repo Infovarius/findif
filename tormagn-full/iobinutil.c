@@ -27,7 +27,8 @@ return(ff);
 
 void fileclose(FILE *fd)        // closing file with checking
 {
-if(fd==NULL) putlog("It was endeavor to close unopened file",1);
+if(fd==NULL) 
+             putlog("It was endeavor to close unopened file",1);
         else fclose(fd);
 }
 
@@ -116,11 +117,6 @@ double d;
 	Master if(!count) nmessage("Parameters were extracted from file",0,0);
 	fileclose(iop);
    
-	ghost=(approx-1)/2;                  //radius of approx sample
-	dx[0]=2*R/N1;
-	dx[1]=lfi/N2;
-	dx[2]=2*R/N3;
-
 }
 
 void read_tilleq(FILE *ffff,char lim, char echo)
@@ -250,6 +246,25 @@ for(i=beg1;i<beg1+n1;i++) {
     }
 }
 
+void print_array3i(FILE *ff,int ***a,
+        int beg1,int n1,int beg2,int n2,int beg3,int n3)
+{
+int i,j,k;
+fprintf(ff,"{");
+for(i=beg1;i<beg1+n1;i++) {
+    fprintf(ff,"{");
+    for(j=beg2;j<beg2+n2;j++) {
+        fprintf(ff,"{");
+        for(k=beg3;k<beg3+n3;k++) {
+            fprintf(ff,"%d",a[i][j][k]);
+            fprintf(ff,k<beg3+n3-1 ? "," : "}");
+            }
+        fprintf(ff,j<beg2+n2-1 ? "," : "}");
+        }
+    fprintf(ff,i<beg1+n1-1 ? "," : "}\n");
+    }
+}
+
 void printbin_array3d(FILE *ff,double ***a,
         int beg1,int n1,int beg2,int n2,int beg3,int n3)
 {
@@ -311,18 +326,18 @@ for(i=0;i<m1;i++)
    for(j=ghost;j<mm2;j++)
       for(k=0;k<m3;k++)
         {
-        if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
+        if(isType(node[i][j][k],NodeFluid) && !isType(node[i][j][k],NodeClued))
            {
            temp=dr(f1[1],i,j,k,1,0,dx[0],ghost, approx)
-               +dr(f1[2],i,j,k,2,0,dx[1],ghost, approx)*r_1[i]
-               +dr(f1[3],i,j,k,3,0,dx[2],ghost, approx)+f1[1][i][j][k]*r_1[i];
+               +dr(f1[2],i,j,k,2,0,dx[1],ghost, approx)
+               +dr(f1[3],i,j,k,3,0,dx[2],ghost, approx);
            if (fabs(temp)>divv) divv=fabs(temp);
            }
-        if(isType(node[i][k],NodeMagn) && !isType(node[i][k],NodeClued))
+        if(isType(node[i][j][k],NodeMagn) && !isType(node[i][j][k],NodeClued))
            {
            temp=dr(B[0],i,j,k,1,0,dx[0],ghost, approx)
-               +dr(B[1],i,j,k,2,0,dx[1],ghost, approx)*r_1[i]
-               +dr(B[2],i,j,k,3,0,dx[2],ghost, approx)+B[0][i][j][k]*r_1[i];
+               +dr(B[1],i,j,k,2,0,dx[1],ghost, approx)
+               +dr(B[2],i,j,k,3,0,dx[2],ghost, approx);
            if (fabs(temp)>divB) divB=fabs(temp);
            }
         }
@@ -343,8 +358,8 @@ Master printf("time per iteration per node: %g  includes time for exchanging: %g
        for(i=0;i<m1;i++)
         for(j=ghost;j<mm2;j++)
          for(k=0;k<m3;k++)
-         if((l<=3 && isType(node[i][k],NodeFluid) || l>=4&& isType(node[i][k],NodeMagn))
-            && !isType(node[i][k],NodeClued))
+         if((l<=3 && isType(node[i][j][k],NodeFluid) || l>=4&& isType(node[i][j][k],NodeMagn))
+            && !isType(node[i][j][k],NodeClued))
           {
             if (fabs(f1[l][i][j][k])>mf[0]) mf[0]=fabs(f1[l][i][j][k]);
             temp=fabs(f[l][i][j][k]-f1[l][i][j][k]);
@@ -363,7 +378,7 @@ Master printf("time per iteration per node: %g  includes time for exchanging: %g
        for(i=0;i<m1;i++)
         for(j=ghost;j<m2;j++)
          for(k=0;k<mm3;k++)
-         if(isType(node[i][k],NodeMagn) && !isType(node[i][k],NodeClued))
+         if(isType(node[i][j][k],NodeMagn) && !isType(node[i][j][k],NodeClued))
           {
             if (fabs(B[l][i][j][k])>mf[0]) mf[0]=fabs(B[l][i][j][k]);
           }
@@ -371,7 +386,12 @@ Master printf("time per iteration per node: %g  includes time for exchanging: %g
        Master printf("%d  maxB=%e(loc=%e)\n",
                        l,      totmf[0],mf[0]);
 //       Master fprintf(fen,"\t %e",totmf[0]);
-       Master fprintf(fen,"\t %e",B[l][ghost][ghost][ghost]);
+	   if(n[0]<=N1/2 && N1/2<=n[0]+mm1 && n[1]==0 && n[2]<=N3/2 && N3/2<=n[2]+mm3)
+		   MPI_Send(&B[l][N1/2-n[0]][ghost+1][N3/2-n[2]],1,MPI_DOUBLE,0,l,MPI_COMM_WORLD);
+	   Master {
+		   MPI_Recv(totmf, 1, MPI_DOUBLE, MPI_ANY_SOURCE, l, MPI_COMM_WORLD, statuses);
+		   fprintf(fen,"\t %e",totmf[0]);
+	   }
        }
   // --------------- quadratic norma of arrays --------------------------------------
    for(l=0;l<nvar;l++) {
@@ -379,9 +399,9 @@ Master printf("time per iteration per node: %g  includes time for exchanging: %g
        for(i=0;i<m1;i++)
         for(j=ghost;j<mm2;j++)
          for(k=0;k<m3;k++)
-         if((l<=3 && isType(node[i][k],NodeFluid) || l>=4&& isType(node[i][k],NodeMagn))
-            && !isType(node[i][k],NodeClued))
-	    mf[0] += fabs(1+coordin(i,0)*rc)*pow(f1[l][i][j][k],2);
+         if((l<=3 && isType(node[i][j][k],NodeFluid) || l>=4&& isType(node[i][j][k],NodeMagn))
+            && !isType(node[i][j][k],NodeClued))
+	    mf[0] += pow(f1[l][i][j][k],2);
        MPI_Allreduce(mf, totmf, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
        Master fprintf(fen,"\t %e",totmf[0]/N1/N2/N3);
        }
@@ -392,8 +412,8 @@ Master printf("time per iteration per node: %g  includes time for exchanging: %g
        for(i=0;i<m1;i++)
         for(j=ghost;j<m2;j++)
          for(k=0;k<mm3;k++)
-         if(isType(node[i][k],NodeMagn))
-	    mf[0] += fabs(1+coordin(i,0)*rc)*pow(B[l][i][j][k],2);
+         if(isType(node[i][j][k],NodeMagn))
+	    mf[0] += pow(B[l][i][j][k],2);
        MPI_Allreduce(mf, totmf, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
 	   TotalEnergy += totmf[0];
        Master fprintf(fen,"\t %e",totmf[0]/N1/N2/N3);
