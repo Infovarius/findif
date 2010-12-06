@@ -43,14 +43,17 @@ int main(int argc, char** argv)
                   Master if((fd=fopen(NameCPFile,"w+"))!=NULL) putlog("File cp was successfully created",1);
                 }
            else ;//putlog("File of control points opened=",(long)fd);
+   MPI_Barrier(MPI_COMM_WORLD);
    if(goon)
       { do fscanf(fd,"%s\n",NameInitFile); while (!feof(fd));
         goon = strcmp(NameInitFile,"END");
         fileclose(fd);
       }
-
-   init_param(argc,argv,&dtnext,0);       // initialization of parameters
+      rc = 0;
 nextrc: 
+       rc_tmp = rc;
+   init_param(argc,argv,&dtnext,0);       // initialization of parameters
+	if(rc_tmp!=0) rc = rc_tmp;
    	ghost=(approx-1)/2;                  //radius of approx sample
 	dx[0]=2*(R+Rfl/rc)/N1;
 	dx[1]=2*(R+Rfl/rc)/N2;
@@ -153,10 +156,11 @@ nextrc:
 
         if (ChangeParamTime!=0 && floor((t_cur-dtdid)/ChangeParamTime)<floor(t_cur/ChangeParamTime))
 		{
-		//Rm = floor(t_cur/ChangeParamTime+0.5)*DeltaParam-190;
+//		Rm = floor(t_cur/ChangeParamTime+0.5)*DeltaParam-190;
 //		if(!outed) { snapshot(f,eta,t_cur,count); outed = 1;}
 //                MPI_Barrier(MPI_COMM_WORLD);
-		Rm_tmp = (Rm /= (1+max(-0.9,DeltaParam*log(TotalEnergy/TotalEnergyOld))));
+//		Rm_tmp = (Rm /= (1+max(-0.9,DeltaParam*log(TotalEnergy/TotalEnergyOld))));
+		Rm_tmp = Rm += DeltaParam;
               rc_tmp = rc;
                 tmpC = count;  tmpT = t_cur;
 			init_param(argc,argv,&dtnext,1);       // initialization of parameters
@@ -194,7 +198,7 @@ sprintf(str,"energy(%0.2f).dat",rc);
 Master rename("energy.dat",str);
 MPI_Barrier(MPI_COMM_WORLD);
 	operate_memory(-1);
-if((rc -= 0.1) >=0.3) 
+if((rc -= 0.025) >=0.6) 
     {
    Master nmessage("--------------------------------------------------------------------------",-1,-1);
 	Master nmessage("rc was changed to",rc,count);

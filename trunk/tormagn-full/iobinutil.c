@@ -314,7 +314,7 @@ void printing(double ****f1,double dtdid,double t_cur,long count,double en)
 {
 double temp, divv, divB, totdivv, totdivB;
 int i,j,k,l;
-double mf[3], totmf[3], toten;     //mf[0]=max(f), mf[1]=max(df), mf[2]=max(df/f)
+double mf[5], totmf[5], toten;     //mf[0]=max(f), mf[1]=max(df), mf[2]=max(df/f)
 FILE *fv,*fen;
 
 //clrscr();
@@ -380,17 +380,19 @@ Master printf("time per iteration per node: %g  includes time for exchanging: %g
          for(k=0;k<mm3;k++)
          if(isType(node[i][j][k],NodeMagn) && !isType(node[i][j][k],NodeClued))
           {
-            if (fabs(B[l][i][j][k])>mf[0]) mf[0]=fabs(B[l][i][j][k]);
+            if (fabs(B[l][i][j][k])>mf[0]) mf[0]=fabs(B[l][i][j][k]); 
           }
        MPI_Allreduce(mf, totmf, 1, MPI_DOUBLE , MPI_MAX, MPI_COMM_WORLD);
        Master printf("%d  maxB=%e(loc=%e)\n",
                        l,      totmf[0],mf[0]);
 //       Master fprintf(fen,"\t %e",totmf[0]);
-	   if(n[0]<=N1/2 && N1/2<=n[0]+mm1 && n[1]==0 && n[2]<=N3/2 && N3/2<=n[2]+mm3)
-		   MPI_Send(&B[l][N1/2-n[0]][ghost+1][N3/2-n[2]],1,MPI_DOUBLE,0,l,MPI_COMM_WORLD);
+	   if(coordin(0,0,0,0)<=0 && 0<coordin(mm1,mm2,0,0) && coordin(mm1,0,0,1)<=0 && 0<coordin(0,mm2,0,1) && n[2]<=N3/2 && N3/2<n[2]+mm3)
+		{ mf[0] = B[l][mm1/2][mm2/2][N3/2-n[2]]; mf[1]=i; mf[2]=j; mf[3]=k; mf[4]=rank;
+		   MPI_Send(mf,5,MPI_DOUBLE,0,l,MPI_COMM_WORLD);}
 	   Master {
-		   MPI_Recv(totmf, 1, MPI_DOUBLE, MPI_ANY_SOURCE, l, MPI_COMM_WORLD, statuses);
+		   MPI_Recv(totmf, 5, MPI_DOUBLE, MPI_ANY_SOURCE, l, MPI_COMM_WORLD, statuses);
 		   fprintf(fen,"\t %e",totmf[0]);
+		   putlog("mB from",(int)totmf[4]);
 	   }
        }
   // --------------- quadratic norma of arrays --------------------------------------
@@ -412,7 +414,7 @@ Master printf("time per iteration per node: %g  includes time for exchanging: %g
        for(i=0;i<m1;i++)
         for(j=ghost;j<m2;j++)
          for(k=0;k<mm3;k++)
-         if(isType(node[i][j][k],NodeMagn))
+         if(isType(node[i][j][k],NodeFluid))
 	    mf[0] += pow(B[l][i][j][k],2);
        MPI_Allreduce(mf, totmf, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
 	   TotalEnergy += totmf[0];
