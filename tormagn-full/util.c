@@ -23,7 +23,7 @@ void nmessage(char msg_text[],double t_cur,long count)
    FILE *msg;
    msg=fileopen(NameMessageFile,1);
    time_now = (t_cur<0)?time_begin:MPI_Wtime();
-   fprintf(msg,"message of proc#%d at t=%-7.4lf Niter=%-6d time of work=%g sec:\n",rank,
+   fprintf(msg,"message of proc#%d at t=%-7.4lf Niter=%-6ld time of work=%g sec:\n",rank,
                     t_cur,count,time_now-time_begin);
    fprintf(msg,"%s\n",msg_text);
    fileclose(msg);

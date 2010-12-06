@@ -1,7 +1,7 @@
 8
 ---------  Geometry parameters ------------------------------------
 6.283		| streamwise length in radii units
-1		| inverse distance from centre to axis of torus
+0.5		| inverse distance from centre to axis of torus
 1		| inner radius of torus (with fluid)
 1		| outer radius of torus (with shell)
 2		| radius of region to be modelled
@@ -18,14 +18,14 @@
 10		| maximal level of fluctuation after which nut is on
 
 ---------   Magnetic parameters   -----------------------------
-10		| magnetic Reynolds number
+100		| magnetic Reynolds number
 1		| magnetic diffusivity in conducting shell
 1		| magnetic diffusivity in poorly counducting medium(vacuum) outside
 
 ---------  Scheme (approximation) parameters ------------------
-128		| mesh point in R
-128		| mesh point in PHI
-64		| mesh point in Z
+32		| mesh point in R
+32		| mesh point in PHI
+32		| mesh point in Z
 7		| variables number
 7		| sample width
 0.001		| initial timestep
@@ -33,7 +33,7 @@
 ---------  Output parameters  -------------------------------
 10		| steps to statistics output (OutStep)
 0		| steps to snaps (SnapStep)
-0.5		| simulation time delta to snap (SnapDelta)
+0.1		| simulation time delta to snap (SnapDelta)
 5		| minutes between dumps (DumpInterval)
 0		| keep dumps (DumpKeep)
 10		| steps of checking divergence (CheckStep)
@@ -41,6 +41,6 @@
 10		| Total time
 
 ---------  Regulators ----------------------------------------
-0.2		| simulation time delta between parameter changing (ChangeParamTime)
+0		| simulation time delta between parameter changing (ChangeParamTime)
 3		| delta of parameter changing (DeltaParam)
 -1		| name of initial file

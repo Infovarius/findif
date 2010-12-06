@@ -39,9 +39,9 @@ void putlog(char msg_text[],long num)
    sprintf(name,"mess%d.log",rank);
    log=fileopen(name,num);
    time_now = (num==0)?time_begin:MPI_Wtime();
-   fprintf(log,"message at t=%-7.4lf Niter=%-6d time of work=%g sec\n",
+   fprintf(log,"message at t=%-7.4lf Niter=%-6ld time of work=%g sec\n",
                     t_cur,count,time_now-time_begin);
-   fprintf(log,"%s %d\n",msg_text,num);
+   fprintf(log,"%s %ld\n",msg_text,num);
    fileclose(log);
 }
 
@@ -314,7 +314,7 @@ void printing(double ****f1,double dtdid,double t_cur,long count,double en)
 {
 double temp, divv, divB, totdivv, totdivB;
 int i,j,k,l;
-double mf[5], totmf[5], toten;     //mf[0]=max(f), mf[1]=max(df), mf[2]=max(df/f)
+double mf[3], totmf[3], toten;     //mf[0]=max(f), mf[1]=max(df), mf[2]=max(df/f)
 FILE *fv,*fen;
 
 //clrscr();
@@ -343,11 +343,11 @@ for(i=0;i<m1;i++)
         }
 MPI_Allreduce(&divv, &totdivv, 1, MPI_DOUBLE , MPI_MAX, MPI_COMM_WORLD);
 MPI_Allreduce(&divB, &totdivB, 1, MPI_DOUBLE , MPI_MAX, MPI_COMM_WORLD);
-Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g) maxdivB=%g(local=%g)\n",
+Master printf("t=%g dtdid=%g NIter=%ld maxdivv=%g(local=%g) maxdivB=%g(local=%g)\n",
                t_cur, dtdid, count,   totdivv,   divv,     totdivB,   divB);
 Master printf("time per iteration per node: %g  includes time for exchanging: %g\n",(time1-time0)/(N1*N2*N3*OutStep),(timeE1)/(N1*N2*N3*OutStep));
 
-   MPI_Allreduce(&en, &toten, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
+   MPI_Allreduce(&en, &toten, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
    Master printf("Energy of pulsations=%g (local=%g)\n",toten,en);
    Master fen = fileopen(NameEnergyFile,count);
    Master fprintf(fen,"%8.8g  \t%e",t_cur,toten);
@@ -367,7 +367,7 @@ Master printf("time per iteration per node: %g  includes time for exchanging: %g
             if(f1[l][i][j][k]!=0) temp/=f1[l][i][j][k];
             if (temp>mf[2]) mf[2]=temp;
           }
-       MPI_Allreduce(mf, totmf, 3, MPI_DOUBLE , MPI_MAX, MPI_COMM_WORLD);
+       MPI_Allreduce(mf, totmf, 3, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
        Master printf("%d  maxf=%e(loc=%e) \tmaxdf=%e(loc=%e) \tmax(df/f)=%e(loc=%e)\n",
                        l,      totmf[0],mf[0],    totmf[1],mf[1],       totmf[2],mf[2]);
 //       Master fprintf(fen,"\t %e \t %e",totmf[0],totmf[1]);
@@ -382,19 +382,21 @@ Master printf("time per iteration per node: %g  includes time for exchanging: %g
           {
             if (fabs(B[l][i][j][k])>mf[0]) mf[0]=fabs(B[l][i][j][k]); 
           }
-       MPI_Allreduce(mf, totmf, 1, MPI_DOUBLE , MPI_MAX, MPI_COMM_WORLD);
+       MPI_Allreduce(mf, totmf, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
        Master printf("%d  maxB=%e(loc=%e)\n",
                        l,      totmf[0],mf[0]);
 //       Master fprintf(fen,"\t %e",totmf[0]);
-	   if(coordin(0,0,0,0)<=0 && 0<coordin(mm1,mm2,0,0) && coordin(mm1,0,0,1)<=0 && 0<coordin(0,mm2,0,1) && n[2]<=N3/2 && N3/2<n[2]+mm3)
-		{ mf[0] = B[l][mm1/2][mm2/2][N3/2-n[2]]; mf[1]=i; mf[2]=j; mf[3]=k; mf[4]=rank;
-		   MPI_Send(mf,5,MPI_DOUBLE,0,l,MPI_COMM_WORLD);}
+//	   if(coordin(0,0,0,0)<=0 && 0<coordin(mm1,mm2,0,0) && coordin(mm1,0,0,1)<=0 && 0<coordin(0,mm2,0,1) && n[2]<=N3/2 && N3/2<n[2]+mm3)
+	   k = (int)(N1/2 + Rfl*(1./rc-1) / dx[0]);
+	   if(n[0]+ghost<=k && k<n[0]+mm1 && n[1]+ghost<=N2/2 && N2/2<n[1]+mm2 && n[2]+ghost<=N3/2 && N3/2<n[2]+mm3)
+		    { mf[0] = B[l][mm1/2][mm2/2][N3/2-n[2]]; mf[1]=10000+(double)rank; }
+	   else { mf[0] = mf[1]=0; }
+       MPI_Allreduce(mf, totmf, 2, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 	   Master {
-		   MPI_Recv(totmf, 5, MPI_DOUBLE, MPI_ANY_SOURCE, l, MPI_COMM_WORLD, statuses);
 		   fprintf(fen,"\t %e",totmf[0]);
-		   putlog("mB from",(int)totmf[4]);
+//		   putlog("mB from",(int)totmf[1]);
 	   }
-       }
+   }
   // --------------- quadratic norma of arrays --------------------------------------
    for(l=0;l<nvar;l++) {
        mf[0]=0;
@@ -423,7 +425,7 @@ Master printf("time per iteration per node: %g  includes time for exchanging: %g
    
    Master fprintf(fen,"\n");
    Master fileclose(fen);
-   Master printf("number of runge-kutt calculations=%d\n",enter);
+   Master printf("number of runge-kutt calculations=%ld\n",enter);
 
  // -------------------- average profile of velocity ---------------------
 /*         for(i=0;i<N3;i++)    vfi[i]=0;
@@ -449,7 +451,7 @@ FILE *fd;
 char message[10]="dump";
 int tag=1,v;
 
-if(DumpKeep)  sprintf(str,"%s_%d_%d.dmp",NameSnapFile,rank,count);
+if(DumpKeep)  sprintf(str,"%s_%d_%ld.dmp",NameSnapFile,rank,count);
 	else {
 		sprintf(str,"%s%d.dmp",NameSnapFile,rank);
 		sprintf(str1,"%s%d.bak",NameSnapFile,rank);
@@ -479,7 +481,7 @@ if(DumpKeep)  sprintf(str,"%s_%d_%d.dmp",NameSnapFile,rank,count);
  MPI_Barrier(MPI_COMM_WORLD);
  Master 
  {    nmessage("dump is done",t_cur,count);
-	  if(DumpKeep)  sprintf(str,"%s_*_%d.dmp",NameSnapFile,count);
+	  if(DumpKeep)  sprintf(str,"%s_*_%ld.dmp",NameSnapFile,count);
 			else 	sprintf(str,"%s*.dmp",NameSnapFile);
 	  add_control_point(str);
       }
@@ -492,7 +494,7 @@ char message[10]="message";
 long tag=count,v;
 FILE *fd;
 
- sprintf(str,"%s_%d_%d.snp",NameSnapFile,size,count);
+ sprintf(str,"%s_%d_%ld.snp",NameSnapFile,size,count);
 // boundary_conditions(f1);
 // calculate_curl(&f1[4],B,NodeMagn);
 // calculate_curl(B,J,NodeMagn);

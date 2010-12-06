@@ -198,7 +198,7 @@ sprintf(str,"energy(%0.2f).dat",rc);
 Master rename("energy.dat",str);
 MPI_Barrier(MPI_COMM_WORLD);
 	operate_memory(-1);
-if((rc -= 0.025) >=0.6) 
+if((rc += 0.025) <=0.55) 
     {
    Master nmessage("--------------------------------------------------------------------------",-1,-1);
 	Master nmessage("rc was changed to",rc,count);
