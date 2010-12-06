@@ -14,7 +14,7 @@ void nrerror(char error_text[],double t_cur,long count)
     fileclose(err);
     if(f) operate_memory(-1);
     add_control_point("END");
-    MPI_Finalize();
+//    MPI_Finalize();
     exit(1);
 }
 
@@ -73,15 +73,25 @@ int i, j, k;
    for(i = 0; i < mvar; i++)
    for(j = 0; j < n1; j++)
    for(k = 0; k < n2; k++)
+    { 
+    if(!aaa[i][j][k]) {putlog("error at releasing",(long)aaa[i][j][k]);return;}
 	free(aaa[i][j][k]);
+	}
 
    for(i = 0; i < mvar; i++)
    for(j = 0; j < n1; j++)
+    {
+    if(!aaa[i][j]) {putlog("error at releasing",(long)aaa[i][j]);return;}
 	free(aaa[i][j]);
+	}
 
    for(i = 0; i < mvar; i++)
+    {
+    if(!aaa[i]) {putlog("error at releasing",(long)aaa[i]);return;}
 	free(aaa[i]);
+	}
 
+   if(!aaa) {putlog("error at releasing",(long)aaa);return;}
    free(aaa);
 
    return;
@@ -115,11 +125,18 @@ int j, k;
 
    for(j = 0; j < n1; j++)
    for(k = 0; k < n2; k++)
+    {
+    if(!aaa[j][k]) {putlog("error at releasing",(long)aaa[j][k]);return;}
 	free(aaa[j][k]);
+	}
 
    for(j = 0; j < n1; j++)
+    {
+    if(!aaa[j]) {putlog("error at releasing",(long)aaa[j]);return;}
 	free(aaa[j]);
+	}
 
+    if(!aaa) {putlog("error at releasing",(long)aaa);return;}
    free(aaa);
 
    return;
@@ -162,8 +179,12 @@ void free_mem_2f(double **aa, int n1, int n2)
 int j, k;
 
    for(j = 0; j < n1; j++)
+    {
+    if(!aa[j]) {putlog("error at releasing",(long)aa[j]);return;}
 	free(aa[j]);
+	}
 
+   if(!aa) {putlog("error at releasing",(long)aa);return;}
    free(aa);
 
    return;
@@ -174,8 +195,12 @@ void free_mem_2i(int **aa, int n1, int n2)
 int j, k;
 
    for(j = 0; j < n1; j++)
+    {
+    if(!aa[j]) {putlog("error at releasing",(long)aa[j]);return;}
 	free(aa[j]);
+	}
 
+   if(!aa) {putlog("error at releasing",(long)aa);return;}
    free(aa);
 
    return;
@@ -204,6 +229,7 @@ return(a);
 void free_mem_1f(double *a, int n)
 {
 int k;
+   if(!a) {putlog("error at releasing",(long)a);return;}
    free(a);
    return;
 }
@@ -211,40 +237,40 @@ int k;
 void free_mem_1i(int *a, int n)
 {
 int k;
+   if(!a) {putlog("error at releasing",(long)a);return;}
    free(a);
    return;
 }
 
 void operate_memory(int dir)
 {
+int i,k;
  if(dir>0)
-   {   
-       f  =alloc_mem_4f(nvar, m1, m2, m3);   //f[3]-pressure,f[0..2]-v(vector),f[4..6]-potential of induction(vector)
+   {
+       f  =alloc_mem_4f(nvar, m1, m2, m3);   //f[0]-pressure,f[1..3]-v(vector)
        f1 =alloc_mem_4f(nvar, m1, m2, m3);
        df =alloc_mem_4f(nvar, m1, m2, m3);
        df2=alloc_mem_4f(nvar, m1, m2, m3);
        df3=alloc_mem_4f(nvar, m1, m2, m3);
        df4=alloc_mem_4f(nvar, m1, m2, m3);
        df5=alloc_mem_4f(nvar, m1, m2, m3);
-       B = alloc_mem_4f(3, m1, m2, m3);      // vector of magnetic induction itself
-       J = alloc_mem_4f(3, m1, m2, m3);      // vector of electric current
        r_1=alloc_mem_1f(m1);                  // r^(-1)
        r_2=alloc_mem_1f(m1);                  // r^(-2)
        node=alloc_mem_2i(m1, m3);         // kind of nodes
-       refr_f=alloc_mem_2f(m1, m3);         // reflection of nodes relative inner surface (for hydro)
-       refz_f=alloc_mem_2f(m1, m3);
-       refr_m=alloc_mem_2f(m1, m3);         // reflection of nodes relative sphere of simulation (for magn)
-       refz_m=alloc_mem_2f(m1, m3);
+       refr=alloc_mem_2f(m1, m3);         // reflection of nodes relative circle
+       refz=alloc_mem_2f(m1, m3);
        sinth=alloc_mem_2f(m1, m3);
        costh=alloc_mem_2f(m1, m3);
-       nut = alloc_mem_3f(m1, m2, m3);
-       eta = alloc_mem_3f(m1, m2, m3);
+       chi=alloc_mem_2f(m1, m3);          // angle of blade tilt
+       nut=alloc_mem_3f(m1, m2, m3);
        averf = alloc_mem_3f(nvar,m1,m3);
        vfi = alloc_mem_1f(N3);
        totvfi = alloc_mem_1f(N3);
-    } else
+/*       for(i=0;i<3;i++)
+        for(k=0;k<3;k++)
+          tau[i][k] = alloc_mem_3f(m1,m2,m3);
+*/    } else
    {
-//   free_mem_2f(s_func,n3+2,kol_masht);
        free_mem_4f(f  ,nvar, m1, m2, m3);
        free_mem_4f(f1 ,nvar, m1, m2, m3);
        free_mem_4f(df ,nvar, m1, m2, m3);
@@ -252,23 +278,22 @@ void operate_memory(int dir)
        free_mem_4f(df3,nvar, m1, m2, m3);
        free_mem_4f(df4,nvar, m1, m2, m3);
        free_mem_4f(df5,nvar, m1, m2, m3);
-       free_mem_4f(B, 3, m1, m2, m3);
-       free_mem_4f(J, 3, m1, m2, m3);
        free_mem_3f(nut, m1, m2, m3);
-       free_mem_2f(refr_f,m1, m3);
-       free_mem_2f(refz_f,m1, m3);
-       free_mem_2f(refr_m,m1, m3);
-       free_mem_2f(refz_m,m1, m3);
+       free_mem_2f(refr,m1, m3);
+       free_mem_2f(refz,m1, m3);
        free_mem_2f(sinth,m1, m3);
        free_mem_2f(costh,m1, m3);
+       free_mem_2f(chi,  m1, m3);
        free_mem_2i(node,m1, m3);
        free_mem_3f(averf,nvar,m1,m3);
        free_mem_1f(vfi,N3);
        free_mem_1f(totvfi,N3);
        free_mem_1f(r_1,m1);
        free_mem_1f(r_2,m1);
-       free_mem_3f(eta,m1,m2,m3);
-    }
+/*       for(i=0;i<3;i++)
+        for(k=0;k<3;k++)
+          free_mem_3f(tau[i][k],m1,m2,m3);
+*/    }
 }
 
 int isType(int nod, enum TypeNodes tip)
@@ -282,7 +307,7 @@ void setType(int *nod, enum TypeNodes tip)
   return;
 }
 
-void CopyBufferToGrid(double ****m,double ***nut,double *buffer,int x1,int y1,int z1,int x2,int y2,int z2)
+ void CopyBufferToGrid(double ****m,double ***nut,double *buffer,int x1,int y1,int z1,int x2,int y2,int z2)
  {
    int i,j,k,l,n=0;
    for(l=0;l<nvar;l++)
@@ -296,7 +321,7 @@ void CopyBufferToGrid(double ****m,double ***nut,double *buffer,int x1,int y1,in
      nut[i][j][k]=buffer[n++];
  }
 
-void CopyGridToBuffer(double ****m,double ***nut,double *buffer,int x1,int y1,int z1,int x2,int y2,int z2)
+ void CopyGridToBuffer(double ****m,double ***nut,double *buffer,int x1,int y1,int z1,int x2,int y2,int z2)
  {
    int i,j,k,l,n=0;
    for(l=0;l<nvar;l++)
