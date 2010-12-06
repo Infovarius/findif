@@ -31,7 +31,7 @@ int main(int argc, char** argv)
    dx[0]=l1/n1;
    dx[1]=l2/n2;
    dx[2]=l3/n3;
-   p1 = 80*l1/(l3*Re) ; p2 = 0;
+   p1 = 8*l1/(l3*Re) ; p2 = 0;
 
 
    m1 = n1+2*ghost;
