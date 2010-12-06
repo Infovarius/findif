@@ -7,7 +7,7 @@
 #define Pshrink      (double)-0.25
 #define ErrCon       (double)1.89e-4
 #define ErrScale     (double)1e4
-#define MinScale     (double)1e-7
+#define MinScale     (double)1e-12
 
 
 void timestep(double ****f, double ****df, double t, double ****fout,
@@ -67,7 +67,7 @@ enter++;
    for(i=0;i<m1;i++)
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
-//     if(l<=3&&isType(node[i][k],NodeFluid) || l>=4&&isType(node[i][k],NodeMagn))
+     if(l<=3&&isType(node[i][k],NodeFluid) || l>=4&&isType(node[i][k],NodeMagn))
       fout[l][i][j][k] = f[l][i][j][k]+dt*b21*df1[l][i][j][k];
    pde(t+a2*dt,fout, df2);
 
@@ -76,7 +76,7 @@ enter++;
    for(i=0;i<m1;i++)
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
-//     if(l<=3&&isType(node[i][k],NodeFluid) || l>=4&&isType(node[i][k],NodeMagn))
+     if(l<=3&&isType(node[i][k],NodeFluid) || l>=4&&isType(node[i][k],NodeMagn))
       fout[l][i][j][k] = f[l][i][j][k]+dt*(b31*df1[l][i][j][k]+
                                            b32*df2[l][i][j][k]);
    pde(t+a3*dt,fout, df3);
@@ -86,7 +86,7 @@ enter++;
    for(i=0;i<m1;i++)
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
-//     if(l<=3&&isType(node[i][k],NodeFluid) || l>=4&&isType(node[i][k],NodeMagn))
+     if(l<=3&&isType(node[i][k],NodeFluid) || l>=4&&isType(node[i][k],NodeMagn))
       fout[l][i][j][k] = f[l][i][j][k]+dt*(b41*df1[l][i][j][k]+
                                            b42*df2[l][i][j][k]+
                                            b43*df3[l][i][j][k]);
@@ -97,7 +97,7 @@ enter++;
    for(i=0;i<m1;i++)
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
-//     if(l<=3&&isType(node[i][k],NodeFluid) || l>=4&&isType(node[i][k],NodeMagn))
+     if(l<=3&&isType(node[i][k],NodeFluid) || l>=4&&isType(node[i][k],NodeMagn))
       fout[l][i][j][k] = f[l][i][j][k]+dt*(b51*df1[l][i][j][k]+
                                            b52*df2[l][i][j][k]+
                                            b53*df3[l][i][j][k]+
@@ -109,7 +109,7 @@ enter++;
    for(i=0;i<m1;i++)
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
-//     if(l<=3&&isType(node[i][k],NodeFluid) || l>=4&&isType(node[i][k],NodeMagn))
+     if(l<=3&&isType(node[i][k],NodeFluid) || l>=4&&isType(node[i][k],NodeMagn))
       fout[l][i][j][k] = f[l][i][j][k]+dt*(b61*df1[l][i][j][k]+
                                            b62*df2[l][i][j][k]+
                                            b63*df3[l][i][j][k]+
@@ -123,7 +123,7 @@ enter++;
    for(i=0;i<m1;i++)
    for(j=0;j<m2;j++)
    for(k=0;k<m3;k++)
-//     if(l<=3&&isType(node[i][k],NodeFluid) || l>=4&&isType(node[i][k],NodeMagn))
+     if(l<=3&&isType(node[i][k],NodeFluid) || l>=4&&isType(node[i][k],NodeMagn))
    {
       fout[l][i][j][k] = f[l][i][j][k]+dt*(c1*df1[l][i][j][k]+
                                            c3*df3[l][i][j][k]+

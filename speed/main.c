@@ -1,6 +1,8 @@
 #define LEVEL
 
 #include "head.h"
+#include "time.h"
+#define Tunit 0.36915
 
 int main(int argc, char** argv)
 {
@@ -9,6 +11,9 @@ int main(int argc, char** argv)
    int i,j,k,l,i2,j2,k2;
    FILE *fd;
    int strl;
+   double ChangeParamTime = 3, DeltaParam = 10;         // for iteration on parameters
+   double dv1[7][3],dv2[7][3],dA11[7][3][3],dp1[3],dn1[3],w,dw;
+   int m;
 
  /* Initialize MPI */
  MPI_Init(&argc,&argv);
@@ -16,6 +21,8 @@ int main(int argc, char** argv)
  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
  MPI_Comm_size(MPI_COMM_WORLD,&size);
 
+  srand(rank);
+//init_tick(0,"init");
 start_tick(0,"init");
   NameMessageFile = "message.dat";
   NameErrorFile = "error.err";
@@ -33,23 +40,26 @@ start_tick(0,"init");
   NameStatFile =(char *)calloc(strl+9,sizeof(char));
   sprintf(NameStatFile,"%s_%d.sta",fname,rank); NameStatFile[strl+8] = 0;
 
-   Master nmessage("--------------------------------------------------------------------------",0,0);
+   Master nmessage("--------------------------------------------------------------------------",-1,-1);
    init_param(argc,argv,&dtnext);       // initialization of parameters
    Gamma=1e-4;
    ghost=(approx-1)/2;                  //radius of approx sample
-   MPI_Barrier(MPI_COMM_WORLD);
    t_cur=0;
    count=0; enter = 0;
 
 /* ---------------------- initialization of arrays --------------------- */
-   goon = ((fd=fopen(NameCPFile,"r"))>0);
+   goon = ((fd=fopen(NameCPFile,"r+"))>0);
+   if(fd==NULL) { //putlog("File of cp were not opened",goon);
+                  Master if((fd=fopen(NameCPFile,"w+"))!=NULL) ;//putlog("File cp was successfully created",1);
+                }
+           else ;//putlog("File of control points opened=",(long)fd);
    if(goon)
       { do fscanf(fd,"%s\n",NameInitFile); while (!feof(fd));
         goon = strcmp(NameInitFile,"END");
       }
-   if(goon) {if(init_data()) nrerror("error of reading initial arrays",0,0);}
+   if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
        else { init_parallel();  operate_memory(1);}
-   fclose(fd);
+   fileclose(fd);
 
    dx[0]=2*R/N1;
    dx[1]=lfi/N2;
@@ -58,14 +68,14 @@ start_tick(0,"init");
    init_timers();
 
 //--------------------------------------
-  if(!goon) Master {
+  Master {
       fd=fileopen("coord",rank);
       for(i=0;i<N1+2*ghost;i++) fprintf(fd,"%e ",coordin(i,0));
       fprintf(fd,"\n");
       for(i=0;i<N2+2*ghost;i++) fprintf(fd,"%e ",coordin(i,1));
       fprintf(fd,"\n");
       for(i=0;i<N3+2*ghost;i++) fprintf(fd,"%e ",coordin(i,2));
-      fclose(fd);
+      fileclose(fd);
      }
 //--------------------------------------
  if(!goon) {
@@ -80,7 +90,7 @@ start_tick(0,"init");
  print_array2d(fd,refz_f,0,m1,0,m3);
  print_array2d(fd,refr_m,0,m1,0,m3);
  print_array2d(fd,refz_m,0,m1,0,m3);
- fclose(fd);
+ fileclose(fd);
 
  if(rank!=size-1) MPI_Send("",0,MPI_CHAR,rank+1,1,MPI_COMM_WORLD);
              else nmessage("nodes has been dumped",t_cur,count);
@@ -101,81 +111,51 @@ start_tick(0,"init");
 finish_tick(0);
 
 /*------------------------ MAIN ITERATIONS -------------------------*/
-   while (t_cur < Ttot && !razlet) {
- start_tick(10,"");
-       for(i=0;i<m1;i++)
-         for(j=0;j<m2;j++)
-            for(k=0;k<m3;k++)
-            if(isType(node[i][k],NodeFluid))
-            {
-            r1 = coordin(i,0);  /*phi1 = coordin(j,1);*/  z1 = coordin(k,2);
-            rho=sqrt(pow(r1-rc,2) + z1*z1);
-            vrho = 0;
-            if(rho>=Rfl) continue;
-            vth  = vtheta_given(t_cur,rho,Rfl,phi1);
-            vphi = vfi_given(t_cur,rho,Rfl);
-/*            vth = 0;
-            vphi = vfi_given(0.2,rho,Rfl);      */
-            f[1][i][j][k] = vrho*sinth[i][k]+vth*costh[i][k];
-            f[2][i][j][k] = vphi;
-            f[3][i][j][k] = vrho*costh[i][k]-vth*sinth[i][k];
-            }
-    finish_tick(10);   start_tick(11,"");
-        start_tick(7,"outpde");  pde(t_cur, f, df); finish_tick(7);
-        dttry=dtnext;
-    finish_tick(11);   start_tick(12,"");
-        timestep(f, df, t_cur, f1, dttry, &dtdid, &dtnext);
-    finish_tick(12);   start_tick(13,"");
-        nut_by_flux(f,dtdid);
-        t_cur+=dtdid;
-        count++;
-        if (CheckStep!=0 && count%CheckStep==0)
-            {
-            boundary_conditions(f1);
-            check(f1);
-            }
-        if (OutStep!=0 && count%OutStep==0)
-            {
-            if (CheckStep!=0 && count%CheckStep!=0)
-                {
-                boundary_conditions(f1);
-                check(f1);
-                }
-              else boundary_conditions(f1);
-            printing(f1,dtdid,t_cur,count,PulsEnergy);
-            }
-        if (SnapStep!=0 && count%SnapStep==0)
-            snapshot(f1,eta,t_cur,count);
-    finish_tick(13);   start_tick(14,"exch");
-        for(l=0;l<nvar;l++)
-        for(i=0;i<m1;i++)
-        for(j=0;j<m2;j++)
-        for(k=0;k<m3;k++)
-           f[l][i][j][k]=f1[l][i][j][k];
-/*        if(kbhit())
-             {
-                switch (getch()) {
-                        case 'd' : dump(f,t_cur,count);  break;
-                        case 'q' : { dump(f,t_cur,count);
-                                     MPI_Finalize();
-                                     nrerror("You asked to exit. Here you are...",t_cur);
-                                    }
-                        }
-              }*/
-    finish_tick(14); 
-   }
 
+start_tick(10,"all_dr");
+ for(count=0;count<10000;count++) {
+      for(i=ghost;i<mm1;i++)
+   for(j=ghost;j<mm2;j++)
+   for(k=ghost;k<mm3;k++)
+   {
+     if(isType(node[i][k],NodeMagn) && !isType(node[i][k],NodeClued))
+      {
+//start_tick(15,"");
+      for(l=4;l<=6;l++) {
+       for(m=0;m<3;m++) {
+//   start_tick(17,"");
+         dv1[l][m]=dr(f[l],i,j,k,m+1,0,dx[m],ghost,approx);
+//        dv1[l][m] = 1.2*(f[l][i+1][j][k]-f[l][i-1][j][k])+2.3*f[l][i][j][k];
+/*        dv1[l][m] = 1.2*(nut[i+3][j][k]-nut[i-3][j][k])
+                               + 2.3*(nut[i+2][j][k]-nut[i-2][j][k])
+                               + 3.4*(nut[i+1][j][k]-nut[i-1][j][k])
+                               + 4.5*nut[i][j][k];*/
+//   finish_tick(17); start_tick(18,"");
+//         dv2[l][m]=dr(f[l],i,j,k,m+1,1,dx[m]*dx[m],ghost, approx);
+//finish_tick(18);
+	 }     //	start_tick(19,"");
+/*        dA11[l][0][1] = dA11[l][1][0] = d2cross(f[l],i,j,k,2,1,ghost,approx);
+        dA11[l][0][2] = dA11[l][2][0] = d2cross(f[l],i,j,k,3,1,ghost,approx);
+        dA11[l][1][2] = dA11[l][2][1] = d2cross(f[l],i,j,k,3,2,ghost,approx);*/
+//finish_tick(19);
+        }
+//finish_tick(15);
+      } //  else df[4][i][j][k] = df[5][i][j][k] = df[6][i][j][k] = 0;
+  } //global for
+
+   }
+finish_tick(10);
    printing(f1,dtdid,t_cur,count,PulsEnergy);
    snapshot(f,eta,t_cur,count);
    if(rank==size-1) add_control_point("END");
    print_CPU_usage();
 
-   operate_memory(-1);
-//   Master fclose(NameErrorFile);
+//   Master fileclose(NameErrorFile);
 
    if(t_cur>=Ttot&&!razlet) nmessage("work is succesfully done",t_cur,count);
        else nrerror("this is break of scheme",t_cur,count);
    MPI_Barrier(MPI_COMM_WORLD);
+   operate_memory(-1);
    MPI_Finalize();
    nmessage("mpi_finalize is done",t_cur,count);
 return 0;

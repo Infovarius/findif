@@ -1,42 +1,38 @@
-3
+5
 ---------  Geometry parameters ------------------------------------
-6.283185307	| streamwise length (full round)
-4		| distance from centre to axis of torus
+6.283185307	| streamwise length in radii units
+0.0		| inverse distance from centre to axis of torus
 1		| inner radius of torus (with fluid)
-1		| outer radius of torus (with shell)
-3		| radius of region to be modelled
+1.3		| outer radius of torus (with shell)
+2		| radius of region to be modelled
 
 ---------  Hydrodynamical parameters ------------------------------
 1		| Reynolds number
 
-0		| init profile: 0 - zero, 1 - parabole
+0		| HD profile: 0 - parabole, >0 - Hartmann ksi, <0 - solid body
 0.0		| amplitude of initial random noise
-0.0		| amplitude of initial normal noise
+0		| velocity dependance on time (0 - none, 1 - approximative)
+1		| relation of vstream to vtransverse (Gailitis chi)
+0	 	| scaling factor in nu turbulent (maschtab)
 10		| maximal level of fluctuation after which nut is on
-45		| maximal angle of blade tilt (degrees)
 
 ---------   Magnetic parameters   -----------------------------
-1		| magnetic Reynolds number
+10		| magnetic Reynolds number
 0.2		| magnetic diffusivity in conducting shell
 5		| magnetic diffusivity in poorly counducting medium(vacuum) outside
 
 ---------  Scheme (approximation) parameters ------------------
-64		| mesh point in R
-64		| mesh point in PHI
-64		| mesh point in Z
+15		| mesh point in R
+15		| mesh point in PHI
+15		| mesh point in Z
 7		| variables number
 7		| sample width
-0.001		| initial timestep
-
----------  Shell model parameters  --------------------------
-15		| number of shells (Ns)
-1000000 	| scaling factor in nu turbulent (maschtab)
-2		| quotient of shell wavenumbers (lambda)
-3		| maximal size of averaging vicinity (max_okr)
+0.0001		| initial timestep
 
 ---------  Output parameters  -------------------------------
 10		| steps to statistics output (OutStep)
-100		| steps to snaps (SnapStep)
+0		| steps to snaps (SnapStep)
+0		| simulation time delta to snap (SnapDelta)
 10		| steps of checking divergence (CheckStep)
 1		| test of time step (VarStep)
-100		| Total time
+0.2		| Total time
