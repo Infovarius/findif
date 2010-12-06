@@ -26,7 +26,8 @@ if(t<t_begin) *w=omega0;
 void pde(double t, double ***f, double ***df)
 {
    int i,k,l,m;
-   double dv1[4][3],dv2[4][3],dp1[3],dn1[3],w,dw;
+   double M;
+   double dv1[4][3],dv2[4][3],dp1[3],dA11[4],dn1[3],w,dw;
 
    boundary_conditions(f,nut);
 
@@ -35,16 +36,20 @@ void pde(double t, double ***f, double ***df)
    for(k=0;k<m3;k++)
      if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
      {
+      M = 1./(rc*coordin(i,0)+1);
       for(m=0;m<3;m++ for2D(m)) {
          dp1[m]=dr(f[0],i,k,m+1,0,dx[m],(approx-1)/2, approx);
          dn1[m]=dr(nut,i,k,m+1,0,dx[m],(approx-1)/2, approx);
       }
+      dp1[1] *= M; dn1[1] *= M;
       for(l=1;l<=3;l++) {
        for(m=0;m<3;m++ for2D(m)) {
          dv1[l][m]=dr(f[l],i,k,m+1,0,dx[m],(approx-1)/2, approx);
          dv2[l][m]=dr(f[l],i,k,m+1,1,dx[m]*dx[m],(approx-1)/2, approx);
          }
       }
+      dv1[l][1] *= M;     dv2[l][1]  *= M*M;
+//      dA11[l] = d2cross(f[l],i,k,3,2,(approx-1)/2,approx);
 
       df[1][i][k]=nut[i][k]*(dv2[1][0]+dv2[1][2]+r_1[i]*dv1[1][0]
 				   -f[1][i][k]*r_2[i])
@@ -53,7 +58,13 @@ void pde(double t, double ***f, double ***df)
 		     + (dn1[0]-f[1][i][k])*dv1[1][0]
 		     + (dn1[2]-f[3][i][k])*dv1[1][2]
 		     + f[2][i][k]*r_1[i]*f[2][i][k]
-		     ;
+/*		+nut[i][k]/3*(dv2[1][0]+dv1[1][0]*r_1[i]-f[1][i][k]*r_2[i]-dv1[2][1]*r_1[i]+dA11[2][0][1]+dA11[3][0][2])
+                     - dvv(f[1],f[1],1,i,j,k,(approx-1)/2,approx)
+                     - dvv(f[2],f[1],2,i,j,k,(approx-1)/2,approx)
+                     - dvv(f[3],f[1],3,i,j,k,(approx-1)/2,approx)
+                     - f[1][i][j][k]*f[1][i][j][k]*r_1[i]
+		     - (dn1[1]-f[2][i][j][k])*r_1[i]*f[2][i][j][k]
+*/		     ;
       df[2][i][k]=nut[i][k]*(dv2[2][0]+dv2[2][2]+r_1[i]*dv1[2][0]
 				   -f[2][i][k]*r_2[i])
 		     + p1*pow(rc*coordin(i,0)+1,-1.)//-dw/r_1[i] -2*w*f[1][i][k]                   //forces of inertion
