@@ -11,10 +11,10 @@ FILE *fileopen(const char *x, int mode)  //opening of file to ff
                          /*   0-rewrite;>0-append;<0-read    */
 {
 FILE *ff;
-char* s_mode;                              
-if(mode>0) s_mode="a";
-if(mode<0) s_mode="r";
-if(mode==0) s_mode="w";
+char* s_mode;
+if(mode>0) s_mode="ab";
+if(mode<0) s_mode="rb";
+if(mode==0) s_mode="wb";
 if ((ff = fopen(x,s_mode))==NULL)
 	 {
 		nrerror ("Can't open file !\n",t_cur,count);
@@ -61,42 +61,21 @@ double d;
  if(argc<2 || (iop=fopen(argv[1],"r"))==NULL) //no ini file
     {
      nrerror("Start from no ini file!",-1,-1);
-     Re=10.;
-     lfi=3.;
-     rc=3.;
-     R=1.;
-     parabole=0.;
-     Noise=0.;
-     NoiseNorm=0.;
-     UpLimit=10.;
-     N1=10;
-     N2=10;
-     N3=10;
-     nvar=4;
-     approx=7;                    //width of approximation sample
-     *dtnext=1e-3;
-     Ns=15;
-     maschtab=1e6;
-     lambda = 2.0;
-     max_okr = 3;
-     OutStep = (CheckStep=100)/1;
-     VarStep = 0;
-     SnapStep = 100;
-     Ttot=1.;
      }
     else {
-      if(fscanf(iop,"%d",&ver)<1 || ver!=4) nrerror("parameters' file has wrong version",-1,-1);
+      if(fscanf(iop,"%d",&ver)<1 || ver!=5) nrerror("parameters' file has wrong version",-1,-1);
       read_token(iop,&lfi);        //geometry
       read_token(iop,&rc);
       read_token(iop,&Rfl);
       read_token(iop,&Rsh);
       read_token(iop,&R);
       read_token(iop,&Re);         //hydrodynamical
-      read_token(iop,&parabole);
+      read_token(iop,&Hksi);
       read_token(iop,&Noise);
-      read_token(iop,&NoiseNorm);
+      read_token(iop,&d);         TDV = (int)d;
+      if(ver>=2) read_token(iop,&chi);
+      read_token(iop,&maschtab);
       read_token(iop,&UpLimit);
-      if(ver>=2) read_token(iop,&chimax);
       read_token(iop,&Rm);         //magnetic
       read_token(iop,&etash);
       read_token(iop,&etavac);
@@ -106,12 +85,9 @@ double d;
       read_token(iop,&d);         nvar = (int)d;
       read_token(iop,&d);         approx = (int)d;
       read_token(iop,dtnext);
-      read_token(iop,&d);         Ns = (int)d;   //shell
-      read_token(iop,&maschtab);
-      read_token(iop,&lambda);
-      read_token(iop,&d);         max_okr = (int)d;
       read_token(iop,&d);         OutStep = (int)d;    //output
       read_token(iop,&d);         SnapStep = (int)d;
+      read_token(iop,&SnapDelta);
       read_token(iop,&d);         CheckStep = (int)d;
       read_token(iop,&d);         VarStep = (int)d;
       read_token(iop,&Ttot);
@@ -120,30 +96,31 @@ double d;
       }
 }
 
-void read_tilleq(FILE *ffff,char echo)
+void read_tilleq(FILE *ffff,char lim, char echo)
 {char ch;
-  if (echo=='n') while ((ch=(char)fgetc(ffff))!='=');
-         else    while ((ch=(char)fgetc(ffff))!='=') printf("%c",ch);
+  if (echo=='n') while ((ch=(char)fgetc(ffff))!=lim);
+         else    while ((ch=(char)fgetc(ffff))!=lim) printf("%c",ch);
 }
 
 int init_data(void)                 //returns code of error
 {
  int error=0;
  int i,j,k,l,tmpr;
- float tmpd;
- char tmpc;	 
- double Re1;		  // prioritet in parameter for runtest.dat
+ float tmpf;
+ char tmpc;
 
  FILE *inp = fileopen(NameInitFile,-1);
- read_tilleq(inp,'n');   if(fscanf(inp,"%lf",&t_cur)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%ld",&count)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%c%d%c%d%c%d%c",&tmpc,&pp[0],&tmpc,&pp[1],&tmpc,&pp[2],&tmpc)<7) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%lf",&t_cur)==0) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%ld",&count)==0) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%c%d%c%d%c%d%c",&tmpc,&pp[0],&tmpc,&pp[1],&tmpc,&pp[2],&tmpc)<7) error=1;
                          //no need unless process distribution is written
  if(pp[0]*pp[1]*pp[2]!=size) nrerror("Wrong number of processors in data file. Can't read data.",-1,-1);
- read_tilleq(inp,'n');   if(fscanf(inp,"%d",&N1)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%d",&N2)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%d",&N3)==0) error=1;
- read_tilleq(inp,'n');   if(fscanf(inp,"%lf",&Re1)==0) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%d",&N1)==0) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%d",&N2)==0) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%d",&N3)==0) error=1;
+ read_tilleq(inp,'=','n');   if(fscanf(inp,"%lf",&Re)==0) error=1;
+// fgetc(inp);  fgetc(inp);
+ read_tilleq(inp,0x0A,'n');
 
  init_parallel();
  operate_memory(1);                     // creating arrays
@@ -151,65 +128,25 @@ int init_data(void)                 //returns code of error
  for(tmpr=0;tmpr<=rank;tmpr++)           //reading until arrays of this process
  {
  for(l=0;l<nvar;l++)                    // reading f
-        {
-        do fscanf(inp,"%c",&tmpc); while (tmpc!='{');
         for(i=0;i<m1;i++)
-           {
-           do fscanf(inp,"%c",&tmpc); while (tmpc!='{');
-           for(j=0;j<m2;j++)
-               {
-               do fscanf(inp,"%c",&tmpc); while (tmpc!='{');
-               for(k=0;k<m3;k++)
-                  {
-                  if(fscanf(inp,"%g",&tmpd)==0) error=2;
-                  fscanf(inp,"%c",&tmpc);
-                  f[l][i][j][k]=tmpd;
-                  }
-               fscanf(inp,"%c",&tmpc);
-               }
-            fscanf(inp,"%c",&tmpc);
-            }
-        fscanf(inp,"%c",&tmpc);
-        }
+        for(j=0;j<m2;j++)
+        for(k=0;k<m3;k++)
+       {
+       if(fread(&tmpf,sizeof(float),1,inp)<1) error=2;
+       f[l][i][j][k] = tmpf;
+       }
+
 /* for(l=0;l<6;l++)                    // reading B and j
-        {
-        do fscanf(inp,"%c",&tmpc); while (tmpc!='{');
         for(i=0;i<m1;i++)
-           {
-           do fscanf(inp,"%c",&tmpc); while (tmpc!='{');
            for(j=0;j<m2;j++)
-               {
-               do fscanf(inp,"%c",&tmpc); while (tmpc!='{');
-               for(k=0;k<m3;k++)
-                  {
-                  if(fscanf(inp,"%g",&tmpd)==0) error=2;
-                  fscanf(inp,"%c",&tmpc);
-                  B[l%3][i][j][k]=tmpd;
-                  }
-               fscanf(inp,"%c",&tmpc);
-               }
-            fscanf(inp,"%c",&tmpc);
-            }
-        fscanf(inp,"%c",&tmpc);
-        }*/
- do fscanf(inp,"%c",&tmpc); while (tmpc!='{');   //reading nut
+             if(fread(B[l%3][i][j],sizeof(double),m3,inp)<m3) error=2;*/
  for(i=0;i<m1;i++)
-     {
-     do fscanf(inp,"%c",&tmpc); while (tmpc!='{');
      for(j=0;j<m2;j++)
-         {
-         do fscanf(inp,"%c",&tmpc); while (tmpc!='{');
-         for(k=0;k<m3;k++)
-             {
-             if(fscanf(inp,"%g",&tmpd)==0) error=3;
-             fscanf(inp,"%c",&tmpc);
-             nut[i][j][k]=tmpd;
-             }
-         fscanf(inp,"%c",&tmpc);
-         }
-     fscanf(inp,"%c",&tmpc);
-     }
- fscanf(inp,"%c",&tmpc);
+     for(k=0;k<m3;k++)
+       {
+       if(fread(&tmpf,sizeof(float),1,inp)<1) error=3;
+       nut[i][j][k] = tmpf;
+       }
  }
 fileclose(inp);
 if(error) nrerror("Data couldn't have been read from file!!!",-1,error);
@@ -263,10 +200,25 @@ for(i=beg1;i<beg1+n1;i++) {
     }
 }
 
+void printbin_array3d(FILE *ff,double ***a,
+        int beg1,int n1,int beg2,int n2,int beg3,int n3)
+{
+int i,j,k;
+long sum=0;
+float tmp;
+for(i=beg1;i<beg1+n1;i++)
+for(j=beg2;j<beg2+n2;j++)
+for(k=beg3;k<beg3+n3;k++)
+   {
+   tmp = a[i][j][k];
+   sum += fwrite(&tmp,sizeof(float),1,ff);
+   }
+if(sum<n1*n2*n3) nrerror("Wrong binary output",t_cur,count);
+} 
+
 void check(double ****f)   //calculate energy of pulsations of all components and know if there's crash
 {
 int i,j,k,l;
-start_tick(6,"check_p");
 PulsEnergy=0;
 TotalEnergy=0;
 for(l=0;l<=2;l++)
@@ -288,7 +240,6 @@ for(l=0;l<=2;l++)
            TotalEnergy += pow(averf[l][i][k],2.);
 TotalEnergy += 1.;   //if zero average field
 razlet = (PulsEnergy/TotalEnergy>UpLimit);
-finish_tick(6);
 }
 
 void printing(double ****f1,double dtdid,double t_cur,long count,double en)
@@ -299,7 +250,6 @@ double mf[3], totmf[3], toten;     //mf[0]=max(f), mf[1]=max(df), mf[2]=max(df/f
 FILE *fv,*fnu,*fen,*fkv;
 
 //clrscr();
-start_tick(2,"print_p");
 time_now = MPI_Wtime();
 Master printf("program is working %0.2f seconds\n",time_now-time_begin);
 calculate_curl(&f1[4],B,NodeMagn);
@@ -412,7 +362,6 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g) maxdivB=%g(local=%g)\
                  print_array1d(fv,totvfi,0,N3);
                  fileclose(fv);
                 }
-finish_tick(2);
 }
 
 void dump(double ****f1,double ***nu,double t_cur,long count)
@@ -436,14 +385,14 @@ int tag=1,v;
  Master fprintf(fd,"Reynolds number = %lf\n",Re);
 
  for(v=0;v<nvar;v++)
-    print_array3d(fd,f1[v],0,m1,0,m2,0,m3);
- print_array3d(fd,nu,0,m1,0,m2,0,m3);
+    printbin_array3d(fd,f1[v],0,m1,0,m2,0,m3);
+ printbin_array3d(fd,nu,0,m1,0,m2,0,m3);
  fileclose(fd);
 
  if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
  MPI_Barrier(MPI_COMM_WORLD);
  Master {nmessage("dump is done",t_cur,count);
-         add_control_point(NameDumpFile);}
+                   add_control_point(NameDumpFile);}
 }
 
 void snapshot(double ****f1,double ***nu,double t_cur,long count)
@@ -453,7 +402,6 @@ char *message="message";
 long tag=count,v;
 FILE *fd;
 
-start_tick(8,"snap_p");
  sprintf(str,"%s_%d_%d.snp",NameSnapFile,size,count);
  boundary_conditions(f1);
 // calculate_curl(&f1[4],B,NodeMagn);
@@ -468,17 +416,17 @@ start_tick(8,"snap_p");
  Master fprintf(fd,"Number of points along x = %d\n",N1);
  Master fprintf(fd,"Number of points along y = %d\n",N2);
  Master fprintf(fd,"Number of points along z = %d\n",N3);
- Master fprintf(fd,"Reynolds number = %lf\n",Re);
+ Master fprintf(fd,"Reynolds number = %lf\n",Rm);
 
  for(v=0;v<nvar;v++)
-    print_array3d(fd,f1[v],0,m1,0,m2,0,m3);
- print_array3d(fd,nu,0,m1,0,m2,0,m3);
+    printbin_array3d(fd,f1[v],0,m1,0,m2,0,m3);
+ printbin_array3d(fd,nu,0,m1,0,m2,0,m3);
  fileclose(fd);
 
  if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
  MPI_Barrier(MPI_COMM_WORLD);
  Master {nmessage("snap is done",t_cur,count);
-         add_control_point(str);}
-finish_tick(8);                   
+                   add_control_point(str);}
 }
-												  
+
+

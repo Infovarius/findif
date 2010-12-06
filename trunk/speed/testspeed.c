@@ -11,6 +11,12 @@ struct
        }
        Tick[MaxTicks];
 
+void init_tick(int num_stage,char *inname)
+{
+ strcpy(Tick[num_stage].name, inname);
+ Tick[num_stage].active = 0;
+}
+
 void start_tick(int num_stage,char *inname)
 {
  strcpy(Tick[num_stage].name, inname);
