@@ -20,9 +20,9 @@ LEVEL char *NameStatFile;
 LEVEL char *fname;
 
 LEVEL double ****f, ****f1, ***nut, ****df, ****df2, ****df3, ****df4, ****df5, ****B, ****J,
-             dx[3], *r_1, *r_2, **refr_f, **refz_f, **refr_m, **refz_m,
-             **sinth, **costh, ***eta;
-LEVEL int **node;
+             dx[3], *r_1, *r_2, ***refx_m, ***refy_m, ***refz_m,
+             ***sinth, ***costh, ***eta;
+LEVEL int ***node;
 
 enum  TypeNodes {NodeUnknown=0,NodeClued=1,
                                NodeFluid=8, NodeShell=2, NodeVacuum=4,   // regions
@@ -93,6 +93,8 @@ double **alloc_mem_2f(int, int);
 void   free_mem_2f(double **, int, int);
 double *alloc_mem_1f(int);
 void   free_mem_1f(double *, int);
+int ***alloc_mem_3i(int, int, int);
+void   free_mem_3i(int ***, int, int, int);
 int **alloc_mem_2i(int, int);
 void   free_mem_2i(int **, int, int);
 int *alloc_mem_1i(int);
@@ -117,7 +119,8 @@ void  init_conditions(void);
 void init_parallel(void);
 double dr(double ***m,int ii,int jj,int kk,int dir,int or,double dx,int sh,int sm);
 double d2cross(double ***m,int ii,int jj,int kk,int dir1,int dir2,int sh,int sm);
-double coordin(int, int);
+double coordec(int, int);
+double coordin(int i, int j, int k, int dir);
 double interpolation(double,double, double,double,double,double);
 void calculate_curl(double ****mas,double ****out,enum TypeNodes tip);
 /*------- ioutil.c  ------*/

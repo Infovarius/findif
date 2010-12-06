@@ -39,18 +39,23 @@ int main(int argc, char** argv)
 
 /* ---------------------- reading files and arrays --------------------- */
    goon = ((fd=fopen(NameCPFile,"r+"))>0);
-   if(fd==NULL) { //putlog("File of cp were not opened",goon);
-                  Master if((fd=fopen(NameCPFile,"w+"))!=NULL) ;//putlog("File cp was successfully created",1);
+   if(fd==NULL) { // putlog("File of cp were not opened",goon);
+                  Master if((fd=fopen(NameCPFile,"w+"))!=NULL) putlog("File cp was successfully created",1);
                 }
            else ;//putlog("File of control points opened=",(long)fd);
    if(goon)
       { do fscanf(fd,"%s\n",NameInitFile); while (!feof(fd));
         goon = strcmp(NameInitFile,"END");
+        fileclose(fd);
       }
 
-   fileclose(fd);
    init_param(argc,argv,&dtnext,0);       // initialization of parameters
 nextrc: 
+   	ghost=(approx-1)/2;                  //radius of approx sample
+	dx[0]=2*(R+Rfl/rc)/N1;
+	dx[1]=2*(R+Rfl/rc)/N2;
+	dx[2]=2*R/N3;
+
    t_cur=0;
    count=0; enter = 0;
    timeE1=0;
@@ -62,11 +67,11 @@ nextrc:
 //--------------------------------------
   Master {
       fd=fileopen("coord",0);
-      for(i=0;i<N1+2*ghost;i++) fprintf(fd,"%e ",coordin(i,0));
+      for(i=0;i<N1+2*ghost;i++) fprintf(fd,"%e ",coordec(i,0));
       fprintf(fd,"\n");
-      for(i=0;i<N2+2*ghost;i++) fprintf(fd,"%e ",coordin(i,1));
+      for(i=0;i<N2+2*ghost;i++) fprintf(fd,"%e ",coordec(i,1));
       fprintf(fd,"\n");
-      for(i=0;i<N3+2*ghost;i++) fprintf(fd,"%e ",coordin(i,2));
+      for(i=0;i<N3+2*ghost;i++) fprintf(fd,"%e ",coordec(i,2));
       fileclose(fd);
      }
 //--------------------------------------
@@ -77,11 +82,10 @@ nextrc:
 
  Master nmessage("nodes outputting has been started",t_cur,count);
 
- print_array2i(fd,node,0,m1,0,m3);
- print_array2d(fd,refr_f,0,m1,0,m3);
- print_array2d(fd,refz_f,0,m1,0,m3);
- print_array2d(fd,refr_m,0,m1,0,m3);
- print_array2d(fd,refz_m,0,m1,0,m3);
+ print_array3i(fd,node,0,m1,0,m2,0,m3);
+ print_array3d(fd,refx_m,0,m1,0,m2,0,m3);
+ print_array3d(fd,refy_m,0,m1,0,m2,0,m3);
+ print_array3d(fd,refz_m,0,m1,0,m2,0,m3);
  fileclose(fd);
 
  if(rank!=size-1) MPI_Send(fname,0,MPI_CHAR,rank+1,1,MPI_COMM_WORLD);
@@ -101,7 +105,7 @@ nextrc:
    if(CheckStep!=0) check(f);
    if (OutStep!=0) printing(f,0,t_cur,count,TotalEnergy);
 
-/*------------------------ MAIN ITERATIONS -------------------------*/
+   /*------------------------ MAIN ITERATIONS -------------------------*/
 
    while ((Ttot==0 || t_cur < Ttot) && !razlet) {
    //   fill_velocity(t_cur, f);
@@ -190,13 +194,14 @@ sprintf(str,"energy(%0.2f).dat",rc);
 Master rename("energy.dat",str);
 MPI_Barrier(MPI_COMM_WORLD);
 	operate_memory(-1);
-if((rc += 0.05) <1) 
+if((rc -= 0.025) >=0.3) 
     {
    Master nmessage("--------------------------------------------------------------------------",-1,-1);
 	Master nmessage("rc was changed to",rc,count);
 	goon=0;
 	goto nextrc;
 }
+putlog("I've got here=",4);
    Master fileclose(ferror);
 
 	MPI_Barrier(MPI_COMM_WORLD);
