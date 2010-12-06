@@ -1,7 +1,7 @@
 //----------------------- Calculation of PDE right part  ----------//
 #define LEVEL extern
 #include "head.h"
-#define eta0 1
+#define eta0 etavac
 
 double norma(double a,double b,double c,int order)
 {
@@ -346,11 +346,11 @@ void  boundary_conditions(double ****f)
                 f[4][i][j][k] = ztau*f[4][i1][j1][k1] + (znorm-ztau)*An*(i1-i);
                 f[5][i][j][k] = ztau*f[5][i1][j1][k1] + (znorm-ztau)*An*(j1-j);
                 f[6][i][j][k] = ztau*f[6][i1][j1][k1] + (znorm-ztau)*An*(k1-k);
-                if((i1-i)*(j1-j)*(k1-k)!=0) {
+/*                if((i1-i)*(j1-j)*(k1-k)!=0) {
                                      f[4][i][j][k] = -f[4][i1][j1][k1];
                                      f[5][i][j][k] = -f[5][i1][j1][k1];
                                      f[6][i][j][k] = -f[6][i1][j1][k1];
-                                     }
+                                     }*/
                 }
         }
   timeE1+=(MPI_Wtime()-timeE0);
@@ -476,8 +476,8 @@ if(!goon) {
       }
 //   Master f[4][2*ghost][2*ghost][2*ghost] = 100;   
 //   struct_func(f,2,2,3);
-   nmessage("Arrays were filled with initial values - calculation from beginning",-1,-1);
-   } else nmessage("Arrays were filled with initial values - calculation is continuing",t_cur,count);
+   Master nmessage("Arrays were filled with initial values - calculation from beginning",-1,-1);
+   } else Master nmessage("Arrays were filled with initial values - calculation is continuing",t_cur,count);
 }
 
 void init_parallel()
