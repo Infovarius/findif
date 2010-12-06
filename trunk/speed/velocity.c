@@ -3,6 +3,7 @@
 #include "head.h"
 #include <math.h>
 #define Vmax 0.849931
+#define TDV 0
 
 double ch(double x)
 {
@@ -29,7 +30,7 @@ double a1=30,amp1=0,amp2=1,t1=0.03,vlim=0.1,dec=3,tbr=0.2,tpereg=0.3;
 double chimod(double t,double phi)
 {
  if(TDV) return( (th(-2*exp(-50*t)*(phi-40*M_PI*t))+1) / (th(80*exp(-50*t)*M_PI*t)+1) );
-    else return chi;
+    else return 1;
 }
 
 double Gartmann(double rho,double rho0,double ksi)
@@ -39,7 +40,7 @@ double Gartmann(double rho,double rho0,double ksi)
 
 double vfi_given(double t,double rho,double rho0)
 {
-const double ksi=Hksi;
+const double ksi=0;
  if(ksi>0) return( vmod(t)*Gartmann(rho,rho0,ksi)/Vmax);
  if(ksi==0) return( vmod(t)*Gartmann(rho,rho0,0.0001)/Vmax);
  return 1.;
