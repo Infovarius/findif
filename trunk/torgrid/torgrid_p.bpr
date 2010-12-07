@@ -4,7 +4,9 @@
   <MACROS>
     <VERSION value="BCB.06.00"/>
     <PROJECT value="torgrid_p.exe"/>
-    <OBJFILES value="main.obj pde.obj ioutil.obj rkad.obj util.obj velocity.obj"/>
+    <OBJFILES value="..\..\obj\goy.obj ..\..\obj\main.obj ..\..\obj\pde.obj 
+      ..\..\obj\ioutil.obj ..\..\obj\rkad.obj ..\..\obj\struct_func.obj 
+      ..\..\obj\util.obj"/>
     <RESFILES value=""/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>
@@ -23,7 +25,7 @@
     <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
     <RELEASELIBPATH value="$(BCB)\lib\release"/>
     <LINKER value="ilink32"/>
-    <USERDEFINES value=""/>
+    <USERDEFINES value="_DEBUG"/>
     <SYSDEFINES value="NO_STRICT;_NO_VCL;_RTLDLL;USEPACKAGES"/>
     <MAINSOURCE value="torgrid_p.bpf"/>
     <INCLUDEPATH value="$(BCB)\include;$(BCB)\include\vcl"/>
@@ -32,13 +34,13 @@
     <OTHERFILES value=""/>
   </MACROS>
   <OPTIONS>
-    <IDLCFLAGS value="-I$(BCB)\include -I$(BCB)\include\vcl -src_suffix cpp -boa"/>
-    <CFLAG1 value="-O2 -H=c:\PROGRA~1\borland\CBUILD~1\lib\vcl60.csm -Hc -Q -Vx -Ve -X- -a8 
-      -6 -b- -k- -vi -tWC -tWM- -c"/>
-    <PFLAGS value="-$Y- -$L- -$D- -$A8 -v -JPHNE -M"/>
+    <IDLCFLAGS value="-I$(BCB)\include -I$(BCB)\include\vcl -src_suffix cpp -D_DEBUG -boa"/>
+    <CFLAG1 value="-Od -H=c:\PROGRA~1\borland\CBUILD~1\lib\vcl60.csm -Hc -Q -Vx -Ve -X- -r- 
+      -a8 -6 -b- -k -y -v -vi- -tWC -tWM- -c"/>
+    <PFLAGS value="-N2D:\programs\obj -N0D:\programs\obj -$Y+ -$W -$O- -$A8 -v -JPHNE -M"/>
     <RFLAGS value=""/>
-    <AFLAGS value="/mx /w2 /zn"/>
-    <LFLAGS value="-D&quot;&quot; -ap -Tpe -x -Gn"/>
+    <AFLAGS value="/mx /w2 /zi"/>
+    <LFLAGS value="-ID:\programs\obj -D&quot;&quot; -ap -Tpe -x -Gn -v"/>
     <OTHERFILES value=""/>
   </OPTIONS>
   <LINKER>
@@ -50,13 +52,14 @@
   <FILELIST>
       <FILE FILENAME="torgrid_p.bpf" FORMNAME="" UNITNAME="torgrid_p" CONTAINERID="BPF" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="wmpi1.lib" FORMNAME="" UNITNAME="wmpi1" CONTAINERID="LibTool" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="goy.c" FORMNAME="" UNITNAME="goy" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="main.c" FORMNAME="" UNITNAME="main" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="pde.c" FORMNAME="" UNITNAME="pde" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="ioutil.c" FORMNAME="" UNITNAME="ioutil" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="rkad.c" FORMNAME="" UNITNAME="rkad" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="struct_func.c" FORMNAME="" UNITNAME="struct_func" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="util.c" FORMNAME="" UNITNAME="util" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
       <FILE FILENAME="torgrid_p.todo" FORMNAME="" UNITNAME="torgrid_p" CONTAINERID="ToDo" DESIGNCLASS="" LOCALCOMMAND=""/>
-      <FILE FILENAME="velocity.c" FORMNAME="" UNITNAME="velocity" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
   </FILELIST>
   <BUILDTOOLS>
   </BUILDTOOLS>
@@ -110,8 +113,8 @@ Item0=_DEBUG
 
 [HistoryLists\hlIntOutputDir]
 Count=5
-Item0=D:\Home\Anton\programs\obj
-Item1=D:\programs\obj
+Item0=D:\programs\obj
+Item1=D:\Home\Anton\programs\obj
 Item2=D:\programs\obj\
 Item3=D:\Anton\obj
 Item4=..\..\..\obj
