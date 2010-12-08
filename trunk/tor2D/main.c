@@ -60,7 +60,7 @@ int main(int argc, char** argv)
 
 //--------------------------------------
   Master {
-      fd=fileopen("coord",rank);
+      fd=fileopen("coord",0);
       for(i=0;i<N1+2*ghost;i++) fprintf(fd,"%e ",coordin(i,0));
       fprintf(fd,"\n");
       for(i=0;i<N3+2*ghost;i++) fprintf(fd,"%e ",coordin(i,2));
@@ -155,16 +155,6 @@ int main(int argc, char** argv)
 			goon = 1;
             Master nmessage("parameter was changed to",Re,count);
             }
-/*	if(kbhit())
-		{
-		switch (getch()) {
-			case 'd' : dump(f,t_cur,count);  break;
-			case 'q' : { dump(f,t_cur,count);
-				     MPI_Finalize();
-                                     nrerror("You asked to exit. Here you are...",t_cur);
-                                    }
-                        }
-              }*/
 	} // end while
 
 	printing(f1,dtdid,t_cur,count,PulsEnergy);
