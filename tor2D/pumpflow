@@ -1,6 +1,6 @@
-1
+2
 ---------  Geometry paramereters ------------------------------
-0		| inverse distance from centre to axis of torus
+0.5		| inverse distance from centre to axis of torus
 1		| radius of torus
 
 ---------  Physical paramereters ------------------------------
@@ -20,12 +20,14 @@
 3		| maximal size of averaging vicinity (max_okr)
 
 ---------  Output parameters  -------------------------------
-10		| steps to statistics output (OutStep)
+20		| steps to statistics output (OutStep)
 0		| steps to snaps (SnapStep)
 1		| simulation time delta to snap (SnapDelta)
+0		| minutes between dumps (DumpInterval)
+1		| keep dumps (DumpKeep)
 10		| steps of checking divergence (CheckStep)
 1		| test of time step (VarStep)
-30		| Total time
+15		| Total time
 ---------  Regulators ----------------------------------------
 0		| simulation time delta between parameter changing (ChangeParamTime)
 0.1		| delta of parameter changing (DeltaParam)

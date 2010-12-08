@@ -1,10 +1,12 @@
-#include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
+#define _USE_MATH_DEFINES
 #include <math.h>
 #include <string.h>
 //#include <conio.h>
-#define M_PI       3.14159265358979323846
+#include <mpi.h>
+
+// #define M_PI       3.14159265358979323846L
 
 #define for2D(l)  ,l==1?l++:l
 
@@ -51,9 +53,10 @@ LEVEL int CheckStep;  //each CheckStep divergence of program is checking
 LEVEL int OutStep;    //each OutStep result is printing
 LEVEL int SnapStep;   //each SnapStep snapshot is done
 LEVEL double SnapDelta;  //each SnapDelta of simulation time snapshot is done
+LEVEL double DumpInterval;  // each DumpInterval all essential data is saved
+LEVEL int DumpKeep;   // if to keep all Dumps (0 - only 2 last)
 LEVEL int VarStep;    //each VarStep step in RungeKutta varies
 LEVEL double ChangeParamTime, DeltaParam;  // for iteration on parameters
-LEVEL int num_dump;
 LEVEL long numlog;
 
 #ifndef max
@@ -77,7 +80,6 @@ LEVEL int pr[3];                                         //3D
 
 //--------for GOY
 LEVEL int max_okr;  //должно быть <=ghost, иначе окрестность выходит из фикт.обл-ти - виснет
-
 /*------- util.c  -----------*/
 void nrerror(char *mess,double t_cur,long count);
 void nmessage(char *mess,double t_cur,long count);

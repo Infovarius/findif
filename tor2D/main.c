@@ -4,7 +4,7 @@
 
 int main(int argc, char** argv)
 {
-   double dttry, dtdid, dtnext, tmp,tmpT;
+   double dttry, dtdid, dtnext, tmp,tmpT, time_old;
    int i,k,l,tmpC;
    int outed;
    FILE *fd, *ferror;
@@ -45,7 +45,7 @@ int main(int argc, char** argv)
 	if(goon)
 		{
 		do fscanf(fd,"%s\n",NameInitFile); while (!feof(fd));
-		goon = strcmp(NameInitFile,"END");
+		goon = strcmp(NameInitFile,"END") || strlen(NameInitFile)==0;
 		fileclose(fd);
 		}
 
@@ -104,6 +104,7 @@ int main(int argc, char** argv)
 	timestep(f, df, nut, t_cur, f1, dttry, &dtdid, &dtnext);
 //	nut_by_flux(f,nut,dtdid);
 	t_cur+=dtdid;
+	time_old = time_now;
 	count++;
         if(t_cur >= Ttot && Ttot>0) break;
 	if (CheckStep!=0 && count%CheckStep==0)
@@ -155,6 +156,11 @@ int main(int argc, char** argv)
 			goon = 1;
             Master nmessage("parameter was changed to",Re,count);
             }
+	if (OutStep==0 || count%OutStep!=0) time_now=MPI_Wtime();
+	Master tmpC = DumpInterval>0 && floor((time_now-time_begin)/60/DumpInterval)>floor((time_old-time_begin)/60/DumpInterval);
+	MPI_Bcast(&tmpC,1,MPI_INT,0,MPI_COMM_WORLD);
+	if(tmpC) dump(f,nut,t_cur,count);
+
 	} // end while
 
 	printing(f1,dtdid,t_cur,count,PulsEnergy);
