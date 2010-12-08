@@ -135,7 +135,7 @@ for(k=0;k<m3;k++)
    }
 }
 
-void ghost_filling(double ****f, double ***nut)
+void ghost_filling(double ***f, double **nut)
 {
    int i,j,k,l;
    int r1,r2,z1,z2;
@@ -163,7 +163,7 @@ void ghost_filling(double ****f, double ***nut)
 }				
 
 
-void interprocessor_communication(double ****f, double***nut)
+void interprocessor_communication(double ***f, double **nut)
 {
    int req_numS=0, req_numR=0,tag=10;
    int reslen;
@@ -243,7 +243,7 @@ void interprocessor_communication(double ****f, double***nut)
 //    MPI_Waitall(req_numR,RecvRequest,statuses);
 }
 
-void  boundary_conditions(double ****f, double ***nut)
+void  boundary_conditions(double ***f, double **nut)
 {
    int i, j, k, l;
    double vrho,vphi,vth;
