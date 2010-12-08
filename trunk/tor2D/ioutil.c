@@ -62,7 +62,7 @@ double d;
  if(argc<2 || (iop=fopen(argv[1],"r"))==NULL) //no ini file
      nrerror("Start from no ini file!",-1,-1);
 
- if(fscanf(iop,"%d",&ver)<1 || ver!=1) nrerror("parameters' file has wrong version",0,0);
+ if(fscanf(iop,"%d",&ver)<1 || ver!=2) nrerror("parameters' file has wrong version",0,0);
       read_token(iop,&rc);
       read_token(iop,&R);
       read_token(iop,&Re);
@@ -80,6 +80,8 @@ double d;
       read_token(iop,&d);         OutStep = (int)d;
       read_token(iop,&d);         SnapStep = (int)d;
       read_token(iop,&SnapDelta);
+      if(ver>=2) read_token(iop,&DumpInterval);
+      if(ver>=2) read_token(iop,&d);         DumpKeep = (int)d;
       read_token(iop,&d);         CheckStep = (int)d;
       read_token(iop,&d);         VarStep = (int)d;
       read_token(iop,&Ttot);
@@ -337,13 +339,21 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
 
 void dump(double ***f1,double **nu,double t_cur,long count)
 {
+char str[256],str1[256];
 FILE *fd;
 char *message="dump";
 int tag=1,v;
 
- if(rank!=0) MPI_Recv(message,0,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);
+ if(DumpKeep)  sprintf(str,"dump/%s_%d_%d.dmp",NameSnapFile,rank,count);
+	else {
+		sprintf(str,"%s%d.dmp",NameSnapFile,rank);
+		sprintf(str1,"%s%d.bak",NameSnapFile,rank);
+		remove(str1);
+		rename(str,str1);
+		}
+// if(rank!=0) MPI_Recv(message,0,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);
 
- fd=fileopen(NameDumpFile,rank);
+ fd=fileopen(str,rank);
 
  Master nmessage("dump has been started",t_cur,count);
  Master fprintf(fd,"current time = %0.10f \ncurrent iteration = %ld\n",t_cur,count);
@@ -357,10 +367,13 @@ int tag=1,v;
  print_array2d(fd,nu,0,m1,0,m3);
  fileclose(fd);
 
- if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
+// if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
  MPI_Barrier(MPI_COMM_WORLD);
- Master {nmessage("dump is done",t_cur,count);
-                   //add_control_point(NameDumpFile);
+ Master 
+ {    nmessage("dump is done",t_cur,count);
+	  if(DumpKeep)  sprintf(str,"%s_*_%d.dmp",NameSnapFile,count);
+			else 	sprintf(str,"%s*.dmp",NameSnapFile);
+                   add_control_point(str);
                    }
 }
 
