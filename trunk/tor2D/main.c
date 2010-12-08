@@ -39,13 +39,15 @@ int main(int argc, char** argv)
 /* ---------------------- reading files and arrays --------------------- */
    goon = ((fd=fopen(NameCPFile,"r+"))>0);
    if(fd==NULL) { //putlog("File of cp were not opened",goon);
-                  Master if((fd=fopen(NameCPFile,"w+"))!=NULL) ;//putlog("File cp was successfully created",1);
+                  Master if((fd=fopen(NameCPFile,"w+"))!=NULL) putlog("File cp was successfully created",1);
                 }
-           else ;//putlog("File of control points opened=",(long)fd);
-   if(goon)
-      { do fscanf(fd,"%s\n",NameInitFile); while (!feof(fd));
-        goon = strcmp(NameInitFile,"END");
-      }
+           else ; //putlog("File of control points opened=",(long)fd);
+	if(goon)
+		{
+		do fscanf(fd,"%s\n",NameInitFile); while (!feof(fd));
+		goon = strcmp(NameInitFile,"END");
+		fileclose(fd);
+		}
 
    init_param(argc,argv,&dtnext,0);       // initialization of parameters
    t_cur=0;
@@ -53,7 +55,6 @@ int main(int argc, char** argv)
 
    if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
        else { init_parallel();  operate_memory(1);}
-   fileclose(fd);
 
    init_conditions();
 

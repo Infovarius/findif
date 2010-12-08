@@ -239,8 +239,8 @@ void  boundary_conditions(double ***f, double **nut)
   for(i=0;i<m1;i++)
         for(k=0;k<m3;k++)
           if(isType(node[i][k],NodeGhostFluid) && !isType(node[i][k],NodeClued)) {
-                r2=(r1=floor(refr[i][k]))+1;
-                z2=(z1=floor(refz[i][k]))+1;
+                r2=(r1=(int)floor(refr[i][k]))+1;
+                z2=(z1=(int)floor(refz[i][k]))+1;
                 for(l=0;l<nvar;l++)
                    f[l][i][k] = ( (refr[i][k]-r2)*(f[l][r1][z1]*(refz[i][k]-z2)-f[l][r1][z2]*(refz[i][k]-z1))
                                    + (refr[i][k]-r1)*(f[l][r2][z2]*(refz[i][k]-z1)-f[l][r2][z1]*(refz[i][k]-z2))
@@ -368,8 +368,8 @@ if(!goon) {                       //reading sizes from file when continuing
   pr[0] = rank%pp[0];  pr[2] = (rank/pp[0])%pp[2];  // coordinates of current subregion
 
 /* dimensions of subregion:         global indicies of subregion origin          if there's nonequal subregions*/
-  n1 = floor((double)N1/pp[0]);     n[0] = n1*pr[0] + min(pr[0],N1-pp[0]*n1);    if(pr[0]<N1-pp[0]*n1) n1++;              // dimensions of subregion
-  n3 = floor((double)N3/pp[2]);     n[2] = n3*pr[2] + min(pr[2],N3-pp[2]*n3);    if(pr[2]<N3-pp[2]*n3) n3++;
+  n1 = (int)floor((double)N1/pp[0]);     n[0] = n1*pr[0] + min(pr[0],N1-pp[0]*n1);    if(pr[0]<N1-pp[0]*n1) n1++;              // dimensions of subregion
+  n3 = (int)floor((double)N3/pp[2]);     n[2] = n3*pr[2] + min(pr[2],N3-pp[2]*n3);    if(pr[2]<N3-pp[2]*n3) n3++;
    if(n1<ghost || n3<ghost) nrerror("Too small mesh or incorrect number of processes",0,0);
 
    m1 = n1+2*ghost;

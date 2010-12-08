@@ -4,7 +4,7 @@
 1		| radius of torus
 
 ---------  Physical paramereters ------------------------------
-1		| Reynolds number
+10		| Reynolds number
 0		| init profile: 0 - zero, 1 - parabole
 0.0		| amplitude of initial random noise
 0.0		| amplitude of initial normal noise
@@ -12,8 +12,8 @@
 45		| maximal angle of blade tilt (degrees)
 
 ---------  Scheme (aproximation) parameters ------------------
-101		| mesh point in R
-101		| mesh point in Z
+32		| mesh point in R
+32		| mesh point in Z
 4		| variables number
 7		| aproxx order
 0.001		| initial timestep
@@ -27,6 +27,6 @@
 1		| test of time step (VarStep)
 30		| Total time
 ---------  Regulators ----------------------------------------
-5		| simulation time delta between parameter changing (ChangeParamTime)
+0		| simulation time delta between parameter changing (ChangeParamTime)
 0.1		| delta of parameter changing (DeltaParam)
 -1		| name of initial file
