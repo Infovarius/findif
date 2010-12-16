@@ -4,7 +4,8 @@
 
 int main(int argc, char** argv)
 {
-   double dttry, dtdid, dtnext, tmp,tmpT, time_old;
+   double dttry, dtdid, dtnext, Re_tmp, rc_tmp, tmpT, time_old;
+   char str[200];
    int i,k,l,tmpC;
    int outed;
    FILE *fd, *ferror;
@@ -48,8 +49,15 @@ int main(int argc, char** argv)
 		goon = strcmp(NameInitFile,"END") || strlen(NameInitFile)==0;
 		fileclose(fd);
 		}
+	rc = 0;
+nextrc: 
+	rc_tmp = rc;
+	init_param(argc,argv,&dtnext,0);       // initialization of parameters
+	if(rc_tmp!=0) rc = rc_tmp;
+	ghost=(approx-1)/2+3;                  //radius of approx sample
+	dx[0]=2*R/N1;
+	dx[2]=2*R/N3;
 
-   init_param(argc,argv,&dtnext,0);       // initialization of parameters
    t_cur=0;
    count=0; enter = 0;
 
@@ -74,10 +82,10 @@ int main(int argc, char** argv)
 
  Master nmessage("nodes outputting has been started",t_cur,count);
 
- print_array2i(fd,node,0,m1,0,m3);
- print_array2d(fd,refr,0,m1,0,m3);
- print_array2d(fd,refz,0,m1,0,m3);
- fileclose(fd);
+	print_array2i(fd,node,0,m1,0,m3);
+	print_array2d(fd,refr,0,m1,0,m3);
+	print_array2d(fd,refz,0,m1,0,m3);
+	fileclose(fd);
          
  if(rank!=size-1) {MPI_Send(&rank,1,MPI_INT,rank+1,rank,MPI_COMM_WORLD); }
              else nmessage("nodes has been dumped",t_cur,count);
@@ -124,16 +132,18 @@ int main(int argc, char** argv)
 	    }
         outed = 0;
 	if (SnapStep!=0 && count%SnapStep==0)
-	     { snapshot(f1,nut,t_cur,count); outed=1; }
+		{ snapshot(f1,nut,t_cur,count); outed=1; }
 	if (SnapDelta>5*dtdid && floor((t_cur-dtdid)/SnapDelta)<floor(t_cur/SnapDelta))
-   	     { snapshot(f1,nut,t_cur,count); outed=1; }
+		{ snapshot(f1,nut,t_cur,count); outed=1; }
 	ft = f;  f = f1;  f1 = ft;
 	if (count%100==0) {
 //			MPI_Barrier(MPI_COMM_WORLD);
-			tmp=Re;
+			Re_tmp=Re;
+			rc_tmp = rc;
 			init_param(argc,argv,&dttry,0);
-			Re=tmp;
+			Re=Re_tmp;
 			p1 = 4/Re;
+			rc = rc_tmp;
 //			MPI_Barrier(MPI_COMM_WORLD);
 			}
 
@@ -142,19 +152,20 @@ int main(int argc, char** argv)
 			//Rm = floor(t_cur/ChangeParamTime+0.5)*DeltaParam-190;
 			if(!outed) { snapshot(f,nut,t_cur,count); outed = 1;}
 //                MPI_Barrier(MPI_COMM_WORLD);
-
-			tmp = (Re += DeltaParam);
+//		Rm_tmp = (Rm /= (1+max(-0.9,DeltaParam*log(TotalEnergy/TotalEnergyOld))));
+		Re_tmp = Re += DeltaParam;
+              rc_tmp = rc;
 				tmpC = count;  tmpT = t_cur;
 			init_param(argc,argv,&dtnext,1);       // initialization of parameters
 
 			if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
 			if(strcmp(NameInitFile,"-1")==0) goon = 1;
 
-			count = tmpC;  t_cur = tmpT;  Re = tmp;
+			count = tmpC;  t_cur = tmpT;  Re = Re_tmp; rc = rc_tmp;
 			init_conditions();
 			p1 = 4/Re;
 			goon = 1;
-            Master nmessage("parameter was changed to",Re,count);
+		Master nmessage("Re was changed to",Re,count);
             }
 	if (OutStep==0 || count%OutStep!=0) time_now=MPI_Wtime();
 	Master tmpC = DumpInterval>0 && floor((time_now-time_begin)/60/DumpInterval)>floor((time_old-time_begin)/60/DumpInterval);
@@ -167,10 +178,21 @@ int main(int argc, char** argv)
 	if(!outed) snapshot(f,nut,t_cur,count);
 	if(rank==0) add_control_point("END");
 
+sprintf(str,"energy(%0.2f).dat",rc);
+Master rename("energy.dat",str);
+MPI_Barrier(MPI_COMM_WORLD);
+	operate_memory(-1);
+if((rc += 0.1) <=0.5) 
+	{
+	Master nmessage("--------------------------------------------------------------------------",-1,-1);
+	Master nmessage("rc was changed to",rc,count);
+	goon=0;
+	goto nextrc;
+}
+putlog("I've got here=",4);
 	Master fileclose(ferror);
 
 	MPI_Barrier(MPI_COMM_WORLD);
-	operate_memory(-1);
 	if(t_cur>=Ttot&&!razlet) nmessage("work is succesfully done",t_cur,count);
 		else nrerror("this is break of scheme",t_cur,count);
 	MPI_Finalize();
