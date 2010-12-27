@@ -342,8 +342,8 @@ int tag=1,v;
 
  if(DumpKeep)  sprintf(str,"dump/%s_%d_%d.dmp",NameSnapFile,rank,count);
 	else {
-		sprintf(str,"%s%d.dmp",NameSnapFile,rank);
-		sprintf(str1,"%s%d.bak",NameSnapFile,rank);
+		sprintf(str,"dump/%s%d.dmp",NameSnapFile,rank);
+		sprintf(str1,"dump/%s%d.bak",NameSnapFile,rank);
 		remove(str1);
 		rename(str,str1);
 		}
