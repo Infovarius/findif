@@ -32,17 +32,22 @@ void pde(double t, double ***f, double ***df)
    boundary_conditions(f,nut);
 
    omega(t,&w,&dw);
+#pragma omp parallel default(none) shared(f,dx,approx,nut,df,node,m1,m3,rc,r_1,r_2,p1,Gamma) private (M,i,k,l,dp1,dn1,dv1,dv2,m)
    for(i=0;i<m1;i++)
+//#pragma omp parallel nowait
    for(k=0;k<m3;k++)
      if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
      {
       M = 1./(rc*coordin(i,0)+1);
+#pragma omp single
       for(m=0;m<3;m++ for2D(m)) {
          dp1[m]=dr(f[0],i,k,m+1,0,dx[m],(approx-1)/2, approx);
          dn1[m]=dr(nut,i,k,m+1,0,dx[m],(approx-1)/2, approx);
       }
       dp1[1] *= M; dn1[1] *= M;
+//#pragma omp parallel nowait
       for(l=1;l<=3;l++) {
+#pragma omp single
        for(m=0;m<3;m++ for2D(m)) {
          dv1[l][m]=dr(f[l],i,k,m+1,0,dx[m],(approx-1)/2, approx);
          dv2[l][m]=dr(f[l],i,k,m+1,1,dx[m]*dx[m],(approx-1)/2, approx);
@@ -79,7 +84,7 @@ void pde(double t, double ***f, double ***df)
 		     + (dn1[2]-f[3][i][k])*dv1[3][2];
       df[0][i][k]= -(dv1[1][0]+dv1[3][2]+f[1][i][k]*r_1[i])/Gamma;
 //      df[0][i][k] = df[1][i][k] = df[2][i][k] = df[3][i][k] = 0;
-
+#pragma omp barrier
   } //global for
    return;
 }
