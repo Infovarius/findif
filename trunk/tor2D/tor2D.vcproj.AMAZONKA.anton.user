@@ -80,7 +80,7 @@
 				EnvironmentMerge="true"
 				DebuggerFlavor="3"
 				MPIRunCommand="mpiexec"
-				MPIRunArguments="-np 2"
+				MPIRunArguments="-np 1"
 				MPIRunWorkingDirectory="$(ProjectDir)Run"
 				ApplicationCommand="$(ProjectDir)$(ConfigurationName)\$(TargetFileName)"
 				ApplicationArguments="pumpflow"
