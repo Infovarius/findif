@@ -5,7 +5,6 @@
 #include <string.h>
 //#include <conio.h>
 #include <mpi.h>
-#include <omp.h>
 
 // #define M_PI       3.14159265358979323846L
 
