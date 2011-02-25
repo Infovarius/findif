@@ -17,7 +17,7 @@ if(mode<0) s_mode="r";
 if(mode==0) s_mode="w";
 if ((ff = fopen(x,s_mode))==NULL)
 	 {
-		nrerror ("Can't open file !\n",t_cur,count);
+		nrerror (strcat("Can't open file !\n",x),t_cur,count);
 		exit(-1);
 	 }
 return(ff);
@@ -99,7 +99,7 @@ double d;
                 sprintf(NameInitFile,"%s_%d_%05d.snp",NameSnapFile,size,(int)d);
                 }
 	  else {// without reading (d<0)
-		    goon=0;
+			goon=0;
 			strcpy(NameInitFile,"-1");
 	  }
      }
@@ -120,11 +120,19 @@ int init_data(void)                 //returns code of error
 {
  int error=0;
  int i,j,k,l,tmpr;
+ char fstr[256], pos;
  float tmpd;
  char tmpc;	 
  double Re1;		  // priority for parameter in snap-file
+ FILE *inp;
 
-	 FILE *inp = fileopen(NameInitFile,-1);
+ pos = strcspn(NameInitFile,"*");
+ NameInitFile[pos]=0;
+ sprintf(fstr,"%s%d%s",NameInitFile,rank,NameInitFile+pos+1);
+
+ putlog("reach here", 2);
+ inp = fileopen(fstr,-1);
+// inp = fileopen(NameInitFile,-1);
  read_tilleq(inp,'=','n');   if(fscanf(inp,"%lf",&t_cur)==0) error=1;
  read_tilleq(inp,'=','n');   if(fscanf(inp,"%ld",&count)==0) error=1;
  read_tilleq(inp,'=','n');   if(fscanf(inp,"%c%d%c%d%c",&tmpc,&pp[0],&tmpc,&pp[2],&tmpc)<5) error=1;
@@ -136,9 +144,9 @@ int init_data(void)                 //returns code of error
 
  init_parallel();
  operate_memory(1);                     // creating arrays
-
- for(tmpr=0;tmpr<=rank;tmpr++)           //reading until arrays of this process
- {
+ putlog("reach here", 1);
+// for(tmpr=0;tmpr<=rank;tmpr++)           //reading until arrays of this process
+// {
  for(l=0;l<nvar;l++)                    // reading f
         {
         do fscanf(inp,"%c",&tmpc); while (tmpc!='{');
@@ -155,6 +163,7 @@ int init_data(void)                 //returns code of error
                }
         fscanf(inp,"%c",&tmpc);
         }
+ // смысла нет
  do fscanf(inp,"%c",&tmpc); while (tmpc!='{');   //reading nut
  for(i=0;i<m1;i++)
          {
@@ -168,10 +177,11 @@ int init_data(void)                 //returns code of error
          fscanf(inp,"%c",&tmpc);
          }
  fscanf(inp,"%c",&tmpc);
- }
+ 
+ //}
 fileclose(inp);
 if(error) nrerror("Data couldn't have been read from file!!!",-1,error);
-     else Master nmessage("Data has been read from file",t_cur,count);
+     else nmessage("Data has been read from file",t_cur,count);
 return(error);
 }
 
@@ -366,11 +376,12 @@ int tag=1,v;
 // if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
  MPI_Barrier(MPI_COMM_WORLD);
  Master 
- {    nmessage("dump is done",t_cur,count);
-	  if(DumpKeep)  sprintf(str,"%s_*_%d.dmp",NameSnapFile,count);
-			else 	sprintf(str,"%s*.dmp",NameSnapFile);
-                   add_control_point(str);
-                   }
+    {   
+	 nmessage("dump is done",t_cur,count);
+	 if(DumpKeep)  sprintf(str,"dump/%s_*_%d.dmp",NameSnapFile,count);
+		else 	sprintf(str,"dump/%s*.dmp",NameSnapFile);
+    add_control_point(str);
+    }
 }
 
 void snapshot(double ***f1,double **nu,double t_cur,long count)

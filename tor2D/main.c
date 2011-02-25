@@ -39,10 +39,10 @@ int main(int argc, char** argv)
 
 /* ---------------------- reading files and arrays --------------------- */
    goon = ((fd=fopen(NameCPFile,"r+"))>0);
-   if(fd==NULL) { //putlog("File of cp were not opened",goon);
+   if(fd==NULL) { putlog("File of cp were not opened",goon);
                   Master if((fd=fopen(NameCPFile,"w+"))!=NULL) putlog("File cp was successfully created",1);
                 }
-           else ; //putlog("File of control points opened=",(long)fd);
+           else putlog("File of control points opened=",(long)fd);
 	if(goon)
 		{
 		do fscanf(fd,"%s\n",NameInitFile); while (!feof(fd));
@@ -152,7 +152,6 @@ nextrc:
 			//Rm = floor(t_cur/ChangeParamTime+0.5)*DeltaParam-190;
 			if(!outed) { snapshot(f,nut,t_cur,count); outed = 1;}
 //                MPI_Barrier(MPI_COMM_WORLD);
-//		Rm_tmp = (Rm /= (1+max(-0.9,DeltaParam*log(TotalEnergy/TotalEnergyOld))));
 		Re_tmp = Re += DeltaParam;
               rc_tmp = rc;
 				tmpC = count;  tmpT = t_cur;
