@@ -311,14 +311,14 @@ void interprocessor_communication(double ****f, double***nut)
 		}
 
    MPI_Waitall(req_numS,SendRequest,statuses);
-   if(req_numS && statuses[0].MPI_ERROR) {putlog("bc:error during send=",numlog++);
+   if(req_numS && statuses[0].MPI_ERROR) {putlog("bc:error during phi-send=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
                                }    else numlog++;
    req_numS = 0;
    MPI_Waitall(req_numR,RecvRequest,statuses);
-   if(req_numR && statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
+   if(req_numR && statuses[0].MPI_ERROR) {putlog("bc:error during phi-receive=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
@@ -342,14 +342,14 @@ void interprocessor_communication(double ****f, double***nut)
 		}
 
    MPI_Waitall(req_numS,SendRequest,statuses);
-   if(req_numS && statuses[0].MPI_ERROR) {putlog("bc:error during send=",numlog++);
+   if(req_numS && statuses[0].MPI_ERROR) {putlog("bc:error during r-send=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
                                }    else numlog++;
    req_numS = 0;
    MPI_Waitall(req_numR,RecvRequest,statuses);
-   if(req_numR && statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
+   if(req_numR && statuses[0].MPI_ERROR) {putlog("bc:error during r-receive=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
@@ -373,14 +373,14 @@ void interprocessor_communication(double ****f, double***nut)
 	        }
 
    MPI_Waitall(req_numS,SendRequest,statuses);
-   if(req_numS && statuses[0].MPI_ERROR) {putlog("bc:error during send=",numlog++);
+   if(req_numS && statuses[0].MPI_ERROR) {putlog("bc:error during z-send=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);
                                }    else numlog++;
    req_numS = 0;
    MPI_Waitall(req_numR,RecvRequest,statuses);
-   if(req_numR && statuses[0].MPI_ERROR) {putlog("bc:error during receive=",numlog++);
+   if(req_numR && statuses[0].MPI_ERROR) {putlog("bc:error during z-receive=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
                                putlog(msg_err,numlog++);

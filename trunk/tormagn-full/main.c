@@ -172,18 +172,8 @@ nextrc:
 		init_conditions();
 		fill_velocity(0.3, f);   fill_velocity(0.3, f1);
 		goon = 1;
-		Master nmessage("Rm was changed to",Rm,count);
-   	   	}
-/*        if(kbhit())
-             {
-                switch (getch()) {
-                        case 'd' : dump(f,t_cur,count);  break;
-                        case 'q' : { dump(f,t_cur,count);
-                                     MPI_Finalize();
-                                     nrerror("You asked to exit. Here you are...",t_cur,count);
-                                    }
-                        }
-              }*/
+            Master nmessage("parameter was changed to",Re,count);
+            }
 	if (OutStep==0 || count%OutStep!=0) time_now=MPI_Wtime();
 	Master tmpC = DumpInterval>0 && floor((time_now-time_begin)/60/DumpInterval)>floor((time_old-time_begin)/60/DumpInterval);
 	MPI_Bcast(&tmpC,1,MPI_INT,0,MPI_COMM_WORLD);
