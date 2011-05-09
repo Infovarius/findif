@@ -283,6 +283,7 @@ FILE *fv,*fnu,*fen,*fkv;
 time_now = MPI_Wtime();
 Master printf("program is working %0.2f seconds\n",time_now-time_begin);
 
+divv = 0;
 for(i=0;i<m1;i++)
    for(j=ghost;j<mm2;j++)
       for(k=0;k<m3;k++)
