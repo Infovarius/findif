@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "torMHD", "torMHD\torMHD.vcp
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tor2d", "tor2D\tor2D.vcproj", "{D2DB9E46-EDD4-41C3-846A-D29E928C7A71}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "speed", "speed\speed.vcproj", "{B1B27CB5-79C6-41D6-918C-66ABE6189F56}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -43,6 +45,10 @@ Global
 		{D2DB9E46-EDD4-41C3-846A-D29E928C7A71}.Release|Win32.ActiveCfg = Release|Win32
 		{D2DB9E46-EDD4-41C3-846A-D29E928C7A71}.Release|Win32.Build.0 = Release|Win32
 		{D2DB9E46-EDD4-41C3-846A-D29E928C7A71}.Release|x64.ActiveCfg = Release|Win32
+		{B1B27CB5-79C6-41D6-918C-66ABE6189F56}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B1B27CB5-79C6-41D6-918C-66ABE6189F56}.Debug|x64.ActiveCfg = Debug|x64
+		{B1B27CB5-79C6-41D6-918C-66ABE6189F56}.Release|Win32.ActiveCfg = Release|Win32
+		{B1B27CB5-79C6-41D6-918C-66ABE6189F56}.Release|x64.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
