@@ -5,7 +5,8 @@
 int main(int argc, char** argv)
 {
    double dttry, dtdid, dtnext;
-   int i,j,k,l,i2,j2,k2,z=0;
+   int i,j,k,l,i2,j2,k2;
+   double ****ft;
 
  /* Initialize MPI */
  MPI_Init(&argc,&argv);
@@ -13,8 +14,9 @@ int main(int argc, char** argv)
  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
  MPI_Comm_size(MPI_COMM_WORLD,&size);           putlog("main:reach this ",numlog++);
 
+  srand(rank);
   NameMessageFile = "message.dat";
-  NameErrorFile = "error.dat";
+  NameErrorFile = "error.err";
   NameNuFile = "nut.dat";
   NameVFile  = "vv.dat";
   //NameDumpFile = "dump.dat";
@@ -28,17 +30,17 @@ int main(int argc, char** argv)
    dx[0]=l1/N1;
    dx[1]=l2/N2;
    dx[2]=l3/N3;
-   p1 = 8*l1/(l3*Re) ; p2 = 0;
+   p1 = 4*l1/(l3*Re) ; p2 = 0;
 
    t_cur=0;
    count=0; enter = 0;
 
-   nmessage("work has begun",0);
+   nmessage("work has begun",0,0);
 
    sprintf(fname,"%s",(argc>1)? argv[1] : argv[0]);
    NameSnapFile = fname;
    sprintf(NameDumpFile ,"%s.dmp",fname);
-   sprintf(fname_stat,"%s_%d.sta",fname,rank);
+   sprintf(NameStatFile,"%s_%d.sta",fname,rank);
 
    init_parallel();
 
@@ -55,45 +57,43 @@ int main(int argc, char** argv)
 
    time_begin = MPI_Wtime();
 
-   Master fileopen("error.err",0);
+   Master fileopen(NameErrorFile,0);
 
-   init_conditions(f,Re);
+   init_conditions();
 
-   boundary_conditions(f);                             putlog("main:reach this ",numlog++);
+   boundary_conditions(f, nut);                           putlog("main:reach this ",numlog++);
 //   dump(f,t_cur,count);                                 putlog("main:reach this ",numlog++);
 
-   if(CheckStep!=0) PulsEn=check(f);                   putlog("main:reach this ",numlog++);
-   if (OutStep!=0) printing(f,0,t_cur,count,PulsEn);   //in parallel version better not to do
+   if(CheckStep!=0) check(f);                   putlog("main:reach this ",numlog++);
+   if (OutStep!=0) printing(f,0,t_cur,count,PulsEnergy);   //in parallel version better not to do
 
 /*------------------------ MAIN ITERATIONS -------------------------*/
-   while (t_cur < Ttot /*&& !razlet*/) {
+   while ((Ttot==0 || t_cur < Ttot) && !razlet) {
         pde(t_cur, f, df);
         dttry=dtnext;
-        timestep(f, df, t_cur, f1, dttry, &dtdid, &dtnext);
+        timestep(f, df, nut, t_cur, f1, dttry, &dtdid, &dtnext);
         nut_by_flux(f,dtdid);
         t_cur+=dtdid;
         count++;
+        if(t_cur >= Ttot && Ttot>0) break;
         if (CheckStep!=0 && count%CheckStep==0)
             {
-            boundary_conditions(f1);
-            PulsEn=check(f);
+	    boundary_conditions(f1,nut);
+            check(f1);
             }
         if (OutStep!=0 && count%OutStep==0)
             {
             if (CheckStep!=0 && count%CheckStep!=0)
                 {
-                boundary_conditions(f1);
-                PulsEn=check(f);
+		boundary_conditions(f1,nut);
+                check(f1);
                 }
-            printing(f1,dtdid,t_cur,count,PulsEn);
+	      else boundary_conditions(f1,nut);
+            printing(f1,dtdid,t_cur,count,PulsEnergy);
             }
         if (SnapStep!=0 && count%SnapStep==0)
-            snapshot(f,t_cur,count);
-        for(l=0;l<nvar;l++)
-        for(i=ghost;i<mm1;i++)
-        for(j=ghost;j<mm2;j++)
-        for(k=ghost;k<mm3;k++)
-           f[l][i][j][k]=f1[l][i][j][k];
+            snapshot(f,nut,t_cur,count);
+	ft = f;  f = f1;  f1 = ft;
 /*        if(kbhit())
              {
                 switch (getch()) {
@@ -106,7 +106,7 @@ int main(int argc, char** argv)
               }*/
    }
 
-   dump(f,t_cur,count);
+   dump(f,nut,t_cur,count);
 //   free_mem_2f(s_func,n3+2,kol_masht);
    free_mem_4f(f  ,nvar, m1, m2, m3);
    free_mem_4f(f1 ,nvar, m1, m2, m3);
@@ -116,9 +116,9 @@ int main(int argc, char** argv)
    free_mem_4f(df4,nvar, m1, m2, m3);
    free_mem_4f(df5,nvar, m1, m2, m3);
    free_mem_3f(nut, m1, m2, m3);
-   if(t_cur>=Ttot&&!razlet) nmessage("work is succesfully done",t_cur);
-       else nrerror("this is break of scheme",t_cur);
+   if(t_cur>=Ttot&&!razlet) nmessage("work is succesfully done",t_cur,count);
+       else nrerror("this is break of scheme",t_cur,count);
    MPI_Finalize();
-   nmessage("mpi_finalize is done",t_cur);
+   nmessage("mpi_finalize is done",t_cur,count);
 return 0;
 }

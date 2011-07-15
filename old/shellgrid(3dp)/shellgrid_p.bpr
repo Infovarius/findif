@@ -3,11 +3,10 @@
 <PROJECT>
   <MACROS>
     <VERSION value="BCB.06.00"/>
-    <PROJECT value="D:\Home\Anton\Parallel\3dp\run\shellgrid_p.exe"/>
-    <OBJFILES value="..\..\programs\obj\goy.obj ..\..\programs\obj\main.obj 
-      ..\..\programs\obj\pde.obj ..\..\programs\obj\ioutil.obj 
-      ..\..\programs\obj\rkad.obj ..\..\programs\obj\struct_func.obj 
-      ..\..\programs\obj\util.obj"/>
+    <PROJECT value="d:\home\anton\programs\old\shellgrid(3dp)\run2\shellgrid_p.exe"/>
+    <OBJFILES value="..\..\obj\goy.obj ..\..\obj\main.obj ..\..\obj\pde.obj 
+      ..\..\obj\ioutil.obj ..\..\obj\rkad.obj ..\..\obj\struct_func.obj 
+      ..\..\obj\util.obj"/>
     <RESFILES value=""/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>
@@ -117,14 +116,15 @@ Item2=D:\programs\obj\
 Item3=D:\programs\obj
 
 [HistoryLists\hlFinalOutputDir]
-Count=7
-Item0=D:\Home\Anton\Parallel\3dp\run
-Item1=run\
-Item2=run
-Item3=D:\Home\Anton\Parallel\3dp\run\
-Item4=D:\programs\ICMM\parallel\3dp\run
-Item5=..\..\..\exe\
-Item6=D:\programs\exe
+Count=8
+Item0=d:\home\anton\programs\old\shellgrid(3dp)\run2
+Item1=D:\Home\Anton\Parallel\3dp\run\
+Item2=D:\Home\Anton\Parallel\3dp\run
+Item3=run\
+Item4=run
+Item5=D:\programs\ICMM\parallel\3dp\run
+Item6=..\..\..\exe\
+Item7=D:\programs\exe
 
 [Debugging]
 DebugSourceDirs=$(BCB)\source\vcl

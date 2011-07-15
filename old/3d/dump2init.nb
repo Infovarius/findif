@@ -40,9 +40,9 @@ Wolfram Research.
 
 (*NotebookFileLineBreakTest
 NotebookFileLineBreakTest*)
-(*NotebookOptionsPosition[      2928,         77]*)
-(*NotebookOutlinePosition[      3571,         99]*)
-(*  CellTagsIndexPosition[      3527,         95]*)
+(*NotebookOptionsPosition[      2920,         76]*)
+(*NotebookOutlinePosition[      3563,         98]*)
+(*  CellTagsIndexPosition[      3519,         94]*)
 (*WindowFrame->Normal*)
 
 
@@ -56,8 +56,7 @@ Cell[BoxData[{
             Map[Map[\((AverProfil + dissip*\((# - AverProfil)\))\) &, #] &, 
               l]];\[IndentingNewLine]];\)\), "\[IndentingNewLine]", 
     \(\(Off[General::spell1];\)\), "\[IndentingNewLine]", 
-    \(\(kat = "\<D:\\doc\\imcc\\progs\\3d.1\\\>";\)\), "\[IndentingNewLine]", \
-
+    \(\(kat = "\<D:\\home\\anton\\3d1\\\>";\)\), "\[IndentingNewLine]", 
     \(\(GettingInitialData[dissip_] := 
         Block[{}, \[IndentingNewLine]dump = 
             ReadList[kat <> "\<Re10000\\dump.dat\>"]; \[IndentingNewLine]{t, 
@@ -76,7 +75,7 @@ Cell[BoxData[
     \(\(GettingInitialData[1];\)\)], "Input"]
 },
 FrontEndVersion->"4.1 for Microsoft Windows",
-ScreenRectangle->{{2, 1024}, {0, 695}},
+ScreenRectangle->{{0, 1024}, {0, 723}},
 WindowSize->{770, 521},
 WindowMargins->{{0, Automatic}, {Automatic, 0}}
 ]
@@ -98,8 +97,8 @@ CellTagsIndex->{}
 
 (*NotebookFileOutline
 Notebook[{
-Cell[1705, 50, 1157, 22, 310, "Input"],
-Cell[2865, 74, 59, 1, 30, "Input"]
+Cell[1705, 50, 1149, 21, 310, "Input"],
+Cell[2857, 73, 59, 1, 30, "Input"]
 }
 ]
 *)

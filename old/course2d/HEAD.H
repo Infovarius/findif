@@ -47,6 +47,9 @@ LEVEL int CheckStep;  //each CheckStep divergence of program is checking
 LEVEL int OutStep;    //each OutStep result is printing
 LEVEL int num_dump;
 
+#define max(a, b)  (((a) > (b)) ? (a) : (b))
+#define min(a, b)  (((a) < (b)) ? (a) : (b))
+#define min_d min(min(dx[0],dx[1]),dx[2])
 //--------for GOY
 #define kol_masht 5
 LEVEL int max_okr;  //должно быть <=ghost, иначе окрестность выходит из фикт.обл-ти - виснет

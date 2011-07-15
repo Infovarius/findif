@@ -20,7 +20,6 @@ void pde(double t, double ****f, double ****df)
    for(j=ghost;j<mm2;j++)
    for(k=ghost;k<mm3;k++) {
       for(l=0;l<3;l++ for2D(l))
-)
       for(m=0;m<3;m++) {
          dv1[l][m]=dr(f[l],i,j,k,m+1,0,dx[m],ghost, approx);
          dv2[l][m]=dr(f[l],i,j,k,m+1,1,dx[m]*dx[m],ghost, approx);
@@ -38,7 +37,7 @@ void pde(double t, double ****f, double ****df)
       df[3][i][j][k]= (-(dv1[0][0] + dv1[1][1] + dv1[2][2]))/Gamma;
       if(do_dump)
                 {
-                FILE fd=fileopen("slag.dat",0);
+                FILE *fd=fileopen("slag.dat",0);
                 print_array3d(fd,f1[0],0,m1,0,m2,0,m3);
                 do_dump=0;
                 }

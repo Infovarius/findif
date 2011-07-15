@@ -2,52 +2,67 @@
 <!-- C++Builder XML Project -->
 <PROJECT>
   <MACROS>
-    <VERSION value="BCB.05.03"/>
-    <PROJECT value="course.exe"/>
-    <OBJFILES value="d:\bc31\obj\course.obj d:\bc31\obj\GOY.obj d:\bc31\obj\ioutil.obj 
-      d:\bc31\obj\kaskad.obj d:\bc31\obj\pde.obj d:\bc31\obj\RKAD.obj 
-      d:\bc31\obj\run.obj d:\bc31\obj\struct_func.obj d:\bc31\obj\UTIL.obj"/>
+    <VERSION value="BCB.06.00"/>
+    <PROJECT value="COURSE.exe"/>
+    <OBJFILES value="course.obj GOY.obj ioutil.obj kaskad.obj pde.obj RKAD.obj run.obj 
+      struct_func.obj UTIL.obj"/>
     <RESFILES value=""/>
     <IDLFILES value=""/>
     <IDLGENFILES value=""/>
     <DEFFILE value=""/>
     <RESDEPEN value="$(RESFILES) kaskad.dfm"/>
     <LIBFILES value=""/>
-    <LIBRARIES value="Vclx50.lib Vcl50.lib"/>
-    <SPARELIBS value="Vcl50.lib Vclx50.lib"/>
-    <PACKAGES value="Vcl50.bpi Vclx50.bpi bcbsmp50.bpi vclado50.bpi Vcldb50.bpi ibsmp50.bpi 
-      VCLBDE50.bpi vcldbx50.bpi Qrpt50.bpi TeeUI50.bpi TeeDB50.bpi Tee50.bpi 
-      Dss50.bpi TeeQR50.bpi VCLIB50.bpi Vclmid50.bpi vclie50.bpi Inetdb50.bpi 
-      Inet50.bpi NMFast50.bpi webmid50.bpi bcbie50.bpi dclocx50.bpi 
-      bcb2kaxserver50.bpi"/>
+    <LIBRARIES value="vclx.lib vcl.lib rtl.lib"/>
+    <SPARELIBS value="rtl.lib vcl.lib vclx.lib"/>
+    <PACKAGES value="rtl.bpi vcl.bpi vclx.bpi bcbsmp.bpi adortl.bpi dbrtl.bpi vcldb.bpi 
+      ibsmp.bpi bdertl.bpi vcldbx.bpi qrpt.bpi teeui.bpi teedb.bpi tee.bpi 
+      dss.bpi teeqr.bpi ibxpress.bpi dsnap.bpi vclie.bpi inetdb.bpi inet.bpi 
+      nmfast.bpi webdsnap.bpi bcbie.bpi dclocx.bpi bcb2kaxserver.bpi"/>
     <PATHCPP value=".;"/>
     <PATHPAS value=".;"/>
     <PATHRC value=".;"/>
     <PATHASM value=".;"/>
     <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
     <RELEASELIBPATH value="$(BCB)\lib\release"/>
-    <LINKER value="tlink32"/>
+    <LINKER value="ilink32"/>
     <USERDEFINES value="_DEBUG"/>
     <SYSDEFINES value="NO_STRICT;_NO_VCL"/>
     <MAINSOURCE value="course.bpf"/>
     <INCLUDEPATH value="$(BCB)\include;$(BCB)\include\vcl"/>
     <LIBPATH value="$(BCB)\lib\obj;$(BCB)\lib"/>
     <WARNINGS value="-w-par"/>
+    <OTHERFILES value=""/>
   </MACROS>
   <OPTIONS>
     <IDLCFLAGS value="-I$(BCB)\include -I$(BCB)\include\vcl -src_suffix cpp -D_DEBUG -boa"/>
-    <CFLAG1 value="-Od -H=$(BCB)\lib\vcl50.csm -Hc -Vx -Ve -X- -r- -a8 -b- -k -y -v -vi- -tW 
-      -tWM -c"/>
-    <PFLAGS value="-N2&quot;d:\bc31\obj\&quot; -N0&quot;d:\bc31\obj\&quot; -$YD -$W -$O- -v -JPHNE -M"/>
+    <CFLAG1 value="-Od -Vx -Ve -X- -r- -a8 -b- -k -y -v -vi- -tW -tWM -c"/>
+    <PFLAGS value="-$YD -$W -$O- -$A8 -v -JPHNE -M"/>
     <RFLAGS value=""/>
     <AFLAGS value="/mx /w2 /zd"/>
-    <LFLAGS value="-I&quot;d:\bc31\obj\&quot; -D&quot;&quot; -aa -Tpe -x -Gn -v"/>
+    <LFLAGS value="-D&quot;&quot; -aa -Tpe -x -Gn -v"/>
+    <OTHERFILES value=""/>
   </OPTIONS>
   <LINKER>
     <ALLOBJ value="c0w32.obj $(OBJFILES)"/>
     <ALLRES value="$(RESFILES)"/>
     <ALLLIB value="$(LIBFILES) $(LIBRARIES) import32.lib cw32mt.lib"/>
+    <OTHERFILES value=""/>
   </LINKER>
+  <FILELIST>
+      <FILE FILENAME="course.bpf" FORMNAME="" UNITNAME="course" CONTAINERID="BPF" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="course.cpp" FORMNAME="" UNITNAME="course" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="GOY.CPP" FORMNAME="" UNITNAME="GOY" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="ioutil.cpp" FORMNAME="" UNITNAME="ioutil" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="kaskad.cpp" FORMNAME="MainWindow" UNITNAME="kaskad" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="pde.cpp" FORMNAME="" UNITNAME="pde" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="RKAD.CPP" FORMNAME="" UNITNAME="RKAD" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="run.cpp" FORMNAME="" UNITNAME="run" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="struct_func.cpp" FORMNAME="" UNITNAME="struct_func" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+      <FILE FILENAME="UTIL.CPP" FORMNAME="" UNITNAME="UTIL" CONTAINERID="CCompiler" DESIGNCLASS="" LOCALCOMMAND=""/>
+  </FILELIST>
+  <BUILDTOOLS>
+  </BUILDTOOLS>
+
   <IDEOPTIONS>
 [Version Info]
 IncludeVerInfo=0
@@ -93,17 +108,23 @@ Count=1
 Item0=_DEBUG
 
 [HistoryLists\hlIntOutputDir]
-Count=1
-Item0=d:\bc31\obj
+Count=2
+Item0=d:\bc31\obj\
+Item1=d:\bc31\obj
 
 [Debugging]
 DebugSourceDirs=$(BCB)\source\vcl
 
 [Parameters]
 RunParams=
+Launcher=
+UseLauncher=0
+DebugCWD=
 HostApplication=
 RemoteHost=
 RemotePath=
+RemoteLauncher=
+RemoteCWD=
 RemoteDebug=0
 
 [Compiler]
@@ -115,5 +136,10 @@ LinkCGLIB=0
 AddServerUnit=1
 AddClientUnit=1
 PrecompiledHeaders=1
+
+[Language]
+ActiveLang=
+ProjectLang=
+RootDir=
   </IDEOPTIONS>
 </PROJECT>

@@ -47,7 +47,6 @@ nl =alloc_mem_1f(Ns+1);
 //filling num_points (number of near points for structural function)
 int l,m,n,dist,wrong=0;
 double d,rx,ry,rz,logl;
-double min_d=min(min(dx[0],dx[1]),dx[2]);
 logl=log(lambda);
 for(i=0;i<=kol_masht-1;i++) num_points[i] = 0;
 for(i=ghost;i<mm1;i++)

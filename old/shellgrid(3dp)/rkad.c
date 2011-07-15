@@ -10,7 +10,7 @@
 #define MinScale     (double)1e-4
 
 
-void timestep(double ****f, double ****df, double t, double ****fout,
+void timestep(double ****f, double ****df, double ***nut, double t, double ****fout,
               double dttry, double *dtdid, double *dtnext)
 {
    double dt, err, errs;
@@ -18,7 +18,7 @@ void timestep(double ****f, double ****df, double t, double ****fout,
    dt=dttry;
    for (;;)
    {
-      err = rkck(f, df, t, dt, fout);
+      err = rkck(f, df, nut, t, dt, fout);
       if (VarStep==0 || count%VarStep!=0) {
             *dtdid = dt;
             *dtnext = dt;
@@ -34,8 +34,8 @@ void timestep(double ****f, double ****df, double t, double ****fout,
       dt = max(Safety * dt * pow(err, Pshrink), dt*(double)0.1);
       if (t+dt == t)
 	    {
-	     dump(f,t,count);
-             nrerror("Stepsize underflow in rk\n\a",t);
+	     dump(f,nut,t,count);
+             nrerror("Stepsize underflow in rk\n",t,count);
             }
    }
    *dtdid = dt;
@@ -45,7 +45,7 @@ void timestep(double ****f, double ****df, double t, double ****fout,
       *dtnext = dt * (double)5.0;
 }
 
-double rkck(double ****f, double ****df1, double t, double dt, double ****fout)
+double rkck(double ****f, double ****df1, double ***nut, double t, double dt, double ****fout)
 {
 static double   a2=0.2,a3=0.3,a4=0.6,a5=1.0,a6=0.875,b21=0.2,
 		b31=3.0/40.0,b32=9.0/40.0,b41=0.3,b42 = -0.9,b43=1.2,
