@@ -9,7 +9,7 @@
 #include "run.h"
 #include <time.h>
 #include <conio.h>
-//#include <system.hpp>
+#include <system.hpp>
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"

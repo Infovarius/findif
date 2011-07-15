@@ -2,6 +2,8 @@
 #define LEVEL extern
 #include "head.h"
 
+#define EPS 1e-10
+
 double norma(double a,double b,double c,int order)
 {
 if(order==2) return ((a)*(a)+(b)*(b)+(c)*(c));
@@ -13,11 +15,12 @@ void pde(double t, double ****f, double ****df)
    int i,j,k,l,m;
    double dv1[3][3],dv2[3][3],dp1[3],dp2[3],dn1[3];
 
-   boundary_conditions(f);
+   boundary_conditions(f, nut);
 
    for(i=ghost;i<mm1;i++)
    for(j=ghost;j<mm2;j++)
-   for(k=ghost;k<mm3;k++) {
+   for(k=ghost;k<mm3;k++) 
+   {
       for(l=0;l<3;l++)
       for(m=0;m<3;m++) {
          dv1[l][m]=dr(f[l],i,j,k,m+1,0,dx[m],ghost, approx);
@@ -35,7 +38,6 @@ void pde(double t, double ****f, double ****df)
                               + (dn1[1]-f[1][i][j][k])*dv1[l][1]
                               + (dn1[2]-f[2][i][j][k])*dv1[l][2];
       df[3][i][j][k]= (-(dv1[0][0] + dv1[1][1] + dv1[2][2]))/Gamma;
-
    }
 
    return;
@@ -43,7 +45,7 @@ void pde(double t, double ****f, double ****df)
 
 double deviation(double ****f,int i,int j,int k)
 {
-const int size_okr=min(1,ghost);
+const int size_okr=min(max_okr,ghost);
 double flux = 0;
 int kol=0,l;
    for(l=1;l<=size_okr;l++)
@@ -113,7 +115,7 @@ for(k=0;k<n3;k++)
    }
 }
 
-void  boundary_conditions(double ****f)
+void  boundary_conditions(double ****f, double ***nut)
 {
    int i, j, k, l, g, req_numS=0, req_numR=0;
    int flag,cnt,z[4],tag=10;
@@ -240,6 +242,7 @@ void  init_conditions()
 // --------------- initial conditions
 //   k1=2*M_PI/l1;  k3=M_PI/l3;
 
+if(!goon) {
    for(i=ghost;i<mm1;i++)
    for(j=ghost;j<mm2;j++)
    for(k=ghost;k<mm3;k++) {
@@ -260,8 +263,8 @@ void  init_conditions()
 //        (0.39+14.8*exp(-2.13*pow(2*coordin(k,2)-l3,2)))*0.1*0
                     +1)/Re;
 //   struct_func(f,2,2,3);
-   nmessage("Arrays were filled with initial values - calculation from beginning",0);
-   } else nmessage("Arrays were filled with initial values - calculation is continuing",t_cur);
+   Master nmessage("Arrays were filled with initial values - calculation from beginning",-1,-1);
+   } else Master nmessage("Arrays were filled with saved values - calculation is continuing",t_cur,count);
 }
 
 void init_parallel()
@@ -297,6 +300,15 @@ if(!goon) {                       //reading from file when continuing
   n1 = floor((double)N1/pp[0]);     n[0] = n1*pr[0] + min(pr[0],N1-pp[0]*n1);    if(pr[0]<N1-pp[0]*n1) n1++;              // dimensions of subregion
   n2 = floor((double)N2/pp[1]);     n[1] = n2*pr[1] + min(pr[1],N2-pp[1]*n2);    if(pr[1]<N2-pp[1]*n2) n2++;
   n3 = floor((double)N3/pp[2]);     n[2] = n3*pr[2] + min(pr[2],N3-pp[2]*n3);    if(pr[2]<N3-pp[2]*n3) n3++;
+if(rank==size-1)   {
+   iop=fopen(NameStatFile,"w");
+   fprintf(iop,"%d\n",rank);
+   fprintf(iop,"%d\t%d\t%d\n",pr[0],pr[1],pr[2]);
+   fprintf(iop,"%d\t%d\t%d\n",pp[0],pp[1],pp[2]);
+   fprintf(iop,"%d\t%d\t%d\n",n[0],n[1],n[2]);
+   fprintf(iop,"%d\t%d\t%d\n",n1,n2,n3);
+       }
+   if(n1<ghost || n2<ghost || n3<ghost) nrerror("Too small mesh or incorrect number of processes",0,0);
 
    m1 = n1+2*ghost;
    m2 = n2+2*ghost;
@@ -316,26 +328,21 @@ if(!goon) {                       //reading from file when continuing
   pr_neighbour[4] = (pr[2]>0       ? rank-pp[0]*pp[1] :-1);
   pr_neighbour[5] = (pr[2]<pp[2]-1 ? rank+pp[0]*pp[1] :-1);
 
- buf_size[0]=n2*n3*(nvar+1)*ghost;
- buf_size[1]=n1*n3*(nvar+1)*ghost;
- buf_size[2]=n1*n2*(nvar+1)*ghost;
+ buf_size[0]=m2*m3*(nvar+1)*ghost;
+ buf_size[1]=m1*m3*(nvar+1)*ghost;
+ buf_size[2]=m1*m2*(nvar+1)*ghost;
 
  for(i=0;i<3;i++)           //3-D
   for(j=0;j<=1;j++) {
    buf_send[j+2*i] = alloc_mem_1f(buf_size[i]);
    buf_recv[j+2*i] = alloc_mem_1f(buf_size[i]);
   }
-
-   iop=fopen(NameStatFile,"w");
-   fprintf(iop,"%d\n",rank);
-   fprintf(iop,"%d\t%d\t%d\n",pr[0],pr[1],pr[2]);
-   fprintf(iop,"%d\t%d\t%d\n",pp[0],pp[1],pp[2]);
-   fprintf(iop,"%d\t%d\t%d\n",n[0],n[1],n[2]);
+if(rank==size-1) {
    for(i=0;i<6;i++)
      fprintf(iop,"%d ",pr_neighbour[i]);
    fprintf(iop,"\n");
-   fclose(iop);
-
+   fileclose(iop);
+   }
 }
 
 static double kf3[2][3][3]={{{-3./2.0, 2.0, -1./2.0}, {-1./2.0, 0.0, 1./2.0}, {1./2.0, -2.0, 3./2.0}},
@@ -371,7 +378,7 @@ switch (sm*dr) {
 	case 14: for(i=0; i<sm; i++) tmp += m[ii][jj+i-sh][kk]*kf7[or][sh][i]; break;
 	case 21: for(i=0; i<sm; i++) tmp += m[ii][jj][kk+i-sh]*kf7[or][sh][i]; break;
 	default :
-    	nrerror("\nNO SUCH SAMPLE for derivative Bye ...",0);
+    	nrerror("\nNO SUCH SAMPLE for derivative Bye ...",0,0);
 	}
 return(tmp/dx);
 }

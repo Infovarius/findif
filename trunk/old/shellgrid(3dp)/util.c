@@ -2,39 +2,40 @@
 #define LEVEL extern
 #include "head.h"
 
-void nrerror(char error_text[],double t_cur)
+void nrerror(char error_text[],double t_cur,long count)
 {
     FILE *err;
-    nmessage(error_text,t_cur);
+    nmessage(error_text,t_cur,count);
     err=fileopen(NameErrorFile,0);
 
     fprintf(err,"Run-time error of proc#%d at t=%-6.4lf:\n",rank,t_cur);
     fprintf(err,"%s\n",error_text);
     fprintf(err,"...now exiting to system...\n");
-    fclose(err);
-    if(count>0) operate_memory(-1);
+    fileclose(err);
+    if(f) operate_memory(-1);
     add_control_point("END");
     MPI_Finalize();
     exit(1);
 }
 
-void nmessage(char msg_text[],double t_cur)
+void nmessage(char msg_text[],double t_cur,long count)
 {
    FILE *msg;
    msg=fileopen(NameMessageFile,1);
-   time_now = (t_cur==0)?time_begin:MPI_Wtime();
+   time_now = (t_cur<0)?time_begin:MPI_Wtime();
    fprintf(msg,"message of proc#%d at t=%-7.4lf Niter=%-6d time of work=%g sec:\n",rank,
                     t_cur,count,time_now-time_begin);
    fprintf(msg,"%s\n",msg_text);
-   fclose(msg);
+   fileclose(msg);
 }
 
 void add_control_point(char *name_cp)
 {
-FILE *cpf=fileopen(NameCPFile,1);
-Master { if(cpf==NULL) cpf=fileopen(NameCPFile,0);
-         fprintf(cpf,"%s\n",name_cp);
-         fclose(cpf);}
+FILE *cpf;
+cpf = fileopen(NameCPFile,1);
+if(cpf==NULL) cpf=fileopen(NameCPFile,0);
+fprintf(cpf,"%s\n",name_cp);
+fileclose(cpf);
 }
 
 double ****alloc_mem_4f(int mvar, int n1, int n2, int n3)
@@ -43,24 +44,24 @@ int i, j, k;
 double  ****aaa;
 
    aaa = (double ****)calloc(mvar, sizeof(double ***));
-   if(aaa == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",0);
+   if(aaa == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",-1,-1);
 
    for(i = 0; i < mvar; i++) {
       aaa[i] = (double ***)calloc(n1, sizeof(double **));
-      if(aaa[i] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",0);
+         if(aaa[i] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",-1,-1);
    }
 
    for(i = 0; i < mvar; i++)
    for(j = 0; j < n1; j++) {
       aaa[i][j] = (double **)calloc(n2, sizeof(double *));
-      if(aaa[i][j] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",0);
+         if(aaa[i][j] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",-1,-1);
    }
 
 	for(i = 0; i < mvar; i++)
    for(j = 0; j < n1; j++)
    for(k = 0; k < n2; k++) {
 		aaa[i][j][k] = (double *)calloc(n3, sizeof(double));
-		if(aaa[i][j][k] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",0);
+         if(aaa[i][j][k] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",-1,-1);
       }
 
 return(aaa);
@@ -72,15 +73,25 @@ int i, j, k;
 	for(i = 0; i < mvar; i++)
    for(j = 0; j < n1; j++)
    for(k = 0; k < n2; k++)
+    { 
+    if(!aaa[i][j][k]) {putlog("error at releasing",(long)aaa[i][j][k]);return;}
 	free(aaa[i][j][k]);
+	}
 
    for(i = 0; i < mvar; i++)
    for(j = 0; j < n1; j++)
+    {
+    if(!aaa[i][j]) {putlog("error at releasing",(long)aaa[i][j]);return;}
 	free(aaa[i][j]);
+	}
 
    for(i = 0; i < mvar; i++)
+    {
+    if(!aaa[i]) {putlog("error at releasing",(long)aaa[i]);return;}
 	free(aaa[i]);
+	}
 
+   if(!aaa) {putlog("error at releasing",(long)aaa);return;}
    free(aaa);
 
    return;
@@ -92,17 +103,17 @@ int i, j;
 double  ***aaa;
 
    aaa = (double ***)calloc(mvar, sizeof(double **));
-   if(aaa == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",0);
+   if(aaa == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",-1,-1);
 
    for(i = 0; i < mvar; i++) {
       aaa[i] = (double **)calloc(n1, sizeof(double *));
-      if(aaa[i] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",0);
+         if(aaa[i] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",-1,-1);
    }
 
    for(i = 0; i < mvar; i++)
    for(j = 0; j < n1; j++) {
       aaa[i][j] = (double *)calloc(n2, sizeof(double));
-      if(aaa[i][j] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",0);
+         if(aaa[i][j] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",-1,-1);
    }
 
 return(aaa);
@@ -114,11 +125,18 @@ int j, k;
 
    for(j = 0; j < n1; j++)
    for(k = 0; k < n2; k++)
+    {
+    if(!aaa[j][k]) {putlog("error at releasing",(long)aaa[j][k]);return;}
 	free(aaa[j][k]);
+	}
 
    for(j = 0; j < n1; j++)
+    {
+    if(!aaa[j]) {putlog("error at releasing",(long)aaa[j]);return;}
 	free(aaa[j]);
+	}
 
+    if(!aaa) {putlog("error at releasing",(long)aaa);return;}
    free(aaa);
 
    return;
@@ -130,11 +148,11 @@ int i;
 double  **aa;
 
    aa = (double **)calloc(mvar, sizeof(double *));
-   if(aa == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",0);
+   if(aa == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",-1,-1);
 
    for(i = 0; i < mvar; i++) {
       aa[i] = (double *)calloc(n1, sizeof(double));
-      if(aa[i] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",0);
+         if(aa[i] == NULL) nrerror("\nAlloc_mem: insufficient memory!\n",-1,-1);
    }
 
 return(aa);
@@ -145,8 +163,11 @@ void free_mem_2f(double **aa, int n1, int n2)
 int j, k;
 
    for(j = 0; j < n1; j++)
+    {
+    if(!aa[j]) {putlog("error at releasing",(long)aa[j]);return;}
 	free(aa[j]);
-
+    }
+   if(!aa) {putlog("error at releasing",(long)aa);return;}
    free(aa);
 
    return;
@@ -157,7 +178,7 @@ double *alloc_mem_1f(int n)
 double  *a;
 
    a = (double *)calloc(n, sizeof(double));
-   if(a == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",0);
+   if(a == NULL)  nrerror("\nAlloc_mem: insufficient memory!\n",-1,-1);
 
 return(a);
 }
@@ -165,6 +186,7 @@ return(a);
 void free_mem_1f(double *a, int n)
 {
 int k;
+   if(!a) {putlog("error at releasing",(long)a);return;}
    free(a);
    return;
 }
