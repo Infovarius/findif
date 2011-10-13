@@ -10,10 +10,10 @@ File_6=SourceModule,'A:\kaskad.cpp',0,1,1,1,1,1,0
 [Modules]
 Module0=d:\home\anton\programs\old\course3d\pde.cpp
 Module1=d:\home\anton\programs\old\course3d\KASKAD.CPP
-Module2=d:\home\anton\programs\old\course3d\run.cpp
-Module3=d:\home\anton\programs\old\course3d\head.h
+Module2=d:\home\anton\programs\old\course3d\head.h
+Module3=d:\home\anton\programs\old\course3d\run.cpp
 Module4=d:\home\anton\programs\old\course3d\ioutil.cpp
-Module5=d:\home\anton\programs\old\course3d\COURSE.BPR
+Module5=d:\Home\Anton\programs\old\course3d\COURSE.BPR
 Count=6
 EditWindowCount=1
 
@@ -25,14 +25,14 @@ FormOnTop=0
 [d:\home\anton\programs\old\course3d\KASKAD.CPP]
 ModuleType=SourceModule
 FormState=1
-FormOnTop=1
+FormOnTop=0
 
-[d:\home\anton\programs\old\course3d\run.cpp]
+[d:\home\anton\programs\old\course3d\head.h]
 ModuleType=SourceModule
 FormState=0
 FormOnTop=0
 
-[d:\home\anton\programs\old\course3d\head.h]
+[d:\home\anton\programs\old\course3d\run.cpp]
 ModuleType=SourceModule
 FormState=0
 FormOnTop=0
@@ -42,16 +42,16 @@ ModuleType=SourceModule
 FormState=0
 FormOnTop=0
 
-[d:\home\anton\programs\old\course3d\COURSE.BPR]
+[d:\Home\Anton\programs\old\course3d\COURSE.BPR]
 ModuleType=SourceModule
 FormState=0
 FormOnTop=0
 
-[d:\home\anton\programs\old\course3d\ProjectGroup1.bpg]
+[C:\Program Files\Borland\CBuilder6\Projects\ProjectGroup1.bpg]
 FormState=0
 FormOnTop=0
 
-[d:\home\anton\programs\old\course3d\course.todo]
+[d:\Home\Anton\programs\old\course3d\course.todo]
 FormState=0
 FormOnTop=0
 
@@ -74,12 +74,12 @@ Left=200
 Top=164
 Width=1080
 Height=642
-MaxLeft=-4
-MaxTop=108
-MaxWidth=1288
-MaxHeight=796
-ClientWidth=1280
-ClientHeight=762
+MaxLeft=0
+MaxTop=104
+MaxWidth=1280
+MaxHeight=856
+ClientWidth=1272
+ClientHeight=822
 LeftPanelSize=170
 LeftPanelClients=CodeExplorer@EditWindow0
 LeftPanelData=000004000000000000000000000000000000000000000000000100000000000000000C000000436F64654578706C6F726572FFFFFFFF
@@ -89,7 +89,7 @@ BottomPanelClients=MessageView@EditWindow0
 BottomPanelData=000004000000000000000000000000000000000000000000000100000000000000000B0000004D65737361676556696577FFFFFFFF
 
 [View0]
-Module=d:\home\anton\programs\old\course3d\course.cpp
+Module=d:\Home\Anton\programs\old\course3d\course.cpp
 CursorX=1
 CursorY=32
 TopLine=1
@@ -111,9 +111,9 @@ LeftCol=1
 
 [View3]
 Module=d:\home\anton\programs\old\course3d\pde.cpp
-CursorX=102
-CursorY=34
-TopLine=17
+CursorX=1
+CursorY=33
+TopLine=7
 LeftCol=1
 
 [View4]
@@ -125,9 +125,9 @@ LeftCol=1
 
 [View5]
 Module=d:\home\anton\programs\old\course3d\KASKAD.CPP
-CursorX=99
-CursorY=18
-TopLine=1
+CursorX=65
+CursorY=156
+TopLine=136
 LeftCol=1
 
 [Watches]
@@ -260,11 +260,11 @@ State=0
 Left=0
 Top=12
 Width=170
-Height=662
+Height=722
 MaxLeft=-1
 MaxTop=-1
 ClientWidth=170
-ClientHeight=662
+ClientHeight=722
 TBDockHeight=388
 LRDockWidth=170
 Dockable=1
@@ -276,11 +276,11 @@ Visible=1
 State=0
 Left=12
 Top=0
-Width=1268
+Width=1260
 Height=85
 MaxLeft=-1
 MaxTop=-1
-ClientWidth=1268
+ClientWidth=1260
 ClientHeight=85
 TBDockHeight=85
 LRDockWidth=443

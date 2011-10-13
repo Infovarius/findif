@@ -6,23 +6,49 @@ int main(int argc, char** argv)
 {
    double dttry, dtdid, dtnext;
    int i,j,k,l,i2,j2,k2;
+   FILE *fd, *ferror;
+   int strl;
    double ****ft;
 
  /* Initialize MPI */
  MPI_Init(&argc,&argv);
  /*  Get rank of this process and process group size */
  MPI_Comm_rank(MPI_COMM_WORLD,&rank);
- MPI_Comm_size(MPI_COMM_WORLD,&size);           putlog("main:reach this ",numlog++);
+ MPI_Comm_size(MPI_COMM_WORLD,&size);
 
   srand(rank);
   NameMessageFile = "message.dat";
   NameErrorFile = "error.err";
   NameNuFile = "nut.dat";
   NameVFile  = "vv.dat";
-  //NameDumpFile = "dump.dat";
   NameEnergyFile = "energy.dat";
   KaskadVarFile = "kaskvar.dat";
-                                       numlog=0;
+  fname = (argc>1)? argv[1] : argv[0];
+  NameSnapFile = fname;
+  strl=strlen(fname);
+  NameCPFile = (char *)calloc(strl+4,sizeof(char));
+  sprintf(NameCPFile,"%s.cp",fname);   NameCPFile[strl+3] = 0;
+  NameDumpFile =(char *)calloc(strl+5,sizeof(char));
+  sprintf(NameDumpFile ,"%s.dmp",fname); NameDumpFile[strl+4] = 0;
+   NameSnapFile = fname;
+  NameStatFile =(char *)calloc(strl+9,sizeof(char));
+  sprintf(NameStatFile,"%s_%d.sta",fname,rank); NameStatFile[strl+8] = 0;
+
+   numlog = 1;
+   Master nmessage("--------------------------------------------------------------------------",-1,-1);
+
+/* ---------------------- reading files and arrays --------------------- */
+   goon = ((fd=fopen(NameCPFile,"r+"))>0);
+   if(fd==NULL) { putlog("File of cp were not opened",goon);
+                  Master if((fd=fopen(NameCPFile,"w+"))!=NULL) putlog("File cp was successfully created",1);
+                }
+           else putlog("File of control points opened=",(long)fd);
+	if(goon)
+		{
+		do fscanf(fd,"%s\n",NameInitFile); while (!feof(fd));
+		goon = strcmp(NameInitFile,"END") || strlen(NameInitFile)==0;
+		fileclose(fd);
+		}
    init_param(argc,argv,&dtnext);       // initilization of parameters
    Gamma=1e-3;
 
@@ -30,42 +56,29 @@ int main(int argc, char** argv)
    dx[0]=l1/N1;
    dx[1]=l2/N2;
    dx[2]=l3/N3;
-   p1 = 4*l1/(l3*Re) ; p2 = 0;
+   p1 = 8*l1/(l3*Re) ; p2 = 0;
 
    t_cur=0;
    count=0; enter = 0;
 
-   nmessage("work has begun",0,0);
-
-   sprintf(fname,"%s",(argc>1)? argv[1] : argv[0]);
-   NameSnapFile = fname;
-   sprintf(NameDumpFile ,"%s.dmp",fname);
-   sprintf(NameStatFile,"%s_%d.sta",fname,rank);
-
-   init_parallel();
-
-   s_func = alloc_mem_2f(n3+2,kol_masht);
-   f  =alloc_mem_4f(nvar, m1, m2, m3);   //f[3]-pressure,f[0..2]-v(vector)
-   f1 =alloc_mem_4f(nvar, m1, m2, m3);
-   df =alloc_mem_4f(nvar, m1, m2, m3);
-   df2=alloc_mem_4f(nvar, m1, m2, m3);
-   df3=alloc_mem_4f(nvar, m1, m2, m3);
-   df4=alloc_mem_4f(nvar, m1, m2, m3);
-   df5=alloc_mem_4f(nvar, m1, m2, m3);
-   nut=alloc_mem_3f(m1, m2, m3);
-   init_shell();
-
-   time_begin = MPI_Wtime();
-
-   Master fileopen(NameErrorFile,0);
+   if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
+       else { init_parallel();  operate_memory(1);}
 
    init_conditions();
 
-   boundary_conditions(f, nut);                           putlog("main:reach this ",numlog++);
-//   dump(f,t_cur,count);                                 putlog("main:reach this ",numlog++);
+//   init_shell();
+//--------------------------------------
+   boundary_conditions(f,nut);
 
-   if(CheckStep!=0) check(f);                   putlog("main:reach this ",numlog++);
-   if (OutStep!=0) printing(f,0,t_cur,count,PulsEnergy);   //in parallel version better not to do
+   if(!goon)  dump(f,nut,t_cur,count);
+
+   time_begin = MPI_Wtime();
+   if(!goon) Master nmessage("work has begun",0,0);
+       else Master nmessage("work continued",t_cur,count);
+   Master ferror = fileopen(NameErrorFile,abs(goon));
+
+   if(CheckStep!=0) check(f);
+   if(!goon) if (OutStep!=0) printing(f,0,t_cur,count,PulsEnergy);   //in parallel version better not to do
 
 /*------------------------ MAIN ITERATIONS -------------------------*/
    while ((Ttot==0 || t_cur < Ttot) && !razlet) {
@@ -107,15 +120,12 @@ int main(int argc, char** argv)
    }
 
    dump(f,nut,t_cur,count);
-//   free_mem_2f(s_func,n3+2,kol_masht);
-   free_mem_4f(f  ,nvar, m1, m2, m3);
-   free_mem_4f(f1 ,nvar, m1, m2, m3);
-   free_mem_4f(df ,nvar, m1, m2, m3);
-   free_mem_4f(df2,nvar, m1, m2, m3);
-   free_mem_4f(df3,nvar, m1, m2, m3);
-   free_mem_4f(df4,nvar, m1, m2, m3);
-   free_mem_4f(df5,nvar, m1, m2, m3);
-   free_mem_3f(nut, m1, m2, m3);
+   if(rank==0) add_control_point("END");
+
+   Master fileclose(ferror);
+
+   MPI_Barrier(MPI_COMM_WORLD);
+   operate_memory(-1);
    if(t_cur>=Ttot&&!razlet) nmessage("work is succesfully done",t_cur,count);
        else nrerror("this is break of scheme",t_cur,count);
    MPI_Finalize();

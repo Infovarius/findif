@@ -147,35 +147,25 @@ nextrc:
 //          MPI_Barrier(MPI_COMM_WORLD);
         }
 
-        if (ChangeParamTime!=0 && floor((t_cur-dtdid)/ChangeParamTime)<floor(t_cur/ChangeParamTime))
-		{
-		//Rm = floor(t_cur/ChangeParamTime+0.5)*DeltaParam-190;
-//		if(!outed) { snapshot(f,eta,t_cur,count); outed = 1;}
-//                MPI_Barrier(MPI_COMM_WORLD);
-		Rm_tmp = (Rm /= (1+max(-0.9,DeltaParam*log(TotalEnergy/TotalEnergyOld))));
-              rc_tmp = rc;
-                tmpC = count;  tmpT = t_cur;
+      if (ChangeParamTime!=0 && floor((t_cur-dtdid)/ChangeParamTime)<floor(t_cur/ChangeParamTime))
+			{
+			//Rm = floor(t_cur/ChangeParamTime+0.5)*DeltaParam-190;
+//			if(!outed) { snapshot(f,eta,t_cur,count); outed = 1;}
+//		          MPI_Barrier(MPI_COMM_WORLD);
+			Rm_tmp = (Rm /= (1+max(-0.9,DeltaParam*log(TotalEnergy/TotalEnergyOld))));
+         rc_tmp = rc;
+         tmpC = count;  tmpT = t_cur;
 			init_param(argc,argv,&dtnext,1);       // initialization of parameters
 
-		if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
+			if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
 			if(strcmp(NameInitFile,"-1")==0) goon = 1;
 
-                count = tmpC;  t_cur = tmpT;  Rm = Rm_tmp; rc = rc_tmp;
-		init_conditions();
-		fill_velocity(0.3, f);   fill_velocity(0.3, f1);
-		goon = 1;
-		Master nmessage("Rm was changed to",Rm,count);
-   	   	}
-/*        if(kbhit())
-             {
-                switch (getch()) {
-                        case 'd' : dump(f,t_cur,count);  break;
-                        case 'q' : { dump(f,t_cur,count);
-                                     MPI_Finalize();
-                                     nrerror("You asked to exit. Here you are...",t_cur,count);
-                                    }
-                        }
-              }*/
+         count = tmpC;  t_cur = tmpT;  Rm = Rm_tmp; rc = rc_tmp;
+			init_conditions();
+			fill_velocity(0.3, f);   fill_velocity(0.3, f1);
+			goon = 1;
+			Master nmessage("Rm was changed to",Rm,count);
+   		}
 	if (OutStep==0 || count%OutStep!=0) time_now=MPI_Wtime();
 	Master tmpC = DumpInterval>0 && floor((time_now-time_begin)/60/DumpInterval)>floor((time_old-time_begin)/60/DumpInterval);
 	MPI_Bcast(&tmpC,1,MPI_INT,0,MPI_COMM_WORLD);

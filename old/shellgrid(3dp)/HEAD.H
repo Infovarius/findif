@@ -118,7 +118,7 @@ void CopyGridToBuffer(double ****,double ***,double *,int,int,int,int,int,int);
 FILE *fileopen(const char *, int mode);
 void fileclose(FILE *fd);
 void init_param(int argc, char** argv,double *dtnext);
-int init_data(double *Re,double *t_cur,long *count);
+int init_data(/*double *Re,double *t_cur,long *count*/);
 void print_array1d(FILE *ff,double *a,int beg1,int n1);
 void print_array2d(FILE *ff,double **a,int beg1,int n1,int beg2,int n2);
 void print_array3d(FILE *ff,double ***a,int beg1,int n1,int beg2,int n2,int beg3,int n3);

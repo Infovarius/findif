@@ -3,7 +3,7 @@
 <PROJECT>
   <MACROS>
     <VERSION value="BCB.06.00"/>
-    <PROJECT value="d:\home\anton\programs\old\shellgrid(3dp)\run2\shellgrid_p.exe"/>
+    <PROJECT value="d:\home\anton\programs\old\shellgrid(3dp)\2011.10.03\Re1\shellgrid_p.exe"/>
     <OBJFILES value="..\..\obj\goy.obj ..\..\obj\main.obj ..\..\obj\pde.obj 
       ..\..\obj\ioutil.obj ..\..\obj\rkad.obj ..\..\obj\struct_func.obj 
       ..\..\obj\util.obj"/>
@@ -25,7 +25,7 @@
     <DEBUGLIBPATH value="$(BCB)\lib\debug"/>
     <RELEASELIBPATH value="$(BCB)\lib\release"/>
     <LINKER value="ilink32"/>
-    <USERDEFINES value="_DEBUG"/>
+    <USERDEFINES value=""/>
     <SYSDEFINES value="NO_STRICT;_NO_VCL;_RTLDLL;USEPACKAGES"/>
     <MAINSOURCE value="shellgrid_p.bpf"/>
     <INCLUDEPATH value="$(BCB)\include;$(BCB)\include\vcl"/>
@@ -34,14 +34,14 @@
     <OTHERFILES value=""/>
   </MACROS>
   <OPTIONS>
-    <IDLCFLAGS value="-I$(BCB)\include -I$(BCB)\include\vcl -src_suffix cpp -D_DEBUG -boa"/>
-    <CFLAG1 value="-Od -H=c:\PROGRA~1\borland\CBUILD~1\lib\vcl60.csm -Hc -Vx -Ve -X- -r- -a8 
-      -b- -k -y -v -vi- -tWC -tWM- -c"/>
-    <PFLAGS value="-N2D:\Home\Anton\programs\obj -N0D:\Home\Anton\programs\obj -$YD -$W -$O- 
+    <IDLCFLAGS value="-I$(BCB)\include -I$(BCB)\include\vcl -src_suffix cpp -boa"/>
+    <CFLAG1 value="-O2 -H=c:\PROGRA~1\borland\CBUILD~1\lib\vcl60.csm -Hc -Vx -Ve -X- -a8 -b- 
+      -k- -vi -tWC -tWM- -c"/>
+    <PFLAGS value="-N2D:\Home\Anton\programs\obj -N0D:\Home\Anton\programs\obj -$Y- -$L- -$D- 
       -$A8 -v -JPHNE -M"/>
     <RFLAGS value=""/>
-    <AFLAGS value="/mx /w2 /zd"/>
-    <LFLAGS value="-ID:\Home\Anton\programs\obj -D&quot;&quot; -ap -Tpe -x -Gn -v"/>
+    <AFLAGS value="/mx /w2 /zn"/>
+    <LFLAGS value="-ID:\Home\Anton\programs\obj -D&quot;&quot; -ap -Tpe -x -Gn"/>
     <OTHERFILES value=""/>
   </OPTIONS>
   <LINKER>
@@ -116,21 +116,24 @@ Item2=D:\programs\obj\
 Item3=D:\programs\obj
 
 [HistoryLists\hlFinalOutputDir]
-Count=8
-Item0=d:\home\anton\programs\old\shellgrid(3dp)\run2
-Item1=D:\Home\Anton\Parallel\3dp\run\
-Item2=D:\Home\Anton\Parallel\3dp\run
-Item3=run\
-Item4=run
-Item5=D:\programs\ICMM\parallel\3dp\run
-Item6=..\..\..\exe\
-Item7=D:\programs\exe
+Count=11
+Item0=d:\home\anton\programs\old\shellgrid(3dp)\2011.10.03\Re1\
+Item1=d:\home\anton\programs\old\shellgrid(3dp)\2011.10.03\Re1
+Item2=d:\home\anton\programs\old\shellgrid(3dp)\run2\
+Item3=d:\home\anton\programs\old\shellgrid(3dp)\run2
+Item4=D:\Home\Anton\Parallel\3dp\run\
+Item5=D:\Home\Anton\Parallel\3dp\run
+Item6=run\
+Item7=run
+Item8=D:\programs\ICMM\parallel\3dp\run
+Item9=..\..\..\exe\
+Item10=D:\programs\exe
 
 [Debugging]
 DebugSourceDirs=$(BCB)\source\vcl
 
 [Parameters]
-RunParams=runtest1
+RunParams=runtest
 Launcher=
 UseLauncher=0
 DebugCWD=
