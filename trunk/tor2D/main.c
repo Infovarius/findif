@@ -103,7 +103,7 @@ nextrc:
    Master ferror = fileopen(NameErrorFile,abs(goon));
 
    if(CheckStep!=0) check(f);
-   if(!goon) if (OutStep!=0) printing(f,0,t_cur,count,PulsEnergy);
+   if(!goon) if (OutStep!=0) printing(f,0,t_cur,count,PulsEnergy);   //in parallel version better not to do
 
 /*------------------------ MAIN ITERATIONS -------------------------*/
    while ((Ttot==0 || t_cur < Ttot) && !razlet) {
