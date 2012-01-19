@@ -108,6 +108,7 @@ double d;
   fileclose(iop);
    
  	Gamma=1e-4;
+	p1 = 4./Re;
 }
 
 void read_tilleq(FILE *ffff,char lim, char echo)
@@ -119,7 +120,7 @@ void read_tilleq(FILE *ffff,char lim, char echo)
 int init_data(void)                 //returns code of error
 {
  int error=0;
- int i,j,k,l,tmpr;
+ int i,k,l,tmpr;
  char fstr[256], pos;
  float tmpd;
  char tmpc;	 
@@ -249,7 +250,7 @@ for(i=beg1;i<beg1+n1;i++) {
 
 void check(double ***f)   //calculate energy of pulsations of all components and know if there's crash
 {
-int i,j,k,l;
+int i,k,l;
 PulsEnergy=0;
 TotalEnergy=0;
 for(i=0;i<m1;i++)
@@ -266,9 +267,10 @@ razlet = (PulsEnergy/TotalEnergy>UpLimit);
 void printing(double ***f1,double dtdid,double t_cur,long count,double en)
 {
 double temp, divv, totdivv;
-int i,j,k,l;
+int i,k,l;
 double mf[3], totmf[3], toten;     //mf[0]=max(f), mf[1]=max(df), mf[2]=max(df/f)
-FILE *fv,*fnu,*fen,*fkv;
+//FILE *fv,*fnu,*fkv;
+FILE *fen;
 
 //clrscr();
 divv = totdivv = 0;
@@ -347,8 +349,7 @@ void dump(double ***f1,double **nu,double t_cur,long count)
 {
 char str[256],str1[256];
 FILE *fd;
-char *message="dump";
-int tag=1,v;
+int v;
 
  if(DumpKeep)  sprintf(str,"dump/%s_%d_%d.dmp",NameSnapFile,rank,count);
 	else {
@@ -357,7 +358,7 @@ int tag=1,v;
 		remove(str1);
 		rename(str,str1);
 		}
-// if(rank!=0) MPI_Recv(message,0,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);
+// if(rank!=0) MPI_Recv("dump",0,MPI_CHAR,rank-1,/*tag*/1,MPI_COMM_WORLD,statuses);
 
  fd=fileopen(str,rank);
 

@@ -6,9 +6,9 @@ int main(int argc, char** argv)
 {
    double dttry, dtdid, dtnext, Re_tmp, rc_tmp, tmpT, time_old;
    char str[200];
-   int i,k,l,tmpC;
-   int outed;
-   FILE *fd, *ferror;
+   int i,tmpC;
+   int outed = 0;
+   FILE *fd, *ferror=0;
    int strl;
    double ***ft;
 
@@ -98,8 +98,8 @@ nextrc:
 //   if(!goon)  dump(f,nut,t_cur,count);
 
    time_begin = MPI_Wtime();
-   if(!goon) Master nmessage("work has begun",0,0);
-       else Master nmessage("work continued",t_cur,count);
+   if(!goon) { Master nmessage("work has begun",0,0); }
+       else { Master nmessage("work continued",t_cur,count); }
    Master ferror = fileopen(NameErrorFile,abs(goon));
 
    if(CheckStep!=0) check(f);
@@ -142,7 +142,7 @@ nextrc:
 			rc_tmp = rc;
 			init_param(argc,argv,&dttry,0);
 			Re=Re_tmp;
-			p1 = 4/Re;
+			p1 = 4./Re;
 			rc = rc_tmp;
 //			MPI_Barrier(MPI_COMM_WORLD);
 			}
@@ -181,7 +181,7 @@ sprintf(str,"energy(%0.2f).dat",rc);
 Master rename("energy.dat",str);
 MPI_Barrier(MPI_COMM_WORLD);
 	operate_memory(-1);
-if((rc += 0.1) <=0.5) 
+if((rc += 0.1) <=0) 
 	{
 	Master nmessage("--------------------------------------------------------------------------",-1,-1);
 	Master nmessage("rc was changed to",rc,count);

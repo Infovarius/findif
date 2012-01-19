@@ -27,7 +27,7 @@ void pde(double t, double ***f, double ***df)
 {
    int i,k,l,m;
    double M;
-   double dv1[4][3],dv2[4][3],dp1[3],dA11[4],dn1[3],w,dw;
+   double dv1[4][3],dv2[4][3],dp1[3],dn1[3],w,dw;
 
    boundary_conditions(f,nut);
 
@@ -47,8 +47,8 @@ void pde(double t, double ***f, double ***df)
          dv1[l][m]=dr(f[l],i,k,m+1,0,dx[m],(approx-1)/2, approx);
          dv2[l][m]=dr(f[l],i,k,m+1,1,dx[m]*dx[m],(approx-1)/2, approx);
          }
+       dv1[l][1] *= M;     dv2[l][1] *= M*M;
       }
-      dv1[l][1] *= M;     dv2[l][1]  *= M*M;
 //      dA11[l] = d2cross(f[l],i,k,3,2,(approx-1)/2,approx);
 
       df[1][i][k]=nut[i][k]*(dv2[1][0]+dv2[1][2]+r_1[i]*dv1[1][0]
@@ -114,8 +114,8 @@ return(flux);
 
 void nut_by_flux(double ***f, double **nut, double dt) //calculating nu_turbulent by velocity fluctuations
 {
-int i,j,k,l;
-double koef,r1,z1,rho,tmp;
+int i,k;
+double r1,z1,rho,tmp;
 for(k=0;k<m3;k++)
    {
 /*   double tmp = maschtab*pow(
@@ -137,10 +137,10 @@ for(k=0;k<m3;k++)
 
 void ghost_filling(double ***f, double **nut)
 {
-   int i,j,k,l;
+   int i,k,l;
    int r1,r2,z1,z2;
-   int /*flag,cnt,*/z[4],tag=10;
-   double vrho,vphi,vth;
+   int /*flag,cnt,*/z[4];
+//   double vrho,vphi,vth;
    z[0]=1; z[1]=z[2]=z[3]=-1; //  влияет на вид гран.условий (-1:жесткие, 1:свободные)
 
 /*----------------------- filling of ghost nodes ------------------------------*/
@@ -174,17 +174,21 @@ void interprocessor_communication(double ***f, double **nut)
 
 // exchanging in r-direction
  if(pr_neighbour[0]>-1)
+  {
   if(pr_neighbour[0]==rank) CopyGridToBuffer(f,nut,buf_recv[0],n1,0,mm1-1,m3-1);
          else { CopyGridToBuffer(f,nut,buf_send[0],ghost,0,2*ghost-1,m3-1);
 		MPI_Isend(buf_send[0],buf_size[0],MPI_DOUBLE,pr_neighbour[0],tag,MPI_COMM_WORLD,&SendRequest[req_numS++]);
 		MPI_Irecv(buf_recv[0],buf_size[0],MPI_DOUBLE,pr_neighbour[0],tag+1,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
 		}
+  }
  if(pr_neighbour[1]>-1)
+  {
   if(pr_neighbour[1]==rank) CopyGridToBuffer(f,nut,buf_recv[1],ghost,0,2*ghost-1,m3-1);
          else { CopyGridToBuffer(f,nut,buf_send[1],n1,0,mm1-1,m3-1);
 		MPI_Isend(buf_send[1],buf_size[0],MPI_DOUBLE,pr_neighbour[1],tag+1,MPI_COMM_WORLD,&SendRequest[req_numS++]);
 		MPI_Irecv(buf_recv[1],buf_size[0],MPI_DOUBLE,pr_neighbour[1],tag,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
 		}
+  }
 
    MPI_Waitall(req_numS,SendRequest,statuses);
    if(req_numS && statuses[0].MPI_ERROR) {putlog("bc:error during r-send=",numlog++);
@@ -193,7 +197,8 @@ void interprocessor_communication(double ***f, double **nut)
                                putlog(msg_err,numlog++);
                                }    else numlog++;
    req_numS = 0;
-    MPI_Waitall(req_numR,RecvRequest,statuses);
+   
+   MPI_Waitall(req_numR,RecvRequest,statuses);
    if(req_numR && statuses[0].MPI_ERROR) {putlog("bc:error during r-receive=",numlog++);
                                MPI_Error_string(statuses[0].MPI_ERROR,msg_err,&reslen);
                                msg_err[reslen++] = ','; msg_err[reslen]= 0;
@@ -205,17 +210,21 @@ void interprocessor_communication(double ***f, double **nut)
 
 // exchanging in z-direction
  if(pr_neighbour[4]>-1)
+  {
   if(pr_neighbour[4]==rank) CopyGridToBuffer(f,nut,buf_recv[4],0,n3,m1-1,mm3-1);
          else { CopyGridToBuffer(f,nut,buf_send[4],0,ghost,m1-1,2*ghost-1);
 		MPI_Isend(buf_send[4],buf_size[2],MPI_DOUBLE,pr_neighbour[4],tag+4,MPI_COMM_WORLD,&SendRequest[req_numS++]);
 		MPI_Irecv(buf_recv[4],buf_size[2],MPI_DOUBLE,pr_neighbour[4],tag+5,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
 		}
+  }
  if(pr_neighbour[5]>-1)
+  {
   if(pr_neighbour[5]==rank) CopyGridToBuffer(f,nut,buf_recv[5],0,ghost,m1-1,2*ghost-1);
         else { CopyGridToBuffer(f,nut,buf_send[5],0,n3,m1-1,mm3-1);
 	       MPI_Isend(buf_send[5],buf_size[2],MPI_DOUBLE,pr_neighbour[5],tag+5,MPI_COMM_WORLD,&SendRequest[req_numS++]);
 	       MPI_Irecv(buf_recv[5],buf_size[2],MPI_DOUBLE,pr_neighbour[5],tag+4,MPI_COMM_WORLD,&RecvRequest[req_numR++]);
 	       }
+  }
 
    MPI_Waitall(req_numS,SendRequest,statuses);
    if(req_numS && statuses[0].MPI_ERROR) {putlog("bc:error during z-send=",numlog++);
@@ -245,10 +254,6 @@ void interprocessor_communication(double ***f, double **nut)
 
 void  boundary_conditions(double ***f, double **nut)
 {
-   int i, j, k, l;
-   double vrho,vphi,vth;
-
-  
    interprocessor_communication(f,nut);
    ghost_filling(f,nut);
    if(pp[0]>1 || pp[2]>1) interprocessor_communication(f,nut);
@@ -258,7 +263,7 @@ void  boundary_conditions(double ***f, double **nut)
 void  init_conditions()
 {
    int i,k,l;
-   double r, rho, r1, z1;
+   double rho, r1, z1;
    int ghost1=(approx-1)/2;
 //   double k1,k2,k3;
 
@@ -267,10 +272,11 @@ void  init_conditions()
    for(k=0;k<m3;k++)
        {
        node[i][k] = NodeUnknown;
-       if(pr_neighbour[0]!=-1 && i<ghost ||
-           pr_neighbour[1]!=-1 && i>=mm1  ||
-           pr_neighbour[4]!=-1 && k<ghost ||
-           pr_neighbour[5]!=-1 && k>=mm3) setType(&node[i][k],NodeClued);
+       if((pr_neighbour[0]!=-1 && i<ghost) ||
+          (pr_neighbour[1]!=-1 && i>=mm1)  ||
+          (pr_neighbour[4]!=-1 && k<ghost) ||
+          (pr_neighbour[5]!=-1 && k>=mm3)
+	 ) setType(&node[i][k],NodeClued);
        }
    for(i=0;i<m1;i++)
    for(k=0;k<m3;k++)
@@ -342,7 +348,7 @@ if(!goon) {
 void init_parallel()
 {
    FILE *iop;
-   int divisors[100],kd=0,nd1;
+   int divisors[100],kd=0,nd1=0;
    int i,j;
    int kp1,kp3;
    double vtime,mintime;
@@ -429,7 +435,7 @@ double dr(double **m, int ii, int kk, int dir, int or, double dx, int sh,  int s
 /*                                    , 1,2,3 ,  0,1    dx,dx^2  , 0-left , 3,5,7 */
 {
 double tmp=0.0;
-int i;
+//int i;
 if(or==0)
 switch (sm) {
      case 7 :  switch (dir) {
