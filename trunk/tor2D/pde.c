@@ -41,13 +41,11 @@ void pde(double t, double ***f, double ***df)
          dp1[m]=dr(f[0],i,k,m+1,0,dx[m],(approx-1)/2, approx);
          dn1[m]=dr(nut,i,k,m+1,0,dx[m],(approx-1)/2, approx);
       }
-      dp1[1] *= M; dn1[1] *= M;
       for(l=1;l<=3;l++) {
        for(m=0;m<3;m++ for2D(m)) {
          dv1[l][m]=dr(f[l],i,k,m+1,0,dx[m],(approx-1)/2, approx);
          dv2[l][m]=dr(f[l],i,k,m+1,1,dx[m]*dx[m],(approx-1)/2, approx);
          }
-       dv1[l][1] *= M;     dv2[l][1] *= M*M;
       }
 //      dA11[l] = d2cross(f[l],i,k,3,2,(approx-1)/2,approx);
 
