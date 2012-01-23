@@ -108,7 +108,10 @@ double d;
   fileclose(iop);
    
  	Gamma=1e-4;
-	p1 = 4./Re;
+	ghost=(approx-1)/2+3;                  //radius of approx sample
+	dx[0]=2*R/N1;
+	dx[2]=2*R/N3;
+	p1 = 4/Re;
 }
 
 void read_tilleq(FILE *ffff,char lim, char echo)

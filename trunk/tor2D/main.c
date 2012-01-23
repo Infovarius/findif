@@ -46,10 +46,10 @@ int main(int argc, char** argv)
 	if(goon)
 		{
 		do fscanf(fd,"%s\n",NameInitFile); while (!feof(fd));
-		goon = strcmp(NameInitFile,"END") || strlen(NameInitFile)==0;
+		goon = strcmp(NameInitFile,"END") && strlen(NameInitFile)>0;
 		fileclose(fd);
 		}
-	rc = 0;
+	rc = 0.9;
 nextrc: 
 	rc_tmp = rc;
 	init_param(argc,argv,&dtnext,0);       // initialization of parameters
@@ -63,6 +63,7 @@ nextrc:
 
    if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
        else { init_parallel();  operate_memory(1);}
+   fileclose(fd);
 
    init_conditions();
 
@@ -181,7 +182,7 @@ sprintf(str,"energy(%0.2f).dat",rc);
 Master rename("energy.dat",str);
 MPI_Barrier(MPI_COMM_WORLD);
 	operate_memory(-1);
-if((rc += 0.1) <=0) 
+if((rc -= 0.1) >=0.5) 
 	{
 	Master nmessage("--------------------------------------------------------------------------",-1,-1);
 	Master nmessage("rc was changed to",rc,count);
