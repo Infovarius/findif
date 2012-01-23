@@ -202,7 +202,7 @@
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
-				WarningLevel="3"
+				WarningLevel="2"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -218,7 +218,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="msmpi.lib"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;C:\Program Files\Microsoft Compute Cluster Pack\Lib\x86&quot;"
+				AdditionalLibraryDirectories="&quot;C:\Program Files\Microsoft Compute Cluster Pack\Lib\i386&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -330,7 +330,7 @@
 	</References>
 	<Files>
 		<File
-			RelativePath=".\HEAD.H"
+			RelativePath=".\head.h"
 			>
 		</File>
 		<File
