@@ -8,7 +8,7 @@ int main(int argc, char** argv)
    char str[200];
    int i,tmpC;
    int outed = 0;
-   FILE *fd, *ferror=0;
+   FILE *fd=0, *ferror=0;
    int strl;
    double ***ft;
 
@@ -42,14 +42,15 @@ int main(int argc, char** argv)
    if(fd==NULL) { putlog("File of cp were not opened",goon);
                   Master if((fd=fopen(NameCPFile,"w+"))!=NULL) putlog("File cp was successfully created",1);
                 }
-           else putlog("File of control points opened=",(long)fd);
-	if(goon)
+           else ;//putlog("File of control points opened=",(long)fd);
+   if(goon)
 		{
 		do fscanf(fd,"%s\n",NameInitFile); while (!feof(fd));
 		goon = strcmp(NameInitFile,"END") && strlen(NameInitFile)>0;
 		fileclose(fd);
 		}
 	rc = 0.9;
+   Master nmessage("rc was changed to",rc,count);
 nextrc: 
 	rc_tmp = rc;
 	init_param(argc,argv,&dtnext,0);       // initialization of parameters
@@ -57,13 +58,11 @@ nextrc:
 	ghost=(approx-1)/2+3;                  //radius of approx sample
 	dx[0]=2*R/N1;
 	dx[2]=2*R/N3;
-
    t_cur=0;
    count=0; enter = 0;
 
    if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
        else { init_parallel();  operate_memory(1);}
-   fileclose(fd);
 
    init_conditions();
 

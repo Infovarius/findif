@@ -328,8 +328,8 @@ if(!goon) {
 		       (R*R-pow(coordin(i,0),2) - pow(coordin(k,2),2))/R/R;
 	}
 //   struct_func(f,2,2,3);
-   nmessage("Arrays were filled with initial values - calculation from beginning",-1,-1);
-   } else nmessage("Arrays were filled with initial values - calculation is continuing",t_cur,count);
+   if(rank==size-1) nmessage("Arrays were filled with initial values - calculation from beginning",-1,-1);
+   } else if(rank==size-1) nmessage("Arrays were filled with initial values - calculation is continuing",t_cur,count);
    for(i=0;i<m1;i++)
    for(k=0;k<m3;k++)
 	nut[i][k]=1./Re;

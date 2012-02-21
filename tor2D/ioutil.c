@@ -36,10 +36,10 @@ void putlog(char msg_text[],long num)
    sprintf(name,"mess%d.log",rank);
    log=fileopen(name,num);
    time_now = (num==0)?time_begin:MPI_Wtime();
-   fprintf(log,"message at t=%-7.4lf Niter=%-6d time of work=%g sec\n",
+   fprintf(log,"message at t=%-7.4lf Niter=%-6ld time of work=%g sec\n",
                     t_cur,count,time_now-time_begin);
-   fprintf(log,"%s %d\n",msg_text,num);
-   printf("%s %d...",msg_text,num);
+   fprintf(log,"%s %ld\n",msg_text,num);
+//  printf("\nproc %d: %s %d...\n",rank,msg_text,num);
    fileclose(log);
 }
 
@@ -51,7 +51,7 @@ char str[256],*pstr;
  if(sscanf(str,"%lf",param)==0) nrerror("Input of parameter error",-1,-1);
  pstr=strtok(str,"|");
  pstr=strtok((char *)NULL,"|");
- if(!count) printf("%g\t->\t%s",*param,pstr);
+ Master if(!goon && !count) printf("%g\t->\t%s",*param,pstr);
 }
 
 void init_param(int argc, char** argv,double *dtnext,int flag)
@@ -104,7 +104,7 @@ double d;
 	  }
      }
   
-  Master if(!count) nmessage("Parameters were extracted from file",0,0);
+  Master if(!goon && !count) nmessage("Parameters were extracted from file",0,0);
   fileclose(iop);
    
  	Gamma=1e-4;
@@ -134,7 +134,6 @@ int init_data(void)                 //returns code of error
  NameInitFile[pos]=0;
  sprintf(fstr,"%s%d%s",NameInitFile,rank,NameInitFile+pos+1);
 
- putlog("reach here", 2);
  inp = fileopen(fstr,-1);
 // inp = fileopen(NameInitFile,-1);
  read_tilleq(inp,'=','n');   if(fscanf(inp,"%lf",&t_cur)==0) error=1;
@@ -148,7 +147,6 @@ int init_data(void)                 //returns code of error
 
  init_parallel();
  operate_memory(1);                     // creating arrays
- putlog("reach here", 1);
 // for(tmpr=0;tmpr<=rank;tmpr++)           //reading until arrays of this process
 // {
  for(l=0;l<nvar;l++)                    // reading f
@@ -289,7 +287,7 @@ for(i=0;i<m1;i++)
            if (fabs(temp)>divv) divv=fabs(temp);
            }
 MPI_Allreduce(&divv, &totdivv, 1, MPI_DOUBLE , MPI_MAX, MPI_COMM_WORLD);
-Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
+Master printf("t=%g dtdid=%g NIter=%ld maxdivv=%g(local=%g)\n",
                t_cur, dtdid, count,   totdivv,   divv    );
 
    MPI_Allreduce(&en, &toten, 1, MPI_DOUBLE , MPI_SUM, MPI_COMM_WORLD);
@@ -330,7 +328,7 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g)\n",
 
          Master fprintf(fen,"\n");
    Master fileclose(fen);
-   Master printf("number of runge-kutt calculations=%d\n",enter);
+   Master printf("number of runge-kutt calculations=%ld\n",enter);
 
  // -------------------- average profile of velocity ---------------------
 /*         for(i=0;i<N3;i++)    vfi[i]=0;
@@ -354,7 +352,7 @@ char str[256],str1[256];
 FILE *fd;
 int v;
 
- if(DumpKeep)  sprintf(str,"dump/%s_%d_%d.dmp",NameSnapFile,rank,count);
+ if(DumpKeep)  sprintf(str,"dump/%s_%d_%ld.dmp",NameSnapFile,rank,count);
 	else {
 		sprintf(str,"dump/%s%d.dmp",NameSnapFile,rank);
 		sprintf(str1,"dump/%s%d.bak",NameSnapFile,rank);
@@ -365,12 +363,14 @@ int v;
 
  fd=fileopen(str,rank);
 
- Master nmessage("dump has been started",t_cur,count);
- Master fprintf(fd,"current time = %0.10f \ncurrent iteration = %ld\n",t_cur,count);
- Master fprintf(fd,"number of processors along axes={%d,%d}\n",pp[0],pp[2]);
- Master fprintf(fd,"Number of points along x = %d\n",N1);
- Master fprintf(fd,"Number of points along z = %d\n",N3);
- Master fprintf(fd,"Reynolds number = %lf\n",Re);
+//Master { // для вывода в один файл, иначе убрать!! 
+ nmessage("dump has been started",t_cur,count);
+ fprintf(fd,"current time = %0.10f \ncurrent iteration = %ld\n",t_cur,count);
+ fprintf(fd,"number of processors along axes={%d,%d}\n",pp[0],pp[2]);
+ fprintf(fd,"Number of points along x = %d\n",N1);
+ fprintf(fd,"Number of points along z = %d\n",N3);
+ fprintf(fd,"Reynolds number = %lf\n",Re);
+//}
 
  for(v=0;v<nvar;v++)
     print_array2d(fd,f1[v],0,m1,0,m3);
@@ -382,7 +382,7 @@ int v;
  Master 
     {   
 	 nmessage("dump is done",t_cur,count);
-	 if(DumpKeep)  sprintf(str,"dump/%s_*_%d.dmp",NameSnapFile,count);
+	 if(DumpKeep)  sprintf(str,"dump/%s_*_%ld.dmp",NameSnapFile,count);
 		else 	sprintf(str,"dump/%s*.dmp",NameSnapFile);
     add_control_point(str);
     }
@@ -395,7 +395,7 @@ char message[10]="message";
 long tag=count,v;
 FILE *fd;
 
- sprintf(str,"%s_%d_%d.snp",NameSnapFile,size,count);
+ sprintf(str,"%s_%d_%ld.snp",NameSnapFile,size,count);
  boundary_conditions(f1,nut);
 
  if(rank!=0) MPI_Recv(message,0,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);

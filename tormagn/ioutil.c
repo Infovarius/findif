@@ -17,7 +17,7 @@ if(mode<0) s_mode="r";
 if(mode==0) s_mode="w";
 if ((ff = fopen(x,s_mode))==NULL)
 	 {
-		nrerror ("Can't open file !\n",t_cur,count);
+		nrerror (strcat("Can't open file !\n",x),t_cur,count);
 		exit(-1);
 	 }
 return(ff);
