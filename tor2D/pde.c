@@ -12,15 +12,17 @@ if(order==2) return ((a)*(a)+(b)*(b)+(c)*(c));
 
 void omega(double t, double *w, double *dw)
 {
-double a=1,
+double a1=1000, a2=-10,
        omega0=1,
-       t_begin=0.1,
-       t_end=omega0/a+t_begin;
-if(t<t_end && t>t_begin) *dw=-a;
-                    else *dw=0;
-if(t<t_begin) *w=omega0;
- else if(t<t_end) *w=omega0-a*(t-t_begin);
- else *w=0;
+       t_up=omega0/a1,
+	t_rot=10,
+       t_down=-omega0/a2;
+if(t<t_up) {*dw = a1; *w = a1*t; return;}
+else nmessage("acceleration stopped",t,count);
+if(t>=t_up && t<t_rot+t_up)
+	    {*dw = 0; *w = omega0; }
+if(t>t_rot+t_up && t<t_rot+t_up+t_down) 
+	    {*dw = a2; *w=omega0+a2*(t-t_rot-t_up);}
 }
 
 void pde(double t, double ***f, double ***df)
@@ -49,7 +51,7 @@ void pde(double t, double ***f, double ***df)
 
       df[1][i][k]=nut[i][k]*(dv2[1][0]+dv2[1][2]+r_1[i]*dv1[1][0]
 				   -f[1][i][k]*r_2[i])
-		     -dp1[0]//+w*w/r_1[i]       +2*w*f[2][i][k]                   //forces of inertion
+		     -dp1[0] + w*w/r_1[i]  +2*w*f[2][i][k]                        //forces of inertion
 //                     +(j+n[2]<=ghost+2 ? coordin(k,2)*f[2][i][k] : 0)                //helical force
 		     + (dn1[0]-f[1][i][k])*dv1[1][0]
 		     + (dn1[2]-f[3][i][k])*dv1[1][2]
@@ -57,7 +59,7 @@ void pde(double t, double ***f, double ***df)
 		     ;
       df[2][i][k]=nut[i][k]*(dv2[2][0]+dv2[2][2]+r_1[i]*dv1[2][0]
 				   -f[2][i][k]*r_2[i])
-		     + p1*pow(rc*coordin(i,0)+1,-1.)//-dw/r_1[i] -2*w*f[1][i][k]                   //forces of inertion
+		     + p1*dw*pow(rc*coordin(i,0)+1,1.) -2*w*f[1][i][k]//-dw/r_1[i]                   //forces of inertion
 //                     -(j+n[2]<=ghost+2 ? (coordin(i,0)-rc)*f[2][i][k] :0)            //helical force
 		     + (dn1[0]-f[1][i][k])*dv1[2][0]
 		     + (dn1[2]-f[3][i][k])*dv1[2][2]

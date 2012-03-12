@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       145,          7]
-NotebookDataLength[     30256,        805]
-NotebookOptionsPosition[     28446,        743]
-NotebookOutlinePosition[     28841,        760]
-CellTagsIndexPosition[     28798,        757]
+NotebookDataLength[     30756,        820]
+NotebookOptionsPosition[     28889,        754]
+NotebookOutlinePosition[     29284,        771]
+CellTagsIndexPosition[     29241,        768]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -360,86 +360,61 @@ Cell[BoxData[
  CellChangeTimes->{{3.448254553796875*^9, 3.4482545675625*^9}, {
   3.448254611703125*^9, 3.448254632109375*^9}}],
 
+Cell[CellGroupData[{
+
 Cell[BoxData[
  RowBox[{
-  RowBox[{"$ZIP", "=", "True"}], ";"}]], "Input",
+  RowBox[{"$ZIP", "=", "False"}], ";", 
+  RowBox[{"DynamicModule", "[", 
+   RowBox[{
+    RowBox[{"{", "}"}], ",", 
+    RowBox[{"Button", "[", 
+     RowBox[{
+      RowBox[{"Dynamic", "[", 
+       RowBox[{"\"\<Use zipped files? \>\"", "<>", 
+        RowBox[{"ToString", "@", "$ZIP"}]}], "]"}], ",", 
+      RowBox[{"$ZIP", "=", 
+       RowBox[{"!", "$ZIP"}]}]}], "]"}]}], "]"}]}]], "Input",
  InitializationCell->True,
  CellChangeTimes->{{3.46649288961875*^9, 3.46649289180625*^9}, {
   3.46649292624375*^9, 3.46649292693125*^9}, {3.46649299415*^9, 
   3.46649299461875*^9}, {3.466493812040625*^9, 3.466493812540625*^9}, {
-  3.538125869328125*^9, 3.53812587084375*^9}}],
-
-Cell[CellGroupData[{
-
-Cell[BoxData[
- RowBox[{"DynamicModule", "[", 
-  RowBox[{
-   RowBox[{"{", 
-    RowBox[{"$disp", "=", "False"}], "}"}], ",", 
-   RowBox[{"Button", "[", 
-    RowBox[{
-     RowBox[{"Dynamic", "[", 
-      RowBox[{"\"\<Use zipped files? \>\"", "<>", 
-       RowBox[{"ToString", "@", "$disp"}]}], "]"}], ",", 
-     RowBox[{"$ZIP", "=", 
-      RowBox[{"$disp", "=", 
-       RowBox[{"!", "$disp"}]}]}]}], "]"}]}], "]"}]], "Input",
- CellChangeTimes->{{3.53812588075*^9, 3.53812588134375*^9}, {3.53812607575*^9,
-   3.538126220234375*^9}}],
+  3.538125869328125*^9, 3.53812587084375*^9}, {3.539332829879875*^9, 
+  3.539332832098625*^9}}],
 
 Cell[BoxData[
- DynamicModuleBox[{$CellContext`$disp$$ = False}, 
+ DynamicModuleBox[{}, 
   ButtonBox[
    DynamicBox[ToBoxes[
      StringJoin["Use zipped files? ", 
-      ToString[$CellContext`$disp$$]], StandardForm],
+      ToString[$CellContext`$ZIP]], StandardForm],
     ImageSizeCache->{109., {2., 9.}}],
    Appearance->Automatic,
-   ButtonFunction:>($CellContext`$ZIP = ($CellContext`$disp$$ = 
-     Not[$CellContext`$disp$$])),
+   ButtonFunction:>($CellContext`$ZIP = Not[$CellContext`$ZIP]),
    Evaluator->Automatic,
    Method->"Preemptive"],
   DynamicModuleValues:>{}]], "Output",
- CellChangeTimes->{3.538384921390625*^9, 3.538386729171875*^9, 
-  3.538387070625*^9}]
+ CellChangeTimes->{{3.539332840223625*^9, 3.539332840348625*^9}}]
 }, Open  ]],
-
-Cell[BoxData[
- RowBox[{"DynamicModule", "[", 
-  RowBox[{
-   RowBox[{"{", "}"}], ",", 
-   RowBox[{"Button", "[", 
-    RowBox[{
-     RowBox[{"Dynamic", "[", 
-      RowBox[{"\"\<Use zipped files? \>\"", "<>", 
-       RowBox[{"ToString", "@", "$ZIP"}]}], "]"}], ",", 
-     RowBox[{"$ZIP", "=", 
-      RowBox[{"!", "$ZIP"}]}]}], "]"}]}], "]"}]], "Input",
- CellChangeTimes->{{3.53812857353125*^9, 3.53812858496875*^9}}],
-
-Cell[BoxData[
- RowBox[{
-  RowBox[{"$2d", "=", "True"}], ";"}]], "Input",
- InitializationCell->True,
- CellChangeTimes->{{3.505119574517997*^9, 3.5051195789327974`*^9}, {
-  3.5051196167472053`*^9, 3.505119617340005*^9}}],
 
 Cell[CellGroupData[{
 
 Cell[BoxData[
- RowBox[{"DynamicModule", "[", 
-  RowBox[{
-   RowBox[{"{", "}"}], ",", 
-   RowBox[{"Button", "[", 
-    RowBox[{
-     RowBox[{"Dynamic", "[", 
-      RowBox[{"\"\<Use 2d images? \>\"", "<>", 
-       RowBox[{"ToString", "@", "$2d"}]}], "]"}], ",", 
-     RowBox[{"$2d", "=", 
-      RowBox[{"!", "$2d"}]}]}], "]"}]}], "]"}]], "Input",
- CellChangeTimes->{{3.53812588075*^9, 3.53812588134375*^9}, {3.53812607575*^9,
-   3.538126220234375*^9}, {3.53812628059375*^9, 3.53812629684375*^9}, {
-  3.5381286053125*^9, 3.538128614046875*^9}}],
+ RowBox[{
+  RowBox[{"$2d", "=", "True"}], ";", 
+  RowBox[{"DynamicModule", "[", 
+   RowBox[{
+    RowBox[{"{", "}"}], ",", 
+    RowBox[{"Button", "[", 
+     RowBox[{
+      RowBox[{"Dynamic", "[", 
+       RowBox[{"\"\<Use 2d images? \>\"", "<>", 
+        RowBox[{"ToString", "@", "$2d"}]}], "]"}], ",", 
+      RowBox[{"$2d", "=", 
+       RowBox[{"!", "$2d"}]}]}], "]"}]}], "]"}]}]], "Input",
+ InitializationCell->True,
+ CellChangeTimes->{{3.505119574517997*^9, 3.5051195789327974`*^9}, {
+   3.5051196167472053`*^9, 3.505119617340005*^9}, 3.539332837458*^9}],
 
 Cell[BoxData[
  DynamicModuleBox[{}, 
@@ -453,8 +428,7 @@ Cell[BoxData[
    Evaluator->Automatic,
    Method->"Preemptive"],
   DynamicModuleValues:>{}]], "Output",
- CellChangeTimes->{3.538384921421875*^9, 3.538386729203125*^9, 
-  3.53838707065625*^9, 3.5387377033125*^9}]
+ CellChangeTimes->{3.53933284023925*^9}]
 }, Open  ]],
 
 Cell[BoxData[{
@@ -469,6 +443,8 @@ Cell[BoxData[{
      "}"}]}], "]"}], "//", "TableForm"}]}], "Input",
  CellChangeTimes->{{3.5053544397718687`*^9, 3.50535444364067*^9}, {
   3.5381258326875*^9, 3.5381258333125*^9}}],
+
+Cell[CellGroupData[{
 
 Cell[BoxData[{
  RowBox[{
@@ -488,6 +464,41 @@ Cell[BoxData[{
  CellChangeTimes->{{3.448254848171875*^9, 3.448254849859375*^9}, {
   3.46043661084375*^9, 3.46043661353125*^9}, {3.46253371921875*^9, 
   3.46253373046875*^9}, {3.53812583946875*^9, 3.53812583984375*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"\:0421\:0435\:0442\:043a\:0430 \:043e\:0434\:0438\:043d\:0430\
+\:043a\:043e\:0432\:0430\:044f: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{"512", ",", "512", ",", "n3"}], "}"}]}],
+  SequenceForm[
+  "\:0421\:0435\:0442\:043a\:0430 \:043e\:0434\:0438\:043d\:0430\:043a\:043e\
+\:0432\:0430\:044f: ", {512, 512, $CellContext`n3}],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.539332845536125*^9}],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"\<\"\:0414\:0435\:043b\:0435\:043d\:0438\:0435 \:043d\:0430 \:043f\
+\:0440\:043e\:0446\:0435\:0441\:0441\:044b \:043e\:0434\:0438\:043d\:0430\
+\:043a\:043e\:0432\:043e\:0435: \"\>", "\[InvisibleSpace]", 
+   RowBox[{"{", 
+    RowBox[{"16", ",", "16"}], "}"}]}],
+  SequenceForm[
+  "\:0414\:0435\:043b\:0435\:043d\:0438\:0435 \:043d\:0430 \:043f\:0440\:043e\
+\:0446\:0435\:0441\:0441\:044b \:043e\:0434\:0438\:043d\:0430\:043a\:043e\
+\:0432\:043e\:0435: ", {16, 16}],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.539332845536125*^9}],
+
+Cell[BoxData["\<\"\:0421\:0442\:0440\:0443\:043a\:0442\:0443\:0440\:0430 \
+\:0443 \:0432\:0441\:0435\:0445 \:043e\:0434\:0438\:043d\:0430\:043a\:043e\
+\:0432\:0430\:044f\"\>"], "Print",
+ CellChangeTimes->{3.539332845536125*^9}]
+}, Open  ]]
+}, Open  ]],
 
 Cell[CellGroupData[{
 
@@ -772,40 +783,44 @@ Cell[CellGroupData[{
 Cell[14541, 347, 130, 1, 28, "Subsection"],
 Cell[14674, 350, 261, 5, 31, "Input"],
 Cell[14938, 357, 202, 3, 31, "Input"],
-Cell[15143, 362, 349, 7, 31, "Input",
+Cell[CellGroupData[{
+Cell[15165, 364, 736, 18, 31, "Input",
  InitializationCell->True],
-Cell[CellGroupData[{
-Cell[15517, 373, 527, 14, 31, "Input"],
-Cell[16047, 389, 533, 14, 40, "Output"]
+Cell[15904, 384, 448, 12, 40, "Output"]
 }, Open  ]],
-Cell[16595, 406, 413, 11, 31, InheritFromParent],
-Cell[17011, 419, 218, 5, 31, "Input",
+Cell[CellGroupData[{
+Cell[16389, 401, 569, 15, 31, "Input",
  InitializationCell->True],
-Cell[CellGroupData[{
-Cell[17254, 428, 540, 13, 31, "Input"],
-Cell[17797, 443, 484, 13, 40, "Output"]
+Cell[16961, 418, 417, 12, 40, "Output"]
 }, Open  ]],
-Cell[18296, 459, 429, 11, 52, "Input"],
-Cell[18728, 472, 679, 17, 52, "Input"],
+Cell[17393, 433, 429, 11, 52, "Input"],
 Cell[CellGroupData[{
-Cell[19432, 493, 89, 2, 31, "Input"],
-Cell[19524, 497, 383, 7, 30, "Output"]
+Cell[17847, 448, 679, 17, 52, "Input"],
+Cell[CellGroupData[{
+Cell[18551, 469, 461, 10, 23, "Print"],
+Cell[19015, 481, 581, 12, 23, "Print"],
+Cell[19599, 495, 227, 3, 23, "Print"]
+}, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[19944, 509, 527, 14, 31, "Input"],
-Cell[20474, 525, 738, 17, 30, "Output"]
+Cell[19875, 504, 89, 2, 31, "Input"],
+Cell[19967, 508, 383, 7, 30, "Output"]
 }, Open  ]],
-Cell[21227, 545, 733, 20, 31, "Input"],
-Cell[21963, 567, 1018, 28, 31, "Input"],
-Cell[22984, 597, 210, 5, 31, "Input"],
 Cell[CellGroupData[{
-Cell[23219, 606, 146, 3, 31, "Input"],
-Cell[23368, 611, 365, 7, 30, "Output"]
+Cell[20387, 520, 527, 14, 31, "Input"],
+Cell[20917, 536, 738, 17, 30, "Output"]
 }, Open  ]],
-Cell[23748, 621, 456, 14, 31, "Input"],
-Cell[24207, 637, 1456, 31, 72, "Input"],
-Cell[25666, 670, 1177, 29, 72, "Input"],
-Cell[26846, 701, 1584, 39, 112, "Input"]
+Cell[21670, 556, 733, 20, 31, "Input"],
+Cell[22406, 578, 1018, 28, 31, "Input"],
+Cell[23427, 608, 210, 5, 31, "Input"],
+Cell[CellGroupData[{
+Cell[23662, 617, 146, 3, 31, "Input"],
+Cell[23811, 622, 365, 7, 30, "Output"]
+}, Open  ]],
+Cell[24191, 632, 456, 14, 31, "Input"],
+Cell[24650, 648, 1456, 31, 72, "Input"],
+Cell[26109, 681, 1177, 29, 72, "Input"],
+Cell[27289, 712, 1584, 39, 112, "Input"]
 }, Open  ]]
 }
 ]
