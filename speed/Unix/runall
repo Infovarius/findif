@@ -1,0 +1,30 @@
+#!/bin/bash
+mpicc -o speed *.c -lm
+rm *.o
+done=0
+for mesh in `cat listmesh`; do
+for proc in `cat listproc`; do
+  if test -f ex${mesh}_${proc}
+   then echo "Ushe bylo na $proc processah na setke $mesh v kube"; continue
+   fi
+  done=`expr $done + 1`
+  case `expr $done \> $1` in
+    1) { echo "All $1 processes is putted"; exit; } ;;
+    *) echo "Testiruyu na $proc processah na setke $mesh v kube" ;;
+   esac
+  >>ex${mesh}_${proc}
+  mkdir p${mesh}_${proc}
+  cp speed p${mesh}_${proc}
+  cp testspeed${mesh} p${mesh}_${proc}
+  cp testspeed${mesh}.cp p${mesh}_${proc}
+  (cd p${mesh}_${proc}; mpirun -np $proc speed testspeed${mesh};)
+  sleep 2;
+  if test -f p${mesh}_${proc}/speed.img
+      then echo "Ok"
+      else echo "Task is not getting in"; rm ex${mesh}_${proc};
+  fi
+done
+done
+
+echo "Ive done it"
+

@@ -1,0 +1,5 @@
+/Machines
+Katun
+shmem Katun
+/Devices
+internal device shmem

@@ -1,0 +1,5 @@
+#!/bin/bash
+if test -f $1 
+then rm $1
+else del $1/*; rmdir $1
+fi
