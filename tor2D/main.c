@@ -49,7 +49,7 @@ int main(int argc, char** argv)
 		goon = strcmp(NameInitFile,"END") && strlen(NameInitFile)>0;
 		fileclose(fd);
 		}
-	rc = 0.9;
+	rc = 0.45;
    Master nmessage("rc was changed to",rc,count);
 nextrc: 
 	rc_tmp = rc;
