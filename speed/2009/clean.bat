@@ -1,0 +1,9 @@
+del *.log
+del *.dat
+del *.snp
+del coord
+del node
+del output
+del *.~*
+del *.obj
+del *.err
