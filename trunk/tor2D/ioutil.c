@@ -252,15 +252,23 @@ for(i=beg1;i<beg1+n1;i++) {
 void check(double ***f)   //calculate energy of pulsations of all components and know if there's crash
 {
 int i,k,l;
+double meanp = 0;
+long kol=0;
 PulsEnergy=0;
 TotalEnergy=0;
 for(i=0;i<m1;i++)
         for(k=0;k<m3;k++)
-          if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
+		  if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
            {
-           PulsEnergy+=deviation(f,i,k);
+           meanp += f[0][i][k];
+		   kol++;
+		   PulsEnergy+=deviation(f,i,k);
            for(l=1;l<=3;l++) TotalEnergy += fabs(1+coordin(i,0)*rc)*pow(f[l][i][k],2.);
            }
+meanp /= kol;
+for(i=0;i<m1;i++)
+        for(k=0;k<m3;k++)
+			f[0][i][k] -= meanp;
 TotalEnergy += 1.;   //if zero average field
 razlet = (PulsEnergy/TotalEnergy>UpLimit);
 }
@@ -352,6 +360,7 @@ char str[256],str1[256];
 FILE *fd;
 int v;
 
+ if(!access("dump",0)) CreateDir("dump");
  if(DumpKeep)  sprintf(str,"dump/%s_%d_%ld.dmp",NameSnapFile,rank,count);
 	else {
 		sprintf(str,"dump/%s%d.dmp",NameSnapFile,rank);
@@ -418,5 +427,3 @@ FILE *fd;
  Master {nmessage("snap is done",t_cur,count);
                    add_control_point(str);}
 }
-
-												  

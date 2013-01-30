@@ -12,17 +12,21 @@ if(order==2) return ((a)*(a)+(b)*(b)+(c)*(c));
 
 void omega(double t, double *w, double *dw)
 {
-double a1=1000, a2=-10,
+double a1=1, a2=-10,
        omega0=1,
        t_up=omega0/a1,
-	t_rot=10,
+	t_rot=4,
        t_down=-omega0/a2;
-if(t<t_up) {*dw = a1; *w = a1*t; return;}
-else nmessage("acceleration stopped",t,count);
+static nvivd = -1;
+if(t<t_up) {*dw = a1; *w = a1*t; if(nvivd==-1) {nvivd = 0; nmessage("acceleration started",t,count);} return;}
+else 
 if(t>=t_up && t<t_rot+t_up)
-	    {*dw = 0; *w = omega0; }
+	    {if(t<=t_up+1) SnapDelta=0.02; else SnapDelta=0.2;
+		 *dw = 0; *w = omega0; if(nvivd==0) {nvivd = 1;nmessage("acceleration stopped",t,count);}}
 if(t>t_rot+t_up && t<t_rot+t_up+t_down) 
-	    {*dw = a2; *w=omega0+a2*(t-t_rot-t_up);}
+	    {SnapDelta = 0.01; *dw = a2; *w=omega0+a2*(t-t_rot-t_up);if(nvivd==1) {nvivd = 2;nmessage("decceleration started",t,count);}}
+if(t>t_rot+t_up+t_down) 
+	    {if(t<=t_up+t_rot+t_down+1) SnapDelta=0.02; *dw = 0; *w=0; if(nvivd==2) {nvivd = 3;nmessage("decceleration stopped",t,count);}}
 }
 
 void pde(double t, double ***f, double ***df)
