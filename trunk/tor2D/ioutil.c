@@ -3,6 +3,8 @@
 #define LEVEL extern
 //#include <conio.h>
 #include "head.h"
+#include <sys/stat.h>
+#include <windows.h>
 
 double UpLimit;     //after this limit there's dump
 #define PREC 5
@@ -359,8 +361,12 @@ void dump(double ***f1,double **nu,double t_cur,long count)
 char str[256],str1[256];
 FILE *fd;
 int v;
+struct stat st = {0};
 
- if(!access("dump",0)) CreateDir("dump");
+if (stat("dump", &st) == -1) {
+	mkdir("dump", 0777);
+	CreateDirectory ("C:\\random", NULL);
+}
  if(DumpKeep)  sprintf(str,"dump/%s_%d_%ld.dmp",NameSnapFile,rank,count);
 	else {
 		sprintf(str,"dump/%s%d.dmp",NameSnapFile,rank);
