@@ -49,12 +49,12 @@ int main(int argc, char** argv)
 		goon = strcmp(NameInitFile,"END") && strlen(NameInitFile)>0;
 		fileclose(fd);
 		}
-	rc = 0.45;
-   Master nmessage("rc was changed to",rc,count);
+	rc = 0.05;
 nextrc: 
-	rc_tmp = rc;
+	rc_tmp = 0*rc;
 	init_param(argc,argv,&dtnext,0);       // initialization of parameters
-	if(rc_tmp!=0) rc = rc_tmp;
+	if(rc_tmp>0.0001) rc = rc_tmp;
+   Master nmessage("rc was changed to",rc,count);
 	ghost=(approx-1)/2+3;                  //radius of approx sample
 	dx[0]=2*R/N1;
 	dx[2]=2*R/N3;
@@ -181,7 +181,7 @@ sprintf(str,"energy(%0.2f).dat",rc);
 Master rename("energy.dat",str);
 MPI_Barrier(MPI_COMM_WORLD);
 	operate_memory(-1);
-if((rc -= 0.1) >=0.5) 
+if(0 && (rc += 0.05) <=1) 
 	{
 	Master nmessage("--------------------------------------------------------------------------",-1,-1);
 	Master nmessage("rc was changed to",rc,count);
