@@ -37,7 +37,7 @@ void pde(double t, double ***f, double ***df)
 
    boundary_conditions(f,nut);
 
-   omega(t,&w,&dw);
+//   omega(t,&w,&dw);
    for(i=0;i<m1;i++)
    for(k=0;k<m3;k++)
      if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))

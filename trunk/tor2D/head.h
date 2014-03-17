@@ -57,6 +57,7 @@ LEVEL double DumpInterval;  // each DumpInterval all essential data is saved
 LEVEL int DumpKeep;   // if to keep all Dumps (0 - only 2 last)
 LEVEL int VarStep;    //each VarStep step in RungeKutta varies
 LEVEL double ChangeParamTime, DeltaParam;  // for iteration on parameters
+LEVEL int ENDPARAM;
 LEVEL long numlog;
 
 #ifndef max
@@ -120,6 +121,7 @@ double interpolation(double,double, double,double,double,double);
 FILE *fileopen(const char *, int mode);
 void fileclose(FILE *fd);
 void init_param(int argc, char** argv,double *dtnext,int flag);
+void read_params(int argc, char** argv, long count);
 int init_data(void);
 void print_array1d(FILE *ff,double *a,int beg1,int n1);
 void print_array2d(FILE *ff,double **a,int beg1,int n1,int beg2,int n2);

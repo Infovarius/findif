@@ -38,8 +38,8 @@
 			>
 			<DebugSettings
 				Command="$(TargetPath)"
-				WorkingDirectory=""
-				CommandArguments=""
+				WorkingDirectory="$(ProjectDir)Run"
+				CommandArguments="pumpflow"
 				Attach="false"
 				DebuggerType="3"
 				Remote="1"
@@ -50,10 +50,10 @@
 				SQLDebugging=""
 				Environment=""
 				EnvironmentMerge="true"
-				DebuggerFlavor="3"
+				DebuggerFlavor="0"
 				MPIRunCommand="c:\Program Files\Microsoft Compute Cluster Pack\Bin\mpiexec.exe"
 				MPIRunArguments="-np 4"
-				MPIRunWorkingDirectory="$(ProjectDir)2012.02.21\3\Re10k045"
+				MPIRunWorkingDirectory="$(ProjectDir)Run"
 				ApplicationCommand="$(ProjectDir)$(ConfigurationName)\$(TargetFileName)"
 				ApplicationArguments="pumpflow"
 				ShimCommand="c:\Program Files\Microsoft Visual Studio 9.0\Common7\IDE\Remote Debugger\x64\mpishim.exe"
