@@ -4,7 +4,7 @@
 //#include <conio.h>
 #include "head.h"
 #include <sys/stat.h>
-#include <windows.h>
+//#include <windows.h>
 
 double UpLimit;     //after this limit there's dump
 #define PREC 5
@@ -50,7 +50,7 @@ void read_token(FILE *inp,double *param)
 char str[256],*pstr;
  do fgets(str,256,inp); while(strchr(str,'|')==NULL);
  if(strchr(str,'|')==NULL) return;
- if(sscanf(str,"%lf",param)==0) nrerror("Input of parameter error",-1,-1);
+ if(sscanf(str,"%lf",param)<1) nrerror("Input of parameter error",-1,-1);
  pstr=strtok(str,"|");
  pstr=strtok((char *)NULL,"|");
  Master if(!goon && !count) printf("%g\t->\t%s",*param,pstr);
@@ -116,6 +116,43 @@ double d;
 	p1 = 4/Re;
 }
 
+void read_params(int argc, char** argv, long count)
+{
+  FILE *fin,*fout,*fdone;
+  char str[256],*pstr;
+  char TMPNAME[256], INPNAME[256], DONENAME[256];
+  double t1, t2, t3, t4;
+  sprintf(INPNAME,"%s.params",argv[1]);
+  sprintf(TMPNAME,"%s.bak",argv[1]);
+  sprintf(DONENAME,"%s.done",argv[1]);
+  if(argc<2 || (fin=fopen(INPNAME,"r"))==NULL) //no params file
+  {
+      putlog("There is no parameters file.",count);
+      return;
+  }
+  fout = fopen(TMPNAME,"w");
+  fdone = fopen(DONENAME,"a");
+  fgets(str,256,fin); fputs(str,fout);// header
+  fgets(str,256,fin); 
+  ENDPARAM = feof(fin);    if(!ENDPARAM) {fputs(str,fdone); fgets(str,256,fin);}
+  if (sscanf(str,"%lf %lf %lf %lf",&t1, &t2, &t3, &t4)<4) putlog("Couldn't read enough parameters.",count);
+  else {
+	rc = t1;	Master nmessage("rc was changed to",rc,count);
+	Re = t2;	Master nmessage("Re was changed to",Re,count);
+	parabole=t3;	Master nmessage("parabole was changed to",parabole,count);
+	Ttot = t4;	Master nmessage("ttime was changed to",Ttot,count);
+	}
+  while (!feof(fin)) 
+  {
+      fputs(str,fout);
+      fgets(str,256,fin);
+  }
+  fclose(fin); fclose(fout); fclose(fdone);
+  remove(INPNAME); rename(TMPNAME, INPNAME);
+  Master if(ENDPARAM) nmessage("Parameters has been ended in the file",0,0);
+    else nmessage("New parameters were read from the file",0,0);
+}
+
 void read_tilleq(FILE *ffff,char lim, char echo)
 {char ch;
   if (echo=='n') while ((ch=(char)fgetc(ffff))!=lim);
@@ -132,12 +169,12 @@ int init_data(void)                 //returns code of error
  double Re1;		  // priority for parameter in snap-file
  FILE *inp;
 
- pos = strcspn(NameInitFile,"*");
- NameInitFile[pos]=0;
- sprintf(fstr,"%s%d%s",NameInitFile,rank,NameInitFile+pos+1);
+// pos = strcspn(NameInitFile,"*");
+// NameInitFile[pos]=0;
+// sprintf(fstr,"%s%d%s",NameInitFile,rank,NameInitFile+pos+1);
 
- inp = fileopen(fstr,-1);
-// inp = fileopen(NameInitFile,-1);
+// inp = fileopen(fstr,-1);
+ inp = fileopen(NameInitFile,-1);
  read_tilleq(inp,'=','n');   if(fscanf(inp,"%lf",&t_cur)==0) error=1;
  read_tilleq(inp,'=','n');   if(fscanf(inp,"%ld",&count)==0) error=1;
  read_tilleq(inp,'=','n');   if(fscanf(inp,"%c%d%c%d%c",&tmpc,&pp[0],&tmpc,&pp[2],&tmpc)<5) error=1;
@@ -149,8 +186,8 @@ int init_data(void)                 //returns code of error
 
  init_parallel();
  operate_memory(1);                     // creating arrays
-// for(tmpr=0;tmpr<=rank;tmpr++)           //reading until arrays of this process
-// {
+ for(tmpr=0;tmpr<=rank;tmpr++)           //reading until arrays of this process
+ {
  for(l=0;l<nvar;l++)                    // reading f
         {
         do fscanf(inp,"%c",&tmpc); while (tmpc!='{');
@@ -182,7 +219,7 @@ int init_data(void)                 //returns code of error
          }
  fscanf(inp,"%c",&tmpc);
  
- //}
+ }
 fileclose(inp);
 if(error) nrerror("Data couldn't have been read from file!!!",-1,error);
      else nmessage("Data has been read from file",t_cur,count);
@@ -254,23 +291,23 @@ for(i=beg1;i<beg1+n1;i++) {
 void check(double ***f)   //calculate energy of pulsations of all components and know if there's crash
 {
 int i,k,l;
-double meanp = 0;
-long kol=0;
+//double meanp = 0;
+//long kol=0;
 PulsEnergy=0;
 TotalEnergy=0;
 for(i=0;i<m1;i++)
         for(k=0;k<m3;k++)
 		  if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
            {
-           meanp += f[0][i][k];
-		   kol++;
+//           meanp += f[0][i][k];
+//		   kol++;
 		   PulsEnergy+=deviation(f,i,k);
            for(l=1;l<=3;l++) TotalEnergy += fabs(1+coordin(i,0)*rc)*pow(f[l][i][k],2.);
            }
-meanp /= kol;
+/*meanp /= kol;
 for(i=0;i<m1;i++)
         for(k=0;k<m3;k++)
-			f[0][i][k] -= meanp;
+			f[0][i][k] -= meanp;*/
 TotalEnergy += 1.;   //if zero average field
 razlet = (PulsEnergy/TotalEnergy>UpLimit);
 }
@@ -365,7 +402,6 @@ struct stat st = {0};
 
 if (stat("dump", &st) == -1) {
 	mkdir("dump", 0777);
-	CreateDirectory ("C:\\random", NULL);
 }
  if(DumpKeep)  sprintf(str,"dump/%s_%d_%ld.dmp",NameSnapFile,rank,count);
 	else {
@@ -379,7 +415,7 @@ if (stat("dump", &st) == -1) {
  fd=fileopen(str,rank);
 
 //Master { // для вывода в один файл, иначе убрать!! 
- nmessage("dump has been started",t_cur,count);
+// nmessage("dump has been started",t_cur,count);
  fprintf(fd,"current time = %0.10f \ncurrent iteration = %ld\n",t_cur,count);
  fprintf(fd,"number of processors along axes={%d,%d}\n",pp[0],pp[2]);
  fprintf(fd,"Number of points along x = %d\n",N1);

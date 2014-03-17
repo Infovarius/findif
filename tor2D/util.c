@@ -93,7 +93,7 @@ int i, j, k;
 
    if(!aaa) {putlog("error at releasing",(long)aaa);return;}
    free(aaa);
-
+   aaa = 0;
    return;
 }
 
@@ -138,6 +138,7 @@ int j, k;
 
     if(!aaa) {putlog("error at releasing",(long)aaa);return;}
    free(aaa);
+   aaa = 0;
 
    return;
 }
