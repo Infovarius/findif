@@ -53,7 +53,7 @@ int main(int argc, char** argv)
 nextparam: 
 	ENDPARAM = 0;
 	init_param(argc,argv,&dtnext,0);       // initialization of parameters
-	read_params(argc,argv,count+1);  if(ENDPARAM) goto endparam;
+	if(!goon) read_params(argc,argv,count+1);  if(ENDPARAM) goto endparam;
    	ghost=(approx-1)/2+3;                  //radius of approx sample
 	dx[0]=2*R/N1;
 	dx[2]=2*R/N3;

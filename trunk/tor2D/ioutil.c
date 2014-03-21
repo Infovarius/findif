@@ -163,18 +163,22 @@ int init_data(void)                 //returns code of error
 {
  int error=0;
  int i,k,l,tmpr;
+ int rank1=rank;
  char fstr[256], pos;
  float tmpd;
  char tmpc;	 
  double Re1;		  // priority for parameter in snap-file
  FILE *inp;
 
-// pos = strcspn(NameInitFile,"*");
-// NameInitFile[pos]=0;
-// sprintf(fstr,"%s%d%s",NameInitFile,rank,NameInitFile+pos+1);
-
-// inp = fileopen(fstr,-1);
- inp = fileopen(NameInitFile,-1);
+ pos = strcspn(NameInitFile,"*");
+ if(pos<strlen(NameInitFile)) 
+ {
+     NameInitFile[pos]=0;
+     sprintf(fstr,"%s%d%s",NameInitFile,rank,NameInitFile+pos+1);
+     inp = fileopen(fstr,-1);
+     rank1 = 0;
+ }
+ else inp = fileopen(NameInitFile,-1);
  read_tilleq(inp,'=','n');   if(fscanf(inp,"%lf",&t_cur)==0) error=1;
  read_tilleq(inp,'=','n');   if(fscanf(inp,"%ld",&count)==0) error=1;
  read_tilleq(inp,'=','n');   if(fscanf(inp,"%c%d%c%d%c",&tmpc,&pp[0],&tmpc,&pp[2],&tmpc)<5) error=1;
@@ -186,7 +190,7 @@ int init_data(void)                 //returns code of error
 
  init_parallel();
  operate_memory(1);                     // creating arrays
- for(tmpr=0;tmpr<=rank;tmpr++)           //reading until arrays of this process
+ for(tmpr=0;tmpr<=rank1;tmpr++)           //reading until arrays of this process
  {
  for(l=0;l<nvar;l++)                    // reading f
         {
