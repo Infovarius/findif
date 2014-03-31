@@ -175,7 +175,7 @@ nextparam:
 	if(!outed) snapshot(f,nut,t_cur,count);
 	if(rank==0) add_control_point("END");
 
-sprintf(str,"energy(%0.2f).dat",rc);
+sprintf(str,"energy(kappa=%0.2f,Re=%0.2f).dat",rc,Re);
 MPI_Barrier(MPI_COMM_WORLD);
 Master if(rename("energy.dat",str)) nmessage("Renaming of energy.dat was failed",t_cur,count);
 	operate_memory(-1);
