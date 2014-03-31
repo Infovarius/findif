@@ -130,11 +130,11 @@ void read_params(int argc, char** argv, long count)
       putlog("There is no parameters file.",count);
       return;
   }
-  fout = fopen(TMPNAME,"w");
-  fdone = fopen(DONENAME,"a");
-  fgets(str,256,fin); fputs(str,fout);// header
+  Master fout = fopen(TMPNAME,"w");
+  Master fdone = fopen(DONENAME,"a");
+  fgets(str,256,fin); Master fputs(str,fout);// header
   fgets(str,256,fin); 
-  ENDPARAM = feof(fin);    if(!ENDPARAM) {fputs(str,fdone); fgets(str,256,fin);}
+  ENDPARAM = feof(fin);    if(!ENDPARAM) {Master fputs(str,fdone); fgets(str,256,fin);}
   if (sscanf(str,"%lf %lf %lf %lf",&t1, &t2, &t3, &t4)<4) putlog("Couldn't read enough parameters.",count);
   else {
 	rc = t1;	Master nmessage("rc was changed to",rc,count);
@@ -147,10 +147,13 @@ void read_params(int argc, char** argv, long count)
       fputs(str,fout);
       fgets(str,256,fin);
   }
-  fclose(fin); fclose(fout); fclose(fdone);
-  remove(INPNAME); rename(TMPNAME, INPNAME);
-  Master if(ENDPARAM) nmessage("Parameters has been ended in the file",0,0);
-    else nmessage("New parameters were read from the file",0,0);
+  fclose(fin); 
+  Master {
+	fclose(fout); fclose(fdone);
+	remove(INPNAME); rename(TMPNAME, INPNAME);
+	if(ENDPARAM) nmessage("Parameters has been ended in the file",0,0);
+		else nmessage("New parameters were read from the file",0,0);
+	}
 }
 
 void read_tilleq(FILE *ffff,char lim, char echo)

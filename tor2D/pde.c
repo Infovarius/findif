@@ -17,7 +17,7 @@ double a1=1, a2=-10,
        t_up=omega0/a1,
 	t_rot=4,
        t_down=-omega0/a2;
-static nvivd = -1;
+static int nvivd = -1;
 if(t<t_up) {*dw = a1; *w = a1*t; if(nvivd==-1) {nvivd = 0; nmessage("acceleration started",t,count);} return;}
 else 
 if(t>=t_up && t<t_rot+t_up)
