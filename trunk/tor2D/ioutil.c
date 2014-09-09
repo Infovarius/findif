@@ -120,6 +120,7 @@ void read_params(int argc, char** argv, long count)
 {
   FILE *fin,*fout,*fdone;
   char str[256],*pstr;
+  int reading;
   char TMPNAME[256], INPNAME[256], DONENAME[256];
   double t1, t2, t3, t4;
   sprintf(INPNAME,"%s.params",argv[1]);
@@ -133,21 +134,22 @@ void read_params(int argc, char** argv, long count)
   Master fout = fopen(TMPNAME,"w");
   Master fdone = fopen(DONENAME,"a");
   fgets(str,256,fin); Master fputs(str,fout);// header
-  fgets(str,256,fin); 
-  ENDPARAM = feof(fin);    if(!ENDPARAM) {Master fputs(str,fdone); fgets(str,256,fin);}
+  ENDPARAM = (fgets(str,256,fin) == NULL); 
   if (sscanf(str,"%lf %lf %lf %lf",&t1, &t2, &t3, &t4)<4) putlog("Couldn't read enough parameters.",count);
   else {
-	rc = t1;	Master nmessage("rc was changed to",rc,count);
-	Re = t2;	Master nmessage("Re was changed to",Re,count);
-	parabole=t3;	Master nmessage("parabole was changed to",parabole,count);
-	Ttot = t4;	Master nmessage("ttime was changed to",Ttot,count);
+	rc = t1;	nmessage("rc was changed to",rc,count);
+	Re = t2;	nmessage("Re was changed to",Re,count);
+	parabole=t3;	nmessage("parabole was changed to",parabole,count);
+	Ttot = t4;	nmessage("ttime was changed to",Ttot,count);
 	}
-  while (!feof(fin)) 
+  if(!ENDPARAM) {Master fputs(str,fdone); reading = (fgets(str,256,fin)!=NULL);}
+  Master while (reading) 
   {
       fputs(str,fout);
-      fgets(str,256,fin);
+      reading = (fgets(str,256,fin)!=NULL);
   }
   fclose(fin); 
+  MPI_Barrier(MPI_COMM_WORLD);
   Master {
 	fclose(fout); fclose(fdone);
 	remove(INPNAME); rename(TMPNAME, INPNAME);
