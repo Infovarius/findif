@@ -50,7 +50,7 @@
 				SQLDebugging=""
 				Environment=""
 				EnvironmentMerge="true"
-				DebuggerFlavor="0"
+				DebuggerFlavor="3"
 				MPIRunCommand="c:\Program Files\Microsoft Compute Cluster Pack\Bin\mpiexec.exe"
 				MPIRunArguments="-np 4"
 				MPIRunWorkingDirectory="$(ProjectDir)Run"
