@@ -93,6 +93,8 @@ nextrc:
    fill_velocity(0.3, f1);   // additional array
    boundary_conditions(f);
    if(!goon)  dump(f,eta,t_cur,count);
+pde(t_cur, f, df);
+   snapshot(f,eta,t_cur,count);
    time_begin = MPI_Wtime();
    if(!goon) Master nmessage("work has begun",0,0);
        else Master nmessage("work continued",t_cur,count);
@@ -180,7 +182,7 @@ sprintf(str,"energy(%0.2f).dat",rc);
 Master rename("energy.dat",str);
 MPI_Barrier(MPI_COMM_WORLD);
 	operate_memory(-1);
-if((rc += 0.05) <1) 
+if(0 && (rc += 0.05) <1) 
     {
    Master nmessage("--------------------------------------------------------------------------",-1,-1);
 	Master nmessage("rc was changed to",rc,count);
