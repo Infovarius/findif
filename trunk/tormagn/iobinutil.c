@@ -471,7 +471,7 @@ long tag=count,v;
 FILE *fd;
 
  sprintf(str,"%s_%d_%d.snp",NameSnapFile,size,count);
-// boundary_conditions(f1);
+ boundary_conditions(f1);
 // calculate_curl(&f1[4],B,NodeMagn);
 // calculate_curl(B,J,NodeMagn);
 
@@ -490,6 +490,8 @@ FILE *fd;
  for(v=1;v<nvar;v++)
     printbin_array3d(fd,f1[v],0,m1,0,m2,0,m3);
 // printbin_array3d(fd,nu,0,m1,0,m2,0,m3);
+// for(v=0;v<3;v++)
+//    printbin_array3d(fd,B[v],0,m1,0,m2,0,m3);
  fileclose(fd);
 
  if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);

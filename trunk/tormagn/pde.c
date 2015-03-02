@@ -9,7 +9,7 @@ if(order==2) return ((a)*(a)+(b)*(b)+(c)*(c));
    else  return  pow(((a)*(a)+(b)*(b)+(c)*(c)),order/2.);
 }
 
-void omega(double t, double *w, double *dw)
+double omega(double t, double *w, double *dw)
 {
 double a=1,
        omega0=1,
@@ -20,6 +20,7 @@ if(t<t_end && t>t_begin) *dw=-a;
 if(t<t_begin) *w=omega0;
  else if(t<t_end) *w=omega0-a*(t-t_begin);
  else *w=0;
+return *w;
 }
 
 void pde(double t, double ****f, double ****df)
@@ -86,11 +87,13 @@ FILE *inp;
             {
             r1 = coordin(i,0);  phi1 = coordin(j,1);  z1 = coordin(k,2);
             rho=sqrt(r1*r1 + z1*z1);
-            vrho = 0;
-            vth  = vtheta_given(t,rho,Rfl,phi1)/(1+r1*rc);
+/*            vrho = 0;
+            vth  = vtheta_given(t,rho,Rfl,phi1)/(1+r1*rc);*/
+			vrho = vrhoDean(0,rho,sinth[i][k]);
+			vth = vthDean(0,rho,costh[i][k]);
 //            vphi = vfi_given(t_cur*Tunit,rho,Rfl);      // nonstationary time=t_cur*Tunit, max magnitude=0.0990906
 //            vth = 0;
-            vphi = vfi_given(0.0990906,rho,Rfl);
+            vphi = vfi_given(0.0990906,rho,Rfl,costh[i][k]);
             f[1][i][j][k] = vrho*sinth[i][k]+vth*costh[i][k];
             f[2][i][j][k] = vphi;
             f[3][i][j][k] = vrho*costh[i][k]-vth*sinth[i][k];
@@ -321,7 +324,7 @@ void  boundary_conditions(double ****f)
 /*----------------------- filling of ghost nodes ------------------------------*/
 
   for(i=0;i<m1;i++)
-     for(j=0;j<m2;j++)
+   for(j=0;j<m2;j++)
 	for(k=0;k<m3;k++)
         {
           if(isType(node[i][k],NodeGhostFluid)) {
@@ -334,7 +337,7 @@ void  boundary_conditions(double ****f)
                    eta[i][j][k] = (refr_f[i][k]-i2)*(eta[i1][j][k1]*(refz_f[i][k]-k2)-eta[i1][j][k2]*(refz_f[i][k]-k1))
                                 + (refr_f[i][k]-i1)*(eta[i2][j][k2]*(refz_f[i][k]-k1)-eta[i2][j][k1]*(refz_f[i][k]-k2));
                 }
-          if(isType(node[i][k],NodeGhostMagn)) {
+          if(0 && isType(node[i][k],NodeGhostMagn)) {
                 i1=floor(refr_m[i][k]+0.5);
                 rin_1 = r_1[i1]; rfict_1 = r_1[i]; rrel = (rin_1==0)? 1 : rfict_1/rin_1;
                 k1=floor(refz_m[i][k]+0.5);
@@ -433,8 +436,8 @@ void  init_conditions()
 //                                         else node[i][k] -= NodeGhostMagn;
                                           //deleting fictive cells-for constant outside field
      //for divertor's blade
-	sinth[i][k]=r1/rho;
-        costh[i][k]=z1/rho;
+		sinth[i][k]=r1/rho;
+		costh[i][k]=z1/rho;
        }
 
    for(i=0;i<m1;i++) { r_1[i] = rc/(rc*coordin(i,0)+1); r_2[i] = r_1[i]*r_1[i]; }
@@ -473,19 +476,19 @@ if(!goon) {
                     +1.)/Re;
                                         }
             else f[0][i][j][k]=f[1][i][j][k]=f[2][i][j][k]=f[3][i][j][k] = 0;
-      if(isType(node[i][k],NodeFluid)/*||isType(node[i][k],NodeShell)*/ )
-                 {   }
+      if(isType(node[i][k],NodeMagn) || isType(node[i][k],NodeGhostMagn) )
+                 { }
                  f[4][i][j][k]=f[5][i][j][k]=f[6][i][j][k]=0;
                  /*f[4][i][j][k]=coordin(i,0)*cos(coordin(j,1))*sin(coordin(j,1))*/;
                  /*f[5][i][j][k]=coordin(i,0)*cos(coordin(j,1))*cos(coordin(j,1))*/;
-                 f[6][i][j][k]=0;
-//                 if(!isType(node[i][k],NodeMagn))
+                 //f1[4][i][j][k] = f[4][i][j][k]=coordin(k,2);
                   if(isType(node[i][k],NodeFluid))
                      {
                      f[4][i][j][k]+=Noise*((double)rand()-RAND_MAX/2)/RAND_MAX + NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl);
                      f[5][i][j][k]+=Noise*((double)rand()-RAND_MAX/2)/RAND_MAX + NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl);
                      f[6][i][j][k]+=Noise*((double)rand()-RAND_MAX/2)/RAND_MAX + NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl);
                      }
+				  
       }
 //   Master f[4][2*ghost][2*ghost][2*ghost] = 100;   
 //   struct_func(f,2,2,3);

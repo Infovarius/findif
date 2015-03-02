@@ -109,6 +109,7 @@ double rkck(double ****f, double ****df, double t, double dt, double ****fout);
 /*------- pde.c  -----------*/
 void   pde(double t, double ****f, double ****df);
 double norma(double a,double b,double c,int q);
+double omega(double t, double *w, double *dw);
 void fill_velocity(double t, double ****f);
 double deviation(double ****f,int,int,int);
 void nut_by_flux(double ****f,double Re);
@@ -137,8 +138,10 @@ void dump(double ****f1,double ***nu,double t_cur,long count);
 void snapshot(double ****f,double ***nu,double t_cur,long count);
 void putlog(char msg_text[],long num);
 /*--------- velocity.c ----------*/
-double vfi_given(double t,double rho,double rho0);
+double vfi_given(double t,double rho,double rho0,double costheta);
 double vtheta_given(double t,double rho,double rho0,double phi);
+double vrhoDean(double t,double rho,double costheta);
+double vthDean(double t,double rho,double sintheta);
 /*------------ testspeed.c ------*/
 //void init_tick(int num_stage,char *inname);
 void start_tick(int num_stage);
