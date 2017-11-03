@@ -1,0 +1,19 @@
+Borland C++ 5.5 for Win32 Copyright (c) 1993, 2000 Borland
+../goy.c:
+../ioutil.c:
+Warning W8004 ../ioutil.c 44: 'pstr' is assigned a value that is never used in function read_token
+../main.c:
+../pde.c:
+Warning W8057 ../pde.c 96: Parameter 't' is never used in function pde
+Warning W8057 ../pde.c 169: Parameter 'f' is never used in function nut_by_flux
+Warning W8057 ../pde.c 169: Parameter 'dt' is never used in function nut_by_flux
+Warning W8004 ../pde.c 297: 'ztemp' is assigned a value that is never used in function boundary_conditions
+../rkad.c:
+../struct_func.c:
+../util.c:
+Warning W8057 ../util.c 88: Parameter 'n3' is never used in function free_mem_4f
+Warning W8057 ../util.c 126: Parameter 'n3' is never used in function free_mem_3f
+Warning W8057 ../util.c 154: Parameter 'n2' is never used in function free_mem_2f
+Warning W8057 ../util.c 171: Parameter 'n' is never used in function free_mem_1f
+../velocity.c:
+Turbo Incremental Link 5.60 Copyright (c) 1997-2002 Borland

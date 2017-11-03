@@ -1,0 +1,339 @@
+(************** Content-type: application/mathematica **************
+                     CreatedBy='Mathematica 5.0'
+
+                    Mathematica-Compatible Notebook
+
+This notebook can be used with any Mathematica-compatible
+application, such as Mathematica, MathReader or Publicon. The data
+for the notebook starts with the line containing stars above.
+
+To get the notebook into a Mathematica-compatible application, do
+one of the following:
+
+* Save the data starting with the line of stars above into a file
+  with a name ending in .nb, then open the file inside the
+  application;
+
+* Copy the data starting with the line of stars above to the
+  clipboard, then use the Paste menu command inside the application.
+
+Data for notebooks contains only printable 7-bit ASCII and can be
+sent directly in email or through ftp in text mode.  Newlines can be
+CR, LF or CRLF (Unix, Macintosh or MS-DOS style).
+
+NOTE: If you modify the data for this notebook not in a Mathematica-
+compatible application, you must delete the line below containing
+the word CacheID, otherwise Mathematica-compatible applications may
+try to use invalid cache data.
+
+For more information on notebooks and Mathematica-compatible 
+applications, contact Wolfram Research:
+  web: http://www.wolfram.com
+  email: info@wolfram.com
+  phone: +1-217-398-0700 (U.S.)
+
+Notebook reader applications are available free of charge from 
+Wolfram Research.
+*******************************************************************)
+
+(*CacheID: 232*)
+
+
+(*NotebookFileLineBreakTest
+NotebookFileLineBreakTest*)
+(*NotebookOptionsPosition[      9770,        261]*)
+(*NotebookOutlinePosition[     10415,        283]*)
+(*  CellTagsIndexPosition[     10371,        279]*)
+(*WindowFrame->Normal*)
+
+
+
+Notebook[{
+Cell[BoxData[{
+    \(<< ACPackages`\), "\[IndentingNewLine]", 
+    \(\(SetWorkDir[False];\)\), "\[IndentingNewLine]", 
+    \(\($HistoryLength = 0;\)\)}], "Input"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(SetDirectory[Directory[] <> "\</Ponomar\>"]\)], "Input"],
+
+Cell[BoxData[
+    \("D:\\programs\\icmm\\tormagn\\Ponomar"\)], "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(\(arrs = 
+        ReadBinarySnapFile["\<wave30x30x30.snp\>", 8, 
+          PrintInfo \[Rule] All];\)\)], "Input"],
+
+Cell[BoxData[
+    \({1, 1, 1}\)], "Print"],
+
+Cell[BoxData[
+    \({49.839966209`, 45900, 30, 30, 30, 1.`}\)], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\("Length of read from binary="\[InvisibleSpace]373248\
+\[InvisibleSpace]" and size of it="\[InvisibleSpace]1492992\[InvisibleSpace]" \
+bytes"\),
+      SequenceForm[ 
+      "Length of read from binary=", 373248, " and size of it=", 1492992, 
+        " bytes"],
+      Editable->False]], "Print"],
+
+Cell[BoxData[
+    InterpretationBox[\("ghost="\[InvisibleSpace]3\),
+      SequenceForm[ "ghost=", 3],
+      Editable->False]], "Print"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[{
+    \(\(coor = 
+        N[Range /@ Rest[Dimensions[arrs]]];\)\), "\[IndentingNewLine]", 
+    \(bounds = \({#[\([ghost]\)] + #[\([ghost + 
+                      1]\)], #[\([\(-ghost\)]\)] + #[\([\(-ghost\) - 1]\)]}/
+            2 &\) /@ coor\)}], "Input"],
+
+Cell[BoxData[
+    \({{3.5`, 33.5`}, {3.5`, 33.5`}, {3.5`, 33.5`}}\)], "Output"]
+}, Open  ]],
+
+Cell[BoxData[{
+    \(\(arrs1 = 
+        ReadBinarySnapFile["\<wave30x30x30.snp\>", 8, 
+          PrintInfo \[Rule] All];\)\), "\[IndentingNewLine]", 
+    \(\(Max[Abs[#]] &\) /@ \((arrs1 - arrs)\)\)}], "Input"],
+
+Cell[BoxData[
+    RowBox[{
+      RowBox[{"funcs", "=", 
+        RowBox[{
+          RowBox[{
+            RowBox[{"ListInterpolation", "[", 
+              RowBox[{
+              "#", ",", \({{Min[
+                      coor\[LeftDoubleBracket]1\[RightDoubleBracket]], 
+                    Max[coor\[LeftDoubleBracket]1\[RightDoubleBracket]]}, \
+{Min[coor\[LeftDoubleBracket]2\[RightDoubleBracket]], 
+                    Max[coor\[LeftDoubleBracket]2\[RightDoubleBracket]]}, \
+{Min[coor\[LeftDoubleBracket]3\[RightDoubleBracket]], 
+                    Max[coor\[LeftDoubleBracket]3\[RightDoubleBracket]]}}\), 
+                ",", 
+                StyleBox[\(InterpolationOrder -> 1\),
+                  "MR"]}], "]"}], "&"}], "/@", "arrs"}]}], ";"}]], "Input"],
+
+Cell[BoxData[{
+    \(\(Remove[ReStruct];\)\), "\[IndentingNewLine]", 
+    \(\(ReStruct[funcs_, {n1_, n2_, n3_}, ghost_:  3] := 
+        Block[{dx, newcoor, 
+            newarrs}, \[IndentingNewLine]dx = \((\(\(-Apply[
+                        Subtract, #]\) &\) /@ bounds)\)/{n1, n2, 
+                n3}; \[IndentingNewLine]newcoor = 
+            MapThread[
+              Table[First[#3] + #2\ x, {x, 1/2 - ghost, #1 + ghost - 1/2, 
+                    1}] &, {{n1, n2, n3}, dx, 
+                bounds}]; \[IndentingNewLine]Off[
+            InterpolatingFunction::"\<dmval\>"]; \[IndentingNewLine]newarrs = \
+\(Outer[#, Sequence @@ newcoor] &\) /@ funcs; \[IndentingNewLine]On[
+            InterpolatingFunction::"\<dmval\>"]; \[IndentingNewLine]Return[
+            newarrs];\[IndentingNewLine]];\)\)}], "Input"],
+
+Cell[BoxData[
+    \(\(\( (*\ \:041f\:0440\:0435\:043e\:0431\:0440\:0430\:0437\:043e\:0432\
+\:0430\:043d\:0438\:0435\ \:0441\:0442\:0440\:0443\:043a\:0442\:0443\:0440\
+\:044b, \ \:0432\:043c\:0435\:0441\:0442\:043e\ 30  \:044530\:044530\ \:0432\
+\:0432\:0435\:0441\:0442\:0438\ \:043d\:0443\:0436\:043d\:0443\:044e\ \:0441\
+\:0435\:0442\:043a\:0443\ *) \)\(\[IndentingNewLine]\)\(\(newn = {64, 64, 
+          64};\)\[IndentingNewLine]
+    \(arrs1 = ReStruct[funcs, newn, 3];\)\)\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(\( (*\ \:0412\:044b\:0432\:043e\:0434\ \:043f\:0440\:0435\:043e\:0431\
+\:0440\:0430\:0437\:043e\:0432\:0430\:043d\:043d\:043e\:0433\:043e\ \:0432\ \
+\:0444\:0430\:0439\:043b\ \((\(\(\:0442\:0435\:043a\:0441\:0442\:043e\:0432\
+\:044b\:0439!!\)!\))\)\ *) \)\(\[IndentingNewLine]\)\(\(Remove[
+        Put2File];\)\[IndentingNewLine]
+    \(Put2File[fname_, {n1_, n2_, n3_}, {t_, iter_, Rey_}, arrs_, 
+          type_: "\<Real32\>"] := 
+        Block[{fin}, \[IndentingNewLine]fin = 
+            OpenWrite[fname, 
+              DOSTextFormat \[Rule] False]; \[IndentingNewLine]SetOptions[
+            fin, FormatType -> OutputForm]; \[IndentingNewLine]Write[
+            fin, "\<current time = \>", t]; \[IndentingNewLine]Write[
+            fin, "\<current iteration = \>", iter]; \[IndentingNewLine]Write[
+            fin, "\<number of processors along axes=\>", {1, 1, 
+              1}]; \[IndentingNewLine]Write[
+            fin, "\<Number of points along x = \>", 
+            n1]; \[IndentingNewLine]Write[
+            fin, "\<Number of points along y = \>", 
+            n2]; \[IndentingNewLine]Write[
+            fin, "\<Number of points along z = \>", 
+            n3]; \[IndentingNewLine]Write[fin, "\<Reynolds number = \>", 
+            Rey]; \[IndentingNewLine] (*Close[fin]; 
+            fin = OpenAppend[fname, 
+                DOSTextFormat \[Rule] 
+                  False]; \[IndentingNewLine]Experimental`BinaryExport[fin, 
+              Flatten[arrs], {type .. }, 
+              CharacterEncoding \[Rule] 
+                None];*) \[IndentingNewLine]SetOptions[fin, 
+            FormatType \[Rule] 
+              InputForm]; \[IndentingNewLine]\(Write[
+                fin, \((# /. 
+                    b_ \[RuleDelayed] CForm[b] /; NumericQ[b])\)] &\) /@ 
+            arrs; \[IndentingNewLine]Close[
+            fin];\[IndentingNewLine]];\)\)\)\)], "Input"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(Put2File["\<wave64x64x64.snp\>", newn, {49.8399662093, 45900, 1. }, 
+      arrs1]\)], "Input"],
+
+Cell[BoxData[
+    \($Aborted\)], "Output"]
+}, Open  ]],
+
+Cell[BoxData[
+    \( (*\ \:041f\:0440\:043e\:0432\:0435\:0440\:043a\:0430\ \:043f\:0440\
+\:0430\:0432\:0438\:043b\:044c\:043d\:043e\:0441\:0442\:0438, \ \:043f\:0440\
+\:0438\:043c\:0435\:043d\:044f\:0442\:044c\ \:0434\:043b\:044f\ \:0442\:043e\
+\:0439\ \:0436\:0435\ \:0441\:0435\:0442\:043a\:0438\ *) \)], "Input"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(\({Dimensions[#], ByteCount[#]} &\) /@ {arrs, arrs1}\)], "Input"],
+
+Cell[BoxData[
+    \({{{8, 36, 36, 36}, 3616376}, {{8, 70, 70, 70}, 55993528}}\)], "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+    \(If[Dimensions[arrs] \[Equal] 
+        Dimensions[
+          arrs1], \(Max[Abs[#]] &\) /@ \((arrs1 - 
+            arrs)\), "\<Cannot compare different structures\>"]\)], "Input"],
+
+Cell[BoxData[
+    \("Cannot compare different structures"\)], "Output"]
+}, Open  ]],
+
+Cell[BoxData[
+    \(\(Show2x[
+        ListPlot3D[Cut3D[#, 2, 7], DisplayFunction \[Rule] Identity, 
+            PlotRange \[Rule] All] &, arrs];\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(Show2x[
+        ListPlot3D[Cut3D[#, 2, 7], DisplayFunction \[Rule] Identity, 
+            PlotRange \[Rule] All] &, arrs1];\)\)], "Input"],
+
+Cell[BoxData[
+    \(\({pi, vxi, vyi, vzi, Axi, Ayi, Azi, nuti} = funcs;\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(DisplayTogetherArray[SectionRZ[vxi, vyi, vzi, 5], 
+        SectionR\[CapitalPhi][vxi, vyi, vzi, 
+          Mean[bounds\[LeftDoubleBracket]3\[RightDoubleBracket]], 
+          AspectRatio \[Rule] Automatic], 
+        Section\[CapitalPhi]Z[vxi, vyi, vzi, 
+          Mean[bounds\[LeftDoubleBracket]1\[RightDoubleBracket]], 
+          AspectRatio \[Rule] Automatic], 
+        GraphicsSpacing \[Rule] 0.0];\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(DisplayTogetherArray[SectionRZ[Axi, Ayi, Azi, 5], 
+        SectionR\[CapitalPhi][Axi, Ayi, Azi, 
+          Mean[bounds\[LeftDoubleBracket]3\[RightDoubleBracket]], 
+          AspectRatio \[Rule] Automatic], 
+        Section\[CapitalPhi]Z[Axi, Ayi, Azi, 
+          Mean[bounds\[LeftDoubleBracket]1\[RightDoubleBracket]], 
+          AspectRatio \[Rule] Automatic], 
+        GraphicsSpacing \[Rule] 0.0];\)\)], "Input"]
+},
+FrontEndVersion->"5.0 for Microsoft Windows",
+ScreenRectangle->{{0, 1022}, {0, 681}},
+WindowSize->{768, 532},
+WindowMargins->{{88, Automatic}, {34, Automatic}}
+]
+
+(*******************************************************************
+Cached data follows.  If you edit this Notebook file directly, not
+using Mathematica, you must remove the line containing CacheID at
+the top of  the file.  The cache data will then be recreated when
+you save this file from within Mathematica.
+*******************************************************************)
+
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+
+(*NotebookFileOutline
+Notebook[{
+Cell[1754, 51, 162, 3, 70, "Input"],
+
+Cell[CellGroupData[{
+Cell[1941, 58, 76, 1, 30, "Input"],
+Cell[2020, 61, 72, 1, 29, "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[2129, 67, 133, 3, 30, "Input"],
+Cell[2265, 72, 42, 1, 25, "Print"],
+Cell[2310, 75, 72, 1, 25, "Print"],
+Cell[2385, 78, 330, 7, 25, "Print"],
+Cell[2718, 87, 135, 3, 25, "Print"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[2890, 95, 269, 5, 50, "Input"],
+Cell[3162, 102, 79, 1, 29, "Output"]
+}, Open  ]],
+Cell[3256, 106, 209, 4, 50, "Input"],
+Cell[3468, 112, 758, 16, 70, "Input"],
+Cell[4229, 130, 813, 14, 210, "Input"],
+Cell[5045, 146, 492, 7, 70, "Input"],
+Cell[5540, 155, 1894, 34, 390, "Input"],
+
+Cell[CellGroupData[{
+Cell[7459, 193, 114, 2, 30, "Input"],
+Cell[7576, 197, 42, 1, 29, "Output"]
+}, Open  ]],
+Cell[7633, 201, 315, 4, 30, "Input"],
+
+Cell[CellGroupData[{
+Cell[7973, 209, 85, 1, 30, "Input"],
+Cell[8061, 212, 91, 1, 29, "Output"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+Cell[8189, 218, 197, 4, 50, "Input"],
+Cell[8389, 224, 71, 1, 29, "Output"]
+}, Open  ]],
+Cell[8475, 228, 159, 3, 30, "Input"],
+Cell[8637, 233, 160, 3, 30, "Input"],
+Cell[8800, 238, 86, 1, 30, "Input"],
+Cell[8889, 241, 437, 8, 70, "Input"],
+Cell[9329, 251, 437, 8, 70, "Input"]
+}
+]
+*)
+
+
+
+(*******************************************************************
+End of Mathematica Notebook file.
+*******************************************************************)
+
