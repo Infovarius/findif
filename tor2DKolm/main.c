@@ -129,6 +129,17 @@ nextparam:
 	    printing(f1,dtdid,t_cur,count,PulsEnergy);
 	    }
         outed = 0;
+/*	sprintf(str, "bounds: (%lf; %lf)x(%lf; %lf)", coordin(ghost, 0), coordin(mm1-1, 0), coordin(ghost, 2), coordin(mm3-1, 0));
+	putlog(str, 0);
+	exit(0);*/
+	if(coordin(ghost,0)<-0.1 && coordin(mm1-1,0)>-0.1 && coordin(ghost,2)<0.1 && coordin(mm3-1,2)>0.1)
+	{
+		fd = fileopen("point.dat",count);
+		fprintf(fd,"%d %d %d %d %d\n",rank,lround(1e6*f1[0][ghost+n1/2][ghost+n3/2]),lround(1e6*f1[1][ghost + n1 /2][ghost + n3 /2]),
+									(int)lround(1e6*f1[2][ghost + n1 /2][ghost + n3 /2]),(int)lround(1e6*f1[3][ghost + n1 /2][ghost + n3 /2]));
+		fileclose(fd);
+	}
+		
 	if (SnapStep!=0 && count%SnapStep==0)
 		{ snapshot(f1,nut,t_cur,count); outed=1; }
 	if (SnapDelta>5*dtdid && floor((t_cur-dtdid)/SnapDelta)<floor(t_cur/SnapDelta))
