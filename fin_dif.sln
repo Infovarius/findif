@@ -1,15 +1,19 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "torgrid", "torgrid\Visual\tor.vcproj", "{1CE47D4A-5D6A-4695-816A-7E1EC809F88D}"
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.10
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "torgrid", "torgrid\Visual\tor.vcxproj", "{1CE47D4A-5D6A-4695-816A-7E1EC809F88D}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tormagn", "tormagn\tormagn.vcproj", "{52AE4AA3-2521-455C-AE14-8765114A95A3}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tormagn", "tormagn\tormagn.vcxproj", "{52AE4AA3-2521-455C-AE14-8765114A95A3}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "torMHD", "torMHD\torMHD.vcproj", "{816844AB-422B-4F1B-9D30-D180B1534CEC}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "torMHD", "torMHD\torMHD.vcxproj", "{816844AB-422B-4F1B-9D30-D180B1534CEC}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tor2d", "tor2D\tor2D.vcproj", "{D2DB9E46-EDD4-41C3-846A-D29E928C7A71}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tor2d", "tor2D\tor2D.vcxproj", "{D2DB9E46-EDD4-41C3-846A-D29E928C7A71}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "speed", "speed\speed.vcproj", "{B1B27CB5-79C6-41D6-918C-66ABE6189F56}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "speed", "speed\speed.vcxproj", "{B1B27CB5-79C6-41D6-918C-66ABE6189F56}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Kolm-tor2d", "tor2DKolm\Kolm-tor2d.vcxproj", "{DD57317F-061D-475B-B496-A8E4F9289858}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,8 +53,19 @@ Global
 		{B1B27CB5-79C6-41D6-918C-66ABE6189F56}.Debug|x64.ActiveCfg = Debug|x64
 		{B1B27CB5-79C6-41D6-918C-66ABE6189F56}.Release|Win32.ActiveCfg = Release|Win32
 		{B1B27CB5-79C6-41D6-918C-66ABE6189F56}.Release|x64.ActiveCfg = Release|x64
+		{DD57317F-061D-475B-B496-A8E4F9289858}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DD57317F-061D-475B-B496-A8E4F9289858}.Debug|Win32.Build.0 = Debug|Win32
+		{DD57317F-061D-475B-B496-A8E4F9289858}.Debug|x64.ActiveCfg = Debug|x64
+		{DD57317F-061D-475B-B496-A8E4F9289858}.Debug|x64.Build.0 = Debug|x64
+		{DD57317F-061D-475B-B496-A8E4F9289858}.Release|Win32.ActiveCfg = Release|Win32
+		{DD57317F-061D-475B-B496-A8E4F9289858}.Release|Win32.Build.0 = Release|Win32
+		{DD57317F-061D-475B-B496-A8E4F9289858}.Release|x64.ActiveCfg = Release|x64
+		{DD57317F-061D-475B-B496-A8E4F9289858}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {45E8F5BC-343E-4475-9A68-6661B4D40151}
 	EndGlobalSection
 EndGlobal
