@@ -52,15 +52,14 @@ void pde(double t, double ****f, double ****df)
         }
 
        df[4][i][j][k]=Rm*(f[2][i][j][k]*(dv1[5][0]-dv1[4][1]+f[5][i][j][k]*r_1[i])-f[3][i][j][k]*(dv1[4][2]-dv1[6][0]))
-                      +Rm*(f[2][i][j][k]*B0[2][i][j][k]-f[3][i][j][k]*B0[1][i][j][k])	 // for induced field
+//                      +Rm*f[2][i][j][k]	 // for induced field
                      +eta[i][j][k]*(dv2[4][0]+dv2[4][1]+dv2[4][2]+r_1[i]*dv1[4][0]-f[4][i][j][k]*r_2[i]-2*dv1[5][1]*r_1[i])
                      +(eta0-eta[i][j][k])*(dv2[4][0]+dv1[4][0]*r_1[i]-f[4][i][j][k]*r_2[i]-dv1[5][1]*r_1[i]+dA11[5][0][1]+dA11[6][0][2]);
        df[5][i][j][k]=Rm*(f[3][i][j][k]*(dv1[6][1]-dv1[5][2])-f[1][i][j][k]*(dv1[5][0]-dv1[4][1]+f[5][i][j][k]*r_1[i]))
-                   +Rm*(f[1][i][j][k]*B0[2][i][j][k]-f[3][i][j][k]*B0[0][i][j][k])	// for induced field
+//                     -Rm*f[1][i][j][k]	// for induced field
                      +eta[i][j][k]*(dv2[5][0]+dv2[5][1]+dv2[5][2]+r_1[i]*dv1[5][0]-f[5][i][j][k]*r_2[i]+2*dv1[4][1]*r_1[i])
                      +(eta0-eta[i][j][k])*(dv1[4][1]*r_1[i]+dA11[4][0][1]+dv2[5][1]+dA11[6][1][2]);
        df[6][i][j][k]=Rm*(f[1][i][j][k]*(dv1[4][2]-dv1[6][0])-f[2][i][j][k]*(dv1[6][1]-dv1[5][2]))
-					 +Rm*(f[1][i][j][k]*B0[1][i][j][k]-f[2][i][j][k]*B0[0][i][j][k])	// for induced field
                      +eta[i][j][k]*(dv2[6][0]+dv2[6][1]+dv2[6][2]+r_1[i]*dv1[6][0])
                      +(eta0-eta[i][j][k])*(dv1[4][2]*r_1[i]+dA11[4][0][2]+dA11[5][1][2]+dv2[6][2]);
 /*       df[4][i][j][k]=eta[i][j][k]*(dv2[4][0]+dv2[4][1]+dv2[4][2]+r_1[i]*dv1[4][0]-f[4][i][j][k]*r_2[i]-2*dv1[5][1]*r_1[i]);
@@ -90,7 +89,7 @@ FILE *inp;
             rho=sqrt(r1*r1 + z1*z1);
 /*            vrho = 0;
             vth  = vtheta_given(t,rho,Rfl,phi1)/(1+r1*rc);*/
-			vrho = chi*vrhoDean(0,rho,sinth[i][k]);
+			vrho = vrhoDean(0,rho,sinth[i][k]);
 			vth = vthDean(0,rho,costh[i][k]);
 //            vphi = vfi_given(t_cur*Tunit,rho,Rfl);      // nonstationary time=t_cur*Tunit, max magnitude=0.0990906
 //            vth = 0;
@@ -132,50 +131,6 @@ FILE *inp;
  fileclose(inp);
  */ 
  }
- 
-void fill_magn_field(char *fname,double ***B)
-{
-FILE *fin;
-double Bsect[101][101], mean=0;
-int i,j,k;
-if((fin=fopen(fname,"r+"))==NULL) putlog("error in opening magnetic field",1);
-for(i=0;i<101;i++)
-	for(k=0;k<101;k++)
-		{
-		fscanf(fin,"%lf",&Bsect[i][k]);
-		mean += Bsect[i][k];
-		}
-printf("mean magnetic field for %s is %g",fname,mean/101/101);
-for(i=ghost;i<mm1;i++)
-    for(j=ghost;j<mm2;j++)
-	for(k=ghost;k<mm3;k++)
-		B[i][j][k] = Bsect[i-ghost][k-ghost];
-fileclose(fin);
-}
-
-void fill_magn_field_sect(char *fname,double ***B, int sect)
-{
-FILE *fin;
-double mean=0, tmpf;
-int i,j=0,k;
-if((fin=fopen(fname,"r+"))==NULL) putlog("error in opening magnetic field",1);
-
-for(i=0;i<200;i++)
-	for(k=0;k<200;k++)
-	{
-		if(fscanf(fin,"%lf",&tmpf)<1) nrerror("Error in reading magnetic field",0.,(k+1000*i));
-		if(i>=n[0] && i<n[0]+n1 &&
-//          j>=n[1] && j<n[1]+m2 &&
-          k>=n[2] && k<n[2]+n3)
-		{
-			B[i+ghost-n[0]][sect+ghost][k+ghost-n[2]] = tmpf;
-			j++;
-			mean += tmpf;
-		}
-	}
-printf("mean magnetic field for %s (%d points) is %g\n",fname,j,mean/j);
-fileclose(fin);
-}
 
 double deviation(double ****f,int i,int j,int k)
 {
@@ -429,7 +384,6 @@ void  init_conditions()
 {
    int i,j,k,l;
    double rho, r1, z1;
-   char *fn;
 //   double k1,k2,k3;
 
 // -------- filling of nodes' types +reflections rel circle + nut ---------------
@@ -523,34 +477,21 @@ if(!goon) {
                                         }
             else f[0][i][j][k]=f[1][i][j][k]=f[2][i][j][k]=f[3][i][j][k] = 0;
       if(isType(node[i][k],NodeMagn) || isType(node[i][k],NodeGhostMagn) )
-                 { 
+                 { }
                  f[4][i][j][k]=f[5][i][j][k]=f[6][i][j][k]=0;
                  /*f[4][i][j][k]=coordin(i,0)*cos(coordin(j,1))*sin(coordin(j,1))*/;
                  /*f[5][i][j][k]=coordin(i,0)*cos(coordin(j,1))*cos(coordin(j,1))*/;
-                 f1[4][i][j][k] = f[4][i][j][k]=coordin(k,2)*r_1[i];
+                 //f1[4][i][j][k] = f[4][i][j][k]=coordin(k,2);
                   if(isType(node[i][k],NodeFluid))
                      {
                      f[4][i][j][k]+=Noise*((double)rand()-RAND_MAX/2)/RAND_MAX + NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl);
                      f[5][i][j][k]+=Noise*((double)rand()-RAND_MAX/2)/RAND_MAX + NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl);
                      f[6][i][j][k]+=Noise*((double)rand()-RAND_MAX/2)/RAND_MAX + NoiseNorm*cos(2*M_PI*coordin(j,1)/R)*sin(2*M_PI*coordin(k,2)/Rfl);
                      }
-				  }
+				  
       }
 //   Master f[4][2*ghost][2*ghost][2*ghost] = 100;   
 //   struct_func(f,2,2,3);
-   fn = (char*)malloc(12);
-   for(i=1;i<=10;i++)
-   {
-	   sprintf(fn,"BresX%d.dat",i);
-	   fill_magn_field_sect(fn,B0[1],i-1);
-	   sprintf(fn,"BresY%d.dat",i);
-	   fill_magn_field_sect(fn,B0[0],i-1);
-	   sprintf(fn,"BresZ%d.dat",i);
-	   fill_magn_field_sect(fn,B0[2],i-1);
-   }
-   //fill_magn_field("BresX.txt",B[0]);
-   //fill_magn_field("BresY.txt",B[0]);
-   //fill_magn_field("BresZ.txt",B[2]);
    nmessage("Arrays were filled with initial values - calculation from beginning",-1,-1);
    } else nmessage("Arrays were filled with initial values - calculation is continuing",t_cur,count);
 }
