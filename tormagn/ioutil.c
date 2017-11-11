@@ -3,6 +3,11 @@
 #define LEVEL extern
 //#include <conio.h>
 #include "head.h"
+#ifdef UNIX
+#include <sys/stat.h>
+#else
+#include <windows.h>
+#endif
 
 double UpLimit;     //after this limit there's dump
 #define PREC 5
@@ -11,7 +16,7 @@ FILE *fileopen(const char *x, int mode)  //opening of file to ff
                          /*   0-rewrite;>0-append;<0-read    */
 {
 FILE *ff;
-char* s_mode;                              
+char *s_mode="w";
 if(mode>0) s_mode="a";
 if(mode<0) s_mode="r";
 if(mode==0) s_mode="w";
@@ -413,23 +418,39 @@ Master printf("t=%g dtdid=%g NIter=%d maxdivv=%g(local=%g) maxdivB=%g(local=%g)\
 
 void dump(double ****f1,double ***nu,double t_cur,long count)
 {
+char str[256],str1[256];
 FILE *fd;
 char *message="dump";
 int tag=1,v;
+#ifdef UNIX
+struct stat st = {0};
 
+if (stat("dump", &st) == -1) {
+	mkdir("dump", 0777);
+}		   
+#endif
 // boundary_conditions(f1);
+ if(DumpKeep)  sprintf(str,"dump/%s_%d_%ld.dmp",NameSnapFile,rank,count);
+	else {
+		sprintf(str,"dump/%s%d.dmp",NameSnapFile,rank);
+		sprintf(str1,"dump/%s%d.bak",NameSnapFile,rank);
+		remove(str1);
+		rename(str,str1);
+		}
 
  if(rank!=0) MPI_Recv(message,0,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);
 
- fd=fileopen(NameDumpFile,rank);
+ fd=fileopen(str,rank);
 
- Master nmessage("dump has been started",t_cur,count);
- Master fprintf(fd,"current time = %0.10f \ncurrent iteration = %ld\n",t_cur,count);
- Master fprintf(fd,"number of processors along axes={%d,%d,%d}\n",pp[0],pp[1],pp[2]);
- Master fprintf(fd,"Number of points along x = %d\n",N1);
- Master fprintf(fd,"Number of points along y = %d\n",N2);
- Master fprintf(fd,"Number of points along z = %d\n",N3);
- Master fprintf(fd,"Reynolds number = %lf\n",Re);
+//Master { // для вывода в один файл, иначе убрать!! 
+// nmessage("dump has been started",t_cur,count);
+ fprintf(fd,"current time = %0.10f \ncurrent iteration = %ld\n",t_cur,count);
+ fprintf(fd,"number of processors along axes={%d,%d,%d}\n",pp[0],pp[1],pp[2]);
+ fprintf(fd,"Number of points along x = %d\n",N1);
+ fprintf(fd,"Number of points along z = %d\n",N2);
+ fprintf(fd,"Number of points along z = %d\n",N3);
+ fprintf(fd,"Reynolds number = %lf\n",Re);
+//}
 
  for(v=0;v<nvar;v++)
     print_array3d(fd,f1[v],0,m1,0,m2,0,m3);
@@ -438,8 +459,13 @@ int tag=1,v;
 
  if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
  MPI_Barrier(MPI_COMM_WORLD);
- Master {nmessage("dump is done",t_cur,count);
-         add_control_point(NameDumpFile);}
+ Master 
+    {   
+	 nmessage("dump is done",t_cur,count);
+	 if(DumpKeep)  sprintf(str,"dump/%s_*_%ld.dmp",NameSnapFile,count);
+		else 	sprintf(str,"dump/%s*.dmp",NameSnapFile);
+    add_control_point(str);
+    }
 }
 
 void snapshot(double ****f1,double ***nu,double t_cur,long count)
@@ -475,4 +501,5 @@ FILE *fd;
  Master {nmessage("snap is done",t_cur,count);
          add_control_point(str);}
 }
+
 												  

@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #define _USE_MATH_DEFINES
+#define UNIX
 #include <math.h>
 #include <string.h>
 //#include <conio.h>

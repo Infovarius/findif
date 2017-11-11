@@ -3,8 +3,11 @@
 #define LEVEL extern
 //#include <conio.h>
 #include "head.h"
+#ifdef UNIX
 #include <sys/stat.h>
-//#include <windows.h>
+#else
+#include <windows.h>
+#endif
 
 double UpLimit;     //after this limit there's dump
 #define PREC 5
@@ -13,7 +16,7 @@ FILE *fileopen(const char *x, int mode)  //opening of file to ff
                          /*   0-rewrite;>0-append;<0-read    */
 {
 FILE *ff;
-char* s_mode;
+char *s_mode="w";
 if(mode>0) s_mode="a";
 if(mode<0) s_mode="r";
 if(mode==0) s_mode="w";
@@ -59,7 +62,7 @@ char str[256],*pstr;
 void init_param(int argc, char** argv,double *dtnext,int flag)
 {
 int ver;
-FILE *iop;
+FILE *iop=NULL;
 double d;
  if(argc<2 || (iop=fopen(argv[1],"r"))==NULL) //no ini file
      nrerror("Start from no ini file!",-1,-1);
@@ -118,7 +121,9 @@ double d;
 
 void read_params(int argc, char** argv, long count)
 {
-  FILE *fin,*fout,*fdone;
+	FILE *fin = NULL;
+	FILE *fout = NULL;
+	FILE *fdone = NULL;
   char str[256],*pstr;
   int reading;
   char TMPNAME[256], INPNAME[256], DONENAME[256];
@@ -327,7 +332,7 @@ double temp, divv, totdivv;
 int i,k,l;
 double mf[3], totmf[3], toten;     //mf[0]=max(f), mf[1]=max(df), mf[2]=max(df/f)
 //FILE *fv,*fnu,*fkv;
-FILE *fen;
+FILE *fen = NULL;
 
 //clrscr();
 divv = totdivv = 0;
@@ -406,12 +411,15 @@ void dump(double ***f1,double **nu,double t_cur,long count)
 {
 char str[256],str1[256];
 FILE *fd;
+char message[10]="dump";
 int v;
+#ifdef UNIX
 struct stat st = {0};
 
 if (stat("dump", &st) == -1) {
 	mkdir("dump", 0777);
-}
+}		   
+#endif
  if(DumpKeep)  sprintf(str,"dump/%s_%d_%ld.dmp",NameSnapFile,rank,count);
 	else {
 		sprintf(str,"dump/%s%d.dmp",NameSnapFile,rank);
@@ -419,7 +427,8 @@ if (stat("dump", &st) == -1) {
 		remove(str1);
 		rename(str,str1);
 		}
-// if(rank!=0) MPI_Recv("dump",0,MPI_CHAR,rank-1,/*tag*/1,MPI_COMM_WORLD,statuses);
+
+//if(rank!=0) MPI_Recv(message,0,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);
 
  fd=fileopen(str,rank);
 
@@ -477,4 +486,5 @@ FILE *fd;
  MPI_Barrier(MPI_COMM_WORLD);
  Master {nmessage("snap is done",t_cur,count);
                    add_control_point(str);}
-}
+}	 
+

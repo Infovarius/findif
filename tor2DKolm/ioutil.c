@@ -3,8 +3,11 @@
 #define LEVEL extern
 //#include <conio.h>
 #include "head.h"
-//#include <sys/stat.h>
+#ifdef UNIX
+#include <sys/stat.h>
+#else
 #include <windows.h>
+#endif
 
 double UpLimit;     //after this limit there's dump
 #define PREC 5
@@ -412,12 +415,15 @@ void dump(double ***f1,double **nu,double t_cur,long count)
 {
 char str[256],str1[256];
 FILE *fd;
+char message[10]="dump";
 int v;
-/*struct stat st = {0};
+#ifdef UNIX
+struct stat st = {0};
 
-/if (stat("dump", &st) == -1) {
+if (stat("dump", &st) == -1) {
 	mkdir("dump", 0777);
-}*/
+}
+#endif
  if(DumpKeep)  sprintf(str,"dump/%s_%d_%ld.dmp",NameSnapFile,rank,count);
 	else {
 		sprintf(str,"dump/%s%d.dmp",NameSnapFile,rank);
@@ -425,7 +431,8 @@ int v;
 		remove(str1);
 		rename(str,str1);
 		}
-// if(rank!=0) MPI_Recv("dump",0,MPI_CHAR,rank-1,/*tag*/1,MPI_COMM_WORLD,statuses);
+
+//if(rank!=0) MPI_Recv(message,0,MPI_CHAR,rank-1,tag,MPI_COMM_WORLD,statuses);
 
  fd=fileopen(str,rank);
 
@@ -484,3 +491,4 @@ FILE *fd;
  Master {nmessage("snap is done",t_cur,count);
                    add_control_point(str);}
 }
+

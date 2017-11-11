@@ -3,6 +3,11 @@
 #define LEVEL extern
 //#include <conio.h>
 #include "head.h"
+#ifdef UNIX
+#include <sys/stat.h>
+#else
+#include <windows.h>
+#endif
 
 double UpLimit;     //after this limit there's dump
 #define PREC 5
@@ -11,7 +16,7 @@ FILE *fileopen(const char *x, int mode)  //opening of file to ff
                          /*   0-rewrite;>0-append;<0-read    */
 {
 FILE *ff;
-char* s_mode;
+char *s_mode="w";
 char msg[100];
 if(mode>0) s_mode="ab";
 if(mode<0) s_mode="rb";
@@ -58,7 +63,7 @@ char str[256],*pstr;
 void init_param(int argc, char** argv,double *dtnext,int flag)
 {
 int ver;
-FILE *iop;
+FILE *iop=NULL;
 double d;
  if(argc<2 || (iop=fopen(argv[1],"r"))==NULL) //no ini file
      nrerror("Start from no ini file!",-1,-1);
@@ -426,11 +431,18 @@ char str[256],str1[256];
 FILE *fd;
 char message[10]="dump";
 int tag=1,v;
+#ifdef UNIX
+struct stat st = {0};
 
-if(DumpKeep)  sprintf(str,"%s_%d_%d.dmp",NameSnapFile,rank,count);
+if (stat("dump", &st) == -1) {
+	mkdir("dump", 0777);
+}		   
+#endif
+
+ if(DumpKeep)  sprintf(str,"dump/%s_%d_%ld.dmp",NameSnapFile,rank,count);
 	else {
-		sprintf(str,"%s%d.dmp",NameSnapFile,rank);
-		sprintf(str1,"%s%d.bak",NameSnapFile,rank);
+		sprintf(str,"dump/%s%d.dmp",NameSnapFile,rank);
+		sprintf(str1,"dump/%s%d.bak",NameSnapFile,rank);
 		remove(str1);
 		rename(str,str1);
 		}
@@ -438,8 +450,8 @@ if(DumpKeep)  sprintf(str,"%s_%d_%d.dmp",NameSnapFile,rank,count);
 
  fd=fileopen(str,rank);
 
- Master nmessage("dump has been started",t_cur,count);
-// Master {
+//Master { // для вывода в один файл, иначе убрать!! 
+// nmessage("dump has been started",t_cur,count);
   fprintf(fd,"current time = %0.10f \ncurrent iteration = %ld\n",t_cur,count);
   fprintf(fd,"number of processors along axes={%d,%d,%d}\n",pp[0],pp[1],pp[2]);
   fprintf(fd,"Number of points along x = %d\n",N1);
@@ -456,11 +468,12 @@ if(DumpKeep)  sprintf(str,"%s_%d_%d.dmp",NameSnapFile,rank,count);
 // if(rank!=size-1) MPI_Send(message,0,MPI_CHAR,rank+1,tag,MPI_COMM_WORLD);
  MPI_Barrier(MPI_COMM_WORLD);
  Master 
- {    nmessage("dump is done",t_cur,count);
-	  if(DumpKeep)  sprintf(str,"%s_*_%d.dmp",NameSnapFile,count);
-			else 	sprintf(str,"%s*.dmp",NameSnapFile);
-	  add_control_point(str);
-                   }
+    {   
+	 nmessage("dump is done",t_cur,count);
+	 if(DumpKeep)  sprintf(str,"dump/%s_*_%ld.dmp",NameSnapFile,count);
+		else 	   sprintf(str,"dump/%s*.dmp",NameSnapFile);
+    add_control_point(str);
+    }
 }
 
 void snapshot(double ****f1,double ***nu,double t_cur,long count)

@@ -1,9 +1,13 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
+#define _USE_MATH_DEFINES
+#define UNIX
 #include <math.h>
 #include <string.h>
 //#include <conio.h>
 #include "mpi.h"
+// #define M_PI       3.14159265358979323846L
 
 LEVEL char *NameMessageFile;
 LEVEL char *NameErrorFile;
