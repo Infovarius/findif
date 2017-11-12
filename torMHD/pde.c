@@ -152,7 +152,7 @@ calculate_curl(B,J,NodeFluid);
        df[6][i][j][k]=Rm*(f[1][i][j][k]*(dv1[4][2]-dv1[6][0])-f[2][i][j][k]*(dv1[6][1]-dv1[5][2]))
                      +eta[i][j][k]*(dv2[6][0]+dv2[6][1]+dv2[6][2]+r_1[i]*dv1[6][0])
                      +(eta0-eta[i][j][k])*(dv1[4][2]*r_1[i]+dA11[4][0][2]+dA11[5][1][2]+dv2[6][2]);*/
- Ha=(t_cur>10? 1 : 0);
+ Ha=(t_cur>1? 1 : 0);
        df[4][i][j][k]=Rm*(f[2][i][j][k]*B[2][i][j][k]-f[3][i][j][k]*B[1][i][j][k])
                       +Rm*Ha*f[2][i][j][k]	 // for induced field
                      +eta[i][j][k]*(dv2[4][0]+dv2[4][1]+dv2[4][2]+r_1[i]*dv1[4][0]-f[4][i][j][k]*r_2[i]-2*dv1[5][1]*r_1[i])
@@ -168,15 +168,15 @@ calculate_curl(B,J,NodeFluid);
    if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
 	   {
 	   // пондеромоторная сила
-		df[1][i][j][k]-= 
+		df[1][i][j][k]+= 
 		     -J[2][i][j][k]*B[1][i][j][k]
 		     +J[1][i][j][k]*(B[2][i][j][k]+Ha)
 		     ;
-		df[2][i][j][k]-= 
+		df[2][i][j][k]+= 
 		     +J[2][i][j][k]*B[0][i][j][k]
 		     -J[0][i][j][k]*(B[2][i][j][k]+Ha)
 		     ;
-		df[3][i][j][k]-= 
+		df[3][i][j][k]+= 
 		     -J[1][i][j][k]*B[0][i][j][k]
 		     +J[0][i][j][k]*B[1][i][j][k]
 		     ;
