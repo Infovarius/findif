@@ -252,6 +252,7 @@ void operate_memory(int dir)
        df4=alloc_mem_4f(nvar, m1, m2, m3);
        df5=alloc_mem_4f(nvar, m1, m2, m3);
        B = alloc_mem_4f(3, m1, m2, m3);      // vector of magnetic induction itself
+       B0 = alloc_mem_4f(3, m1, m2, m3);      // vector of external magnetic induction
        J = alloc_mem_4f(3, m1, m2, m3);      // vector of electric current
        r_1=alloc_mem_1f(m1);                  // r^(-1)
        r_2=alloc_mem_1f(m1);                  // r^(-2)
@@ -277,6 +278,7 @@ void operate_memory(int dir)
        free_mem_4f(df4,nvar, m1, m2, m3);
        free_mem_4f(df5,nvar, m1, m2, m3);
        free_mem_4f(B, 3, m1, m2, m3);
+       free_mem_4f(B0, 3, m1, m2, m3);
        free_mem_4f(J, 3, m1, m2, m3);
        free_mem_3f(nut, m1, m2, m3);
        free_mem_2f(refr_f,m1, m3);

@@ -21,7 +21,7 @@ LEVEL char *NameCPFile;
 LEVEL char *NameStatFile;
 LEVEL char *fname;
 
-LEVEL double ****f, ****f1, ***nut, ****df, ****df2, ****df3, ****df4, ****df5, ****B, ****J,
+LEVEL double ****f, ****f1, ***nut, ****df, ****df2, ****df3, ****df4, ****df5, ****B, ****B0, ****J,
              dx[3], *r_1, *r_2, **refr_f, **refz_f, **refr_m, **refz_m,
              **sinth, **costh, ***eta;
 LEVEL int **node;
