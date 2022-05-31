@@ -16,7 +16,7 @@ FILE *fileopen(const char *x, int mode)  //opening of file to ff
                          /*   0-rewrite;>0-append;<0-read    */
 {
 FILE *ff;
-char *s_mode="w";
+char *s_mode="w\0\0";
 char msg[100];
 if(mode>0) s_mode="ab";
 if(mode<0) s_mode="rb";
