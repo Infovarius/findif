@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26730.10
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "torgrid", "torgrid\Visual\tor.vcxproj", "{1CE47D4A-5D6A-4695-816A-7E1EC809F88D}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "speed", "speed\speed.vcxproj", "{B1B27CB5-79C6-41D6-918C-66ABE6189F56}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Kolm-tor2d", "tor2DKolm\Kolm-tor2d.vcxproj", "{DD57317F-061D-475B-B496-A8E4F9289858}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tor2dstab", "tor2dstab\tor2dstab.vcxproj", "{4C0712B2-1B52-4DA2-8354-832F463E3805}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -61,6 +63,14 @@ Global
 		{DD57317F-061D-475B-B496-A8E4F9289858}.Release|Win32.Build.0 = Release|Win32
 		{DD57317F-061D-475B-B496-A8E4F9289858}.Release|x64.ActiveCfg = Release|x64
 		{DD57317F-061D-475B-B496-A8E4F9289858}.Release|x64.Build.0 = Release|x64
+		{4C0712B2-1B52-4DA2-8354-832F463E3805}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4C0712B2-1B52-4DA2-8354-832F463E3805}.Debug|Win32.Build.0 = Debug|Win32
+		{4C0712B2-1B52-4DA2-8354-832F463E3805}.Debug|x64.ActiveCfg = Debug|x64
+		{4C0712B2-1B52-4DA2-8354-832F463E3805}.Debug|x64.Build.0 = Debug|x64
+		{4C0712B2-1B52-4DA2-8354-832F463E3805}.Release|Win32.ActiveCfg = Release|Win32
+		{4C0712B2-1B52-4DA2-8354-832F463E3805}.Release|Win32.Build.0 = Release|Win32
+		{4C0712B2-1B52-4DA2-8354-832F463E3805}.Release|x64.ActiveCfg = Release|x64
+		{4C0712B2-1B52-4DA2-8354-832F463E3805}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
