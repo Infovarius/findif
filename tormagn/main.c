@@ -6,7 +6,7 @@
 
 int main(int argc, char** argv)
 {
-   double dttry, dtdid, dtnext, Rm_tmp, rc_tmp, tmpT, time_old;
+   double dttry, dtdid, dtnext, Rm_tmp, rc_tmp, lfi_tmp, tmpT, time_old;
    char str[200];
    int i,j,k,l,tmpC;
    int outed;
@@ -143,9 +143,11 @@ pde(t_cur, f, df);
 //          MPI_Barrier(MPI_COMM_WORLD);
           Rm_tmp=Rm;
           rc_tmp = rc;
+	   lfi_tmp=lfi;
 			init_param(argc,argv,&dttry,0);
           Rm=Rm_tmp;
           rc = rc_tmp;
+	   lfi=lfi_tmp;  dx[1]=lfi/N2;
 //          MPI_Barrier(MPI_COMM_WORLD);
         }
 
@@ -156,13 +158,13 @@ pde(t_cur, f, df);
 //		          MPI_Barrier(MPI_COMM_WORLD);
 			Rm_tmp = (Rm /= (1+max(-0.9,DeltaParam*log(TotalEnergy/TotalEnergyOld))));
          rc_tmp = rc;
-         tmpC = count;  tmpT = t_cur;
+         tmpC = count;  tmpT = t_cur; lfi_tmp=lfi;
 			init_param(argc,argv,&dtnext,1);       // initialization of parameters
 
 			if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
 			if(strcmp(NameInitFile,"-1")==0) goon = 1;
 
-         count = tmpC;  t_cur = tmpT;  Rm = Rm_tmp; rc = rc_tmp;
+         count = tmpC;  t_cur = tmpT;  Rm = Rm_tmp; rc = rc_tmp;  lfi=lfi_tmp; dx[1]=lfi/N2;
 			init_conditions();
 			fill_velocity(0.3, f);   fill_velocity(0.3, f1);
 			goon = 1;
@@ -178,14 +180,14 @@ pde(t_cur, f, df);
    if(!outed) snapshot(f,eta,t_cur,count);
    if(rank==0) add_control_point("END");
 
-sprintf(str,"energy(%0.2f).dat",rc);
+sprintf(str,"energy(kappa=%0.2f,k=%0.2f).dat",rc,2*M_PI/lfi);
 Master rename("energy.dat",str);
 MPI_Barrier(MPI_COMM_WORLD);
 	operate_memory(-1);
-if(0 && (rc += 0.05) <1) 
+if((lfi = 2*M_PI/(2*M_PI/lfi - 0.05)) <=4*M_PI) 
     {
    Master nmessage("--------------------------------------------------------------------------",-1,-1);
-	Master nmessage("rc was changed to",rc,count);
+	Master nmessage("k was changed to",2*M_PI/lfi,count);
 	goon=0;
 	goto nextrc;
 }
