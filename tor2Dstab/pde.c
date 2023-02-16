@@ -33,30 +33,34 @@ void pde(double t, double ***f, double ***df)
 {
    int i,k,l,m;
    double dv1[4][3], dv2[4][3], dp1[3], w, dw, DV1[4][3];
+   double dv11[7][3][3];
    char* temp = (char*)malloc(10);
+   double zeta = 1000000. / Re;
 
    boundary_conditions(f,nut);
-   putlog("???", 1);
+   //putlog("???", 1);
 //   omega(t,&w,&dw);
    for(i=0;i<m1;i++)
    for(k=0;k<m3;k++)
      if(isType(node[i][k],NodeFluid) && !isType(node[i][k],NodeClued))
      {
 
-         sprintf(temp, "%d+%d:%0.4lf\n", i, k, DV1[i][k]);
-         nmessage(temp, i, k);
-         putlog(temp, 1);
+       //  sprintf(temp, "%d+%d:%0.4lf\n", i, k, DV1[i][k]);
+       //  nmessage(temp, i, k);
+       //  putlog(temp, 1);
       for(m=0;m<3;m++ for2D(m)) {
          dp1[m]=dr(f[0],i,k,m+1,0,dx[m],(approx-1)/2, approx);
       }
       for(l=1;l<=3;l++) {
        for(m=0;m<3;m++ for2D(m)) {
-           printf(temp, "%d+%d:%0.4lf\n", l, m, DV1[l][m]);
+         //  printf(temp, "%d+%d:%0.4lf\n", l, m, DV1[l][m]);
          dv1[l][m]=dr(f[l],i,k,m+1,0,dx[m],(approx-1)/2, approx);
          dv2[l][m]=dr(f[l],i,k,m+1,1,dx[m]*dx[m],(approx-1)/2, approx);
          DV1[l][m] = dr(F[l], i, k, m + 1, 0, dx[m], (approx - 1) / 2, approx);
-         printf(temp, "%d+%d:%0.4lf\n", l, m, DV1[l][m]);
+       
+      //   printf("(%d,%d)%d+%d:%0.4lf\n", i,k,l, m, DV1[l][m]);
          }
+       dv11[l][0][2] = dv11[l][2][0] = d2cross(f[l], i, j, k, 3, 1, (approx - 1) / 2, approx);
       }
 
       df[1][i][k]=nut[i][k]*(dv2[1][0]+dv2[1][2]+r_1[i]*dv1[1][0]
@@ -65,10 +69,11 @@ void pde(double t, double ***f, double ***df)
 //                     +(j+n[2]<=ghost+2 ? coordin(k,2)*f[2][i][k] : 0)                //helical force
              -F[1][i][k]*dv1[1][0]-f[1][i][k]*DV1[1][0]
              -F[3][i][k]*dv1[1][2]-f[3][i][k]*DV1[1][2]+2*r_2[i]*F[2][i][k]*f[2][i][k]
+             +zeta*(-f[1][i][k]*r_2[i] +r_1[i]*dv1[1][0]+dv2[1][0]+dv11[3][0][2])
 		     ;
       df[2][i][k]=nut[i][k]*(dv2[2][0]+dv2[2][2]+r_1[i]*dv1[2][0]
 				   -f[2][i][k]*r_2[i])
-		     + p1//*pow(rc*coordin(i,0)+1,-1.)//-dw/r_1[i] -2*w*f[1][i][k]                   //forces of inertion
+		     //*pow(rc*coordin(i,0)+1,-1.)//-dw/r_1[i] -2*w*f[1][i][k]                   //forces of inertion
 //                     -(j+n[2]<=ghost+2 ? (coordin(i,0)-rc)*f[2][i][k] :0)            //helical force
 		     -F[1][i][k]*dv1[2][0]-f[1][i][k]*DV1[2][0]
              -F[3][i][k]*dv1[2][2]-f[3][i][k]*DV1[2][2]
@@ -78,6 +83,7 @@ void pde(double t, double ***f, double ***df)
 		     -dp1[2]
              -F[1][i][k]*dv1[3][0]-f[1][i][k]*DV1[3][0]
              -F[3][i][k]*dv1[3][2]-f[3][i][k]*DV1[3][2]
+          +zeta*(dv1[1][2]*r_1[i]+dv2[3][2]+dv11[1][0][2])
 		     ;
       df[0][i][k]= -(dv1[1][0]+dv1[3][2]+f[1][i][k]*r_1[i])/Gamma;
 //      df[0][i][k] = df[1][i][k] = df[2][i][k] = df[3][i][k] = 0;
@@ -505,7 +511,46 @@ switch (sm) {
 	} */
 return(tmp/dx);
 }
-
+double d2cross(double*** m, int ii, int jj, int kk, int dir1, int dir2, int sh, int sm)
+/*             matrix     , point                 , directions of dervs,shift , sample */
+/*                                                , 1, 2, 3           , 0-left, 3,5,7 */
+{         //order ==0 (first),dx=dx[dir1]*dx[dir2]
+    double tmp = 0.0;
+    int i1, i2;
+    int dirr = 6 - dir1 - dir2;
+    switch (sm * dirr) {
+    case 3: for (i1 = 0; i1 < sm; i1++)
+        for (i2 = 0; i2 < sm; i2++)
+            tmp += m[ii][jj + i1 - sh][kk + i2 - sh] * kf3[0][sh][i1] * kf3[0][sh][i2]; break;
+    case 6: for (i1 = 0; i1 < sm; i1++)
+        for (i2 = 0; i2 < sm; i2++)
+            tmp += m[ii + i1 - sh][jj][kk + i2 - sh] * kf3[0][sh][i1] * kf3[0][sh][i2]; break;
+    case 9: for (i1 = 0; i1 < sm; i1++)
+        for (i2 = 0; i2 < sm; i2++)
+            tmp += m[ii + i1 - sh][jj + i2 - sh][kk] * kf3[0][sh][i1] * kf3[0][sh][i2]; break;
+    case 5: for (i1 = 0; i1 < sm; i1++)
+        for (i2 = 0; i2 < sm; i2++)
+            tmp += m[ii][jj + i1 - sh][kk + i2 - sh] * kf5[0][sh][i1] * kf5[0][sh][i2]; break;
+    case 10: for (i1 = 0; i1 < sm; i1++)
+        for (i2 = 0; i2 < sm; i2++)
+            tmp += m[ii + i1 - sh][jj][kk + i2 - sh] * kf5[0][sh][i1] * kf5[0][sh][i2]; break;
+    case 15: for (i1 = 0; i1 < sm; i1++)
+        for (i2 = 0; i2 < sm; i2++)
+            tmp += m[ii + i1 - sh][jj + i2 - sh][kk] * kf5[0][sh][i1] * kf5[0][sh][i2]; break;
+    case 7: for (i1 = 0; i1 < sm; i1++)
+        for (i2 = 0; i2 < sm; i2++)
+            tmp += m[ii][jj + i1 - sh][kk + i2 - sh] * kf7[0][sh][i1] * kf7[0][sh][i2]; break;
+    case 14: for (i1 = 0; i1 < sm; i1++)
+        for (i2 = 0; i2 < sm; i2++)
+            tmp += m[ii + i1 - sh][jj][kk + i2 - sh] * kf7[0][sh][i1] * kf7[0][sh][i2]; break;
+    case 21: for (i1 = 0; i1 < sm; i1++)
+        for (i2 = 0; i2 < sm; i2++)
+            tmp += m[ii + i1 - sh][jj + i2 - sh][kk] * kf7[0][sh][i1] * kf7[0][sh][i2]; break;
+    default:
+        nrerror("\nNO SUCH SAMPLE for derivative. Bye ...", 0, 0);
+    }
+    return(tmp / dx[dir1 - 1] / dx[dir2 - 1]);
+}
 double coordin(int i, int dir)
                       //0-r,1-phi,2-z
 {

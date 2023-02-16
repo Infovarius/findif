@@ -436,6 +436,11 @@ Master printf("t=%g dtdid=%g NIter=%ld maxdivv=%g(local=%g)\n",
 //                     l,      totmf[0],mf[0],    totmf[1],mf[1],       totmf[2],mf[2]);
        Master printf("%d  maxf=%e \tmaxdf=%e \tmax(df/f)=%e\n",
                        l,      totmf[0],  totmf[1],      totmf[2]);
+       if (l == 0)
+       {
+           totmf[0] = f[1][20][20];
+               totmf[1] = f[1][40][40];
+       }
        Master fprintf(fen,"\t %10.10g \t %10.10g",totmf[0],totmf[1]);
        }
   // --------------- quadratic norma of arrays --------------------------------------
