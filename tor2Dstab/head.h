@@ -117,7 +117,7 @@ void   boundary_conditions(double ***f, double **nu);
 void  init_conditions(void);
 void init_parallel(void);
 double dr(double **m,int ii,int kk,int dir,int or,double dx,int sh,int sm);
-double d2cross(double*** m, int ii, int jj, int kk, int dir1, int dir2, int sh, int sm);
+double d2cross(double** m, int ii, int kk, int dir1, int dir2, int sh, int sm);
 double coordin(int, int);
 double interpolation(double,double, double,double,double,double);
 /*------- ioutil.c  ------*/

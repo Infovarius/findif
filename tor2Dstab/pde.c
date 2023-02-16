@@ -60,7 +60,7 @@ void pde(double t, double ***f, double ***df)
        
       //   printf("(%d,%d)%d+%d:%0.4lf\n", i,k,l, m, DV1[l][m]);
          }
-       dv11[l][0][2] = dv11[l][2][0] = d2cross(f[l], i, j, k, 3, 1, (approx - 1) / 2, approx);
+       dv11[l][0][2] = dv11[l][2][0] = d2cross(f[l], i, k, 3, 1, (approx - 1) / 2, approx);
       }
 
       df[1][i][k]=nut[i][k]*(dv2[1][0]+dv2[1][2]+r_1[i]*dv1[1][0]
@@ -511,41 +511,46 @@ switch (sm) {
 	} */
 return(tmp/dx);
 }
-double d2cross(double*** m, int ii, int jj, int kk, int dir1, int dir2, int sh, int sm)
+double d2cross(double** m, int ii, int kk, int dir1, int dir2, int sh, int sm)
 /*             matrix     , point                 , directions of dervs,shift , sample */
 /*                                                , 1, 2, 3           , 0-left, 3,5,7 */
 {         //order ==0 (first),dx=dx[dir1]*dx[dir2]
     double tmp = 0.0;
     int i1, i2;
     int dirr = 6 - dir1 - dir2;
+    if (dirr != 2)
+    {
+        nrerror("wrong derivative", t_cur, count);
+        exit(1);
+    }
     switch (sm * dirr) {
     case 3: for (i1 = 0; i1 < sm; i1++)
         for (i2 = 0; i2 < sm; i2++)
-            tmp += m[ii][jj + i1 - sh][kk + i2 - sh] * kf3[0][sh][i1] * kf3[0][sh][i2]; break;
+            tmp += m[ii][kk + i2 - sh] * kf3[0][sh][i1] * kf3[0][sh][i2]; break;
     case 6: for (i1 = 0; i1 < sm; i1++)
         for (i2 = 0; i2 < sm; i2++)
-            tmp += m[ii + i1 - sh][jj][kk + i2 - sh] * kf3[0][sh][i1] * kf3[0][sh][i2]; break;
+            tmp += m[ii + i1 - sh][kk + i2 - sh] * kf3[0][sh][i1] * kf3[0][sh][i2]; break;
     case 9: for (i1 = 0; i1 < sm; i1++)
         for (i2 = 0; i2 < sm; i2++)
-            tmp += m[ii + i1 - sh][jj + i2 - sh][kk] * kf3[0][sh][i1] * kf3[0][sh][i2]; break;
+            tmp += m[ii + i1 - sh][kk] * kf3[0][sh][i1] * kf3[0][sh][i2]; break;
     case 5: for (i1 = 0; i1 < sm; i1++)
         for (i2 = 0; i2 < sm; i2++)
-            tmp += m[ii][jj + i1 - sh][kk + i2 - sh] * kf5[0][sh][i1] * kf5[0][sh][i2]; break;
+            tmp += m[ii][kk + i2 - sh] * kf5[0][sh][i1] * kf5[0][sh][i2]; break;
     case 10: for (i1 = 0; i1 < sm; i1++)
         for (i2 = 0; i2 < sm; i2++)
-            tmp += m[ii + i1 - sh][jj][kk + i2 - sh] * kf5[0][sh][i1] * kf5[0][sh][i2]; break;
+            tmp += m[ii + i1 - sh][kk + i2 - sh] * kf5[0][sh][i1] * kf5[0][sh][i2]; break;
     case 15: for (i1 = 0; i1 < sm; i1++)
         for (i2 = 0; i2 < sm; i2++)
-            tmp += m[ii + i1 - sh][jj + i2 - sh][kk] * kf5[0][sh][i1] * kf5[0][sh][i2]; break;
+            tmp += m[ii + i1 - sh][kk] * kf5[0][sh][i1] * kf5[0][sh][i2]; break;
     case 7: for (i1 = 0; i1 < sm; i1++)
         for (i2 = 0; i2 < sm; i2++)
-            tmp += m[ii][jj + i1 - sh][kk + i2 - sh] * kf7[0][sh][i1] * kf7[0][sh][i2]; break;
+            tmp += m[ii][kk + i2 - sh] * kf7[0][sh][i1] * kf7[0][sh][i2]; break;
     case 14: for (i1 = 0; i1 < sm; i1++)
         for (i2 = 0; i2 < sm; i2++)
-            tmp += m[ii + i1 - sh][jj][kk + i2 - sh] * kf7[0][sh][i1] * kf7[0][sh][i2]; break;
+            tmp += m[ii + i1 - sh][kk + i2 - sh] * kf7[0][sh][i1] * kf7[0][sh][i2]; break;
     case 21: for (i1 = 0; i1 < sm; i1++)
         for (i2 = 0; i2 < sm; i2++)
-            tmp += m[ii + i1 - sh][jj + i2 - sh][kk] * kf7[0][sh][i1] * kf7[0][sh][i2]; break;
+            tmp += m[ii + i1 - sh][kk] * kf7[0][sh][i1] * kf7[0][sh][i2]; break;
     default:
         nrerror("\nNO SUCH SAMPLE for derivative. Bye ...", 0, 0);
     }
