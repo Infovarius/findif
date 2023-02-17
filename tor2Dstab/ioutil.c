@@ -17,14 +17,16 @@ FILE *fileopen(const char *x, int mode)  //opening of file to ff
 {
 FILE *ff;
 char *s_mode="w";
+char err_msg[100];
 if(mode>0) s_mode="a";
 if(mode<0) s_mode="r";
 if(mode==0) s_mode="w";
 if ((ff = fopen(x,s_mode))==NULL)
-	 {
-		nrerror (strcat("Can't open file !\n",x),t_cur,count);
-		exit(-1);
-	 }
+	{
+	sprintf(err_msg, "Can't open file [%s]!\n", x);
+	nrerror (err_msg,t_cur,count);
+	exit(-1);
+	}
 return(ff);
 }
 
@@ -140,7 +142,10 @@ void read_params(int argc, char** argv, long count)
   Master fdone = fopen(DONENAME,"a");
   fgets(str,256,fin); Master fputs(str,fout);// header
   ENDPARAM = (fgets(str,256,fin) == NULL); 
-  if (sscanf(str,"%lf %lf %lf %lf",&t1, &t2, &t3, &t4)<4) putlog("Couldn't read enough parameters.",count);
+  if (sscanf(str, "%lf %lf %lf %lf", &t1, &t2, &t3, &t4) < 4) {
+	  putlog("Couldn't read enough parameters.", count);
+	  ENDPARAM = 1;
+  }
   else {
 	rc = t1;	nmessage("rc was changed to",rc,count);
 	Re = t2;	nmessage("Re was changed to",Re,count);
@@ -302,6 +307,7 @@ int read_snap(char *snapname)                 //returns code of error
     else nmessage("Main flow has been read from file", t_cur, count);
     return(error);
 }
+
 void print_array1d(FILE *ff,double *a,int beg1,int n1)
 {
 int i;

@@ -34,11 +34,10 @@ void pde(double t, double ***f, double ***df)
    int i,k,l,m;
    double dv1[4][3], dv2[4][3], dp1[3], w, dw, DV1[4][3];
    double dv11[7][3][3];
-   char* temp = (char*)malloc(10);
+   //char* temp = (char*)malloc(10);
    double zeta = 1000000. / Re;
 
    boundary_conditions(f,nut);
-   //putlog("???", 1);
 //   omega(t,&w,&dw);
    for(i=0;i<m1;i++)
    for(k=0;k<m3;k++)
@@ -53,7 +52,7 @@ void pde(double t, double ***f, double ***df)
       }
       for(l=1;l<=3;l++) {
        for(m=0;m<3;m++ for2D(m)) {
-         //  printf(temp, "%d+%d:%0.4lf\n", l, m, DV1[l][m]);
+          //printf("%d+%d:%0.4lf\n", l, m, DV1[l][m]);
          dv1[l][m]=dr(f[l],i,k,m+1,0,dx[m],(approx-1)/2, approx);
          dv2[l][m]=dr(f[l],i,k,m+1,1,dx[m]*dx[m],(approx-1)/2, approx);
          DV1[l][m] = dr(F[l], i, k, m + 1, 0, dx[m], (approx - 1) / 2, approx);
@@ -89,6 +88,7 @@ void pde(double t, double ***f, double ***df)
 //      df[0][i][k] = df[1][i][k] = df[2][i][k] = df[3][i][k] = 0;
 
   } //global for
+   //free(temp);
    return;
 }
 

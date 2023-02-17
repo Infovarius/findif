@@ -243,10 +243,11 @@ void free_mem_1i(int *a, int n)
 
 void operate_memory(int dir)
 {
- if(dir>0)
+	static int arrs_allocated = 0;
+ if(dir>0 && !arrs_allocated)
    {
-       f  =alloc_mem_3f(nvar, m1, m3);   //f[0]-pressure,f[1..3]-v(vector)
-       F= alloc_mem_3f(nvar, m1, m3);   //f[0]-pressure,f[1..3]-v(vector)
+       f = alloc_mem_3f(nvar, m1, m3);   //f[0]-pressure,f[1..3]-v(vector)
+       F = alloc_mem_3f(nvar, m1, m3);   //f[0]-pressure,f[1..3]-v(vector)
        f1 =alloc_mem_3f(nvar, m1, m3);
        df =alloc_mem_3f(nvar, m1, m3);
        df2=alloc_mem_3f(nvar, m1, m3);
@@ -264,9 +265,11 @@ void operate_memory(int dir)
        nut=alloc_mem_2f(m1, m3);
        vfi = alloc_mem_1f(N3);
        totvfi = alloc_mem_1f(N3);
+	   arrs_allocated = 1;
     } else
+if(dir<0 && arrs_allocated)
    {
-       free_mem_3f(f  ,nvar, m1, m3);
+       free_mem_3f(f, nvar, m1, m3);
        free_mem_3f(F, nvar, m1, m3);
        free_mem_3f(f1 ,nvar, m1, m3);
        free_mem_3f(df ,nvar, m1, m3);
@@ -285,6 +288,7 @@ void operate_memory(int dir)
        free_mem_1f(totvfi,N3);
        free_mem_1f(r_1,m1);
        free_mem_1f(r_2,m1);
+	   arrs_allocated = 0;
     }
 }
 

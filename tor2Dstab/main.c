@@ -62,7 +62,7 @@ nextparam:
 
    if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
        else { init_parallel();  operate_memory(1);}
-   read_snap("pumpflow_1_Re10.snp");
+   read_snap("../../tor2d/stationars/pumpflow_1_Re1k03n32.snp");
    boundary_conditions(F, nut);
   // snapshot(F, nut, 0, 1);
    init_conditions();
@@ -101,14 +101,13 @@ nextparam:
    time_begin = MPI_Wtime();
    if(!goon) { Master nmessage("work has begun",0,0); }
        else { Master nmessage("work continued",t_cur,count); }
-   Master ferror = fileopen(NameErrorFile,abs(goon));
 
    if(CheckStep!=0) check(f);
    if(!goon) if (OutStep!=0) printing(f,0,t_cur,count,PulsEnergy);   //in parallel version better not to do
 
 /*------------------------ MAIN ITERATIONS -------------------------*/
    while ((Ttot==0 || t_cur < Ttot) && !razlet) {	
-   putlog("Here", 1);  
+//   putlog("Here", 1);  
 
 	pde(t_cur, f, df);
 	dttry=dtnext;	
@@ -195,7 +194,7 @@ putlog("I've got here=",4);
 	Master fileclose(ferror);
 
 	MPI_Barrier(MPI_COMM_WORLD);
-	if(!ENDPARAM&&t_cur>=Ttot&&!razlet) nmessage("work is succesfully done",t_cur,count);
+	if(ENDPARAM || t_cur>=Ttot&&!razlet) nmessage("work is succesfully done",t_cur,count);
 		else nrerror("this is break of scheme",t_cur,count);
 	MPI_Finalize();
 	nmessage("mpi_finalize is done",t_cur,count);
