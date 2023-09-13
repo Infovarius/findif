@@ -190,7 +190,7 @@ putlog("I've got here=",4);
 	Master fileclose(ferror);
 
 	MPI_Barrier(MPI_COMM_WORLD);
-	if(!ENDPARAM&&t_cur>=Ttot&&!razlet) nmessage("work is succesfully done",t_cur,count);
+	if(ENDPARAM || t_cur>=Ttot&&!razlet) nmessage("work is succesfully done",t_cur,count);
 		else nrerror("this is break of scheme",t_cur,count);
 	MPI_Finalize();
 	nmessage("mpi_finalize is done",t_cur,count);
