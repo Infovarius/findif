@@ -35,7 +35,7 @@ void pde(double t, double ***f, double ***df)
    double dv1[4][3], dv2[4][3], dp1[3], w, dw, DV1[4][3];
    double dv11[7][3][3];
    //char* temp = (char*)malloc(10);
-   double zeta = 1000000. / Re;
+   double zeta = 100. / Re;
 
    boundary_conditions(f,nut);
 //   omega(t,&w,&dw);
@@ -414,6 +414,7 @@ if(rank==size-1)   {
    buf_send[j+2*i] = alloc_mem_1f(buf_size[i]);
    buf_recv[j+2*i] = alloc_mem_1f(buf_size[i]);
   }
+
 if(rank==size-1) {
 	for(i=0;i<6;i++)
 		if(i!=2 && i!=3)

@@ -491,7 +491,12 @@ struct stat st = {0};
 
 if (stat("dump", &st) == -1) {
 	mkdir("dump", 0777);
-}		   
+}		
+#else
+if(!CreateDirectory("dump", NULL))
+{
+	nmessage("can't create dump directory", t_cur, count);
+}
 #endif
  if(DumpKeep)  sprintf(str,"dump/%s_%d_%ld.dmp",NameSnapFile,rank,count);
 	else {

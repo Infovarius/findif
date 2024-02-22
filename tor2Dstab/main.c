@@ -60,9 +60,9 @@ nextparam:
    t_cur=0;
    count=0; enter = 0;
 
+   read_snap("../../tor2d/stationars/pumpflow_1_Re1k05n32.snp");
    if(goon) {if(init_data()) nrerror("error of reading initial arrays",-1,-1);}
        else { init_parallel();  operate_memory(1);}
-   read_snap("../../tor2d/stationars/pumpflow_1_Re1k03n32.snp");
    boundary_conditions(F, nut);
   // snapshot(F, nut, 0, 1);
    init_conditions();

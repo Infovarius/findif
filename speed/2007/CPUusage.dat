@@ -1,0 +1,1326 @@
+
+ Sum of times  =    0.0392;
+ Total runtime =    0.0679
+init timer (per 1 times) =	    0.0328=	  48.3250%
+BC_pr timer (per 3 times) =	    0.0064=	   9.4478%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+10th timer (per 0 times) =	    0.0000=	   0.0000%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =    7.0010;
+ Total runtime =   11.2783
+init timer (per 1 times) =	    0.1485=	   1.3170%
+BC_pr timer (per 3 times) =	    6.8525=	  60.7581%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+10th timer (per 0 times) =	    0.0000=	   0.0000%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =    0.1773;
+ Total runtime =    0.1680
+init timer (per 1 times) =	    0.1485=	  88.3863%
+BC_pr timer (per 3 times) =	    0.0288=	  17.1439%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+10th timer (per 0 times) =	    0.0000=	   0.0000%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =    0.1688;
+ Total runtime =    0.1756
+init timer (per 1 times) =	    0.1296=	  73.7733%
+BC_pr timer (per 3 times) =	    0.0392=	  22.3226%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+10th timer (per 0 times) =	    0.0000=	   0.0000%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =    0.1672;
+ Total runtime =    0.1668
+init timer (per 1 times) =	    0.1375=	  82.4337%
+BC_pr timer (per 2 times) =	    0.0036=	   2.1713%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	    0.0261=	  15.6269%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =    3.0037;
+ Total runtime =    3.0028
+init timer (per 1 times) =	    0.1239=	   4.1273%
+BC_pr timer (per 2 times) =	    0.0037=	   0.1239%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	    2.8760=	  95.7782%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =   28.7798;
+ Total runtime =   28.7397
+init timer (per 1 times) =	    0.1580=	   0.5499%
+BC_pr timer (per 2 times) =	    0.0037=	   0.0128%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	   28.6181=	  99.5769%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =   16.8729;
+ Total runtime =   16.8584
+init timer (per 1 times) =	    0.1205=	   0.7147%
+BC_pr timer (per 2 times) =	    0.0035=	   0.0210%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	   16.7489=	  99.3503%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =   16.8260;
+ Total runtime =   16.8120
+init timer (per 1 times) =	    0.1239=	   0.7372%
+BC_pr timer (per 2 times) =	    0.0037=	   0.0218%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	   16.6984=	  99.3241%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =   15.6846;
+ Total runtime =   15.6753
+init timer (per 1 times) =	    0.1394=	   0.8893%
+BC_pr timer (per 2 times) =	    0.0038=	   0.0240%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	   15.5414=	  99.1463%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =    4.1491;
+ Total runtime =    4.1857
+init timer (per 1 times) =	    0.0284=	   0.6781%
+BC_pr timer (per 2 times) =	    0.0036=	   0.0854%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	    4.1171=	  98.3608%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =    6.0461;
+ Total runtime =    6.0510
+init timer (per 1 times) =	    0.1062=	   1.7546%
+BC_pr timer (per 2 times) =	    0.0035=	   0.0573%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	    5.9365=	  98.1081%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =   17.1932;
+ Total runtime =   17.1707
+init timer (per 1 times) =	    0.1310=	   0.7627%
+BC_pr timer (per 2 times) =	    0.0037=	   0.0217%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	   17.0585=	  99.3465%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =   16.5038;
+ Total runtime =   16.4888
+init timer (per 1 times) =	    0.1304=	   0.7909%
+BC_pr timer (per 2 times) =	    0.0036=	   0.0219%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	   16.3697=	  99.2780%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =   16.6858;
+ Total runtime =   16.6644
+init timer (per 1 times) =	    0.1341=	   0.8046%
+BC_pr timer (per 2 times) =	    0.0035=	   0.0210%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	   16.5482=	  99.3028%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =   17.7880;
+ Total runtime =   17.7761
+init timer (per 1 times) =	    0.1311=	   0.7374%
+BC_pr timer (per 2 times) =	    0.0036=	   0.0200%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	   17.6534=	  99.3093%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =   86.9451;
+ Total runtime =   87.6810
+init timer (per 1 times) =	    0.6829=	   0.7789%
+BC_pr timer (per 2 times) =	    0.0067=	   0.0076%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	   86.2555=	  98.3742%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =   49.3759;
+ Total runtime =   49.2323
+init timer (per 1 times) =	    0.2918=	   0.5927%
+BC_pr timer (per 2 times) =	    0.0064=	   0.0130%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	   49.0777=	  99.6859%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =   66.9129;
+ Total runtime =   66.8780
+init timer (per 1 times) =	    0.1953=	   0.2920%
+BC_pr timer (per 2 times) =	    0.0059=	   0.0088%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	   66.7117=	  99.7513%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =   32.3826;
+ Total runtime =   32.3573
+init timer (per 1 times) =	    0.1465=	   0.4528%
+BC_pr timer (per 2 times) =	    0.0058=	   0.0179%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	   32.2303=	  99.6075%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =   26.0077;
+ Total runtime =   25.9905
+init timer (per 1 times) =	    0.1744=	   0.6708%
+BC_pr timer (per 2 times) =	    0.0057=	   0.0220%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	   25.8276=	  99.3731%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =   26.3863;
+ Total runtime =   26.3413
+init timer (per 1 times) =	    0.1784=	   0.6773%
+BC_pr timer (per 2 times) =	    0.0057=	   0.0216%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	   26.2022=	  99.4719%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =   31.4441;
+ Total runtime =   31.4314
+init timer (per 1 times) =	    0.1629=	   0.5183%
+BC_pr timer (per 2 times) =	    0.0057=	   0.0180%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	   31.2755=	  99.5040%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =   48.3577;
+ Total runtime =   48.4391
+init timer (per 1 times) =	    0.1266=	   0.2615%
+BC_pr timer (per 2 times) =	    0.0063=	   0.0130%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	   48.2248=	  99.5576%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =   77.6582;
+ Total runtime =   77.5943
+init timer (per 1 times) =	    0.2577=	   0.3321%
+BC_pr timer (per 2 times) =	    0.0178=	   0.0230%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	   77.3826=	  99.7271%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =   30.4364;
+ Total runtime =   30.3453
+init timer (per 1 times) =	    0.2817=	   0.9284%
+BC_pr timer (per 2 times) =	    0.0175=	   0.0578%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	   30.1371=	  99.3138%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =   38.3314;
+ Total runtime =   38.3225
+init timer (per 1 times) =	    0.2921=	   0.7622%
+BC_pr timer (per 2 times) =	    0.0174=	   0.0455%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	   38.0219=	  99.2155%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =   30.6560;
+ Total runtime =   30.5604
+init timer (per 1 times) =	    0.3071=	   1.0049%
+BC_pr timer (per 2 times) =	    0.0175=	   0.0572%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	   30.3314=	  99.2507%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =   45.7598;
+ Total runtime =   45.7037
+init timer (per 1 times) =	    0.2796=	   0.6117%
+BC_pr timer (per 2 times) =	    0.0162=	   0.0354%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	   45.4640=	  99.4755%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =  120.3915;
+ Total runtime =  120.2494
+init timer (per 1 times) =	    0.3393=	   0.2822%
+BC_pr timer (per 2 times) =	    0.0181=	   0.0151%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	  120.0341=	  99.8209%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =  108.8034;
+ Total runtime =  108.7279
+init timer (per 1 times) =	    0.2965=	   0.2727%
+BC_pr timer (per 2 times) =	    0.0202=	   0.0186%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	  108.4866=	  99.7781%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =  127.8888;
+ Total runtime =  127.7872
+init timer (per 1 times) =	    0.3511=	   0.2748%
+BC_pr timer (per 2 times) =	    0.0195=	   0.0152%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	  127.5183=	  99.7896%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =  154.1587;
+ Total runtime =  154.1699
+init timer (per 1 times) =	    0.3156=	   0.2047%
+BC_pr timer (per 2 times) =	    0.0148=	   0.0096%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	  153.8283=	  99.7784%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =  114.9435;
+ Total runtime =  114.8463
+init timer (per 1 times) =	    0.2379=	   0.2072%
+BC_pr timer (per 2 times) =	    0.0133=	   0.0116%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	  114.6923=	  99.8659%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =  127.1974;
+ Total runtime =  126.9342
+init timer (per 1 times) =	    0.4067=	   0.3204%
+BC_pr timer (per 2 times) =	    0.0139=	   0.0109%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	  126.7768=	  99.8760%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =  104.4349;
+ Total runtime =  104.7751
+init timer (per 1 times) =	    0.1575=	   0.1503%
+BC_pr timer (per 2 times) =	    0.0118=	   0.0113%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	  104.2656=	  99.5137%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =   40.5580;
+ Total runtime =   40.5025
+init timer (per 1 times) =	    0.2016=	   0.4978%
+BC_pr timer (per 2 times) =	    0.0459=	   0.1133%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	   40.3104=	  99.5259%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =   42.0874;
+ Total runtime =   41.9078
+init timer (per 1 times) =	    0.2874=	   0.6858%
+BC_pr timer (per 2 times) =	    0.0120=	   0.0286%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	   41.7880=	  99.7141%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
+
+ Sum of times  =   40.4814;
+ Total runtime =   40.3674
+init timer (per 1 times) =	    0.2276=	   0.5638%
+BC_pr timer (per 2 times) =	    0.0125=	   0.0309%
+ 2th timer (per 0 times) =	    0.0000=	   0.0000%
+ 3th timer (per 0 times) =	    0.0000=	   0.0000%
+ 4th timer (per 0 times) =	    0.0000=	   0.0000%
+ 5th timer (per 0 times) =	    0.0000=	   0.0000%
+ 6th timer (per 0 times) =	    0.0000=	   0.0000%
+ 7th timer (per 0 times) =	    0.0000=	   0.0000%
+ 8th timer (per 0 times) =	    0.0000=	   0.0000%
+ 9th timer (per 0 times) =	    0.0000=	   0.0000%
+all_dr timer (per 1 times) =	   40.2414=	  99.6878%
+11th timer (per 0 times) =	    0.0000=	   0.0000%
+12th timer (per 0 times) =	    0.0000=	   0.0000%
+13th timer (per 0 times) =	    0.0000=	   0.0000%
+14th timer (per 0 times) =	    0.0000=	   0.0000%
+15th timer (per 0 times) =	    0.0000=	   0.0000%
+16th timer (per 0 times) =	    0.0000=	   0.0000%
+17th timer (per 0 times) =	    0.0000=	   0.0000%
+18th timer (per 0 times) =	    0.0000=	   0.0000%
+19th timer (per 0 times) =	    0.0000=	   0.0000%
+20th timer (per 0 times) =	    0.0000=	   0.0000%
+21th timer (per 0 times) =	    0.0000=	   0.0000%
+22th timer (per 0 times) =	    0.0000=	   0.0000%
+23th timer (per 0 times) =	    0.0000=	   0.0000%
+24th timer (per 0 times) =	    0.0000=	   0.0000%
+25th timer (per 0 times) =	    0.0000=	   0.0000%
+26th timer (per 0 times) =	    0.0000=	   0.0000%
+27th timer (per 0 times) =	    0.0000=	   0.0000%
+28th timer (per 0 times) =	    0.0000=	   0.0000%
+29th timer (per 0 times) =	    0.0000=	   0.0000%
+30th timer (per 0 times) =	    0.0000=	   0.0000%
